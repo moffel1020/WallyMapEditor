@@ -1,17 +1,20 @@
+using System;
 using System.Numerics;
+
 using Raylib_cs;
 using Rl = Raylib_cs.Raylib;
+
 namespace WallyMapSpinzor2.Raylib;
 
 public class Editor
 {
     public const float ZOOM_INCREMENT = 0.15f;
-    public const float MIN_ZOOM = 0.07f;
+    public const float MIN_ZOOM = 0.01f;
     public const float MAX_ZOOM = 5.0f;
     public const float LINE_WIDTH = 5; // width at Camera zoom = 1
 
     public string BrawlPath { get; set; }
-    public RaylibCanvas? Canvas { get; set; } = null!;
+    public RaylibCanvas? Canvas { get; set; }
 
     private Camera2D _cam = new();
     public float Zoom { get => _cam.Zoom; }
@@ -20,7 +23,7 @@ public class Editor
     private IDrawable _toDraw;
     public IDrawable ToDraw
     {
-        get => _toDraw; 
+        get => _toDraw;
         set
         {
             _toDraw = value;
@@ -61,13 +64,13 @@ public class Editor
     private void Draw(TimeSpan ts)
     {
         Rl.BeginDrawing();
-        Rlgl.SetLineWidth(LINE_WIDTH * _cam.Zoom);
+        Rlgl.SetLineWidth(Math.Min(LINE_WIDTH * _cam.Zoom, 1));
         Rl.ClearBackground(Raylib_cs.Color.Black);
         Rl.BeginMode2D(_cam);
 
         Canvas ??= new(BrawlPath);
-        Canvas.Scale = _cam.Zoom;
-        ToDraw.DrawOn(Canvas, _config, Transform.IDENTITY, ts, new RenderData());        
+        Canvas.CameraMatrix = Rl.GetCameraMatrix2D(_cam);
+        ToDraw.DrawOn(Canvas, _config, Transform.IDENTITY, ts, new RenderData());
         Canvas.FinalizeDraw();
 
         Rl.EndMode2D();
