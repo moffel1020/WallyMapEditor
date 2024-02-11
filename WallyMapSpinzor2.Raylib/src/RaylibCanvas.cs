@@ -27,6 +27,7 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
     public Dictionary<string, Texture2DWrapper> TextureCache { get; } = new();
     public Dictionary<string, SwfCache> SwfFileCache { get; } = new();
     public Dictionary<(string, string), Texture2DWrapper> SwfTextureCache { get; } = new();
+    public Dictionary<Texture2DWrapper, (double, double)> TextureOffset { get; } = new();
     public Matrix4x4 CameraMatrix { get; set; } = Matrix4x4.Identity;
 
     public RaylibCanvas(string brawlPath)
@@ -130,6 +131,11 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
     public void DrawTexture(double x, double y, Texture2DWrapper texture, Transform trans, DrawPriorityEnum priority)
     {
         if (texture.Texture is null) return;
+        
+        (double xOff, double yOff) = TextureOffset.GetValueOrDefault(texture, (0, 0));
+        
+        trans = trans * Transform.CreateTranslate(xOff, yOff);
+        
         Texture2D rlTexture = (Texture2D)texture.Texture;
         DrawingQueue.Push(() =>
         {
@@ -224,12 +230,13 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
             SwfFileCache.Add(finalPath, cache);
         }
 
-        Texture2DWrapper swfTexture = LoadTextureFromSwf(cache, name);
+        (Texture2DWrapper swfTexture, double xOff, double yOff) = LoadTextureFromSwf(cache, name);
         SwfTextureCache.Add((finalPath, name), swfTexture);
+        TextureOffset.Add(swfTexture, (xOff, yOff));
         return swfTexture;
     }
 
-    private static Texture2DWrapper LoadTextureFromSwf(SwfCache swf, string name)
+    private static (Texture2DWrapper, double, double) LoadTextureFromSwf(SwfCache swf, string name)
     {
         ushort spriteId = swf.SymbolClass[name];
         DefineSpriteTag sprite = swf.SpriteTags[spriteId];
@@ -246,7 +253,7 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
         using MemoryStream ms = new();
         image.SaveAsPng(ms);
         Raylib_cs.Image img = Rl.LoadImageFromMemory(".png", ms.ToArray());
-        return new Texture2DWrapper(Rl.LoadTextureFromImage(img));
+        return (new Texture2DWrapper(Rl.LoadTextureFromImage(img)), shape.ShapeBounds.XMin, shape.ShapeBounds.YMin);
     }
 
     private static SwfCache LoadSwf(string path)

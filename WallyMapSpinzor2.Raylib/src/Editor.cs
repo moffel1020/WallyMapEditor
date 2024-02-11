@@ -39,7 +39,7 @@ public class Editor
 
     private readonly RenderConfig _config = new()
     {
-
+        RedScore = 18
     };
 
     public void Run()
