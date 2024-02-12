@@ -19,16 +19,11 @@ public class Editor
 
     public string BrawlPath { get; set; }
     public RaylibCanvas? Canvas { get; set; }
-
-    public RenderTexture2D Viewport { get; set; }
-    public bool ViewportFocused { get; set; }
-    public bool ViewportHovered { get; set; }
-    public ViewportBounds ViewportBounds { get; set; } = new();
-
     private Camera2D _cam = new();
     public TimeSpan Time { get; set; } = TimeSpan.FromSeconds(0);
-
     public IDrawable ToDraw { get; set; }
+
+    public ViewportWindow ViewportWindow { get; set; } = new();
 
     public Editor(string brawlPath, IDrawable toDraw)
     {
@@ -68,7 +63,7 @@ public class Editor
 
         Gui();
 
-        Rl.BeginTextureMode(Viewport);
+        Rl.BeginTextureMode(ViewportWindow.Framebuffer);
         Rl.BeginMode2D(_cam);
 
         Rl.ClearBackground(Raylib_cs.Color.Black);
@@ -87,36 +82,18 @@ public class Editor
     private void Gui()
     {
         ImGui.DockSpaceOverViewport();
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0, 0));
-
-        ImGui.Begin("Viewport", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
-
-        ViewportFocused = ImGui.IsWindowFocused();
-        ViewportHovered = ImGui.IsWindowHovered();
-        ViewportBounds.P1 = ImGui.GetWindowContentRegionMin() + ImGui.GetWindowPos();
-        ViewportBounds.P2 = ImGui.GetWindowContentRegionMax() + ImGui.GetWindowPos();
-
-        Vector2 windowSize = ViewportBounds.Size;
-        if (Viewport.Texture.Width != windowSize.X || Viewport.Texture.Height != windowSize.Y)
-        {
-            Rl.UnloadRenderTexture(Viewport);
-            Viewport = Rl.LoadRenderTexture((int)windowSize.X, (int)windowSize.Y);
-        }
-        rlImGui.ImageRenderTexture(Viewport);
-        ImGui.End();
-
-        ImGui.PopStyleVar();
+        if (ViewportWindow.Open) ViewportWindow.Show();
     }
 
     private void Update()
     {
-        if (ViewportFocused && ViewportHovered)
+        if (ViewportWindow.Focussed && ViewportWindow.Hovered)
         {
             float wheel = Rl.GetMouseWheelMove();
             if (wheel != 0)
             {
-                Vector2 mousePos = Rl.GetScreenToWorld2D(Rl.GetMousePosition() - ViewportBounds.P1, _cam);
-                _cam.Offset = Rl.GetMousePosition() - ViewportBounds.P1;
+                Vector2 mousePos = Rl.GetScreenToWorld2D(Rl.GetMousePosition() - ViewportWindow.Bounds.P1, _cam);
+                _cam.Offset = Rl.GetMousePosition() - ViewportWindow.Bounds.P1;
                 _cam.Target = mousePos;
                 _cam.Zoom = Math.Clamp(_cam.Zoom + wheel * ZOOM_INCREMENT * _cam.Zoom, MIN_ZOOM, MAX_ZOOM);
             }
@@ -144,8 +121,8 @@ public class Editor
 
         if (bounds is null) return;
 
-        int screenW = (int)ViewportBounds.Width;
-        int screenH = (int)ViewportBounds.Height;
+        int screenW = (int)ViewportWindow.Bounds.Width;
+        int screenH = (int)ViewportWindow.Bounds.Height;
 
         double scale = Math.Min(screenW / bounds.W, screenH / bounds.H);
         _cam.Offset = new(0);
@@ -155,7 +132,6 @@ public class Editor
 
     ~Editor()
     {
-        Rl.UnloadRenderTexture(Viewport);
         rlImGui.Shutdown();
         Rl.CloseWindow();
     }
