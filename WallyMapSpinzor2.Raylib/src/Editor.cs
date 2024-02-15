@@ -32,7 +32,7 @@ public class Editor
         ToDraw = toDraw;
     }
 
-    private RenderConfig _config = new()
+    private readonly RenderConfig _config = new()
     {
 
     };

@@ -25,18 +25,19 @@ public static class ImGuiExt
     public static Color ColorPicker4(string label, Color col)
     {
         Vector4 imCol = new((float)col.R / 255, (float)col.G / 255, (float)col.B / 255, (float)col.A / 255);
-        ImGui.ColorEdit4(label, ref imCol, ImGuiColorEditFlags.NoInputs);
+        ImGui.ColorEdit4(label, ref imCol, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaBar);
         var a = new Color((byte)(imCol.X * 255), (byte)(imCol.Y * 255), (byte)(imCol.Z * 255), (byte)(imCol.W * 255));
         return a;
     }
 
     public static string StringEnumCombo(string label, Type type, string currentName)
     {
-        // idk
         int current = Enum.TryParse(type, currentName, out object? result) ? (int)result : 0;
         List<string> allNames = Enum.GetNames(type).ToList();
         allNames.Insert(0, "None");
+
         ImGui.Combo(label, ref current, allNames.ToArray(), allNames.Count);
+
         return Enum.GetName(type, current) ?? "";
     }
 }

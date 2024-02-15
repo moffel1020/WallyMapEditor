@@ -92,8 +92,6 @@ public class RenderConfigWindow
                 ImGui.TreePop();
             }
 
-            // ColorVolumeTeam, ColorCollisionTeam
-
             if (ImGui.TreeNode("NavNodes##configColors"))
             {
                 Config.ColorNavNode = ImGuiExt.ColorPicker4("NavNode##configColors", Config.ColorNavNode);
@@ -105,6 +103,19 @@ public class RenderConfigWindow
                 Config.ColorNavNodeS = ImGuiExt.ColorPicker4("NavNodeS##configColors", Config.ColorNavNodeS);
                 Config.ColorNavPath = ImGuiExt.ColorPicker4("NavPath##configColors", Config.ColorNavPath);
                 ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNode("Team##configColors"))
+            {
+                for (int i = 0; i < Config.ColorVolumeTeam.Length; i++)
+                {
+                    Config.ColorVolumeTeam[i] = ImGuiExt.ColorPicker4($"Team {i} volume##configColors", Config.ColorVolumeTeam[i]);
+                }
+                ImGui.Separator();
+                for (int i = 0; i < Config.ColorCollisionTeam.Length; i++)
+                {
+                    Config.ColorCollisionTeam[i] = ImGuiExt.ColorPicker4($"Team {i + 1} collision##configColors", Config.ColorCollisionTeam[i]);
+                }
             }
             ImGui.TreePop();
         }
