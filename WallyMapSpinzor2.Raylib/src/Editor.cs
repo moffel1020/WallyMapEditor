@@ -24,6 +24,7 @@ public class Editor
     public IDrawable ToDraw { get; set; }
 
     public ViewportWindow ViewportWindow { get; set; } = new();
+    public RenderConfigWindow RenderConfigWindow { get; set; } = new();
 
     public Editor(string brawlPath, IDrawable toDraw)
     {
@@ -31,7 +32,7 @@ public class Editor
         ToDraw = toDraw;
     }
 
-    private readonly RenderConfig _config = new()
+    private RenderConfig _config = new()
     {
 
     };
@@ -41,8 +42,9 @@ public class Editor
         Rl.SetConfigFlags(ConfigFlags.VSyncHint);
         Rl.InitWindow(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT, "WallyMapSpinzor2.Raylib");
         Rl.SetWindowState(ConfigFlags.ResizableWindow);
-
         rlImGui.Setup(true, true);
+
+        ResetCam(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT); // inaccurate, but it will do for now
 
         while (!Rl.WindowShouldClose())
         {
@@ -82,12 +84,33 @@ public class Editor
     private void Gui()
     {
         ImGui.DockSpaceOverViewport();
+        ShowMainMenuBar();
+
         if (ViewportWindow.Open) ViewportWindow.Show();
+        if (RenderConfigWindow.Open) RenderConfigWindow.Show(_config);
+    }
+
+    private void ShowMainMenuBar()
+    {
+        ImGui.BeginMainMenuBar();
+
+        if (ImGui.BeginMenu("Project"))
+        {
+            ImGui.EndMenu();
+        }
+        if (ImGui.BeginMenu("View"))
+        {
+            if (ImGui.MenuItem("Viewport", null, ViewportWindow.Open)) ViewportWindow.Open = !ViewportWindow.Open;
+            if (ImGui.MenuItem("Render Config", null, RenderConfigWindow.Open)) RenderConfigWindow.Open = !RenderConfigWindow.Open;
+            ImGui.EndMenu();
+        }
+
+        ImGui.EndMainMenuBar();
     }
 
     private void Update()
     {
-        if (ViewportWindow.Focussed && ViewportWindow.Hovered)
+        if (ViewportWindow.Hovered)
         {
             float wheel = Rl.GetMouseWheelMove();
             if (wheel != 0)
@@ -105,11 +128,11 @@ public class Editor
                 _cam.Target += delta;
             }
 
-            if (Rl.IsKeyPressed(KeyboardKey.R)) ResetCam();
+            if (Rl.IsKeyPressed(KeyboardKey.R)) ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
         }
     }
 
-    private void ResetCam()
+    private void ResetCam(int surfaceW, int surfaceH)
     {
         _cam.Zoom = 1.0f;
         CameraBounds? bounds = ToDraw switch
@@ -121,10 +144,7 @@ public class Editor
 
         if (bounds is null) return;
 
-        int screenW = (int)ViewportWindow.Bounds.Width;
-        int screenH = (int)ViewportWindow.Bounds.Height;
-
-        double scale = Math.Min(screenW / bounds.W, screenH / bounds.H);
+        double scale = Math.Min(surfaceW / bounds.W, surfaceH / bounds.H);
         _cam.Offset = new(0);
         _cam.Target = new((float)bounds.X, (float)bounds.Y);
         _cam.Zoom = (float)scale;

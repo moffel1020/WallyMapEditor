@@ -7,12 +7,12 @@ using rlImGui_cs;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public class ViewportWindow : IWindow
+public class ViewportWindow
 {
     public RenderTexture2D Framebuffer { get; set; }
     public ViewportBounds Bounds { get; set; } = new();
-    public bool Focussed { get; set; }
-    public bool Hovered { get; set; }
+    public bool Focussed { get; private set; }
+    public bool Hovered { get; private set; }
     private bool _open = true;
     public bool Open { get => _open; set => _open = value; }
 
@@ -26,16 +26,21 @@ public class ViewportWindow : IWindow
         Bounds.P1 = ImGui.GetWindowContentRegionMin() + ImGui.GetWindowPos();
         Bounds.P2 = ImGui.GetWindowContentRegionMax() + ImGui.GetWindowPos();
 
-        if (Framebuffer.Texture.Width != Bounds.Size.X || Framebuffer.Texture.Height != Bounds.Size.Y)
-        {
-            Rl.UnloadRenderTexture(Framebuffer);
-            Framebuffer = Rl.LoadRenderTexture((int)Bounds.Size.X, (int)Bounds.Size.Y);
-        }
+        if (SizeChanged()) CreateFramebuffer((int)Bounds.Size.X, (int)Bounds.Size.Y);
+
         rlImGui.ImageRenderTexture(Framebuffer);
         ImGui.End();
 
         ImGui.PopStyleVar();
     }
+
+    private void CreateFramebuffer(int width, int height)
+    {
+        if (Framebuffer.Id != 0) Rl.UnloadRenderTexture(Framebuffer);
+        Framebuffer = Rl.LoadRenderTexture(width, height);
+    }
+
+    private bool SizeChanged() => Framebuffer.Texture.Width != Bounds.Size.X || Framebuffer.Texture.Height != Bounds.Size.Y;
 
     ~ViewportWindow()
     {
