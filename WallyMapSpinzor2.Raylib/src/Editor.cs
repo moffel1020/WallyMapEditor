@@ -43,6 +43,7 @@ public class Editor
         Rl.InitWindow(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT, "WallyMapSpinzor2.Raylib");
         Rl.SetWindowState(ConfigFlags.ResizableWindow);
         rlImGui.Setup(true, true);
+        Style.Apply();
 
         ResetCam(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT); // inaccurate, but it will do for now
 
