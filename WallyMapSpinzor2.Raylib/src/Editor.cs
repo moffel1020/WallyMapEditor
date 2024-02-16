@@ -34,7 +34,7 @@ public class Editor
 
     private readonly RenderConfig _config = new()
     {
-
+        
     };
 
     public void Run()
