@@ -29,11 +29,10 @@ public static class Utils
 
     public static Raylib_cs.Color ToRlColor(Color c) => new(c.R, c.G, c.B, c.A);
 
-    private static readonly string[] JPG_EXTENSIONS = new string[] { "jpg", "jpeg", "jpe", "jif", "jfif", "jfi" };
-
     public static Raylib_cs.Texture2D LoadRlTexture(string path)
     {
-        if (JPG_EXTENSIONS.Any(j => path.EndsWith($".{j}")))
+        //brawlhalla only supports JPG, so this is fine
+        if (path.EndsWith(".jpg"))
         {
             using Image image = Image.Load(path);
             using MemoryStream ms = new();
@@ -47,7 +46,8 @@ public static class Utils
 
     public static Raylib_cs.Image LoadRlImage(string path)
     {
-        if (JPG_EXTENSIONS.Any(j => path.EndsWith($".{j}")))
+        //brawlhalla only supports JPG, so this is fine
+        if (path.EndsWith(".jpg"))
         {
             using Image image = Image.Load(path);
             using MemoryStream ms = new();
