@@ -1,12 +1,10 @@
-using ImGuiNET;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using ImGuiNET;
 
 namespace WallyMapSpinzor2.Raylib;
 
-// ImGui is a static class and for some reason you can't make extensions on a static class so this is used instead
 public static class ImGuiExt
 {
     public static bool Checkbox(string label, bool value)
@@ -15,10 +13,16 @@ public static class ImGuiExt
         return value;
     }
 
-    public static double DragFloat(string label, double value)
+    public static int DragInt(string label, int value, int speed = 1, int minValue = int.MinValue, int maxValue = int.MaxValue)
+    {
+        ImGui.DragInt(label, ref value, speed, minValue, maxValue);
+        return value;
+    }
+
+    public static double DragFloat(string label, double value, double speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
     {
         float v = (float)value;
-        ImGui.DragFloat(label, ref v);
+        ImGui.DragFloat(label, ref v, (float)speed, (float)minValue, (float)maxValue);
         return v;
     }
 
@@ -33,11 +37,8 @@ public static class ImGuiExt
     public static string StringEnumCombo(string label, Type type, string currentName)
     {
         int current = Enum.TryParse(type, currentName, out object? result) ? (int)result : 0;
-        List<string> allNames = Enum.GetNames(type).ToList();
-        allNames.Insert(0, "None");
-
-        ImGui.Combo(label, ref current, allNames.ToArray(), allNames.Count);
-
+        string[] allNames = Enum.GetNames(type).Prepend("None").ToArray();
+        ImGui.Combo(label, ref current, allNames, allNames.Length);
         return Enum.GetName(type, current) ?? "";
     }
 }

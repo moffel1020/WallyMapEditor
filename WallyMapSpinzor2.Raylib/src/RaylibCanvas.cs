@@ -25,7 +25,7 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
     public string BrawlPath { get; set; }
     public BucketPriorityQueue<Action> DrawingQueue { get; set; } = new(Enum.GetValues<DrawPriorityEnum>().Length);
     public TextureCache TextureCache { get; set; } = new();
-    public Dictionary<string, SwfCache> SwfFileCache { get; } = new();
+    public Dictionary<string, SwfFileData> SwfFileCache { get; } = new();
     public Dictionary<(string, string), Texture2DWrapper> SwfTextureCache { get; } = new();
     public Dictionary<Texture2DWrapper, Transform> TextureTransform { get; } = new();
     public Matrix4x4 CameraMatrix { get; set; } = Matrix4x4.Identity;
@@ -132,7 +132,7 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
     {
         Transform textureTrans = TextureTransform.GetValueOrDefault(texture, Transform.IDENTITY);
         trans *= textureTrans;
-        
+
         Texture2D rlTexture = (Texture2D)texture.Texture;
         DrawingQueue.Push(() =>
         {
@@ -144,7 +144,7 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
     {
         Transform textureTrans = TextureTransform.GetValueOrDefault(texture, Transform.IDENTITY);
         trans *= textureTrans;
-        
+
         Texture2D rlTexture = (Texture2D)texture.Texture;
         DrawingQueue.Push(() =>
         {
@@ -221,7 +221,7 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
         SwfTextureCache.TryGetValue((finalPath, name), out Texture2DWrapper? texture);
         if (texture is not null) return texture;
 
-        SwfFileCache.TryGetValue(finalPath, out SwfCache? cache);
+        SwfFileCache.TryGetValue(finalPath, out SwfFileData? cache);
         if (cache is null)
         {
             cache = LoadSwf(finalPath);
@@ -234,7 +234,7 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
         return swfTexture;
     }
 
-    private static (Texture2DWrapper, Transform) LoadTextureFromSwf(SwfCache swf, string name)
+    private static (Texture2DWrapper, Transform) LoadTextureFromSwf(SwfFileData swf, string name)
     {
         ushort spriteId = swf.SymbolClass[name];
         DefineSpriteTag sprite = swf.SpriteTags[spriteId];
@@ -255,10 +255,10 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
         return (new Texture2DWrapper(Rl.LoadTextureFromImage(img)), trans);
     }
 
-    private static SwfCache LoadSwf(string path)
+    private static SwfFileData LoadSwf(string path)
     {
         using FileStream stream = new(path, FileMode.Open, FileAccess.Read);
-        return SwfCache.CreateFrom(stream);
+        return SwfFileData.CreateFrom(stream);
     }
 
     public const int MAX_UPLOADS_PER_FRAME = 5;

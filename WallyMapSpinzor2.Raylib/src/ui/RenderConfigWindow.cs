@@ -18,34 +18,62 @@ public class RenderConfigWindow
 
         ImGui.SeparatorText("Collisions##config");
         Config.ShowCollision = ImGuiExt.Checkbox("Collisions##config", Config.ShowCollision);
-        Config.ShowCollisionNormalOverride  = ImGuiExt.Checkbox("Normal overrides##config", Config.ShowCollisionNormalOverride);
+        Config.ShowCollisionNormalOverride = ImGuiExt.Checkbox("Normal overrides##config", Config.ShowCollisionNormalOverride);
 
         ImGui.SeparatorText("Spawns##config");
         Config.ShowRespawn = ImGuiExt.Checkbox("Respawns##config", Config.ShowRespawn);
         Config.ShowItemSpawn = ImGuiExt.Checkbox("Item spawns##config", Config.ShowItemSpawn);
+        Config.ShowZombieSpawns = ImGuiExt.Checkbox("Zombie spawns##config", Config.ShowZombieSpawns);
 
-        ImGui.SeparatorText("Other##config");
+        ImGui.SeparatorText("Assets##config");
         Config.ShowAssets = ImGuiExt.Checkbox("Assets##config", Config.ShowAssets);
         Config.ShowBackground = ImGuiExt.Checkbox("Backgrounds##config", Config.ShowBackground);
         Config.AnimatedBackgrounds = ImGuiExt.Checkbox("Animate backgrounds##config", Config.AnimatedBackgrounds);
+
+        ImGui.SeparatorText("NavNodes##config");
         Config.ShowNavNode = ImGuiExt.Checkbox("NavNodes##config", Config.ShowNavNode);
+
+        ImGui.SeparatorText("Volumes##config");
         Config.ShowGoal = ImGuiExt.Checkbox("Goals##config", Config.ShowGoal);
         Config.ShowNoDodgeZone = ImGuiExt.Checkbox("No dodge zones##config", Config.ShowNoDodgeZone);
-        Config.ShowVolume = ImGuiExt.Checkbox("Volumes##config", Config.ShowVolume);
-        Config.NoSkulls = ImGuiExt.Checkbox("NoSkulls##config", Config.NoSkulls);
+        Config.ShowVolume = ImGuiExt.Checkbox("Plain volumes##config", Config.ShowVolume);
 
-        ImGui.Separator();
+        ImGui.SeparatorText("Others##config");
+        Config.NoSkulls = ImGuiExt.Checkbox("NoSkulls##config", Config.NoSkulls);
         Config.ScoringType = ImGuiExt.StringEnumCombo("Scoring Type##config", typeof(ScoringTypeEnum), Config.ScoringType);
         Config.Theme = ImGuiExt.StringEnumCombo("Theme##config", typeof(ThemeEnum), Config.Theme);
         Config.Hotkey = ImGuiExt.StringEnumCombo("Hotkey##config", typeof(HotkeyEnum), Config.Hotkey);
 
+        ImGui.Separator();
+        if (ImGui.TreeNode("Gamemode Config##config"))
+        {
+            Config.ShowPickedPlatform = ImGuiExt.Checkbox("Highlight platform king platform##config", Config.ShowPickedPlatform);
+            if (!Config.ShowPickedPlatform) ImGui.BeginDisabled();
+            Config.PickedPlatform = ImGuiExt.DragInt("Platform king platform index##config", Config.PickedPlatform, minValue: 0, maxValue: 9);
+            if (!Config.ShowPickedPlatform) ImGui.EndDisabled();
+
+            Config.BlueScore = ImGuiExt.DragInt("Blue team score##config", Config.BlueScore, minValue: 0, maxValue: 99);
+            Config.RedScore = ImGuiExt.DragInt("Red team score##config", Config.RedScore, minValue: 0, maxValue: 99);
+
+            Config.ShowRingRopes = ImGuiExt.Checkbox("Show brawldown ropes##config", Config.ShowRingRopes);
+
+            Config.ShowHordeDoors = ImGuiExt.Checkbox("Show horde doors##config", Config.ShowHordeDoors);
+            if (!Config.ShowHordeDoors) ImGui.BeginDisabled();
+            // we're gonna assume for now we won't be dealing with more than 2
+            Config.DamageHordeDoors[0] = ImGuiExt.DragInt("Door 1 damage##config", Config.DamageHordeDoors[0], minValue: 0, maxValue: 24);
+            Config.DamageHordeDoors[1] = ImGuiExt.DragInt("Door 2 damage##config", Config.DamageHordeDoors[1], minValue: 0, maxValue: 24);
+            if (!Config.ShowHordeDoors) ImGui.EndDisabled();
+
+            ImGui.TreePop();
+        }
+
         if (ImGui.TreeNode("Size##config"))
         {
-            Config.RadiusRespawn = ImGuiExt.DragFloat("Respawn radius##config", Config.RadiusRespawn);
-            Config.RadiusZombieSpawn = ImGuiExt.DragFloat("Zombie spawn radius##config", Config.RadiusZombieSpawn);
-            Config.RadiusNavNode = ImGuiExt.DragFloat("NavNode radius##config", Config.RadiusNavNode);
-            Config.LengthCollisionNormal = ImGuiExt.DragFloat("Collision normal length##config", Config.LengthCollisionNormal);
-            Config.OffsetNavLineArrowSide = ImGuiExt.DragFloat("Offset navnode arrow side##config", Config.OffsetNavLineArrowSide);
+            Config.RadiusRespawn = ImGuiExt.DragFloat("Respawn radius##config", Config.RadiusRespawn, minValue: 0);
+            Config.RadiusZombieSpawn = ImGuiExt.DragFloat("Zombie spawn radius##config", Config.RadiusZombieSpawn, minValue: 0);
+            Config.RadiusNavNode = ImGuiExt.DragFloat("NavNode radius##config", Config.RadiusNavNode, minValue: 0);
+            Config.LengthCollisionNormal = ImGuiExt.DragFloat("Collision normal length##config", Config.LengthCollisionNormal, minValue: 0);
+            Config.OffsetNavLineArrowSide = ImGuiExt.DragFloat("Offset navnode arrow side##config", Config.OffsetNavLineArrowSide, minValue: 0);
             Config.OffsetNavLineArrowBack = ImGuiExt.DragFloat("Offset navnode arrow back##config", Config.OffsetNavLineArrowBack);
             ImGui.TreePop();
         }

@@ -34,7 +34,7 @@ public class Editor
 
     private readonly RenderConfig _config = new()
     {
-        
+
     };
 
     public void Run()
@@ -81,7 +81,7 @@ public class Editor
         rlImGui.End();
         Rl.EndDrawing();
     }
-    
+
     private void Gui()
     {
         ImGui.DockSpaceOverViewport();

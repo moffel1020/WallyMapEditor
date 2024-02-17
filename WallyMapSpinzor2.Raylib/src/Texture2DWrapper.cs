@@ -13,12 +13,15 @@ public class Texture2DWrapper : ITexture
 
     ~Texture2DWrapper()
     {
-        if (Texture.Id != 0) Raylib_cs.Raylib.UnloadTexture(Texture);
+        if (Texture.Id != 0)
+        {
+            Raylib_cs.Raylib.UnloadTexture(Texture);
+        }
     }
 
     public static Texture2DWrapper Default => new(new() { Id = 0 });
 
     public int W => Texture.Width;
 
-    public int H => Texture.Height; 
+    public int H => Texture.Height;
 }
