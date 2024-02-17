@@ -29,21 +29,6 @@ public static class Utils
 
     public static Raylib_cs.Color ToRlColor(Color c) => new(c.R, c.G, c.B, c.A);
 
-    public static Raylib_cs.Texture2D LoadRlTexture(string path)
-    {
-        //brawlhalla only supports JPG, so this is fine
-        if (path.EndsWith(".jpg"))
-        {
-            using Image image = Image.Load(path);
-            using MemoryStream ms = new();
-            image.SaveAsPng(ms);
-            Raylib_cs.Image img = Rl.LoadImageFromMemory(".png", ms.ToArray());
-            return Rl.LoadTextureFromImage(img);
-        }
-
-        return Rl.LoadTexture(path);
-    }
-
     public static Raylib_cs.Image LoadRlImage(string path)
     {
         //brawlhalla only supports JPG, so this is fine
@@ -56,6 +41,19 @@ public static class Utils
         }
 
         return Rl.LoadImage(path);
+    }
+
+    public static bool IsPolygonClockwise(IReadOnlyList<(double, double)> poly)
+    {
+        double area = 0;
+        for (int i = 0; i < poly.Count; ++i)
+        {
+            int j = (i + 1) % poly.Count;
+            (double x1, double y1) = poly[i];
+            (double x2, double y2) = poly[j];
+            area += BrawlhallaMath.Cross(x1, y1, x2, y2);
+        }
+        return area > 0;
     }
 
     public static IEnumerable<ushort> GetShapeIds(this DefineSpriteTag tag) =>

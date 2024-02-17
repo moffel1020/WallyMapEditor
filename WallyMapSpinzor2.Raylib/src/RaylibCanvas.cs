@@ -149,18 +149,12 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
         (double xMax, double yMax) = (x + w, y + h);
         (double, double)[] texCoords = new (double, double)[] { (0, 0), (0, 1), (1, 1), (1, 0), (0, 0) };
         (double, double)[] points = new (double, double)[] { trans * (xMin, yMin), trans * (xMin, yMax), trans * (xMax, yMax), trans * (xMax, yMin), trans * (xMin, yMin) };
-        // we need to ensure that the points are in a counter clockwise order.
-        // but no matter what i do there's always some sprite that still disappears.
-        // so fuck it, just draw it twice.
-        for (int i = 0; i < points.Length - 1; ++i)
+        // raylib requires that the points be in counterclockwise order
+        if (Utils.IsPolygonClockwise(points))
         {
-            Rlgl.TexCoord2f((float)texCoords[i].Item1, (float)texCoords[i].Item2);
-            Rlgl.Vertex2f((float)points[i].Item1, (float)points[i].Item2);
-            Rlgl.TexCoord2f((float)texCoords[i + 1].Item1, (float)texCoords[i + 1].Item2);
-            Rlgl.Vertex2f((float)points[i + 1].Item1, (float)points[i + 1].Item2);
+            Array.Reverse(texCoords);
+            Array.Reverse(points);
         }
-        Array.Reverse(texCoords);
-        Array.Reverse(points);
         for (int i = 0; i < points.Length - 1; ++i)
         {
             Rlgl.TexCoord2f((float)texCoords[i].Item1, (float)texCoords[i].Item2);
@@ -179,12 +173,11 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
         (double xMin, double yMin) = (x, y);
         (double xMax, double yMax) = (x + w, y + h);
         (double, double)[] points = new (double, double)[] { trans * (xMin, yMin), trans * (xMin, yMax), trans * (xMax, yMax), trans * (xMax, yMin), trans * (xMin, yMin) };
-        for (int i = 0; i < points.Length - 1; ++i)
+        // raylib requires that the points be in counterclockwise order
+        if (Utils.IsPolygonClockwise(points))
         {
-            Rlgl.Vertex2f((float)points[i].Item1, (float)points[i].Item2);
-            Rlgl.Vertex2f((float)points[i + 1].Item1, (float)points[i + 1].Item2);
+            Array.Reverse(points);
         }
-        Array.Reverse(points);
         for (int i = 0; i < points.Length - 1; ++i)
         {
             Rlgl.Vertex2f((float)points[i].Item1, (float)points[i].Item2);
@@ -209,14 +202,14 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
         SwfFileCache.Cache.TryGetValue(finalPath, out SwfFileData? swf);
         if (swf is not null)
         {
-            if(SwfTextureCache.Cache.TryGetValue((swf, name), out (Texture2DWrapper, Transform) textData))
+            if (SwfTextureCache.Cache.TryGetValue((swf, name), out (Texture2DWrapper, Transform) textData))
             {
                 (Texture2DWrapper texture, Transform trans) = textData;
-                if(!TextureTransform.ContainsKey(texture))
+                if (!TextureTransform.ContainsKey(texture))
                     TextureTransform[texture] = trans;
                 return texture;
             }
-            
+
             _ = SwfTextureCache.LoadImageAsync(swf, name);
             return Texture2DWrapper.Default;
         }
