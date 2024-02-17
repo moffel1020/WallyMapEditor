@@ -45,6 +45,19 @@ public static class Utils
         return Rl.LoadTexture(path);
     }
 
+    public static Raylib_cs.Image LoadRlImage(string path)
+    {
+        if (JPG_EXTENSIONS.Any(j => path.EndsWith($".{j}")))
+        {
+            using Image image = Image.Load(path);
+            using MemoryStream ms = new();
+            image.SaveAsPng(ms);
+            return Rl.LoadImageFromMemory(".png", ms.ToArray());
+        }
+
+        return Rl.LoadImage(path);
+    }
+
     public static IEnumerable<ushort> GetShapeIds(this DefineSpriteTag tag) =>
         tag.Tags
             .OfType<PlaceObjectBaseTag>()

@@ -24,7 +24,7 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
 {
     public string BrawlPath { get; set; }
     public BucketPriorityQueue<Action> DrawingQueue { get; set; } = new(Enum.GetValues<DrawPriorityEnum>().Length);
-    public Dictionary<string, Texture2DWrapper> TextureCache { get; } = new();
+    public TextureCache TextureCache { get; set; } = new();
     public Dictionary<string, SwfCache> SwfFileCache { get; } = new();
     public Dictionary<(string, string), Texture2DWrapper> SwfTextureCache { get; } = new();
     public Dictionary<Texture2DWrapper, Transform> TextureTransform { get; } = new();
@@ -130,10 +130,8 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
 
     public void DrawTexture(double x, double y, Texture2DWrapper texture, Transform trans, DrawPriorityEnum priority)
     {
-        if (texture.Texture is null) return;
-        
         Transform textureTrans = TextureTransform.GetValueOrDefault(texture, Transform.IDENTITY);
-        trans = trans * textureTrans;
+        trans *= textureTrans;
         
         Texture2D rlTexture = (Texture2D)texture.Texture;
         DrawingQueue.Push(() =>
@@ -144,10 +142,8 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
 
     public void DrawTextureRect(double x, double y, double w, double h, Texture2DWrapper texture, Transform trans, DrawPriorityEnum priority)
     {
-        if (texture.Texture is null) return;
-        
         Transform textureTrans = TextureTransform.GetValueOrDefault(texture, Transform.IDENTITY);
-        trans = trans * textureTrans;
+        trans *= textureTrans;
         
         Texture2D rlTexture = (Texture2D)texture.Texture;
         DrawingQueue.Push(() =>
@@ -212,12 +208,11 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
     public Texture2DWrapper LoadTextureFromPath(string path)
     {
         string finalPath = Path.Combine(BrawlPath, "mapArt", path);
-        TextureCache.TryGetValue(finalPath, out Texture2DWrapper? texture);
+        TextureCache.Cache.TryGetValue(finalPath, out Texture2DWrapper? texture);
         if (texture is not null) return texture;
 
-        texture = new(Utils.LoadRlTexture(finalPath));
-        TextureCache.Add(finalPath, texture);
-        return texture;
+        _ = TextureCache.LoadImageAsync(finalPath);
+        return Texture2DWrapper.Default; // placeholder white texture until the image is read from disk
     }
 
     public Texture2DWrapper LoadTextureFromSWF(string filePath, string name)
@@ -266,8 +261,11 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
         return SwfCache.CreateFrom(stream);
     }
 
+    public const int MAX_UPLOADS_PER_FRAME = 5;
     public void FinalizeDraw()
     {
+        TextureCache.UploadImages(MAX_UPLOADS_PER_FRAME);
+
         while (DrawingQueue.Count > 0)
         {
             Action drawAction = DrawingQueue.PopMin();
