@@ -65,8 +65,8 @@ public class SwfTextureCache
         ImageSharpShapeExporter exporter = new(image, new IMS.Size(-shape.ShapeBounds.XMin, -shape.ShapeBounds.YMin));
         compiledShape.Export(exporter);
         using MemoryStream ms = new();
-        image.SaveAsPng(ms);
-        Raylib_cs.Image img = Rl.LoadImageFromMemory(".png", ms.ToArray());
+        image.SaveAsQoi(ms);
+        Raylib_cs.Image img = Rl.LoadImageFromMemory(".qoi", ms.ToArray());
         Transform trans = Transform.CreateScale(0.05, 0.05) * Transform.CreateTranslate(x: shape.ShapeBounds.XMin, y: shape.ShapeBounds.YMin);
         return (img, trans);
     }

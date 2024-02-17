@@ -36,8 +36,8 @@ public static class Utils
         {
             using Image image = Image.Load(path);
             using MemoryStream ms = new();
-            image.SaveAsPng(ms);
-            return Rl.LoadImageFromMemory(".png", ms.ToArray());
+            image.SaveAsQoi(ms);
+            return Rl.LoadImageFromMemory(".qoi", ms.ToArray());
         }
 
         return Rl.LoadImage(path);
