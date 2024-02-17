@@ -10,7 +10,8 @@ namespace WallyMapSpinzor2.Raylib;
 public class TextureCache
 {
     public Dictionary<string, Texture2DWrapper> Cache { get; } = new();
-    private Queue<(string path, Image)> Images { get; set; } = new();
+    private readonly Queue<(string, Image)> _images = new();
+    private readonly HashSet<string> _queueSet = new();
 
     public void LoadTexture(string path)
     {
@@ -20,25 +21,28 @@ public class TextureCache
 
     public async Task LoadImageAsync(string path)
     {
+        if (_queueSet.Contains(path)) return;
+        _queueSet.Add(path);
         await Task.Run(() =>
         {
             Cache[path] = Texture2DWrapper.Default;
             Image img = Utils.LoadRlImage(path);
-            lock (Images)
+            lock (_images)
             {
-                Images.Enqueue((path, img));
+                _images.Enqueue((path, img));
             }
         });
     }
 
     public void UploadImages(int amount)
     {
-        lock (Images)
+        lock (_images)
         {
-            amount = Math.Clamp(amount, 0, Images.Count);
+            amount = Math.Clamp(amount, 0, _images.Count);
             for (int i = 0; i < amount; i++)
             {
-                (string path, Image img) = Images.Dequeue();
+                (string path, Image img) = _images.Dequeue();
+                _queueSet.Remove(path);
                 Cache[path] = new(Rl.LoadTextureFromImage(img));
             }
         }
@@ -46,7 +50,11 @@ public class TextureCache
 
     public void Clear()
     {
-        Cache.Clear(); 
-        lock (Images) Images.Clear();
+        Cache.Clear();
+        _queueSet.Clear();
+        lock (_images)
+        {
+            _images.Clear();
+        }
     }
 }
