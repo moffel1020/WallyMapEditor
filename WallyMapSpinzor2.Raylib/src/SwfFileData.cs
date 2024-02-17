@@ -12,18 +12,18 @@ using SwiffCheese.Wrappers;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public class SwfCache
+public class SwfFileData
 {
     public SwfFile? Swf { get; set; } = null!;
     public Dictionary<string, ushort> SymbolClass { get; set; } = null!;
     public Dictionary<ushort, DefineSpriteTag> SpriteTags { get; set; } = null!;
     public Dictionary<ushort, DefineShapeXTag> ShapeTags { get; set; } = null!;
 
-    private SwfCache() { }
+    private SwfFileData() { }
 
-    public static SwfCache CreateFrom(Stream stream)
+    public static SwfFileData CreateFrom(Stream stream)
     {
-        SwfCache swf = new()
+        SwfFileData swf = new()
         {
             Swf = SwfFile.ReadFrom(stream)
         };

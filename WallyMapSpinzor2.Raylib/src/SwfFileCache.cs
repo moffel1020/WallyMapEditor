@@ -1,49 +1,48 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
-
-using Raylib_cs;
-using Rl = Raylib_cs.Raylib;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public class TextureCache
+public class SwfFileCache
 {
-    public Dictionary<string, Texture2DWrapper> Cache { get; } = new();
-    private readonly Queue<(string, Image)> _queue = new();
+    public Dictionary<string, SwfFileData?> Cache { get; } = new();
+    private readonly Queue<(string, SwfFileData)> _queue = new();
     private readonly HashSet<string> _queueSet = new();
 
-    public void LoadTexture(string path)
+    public void LoadSwf(string path)
     {
-        Texture2D texture = Utils.LoadRlTexture(path);
-        Cache[path] = new(texture);
+        using FileStream stream = new(path, FileMode.Open, FileAccess.Read);
+        Cache[path] = SwfFileData.CreateFrom(stream);
     }
 
-    public async Task LoadImageAsync(string path)
+    public async Task LoadSwfAsync(string path)
     {
         if (_queueSet.Contains(path)) return;
         _queueSet.Add(path);
         await Task.Run(() =>
         {
-            Cache[path] = Texture2DWrapper.Default;
-            Image img = Utils.LoadRlImage(path);
+            Cache[path] = null;
+            using FileStream stream = new(path, FileMode.Open, FileAccess.Read);
+            SwfFileData swf = SwfFileData.CreateFrom(stream);
             lock (_queue)
             {
-                _queue.Enqueue((path, img));
+                _queue.Enqueue((path, swf));
             }
         });
     }
 
-    public void UploadImages(int amount)
+    public void UploadSwfs(int amount)
     {
         lock (_queue)
         {
             amount = Math.Clamp(amount, 0, _queue.Count);
             for (int i = 0; i < amount; i++)
             {
-                (string path, Image img) = _queue.Dequeue();
+                (string path, SwfFileData swf) = _queue.Dequeue();
                 _queueSet.Remove(path);
-                Cache[path] = new(Rl.LoadTextureFromImage(img));
+                Cache[path] = swf;
             }
         }
     }
