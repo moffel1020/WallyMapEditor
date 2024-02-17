@@ -25,7 +25,7 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
     public string BrawlPath { get; set; }
     public BucketPriorityQueue<Action> DrawingQueue { get; set; } = new(Enum.GetValues<DrawPriorityEnum>().Length);
     public TextureCache TextureCache { get; set; } = new();
-    public Dictionary<string, SwfFileData> SwfFileCache { get; } = new();
+    public SwfFileCache SwfFileCache { get; set; } = new();
     public Dictionary<(string, string), Texture2DWrapper> SwfTextureCache { get; } = new();
     public Dictionary<Texture2DWrapper, Transform> TextureTransform { get; } = new();
     public Matrix4x4 CameraMatrix { get; set; } = Matrix4x4.Identity;
@@ -220,18 +220,17 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
         string finalPath = Path.Combine(BrawlPath, filePath);
         SwfTextureCache.TryGetValue((finalPath, name), out Texture2DWrapper? texture);
         if (texture is not null) return texture;
-
-        SwfFileCache.TryGetValue(finalPath, out SwfFileData? cache);
-        if (cache is null)
+        SwfFileCache.Cache.TryGetValue(finalPath, out SwfFileData? cache);
+        if (cache is not null)
         {
-            cache = LoadSwf(finalPath);
-            SwfFileCache.Add(finalPath, cache);
+            (Texture2DWrapper swfTexture, Transform trans) = LoadTextureFromSwf(cache, name);
+            SwfTextureCache.Add((finalPath, name), swfTexture);
+            TextureTransform.Add(swfTexture, trans);
+            return swfTexture;
         }
 
-        (Texture2DWrapper swfTexture, Transform trans) = LoadTextureFromSwf(cache, name);
-        SwfTextureCache.Add((finalPath, name), swfTexture);
-        TextureTransform.Add(swfTexture, trans);
-        return swfTexture;
+        _ = SwfFileCache.LoadSwfAsync(finalPath);
+        return Texture2DWrapper.Default;
     }
 
     private static (Texture2DWrapper, Transform) LoadTextureFromSwf(SwfFileData swf, string name)
@@ -261,10 +260,12 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
         return SwfFileData.CreateFrom(stream);
     }
 
-    public const int MAX_UPLOADS_PER_FRAME = 5;
+    public const int MAX_TEXTURE_UPLOADS_PER_FRAME = 5;
+    public const int MAX_SWF_UPLOADS_PER_FRAME = 1;
     public void FinalizeDraw()
     {
-        TextureCache.UploadImages(MAX_UPLOADS_PER_FRAME);
+        TextureCache.UploadImages(MAX_TEXTURE_UPLOADS_PER_FRAME);
+        SwfFileCache.UploadSwfs(MAX_SWF_UPLOADS_PER_FRAME);
 
         while (DrawingQueue.Count > 0)
         {
