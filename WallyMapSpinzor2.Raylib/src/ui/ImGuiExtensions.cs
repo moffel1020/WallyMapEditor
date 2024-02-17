@@ -19,6 +19,12 @@ public static class ImGuiExt
         return value;
     }
 
+    public static int SliderInt(string label, int value, int minValue = int.MinValue, int maxValue = int.MaxValue)
+    {
+        ImGui.SliderInt(label, ref value, minValue, maxValue);
+        return value;
+    }
+
     public static double DragFloat(string label, double value, double speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
     {
         float v = (float)value;
