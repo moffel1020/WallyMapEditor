@@ -40,9 +40,9 @@ public class RenderConfigWindow
 
         ImGui.SeparatorText("Others##config");
         Config.NoSkulls = ImGuiExt.Checkbox("NoSkulls##config", Config.NoSkulls);
-        Config.ScoringType = ImGuiExt.StringEnumCombo("Scoring Type##config", typeof(ScoringTypeEnum), Config.ScoringType);
-        Config.Theme = ImGuiExt.StringEnumCombo("Theme##config", typeof(ThemeEnum), Config.Theme);
-        Config.Hotkey = ImGuiExt.StringEnumCombo("Hotkey##config", typeof(HotkeyEnum), Config.Hotkey);
+        Config.ScoringType = ImGuiExt.StringEnumCombo("Scoring Type##config", typeof(ScoringTypeEnum), Config.ScoringType, true);
+        Config.Theme = ImGuiExt.StringEnumCombo("Theme##config", typeof(ThemeEnum), Config.Theme, true);
+        Config.Hotkey = ImGuiExt.StringEnumCombo("Hotkey##config", typeof(HotkeyEnum), Config.Hotkey, false);
 
         ImGui.Separator();
         if (ImGui.TreeNode("Gamemode Config##config"))
@@ -51,19 +51,18 @@ public class RenderConfigWindow
             if (!Config.ShowPickedPlatform) ImGui.BeginDisabled();
             Config.PickedPlatform = ImGuiExt.DragInt("Platform king platform index##config", Config.PickedPlatform, minValue: 0, maxValue: 9);
             if (!Config.ShowPickedPlatform) ImGui.EndDisabled();
-
+            ImGui.Separator();
             Config.BlueScore = ImGuiExt.DragInt("Blue team score##config", Config.BlueScore, minValue: 0, maxValue: 99);
             Config.RedScore = ImGuiExt.DragInt("Red team score##config", Config.RedScore, minValue: 0, maxValue: 99);
-
+            ImGui.Separator();
             Config.ShowRingRopes = ImGuiExt.Checkbox("Show brawldown ropes##config", Config.ShowRingRopes);
-
+            ImGui.Separator();
             Config.ShowHordeDoors = ImGuiExt.Checkbox("Show horde doors##config", Config.ShowHordeDoors);
             if (!Config.ShowHordeDoors) ImGui.BeginDisabled();
             // we're gonna assume for now we won't be dealing with more than 2
             Config.DamageHordeDoors[0] = ImGuiExt.DragInt("Door 1 damage##config", Config.DamageHordeDoors[0], minValue: 0, maxValue: 24);
             Config.DamageHordeDoors[1] = ImGuiExt.DragInt("Door 2 damage##config", Config.DamageHordeDoors[1], minValue: 0, maxValue: 24);
             if (!Config.ShowHordeDoors) ImGui.EndDisabled();
-
             ImGui.TreePop();
         }
 

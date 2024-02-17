@@ -34,10 +34,12 @@ public static class ImGuiExt
         return a;
     }
 
-    public static string StringEnumCombo(string label, Type type, string currentName)
+    public static string StringEnumCombo(string label, Type type, string currentName, bool includeNone)
     {
         int current = Enum.TryParse(type, currentName, out object? result) ? (int)result : 0;
-        string[] allNames = Enum.GetNames(type).Prepend("None").ToArray();
+        string[] allNames = includeNone
+            ? Enum.GetNames(type).Prepend("None").ToArray()
+            : Enum.GetNames(type);
         ImGui.Combo(label, ref current, allNames, allNames.Length);
         return Enum.GetName(type, current) ?? "";
     }
