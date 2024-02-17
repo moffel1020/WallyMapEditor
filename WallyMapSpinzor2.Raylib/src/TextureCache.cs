@@ -15,7 +15,8 @@ public class TextureCache
 
     public void LoadTexture(string path)
     {
-        Texture2D texture = Utils.LoadRlTexture(path);
+        Image img = Utils.LoadRlImage(path);
+        Texture2D texture = Rl.LoadTextureFromImage(img);
         Cache[path] = new(texture);
     }
 
