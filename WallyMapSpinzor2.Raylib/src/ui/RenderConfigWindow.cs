@@ -23,7 +23,6 @@ public class RenderConfigWindow
         ImGui.SeparatorText("Spawns##config");
         Config.ShowRespawn = ImGuiExt.Checkbox("Respawns##config", Config.ShowRespawn);
         Config.ShowItemSpawn = ImGuiExt.Checkbox("Item spawns##config", Config.ShowItemSpawn);
-        Config.ShowZombieSpawns = ImGuiExt.Checkbox("Zombie spawns##config", Config.ShowZombieSpawns);
 
         ImGui.SeparatorText("Assets##config");
         Config.ShowAssets = ImGuiExt.Checkbox("Assets##config", Config.ShowAssets);
@@ -47,15 +46,19 @@ public class RenderConfigWindow
         ImGui.Separator();
         if (ImGui.TreeNode("Gamemode Config##config"))
         {
+            Config.BlueScore = ImGuiExt.SliderInt("Blue team score##config", Config.BlueScore, minValue: 0, maxValue: 99);
+            Config.RedScore = ImGuiExt.SliderInt("Red team score##config", Config.RedScore, minValue: 0, maxValue: 99);
+            ImGui.Separator();
             Config.ShowPickedPlatform = ImGuiExt.Checkbox("Highlight platform king platform##config", Config.ShowPickedPlatform);
             if (!Config.ShowPickedPlatform) ImGui.BeginDisabled();
             Config.PickedPlatform = ImGuiExt.SliderInt("Platform king platform index##config", Config.PickedPlatform, minValue: 0, maxValue: 9);
             if (!Config.ShowPickedPlatform) ImGui.EndDisabled();
             ImGui.Separator();
-            Config.BlueScore = ImGuiExt.SliderInt("Blue team score##config", Config.BlueScore, minValue: 0, maxValue: 99);
-            Config.RedScore = ImGuiExt.SliderInt("Red team score##config", Config.RedScore, minValue: 0, maxValue: 99);
+            Config.ShowZombieSpawns = ImGuiExt.Checkbox("Show zombie spawns##config", Config.ShowZombieSpawns);
             ImGui.Separator();
             Config.ShowRingRopes = ImGuiExt.Checkbox("Show brawldown ropes##config", Config.ShowRingRopes);
+            ImGui.Separator();
+            Config.ShowBombsketballTargets = ImGuiExt.Checkbox("Show bombsketball targets##config", Config.ShowBombsketballTargets);
             ImGui.Separator();
             Config.ShowHordeDoors = ImGuiExt.Checkbox("Show horde doors##config", Config.ShowHordeDoors);
             if (!Config.ShowHordeDoors) ImGui.BeginDisabled();
