@@ -30,7 +30,10 @@ public class TextureCache
         {
             Cache[path] = Texture2DWrapper.Default;
             Image img = Utils.LoadRlImage(path);
-            lock (_queue) _queue.Enqueue((path, img));
+            lock (_queue)
+            {
+                _queue.Enqueue((path, img));
+            }
         });
     }
 
@@ -52,6 +55,13 @@ public class TextureCache
     {
         Cache.Clear();
         _queueSet.Clear();
-        lock (_queue) _queue.Clear();
+        lock (_queue)
+        {
+            while (_queue.Count > 0)
+            {
+                (_, Image img) = _queue.Dequeue();
+                Rl.UnloadImage(img);
+            }
+        }
     }
 }

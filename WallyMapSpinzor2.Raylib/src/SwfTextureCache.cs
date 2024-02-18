@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
-using System.IO;
 
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -86,6 +85,13 @@ public class SwfTextureCache
     {
         Cache.Clear();
         _queueSet.Clear();
-        lock (_queue) _queue.Clear();
+        lock (_queue)
+        {
+            while (_queue.Count > 0)
+            {
+                (_, (Raylib_cs.Image img, _)) = _queue.Dequeue();
+                Rl.UnloadImage(img);
+            }
+        }
     }
 }
