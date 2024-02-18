@@ -14,10 +14,10 @@ namespace WallyMapSpinzor2.Raylib;
 
 public class SwfFileData
 {
-    public SwfFile? Swf { get; set; } = null!;
-    public Dictionary<string, ushort> SymbolClass { get; set; } = null!;
-    public Dictionary<ushort, DefineSpriteTag> SpriteTags { get; set; } = null!;
-    public Dictionary<ushort, DefineShapeXTag> ShapeTags { get; set; } = null!;
+    public SwfFile? Swf { get; private init; } = null!;
+    public Dictionary<string, ushort> SymbolClass { get; private init; } = null!;
+    public Dictionary<ushort, DefineSpriteTag> SpriteTags { get; private init; } = null!;
+    public Dictionary<ushort, DefineShapeXTag> ShapeTags { get; private init; } = null!;
 
     private SwfFileData() { }
 
@@ -25,7 +25,10 @@ public class SwfFileData
     {
         SwfFileData swf = new()
         {
-            Swf = SwfFile.ReadFrom(stream)
+            Swf = SwfFile.ReadFrom(stream),
+            SymbolClass = new(),
+            ShapeTags = new(),
+            SpriteTags = new()
         };
 
         SymbolClassTag? symbolClass = null;
@@ -45,13 +48,11 @@ public class SwfFileData
             throw new Exception("No symbol class in swf");
         }
 
-        swf.SymbolClass = new();
         foreach (SwfSymbolReference reference in symbolClass.References)
         {
             swf.SymbolClass[reference.SymbolName] = reference.SymbolID;
         }
 
-        swf.SpriteTags = new();
         foreach (SwfTagBase tag in swf.Swf.Tags)
         {
             if (tag is DefineSpriteTag st)
@@ -61,7 +62,6 @@ public class SwfFileData
         }
 
         //find matching shape tags
-        swf.ShapeTags = new();
         foreach (SwfTagBase tag in swf.Swf.Tags)
         {
             //skip DefineShape4 because we don't support it

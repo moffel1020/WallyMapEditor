@@ -11,9 +11,9 @@ namespace WallyMapSpinzor2.Raylib;
 public class RaylibCanvas : ICanvas<Texture2DWrapper>
 {
     public string BrawlPath { get; set; }
-    public BucketPriorityQueue<Action> DrawingQueue { get; set; } = new(Enum.GetValues<DrawPriorityEnum>().Length);
-    public TextureCache TextureCache { get; set; } = new();
-    public SwfFileCache SwfFileCache { get; set; } = new();
+    public BucketPriorityQueue<Action> DrawingQueue { get; } = new(Enum.GetValues<DrawPriorityEnum>().Length);
+    public TextureCache TextureCache { get; } = new();
+    public SwfFileCache SwfFileCache { get; } = new();
     public SwfTextureCache SwfTextureCache { get; } = new();
     public Dictionary<Texture2DWrapper, Transform> TextureTransform { get; } = new();
     public Matrix4x4 CameraMatrix { get; set; } = Matrix4x4.Identity;
@@ -121,7 +121,7 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
         Transform textureTrans = TextureTransform.GetValueOrDefault(texture, Transform.IDENTITY);
         trans *= textureTrans;
 
-        Texture2D rlTexture = (Texture2D)texture.Texture;
+        Texture2D rlTexture = texture.Texture;
         DrawingQueue.Push(() =>
         {
             DrawTextureWithTransform(rlTexture, x, y, rlTexture.Width, rlTexture.Height, trans, Color.FromHex(0xFFFFFFFF));
@@ -133,7 +133,7 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
         Transform textureTrans = TextureTransform.GetValueOrDefault(texture, Transform.IDENTITY);
         trans *= textureTrans;
 
-        Texture2D rlTexture = (Texture2D)texture.Texture;
+        Texture2D rlTexture = texture.Texture;
         DrawingQueue.Push(() =>
         {
             DrawTextureWithTransform(rlTexture, x, y, w, h, trans, Color.FromHex(0xFFFFFFFF));
