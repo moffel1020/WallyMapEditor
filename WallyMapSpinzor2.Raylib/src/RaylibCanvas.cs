@@ -11,11 +11,10 @@ namespace WallyMapSpinzor2.Raylib;
 public class RaylibCanvas : ICanvas<Texture2DWrapper>
 {
     public string BrawlPath { get; set; }
-    public BucketPriorityQueue<Action> DrawingQueue { get; set; } = new(Enum.GetValues<DrawPriorityEnum>().Length);
-    public TextureCache TextureCache { get; set; } = new();
-    public SwfFileCache SwfFileCache { get; set; } = new();
+    public BucketPriorityQueue<Action> DrawingQueue { get; } = new(Enum.GetValues<DrawPriorityEnum>().Length);
+    public TextureCache TextureCache { get; } = new();
+    public SwfFileCache SwfFileCache { get; } = new();
     public SwfTextureCache SwfTextureCache { get; } = new();
-    public Dictionary<Texture2DWrapper, Transform> TextureTransform { get; } = new();
     public Matrix4x4 CameraMatrix { get; set; } = Matrix4x4.Identity;
 
     public RaylibCanvas(string brawlPath)
@@ -118,25 +117,17 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
 
     public void DrawTexture(double x, double y, Texture2DWrapper texture, Transform trans, DrawPriorityEnum priority)
     {
-        Transform textureTrans = TextureTransform.GetValueOrDefault(texture, Transform.IDENTITY);
-        trans *= textureTrans;
-
-        Texture2D rlTexture = (Texture2D)texture.Texture;
         DrawingQueue.Push(() =>
         {
-            DrawTextureWithTransform(rlTexture, x, y, rlTexture.Width, rlTexture.Height, trans, Color.FromHex(0xFFFFFFFF));
+            DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, texture.W, texture.H, trans, Color.FromHex(0xFFFFFFFF));
         }, (int)priority);
     }
 
     public void DrawTextureRect(double x, double y, double w, double h, Texture2DWrapper texture, Transform trans, DrawPriorityEnum priority)
     {
-        Transform textureTrans = TextureTransform.GetValueOrDefault(texture, Transform.IDENTITY);
-        trans *= textureTrans;
-
-        Texture2D rlTexture = (Texture2D)texture.Texture;
         DrawingQueue.Push(() =>
         {
-            DrawTextureWithTransform(rlTexture, x, y, w, h, trans, Color.FromHex(0xFFFFFFFF));
+            DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, w, h, trans, Color.FromHex(0xFFFFFFFF));
         }, (int)priority);
     }
 
@@ -202,11 +193,9 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
         SwfFileCache.Cache.TryGetValue(finalPath, out SwfFileData? swf);
         if (swf is not null)
         {
-            if (SwfTextureCache.Cache.TryGetValue((swf, name), out (Texture2DWrapper, Transform) textData))
+            SwfTextureCache.Cache.TryGetValue((swf, name), out Texture2DWrapper? texture);
+            if (texture is not null)
             {
-                (Texture2DWrapper texture, Transform trans) = textData;
-                if (!TextureTransform.ContainsKey(texture))
-                    TextureTransform[texture] = trans;
                 return texture;
             }
 
