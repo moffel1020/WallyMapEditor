@@ -29,15 +29,20 @@ public static class Utils
 
     public static Raylib_cs.Color ToRlColor(Color c) => new(c.R, c.G, c.B, c.A);
 
+    public static Raylib_cs.Image ImageSharpImageToRl(Image image)
+    {
+        using MemoryStream ms = new();
+        image.SaveAsQoi(ms);
+        return Rl.LoadImageFromMemory(".qoi", ms.ToArray());
+    }
+
     public static Raylib_cs.Image LoadRlImage(string path)
     {
         //brawlhalla only supports JPG, so this is fine
         if (path.EndsWith(".jpg"))
         {
             using Image image = Image.Load(path);
-            using MemoryStream ms = new();
-            image.SaveAsQoi(ms);
-            return Rl.LoadImageFromMemory(".qoi", ms.ToArray());
+            return ImageSharpImageToRl(image);
         }
 
         return Rl.LoadImage(path);

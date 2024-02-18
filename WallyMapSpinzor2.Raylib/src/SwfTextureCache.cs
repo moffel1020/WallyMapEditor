@@ -10,6 +10,7 @@ using SixLabors.ImageSharp.PixelFormats;
 using IMS = SixLabors.ImageSharp;
 
 using SwfLib.Tags;
+using SwfLib.Data;
 
 using SwiffCheese.Exporting;
 using SwiffCheese.Shapes;
@@ -19,21 +20,20 @@ using SwiffCheese.Wrappers;
 using Rl = Raylib_cs.Raylib;
 
 using TxtId = System.ValueTuple<WallyMapSpinzor2.Raylib.SwfFileData, string>;
-using TxtData = System.ValueTuple<WallyMapSpinzor2.Raylib.Texture2DWrapper, WallyMapSpinzor2.Transform>;
-using ImgData = System.ValueTuple<Raylib_cs.Image, WallyMapSpinzor2.Transform>;
+using ImgData = System.ValueTuple<Raylib_cs.Image, SwfLib.Data.SwfRect>;
 
 namespace WallyMapSpinzor2.Raylib;
 
 public class SwfTextureCache
 {
-    public ConcurrentDictionary<TxtId, TxtData> Cache { get; } = new();
+    public ConcurrentDictionary<TxtId, Texture2DWrapper> Cache { get; } = new();
     private readonly Queue<(TxtId, ImgData)> _queue = new();
     private readonly HashSet<TxtId> _queueSet = new();
 
     public void LoadTexture(SwfFileData swf, string name)
     {
-        (Raylib_cs.Image img, Transform trans) = LoadImageInternal(swf, name);
-        Cache[(swf, name)] = (new(Rl.LoadTextureFromImage(img)), trans);
+        (Raylib_cs.Image img, SwfRect rect) = LoadImageInternal(swf, name);
+        Cache[(swf, name)] = new(Rl.LoadTextureFromImage(img), rect);
     }
 
     public async Task LoadImageAsync(SwfFileData swf, string name)
@@ -43,9 +43,9 @@ public class SwfTextureCache
 
         await Task.Run(() =>
         {
-            Cache[(swf, name)] = (Texture2DWrapper.Default, Transform.IDENTITY);
-            (Raylib_cs.Image img, Transform trans) = LoadImageInternal(swf, name);
-            lock (_queue) _queue.Enqueue(((swf, name), (img, trans)));
+            Cache[(swf, name)] = Texture2DWrapper.Default;
+            (Raylib_cs.Image img, SwfRect rect) = LoadImageInternal(swf, name);
+            lock (_queue) _queue.Enqueue(((swf, name), (img, rect)));
         });
     }
 
@@ -60,14 +60,11 @@ public class SwfTextureCache
         SwfShape compiledShape = new(shape);
         int width = shape.ShapeBounds.Width();
         int height = shape.ShapeBounds.Height();
-        Image<Rgba32> image = new(width, height, IMS.Color.Transparent.ToPixel<Rgba32>());
+        using Image<Rgba32> image = new(width, height, IMS.Color.Transparent.ToPixel<Rgba32>());
         ImageSharpShapeExporter exporter = new(image, new Size(-shape.ShapeBounds.XMin, -shape.ShapeBounds.YMin));
         compiledShape.Export(exporter);
-        using MemoryStream ms = new();
-        image.SaveAsQoi(ms);
-        Raylib_cs.Image img = Rl.LoadImageFromMemory(".qoi", ms.ToArray());
-        Transform trans = Transform.CreateScale(0.05, 0.05) * Transform.CreateTranslate(x: shape.ShapeBounds.XMin, y: shape.ShapeBounds.YMin);
-        return (img, trans);
+        Raylib_cs.Image img = Utils.ImageSharpImageToRl(image);
+        return (img, shape.ShapeBounds);
     }
 
     public void UploadImages(int amount)
@@ -79,8 +76,8 @@ public class SwfTextureCache
             {
                 (TxtId id, ImgData dat) = _queue.Dequeue();
                 _queueSet.Remove(id);
-                (Raylib_cs.Image img, Transform trans) = dat;
-                Cache[id] = (new(Rl.LoadTextureFromImage(img)), trans);
+                (Raylib_cs.Image img, SwfRect rect) = dat;
+                Cache[id] = new(Rl.LoadTextureFromImage(img), rect);
             }
         }
     }
