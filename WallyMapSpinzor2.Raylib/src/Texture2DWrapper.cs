@@ -1,4 +1,5 @@
 using Raylib_cs;
+using Rl = Raylib_cs.Raylib;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -9,13 +10,14 @@ public class Texture2DWrapper : ITexture
     public Texture2DWrapper(Texture2D texture)
     {
         Texture = texture;
+        Rl.SetTextureWrap(texture, TextureWrap.Clamp);
     }
 
     ~Texture2DWrapper()
     {
         if (Texture.Id != 0)
         {
-            Raylib_cs.Raylib.UnloadTexture(Texture);
+            Rl.UnloadTexture(Texture);
         }
     }
 
