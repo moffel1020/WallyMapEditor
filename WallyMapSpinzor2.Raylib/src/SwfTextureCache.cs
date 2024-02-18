@@ -86,6 +86,13 @@ public class SwfTextureCache
     {
         Cache.Clear();
         _queueSet.Clear();
-        lock (_queue) _queue.Clear();
+        lock (_queue)
+        {
+            while (_queue.Count > 0)
+            {
+                (_, (Raylib_cs.Image img, _)) = _queue.Dequeue();
+                Rl.UnloadImage(img);
+            }
+        }
     }
 }
