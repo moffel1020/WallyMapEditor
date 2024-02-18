@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -7,7 +8,7 @@ namespace WallyMapSpinzor2.Raylib;
 
 public class SwfFileCache
 {
-    public Dictionary<string, SwfFileData?> Cache { get; } = new();
+    public ConcurrentDictionary<string, SwfFileData?> Cache { get; } = new();
     private readonly Queue<(string, SwfFileData)> _queue = new();
     private readonly HashSet<string> _queueSet = new();
 
@@ -21,15 +22,13 @@ public class SwfFileCache
     {
         if (_queueSet.Contains(path)) return;
         _queueSet.Add(path);
+
         await Task.Run(() =>
         {
             Cache[path] = null;
             using FileStream stream = new(path, FileMode.Open, FileAccess.Read);
             SwfFileData swf = SwfFileData.CreateFrom(stream);
-            lock (_queue)
-            {
-                _queue.Enqueue((path, swf));
-            }
+            lock (_queue) _queue.Enqueue((path, swf));
         });
     }
 
@@ -51,9 +50,6 @@ public class SwfFileCache
     {
         Cache.Clear();
         _queueSet.Clear();
-        lock (_queue)
-        {
-            _queue.Clear();
-        }
+        lock (_queue) _queue.Clear();
     }
 }

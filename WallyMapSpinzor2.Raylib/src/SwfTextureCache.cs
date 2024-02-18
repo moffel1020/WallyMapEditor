@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
 using System.IO;
@@ -25,7 +26,7 @@ namespace WallyMapSpinzor2.Raylib;
 
 public class SwfTextureCache
 {
-    public Dictionary<TxtId, TxtData> Cache { get; } = new();
+    public ConcurrentDictionary<TxtId, TxtData> Cache { get; } = new();
     private readonly Queue<(TxtId, ImgData)> _queue = new();
     private readonly HashSet<TxtId> _queueSet = new();
 
@@ -39,14 +40,12 @@ public class SwfTextureCache
     {
         if (_queueSet.Contains((swf, name))) return;
         _queueSet.Add((swf, name));
+
         await Task.Run(() =>
         {
             Cache[(swf, name)] = (Texture2DWrapper.Default, Transform.IDENTITY);
             (Raylib_cs.Image img, Transform trans) = LoadImageInternal(swf, name);
-            lock (_queue)
-            {
-                _queue.Enqueue(((swf, name), (img, trans)));
-            }
+            lock (_queue) _queue.Enqueue(((swf, name), (img, trans)));
         });
     }
 
@@ -61,8 +60,8 @@ public class SwfTextureCache
         SwfShape compiledShape = new(shape);
         int width = shape.ShapeBounds.Width();
         int height = shape.ShapeBounds.Height();
-        IMS.Image<Rgba32> image = new(width, height, IMS.Color.Transparent.ToPixel<Rgba32>());
-        ImageSharpShapeExporter exporter = new(image, new IMS.Size(-shape.ShapeBounds.XMin, -shape.ShapeBounds.YMin));
+        Image<Rgba32> image = new(width, height, IMS.Color.Transparent.ToPixel<Rgba32>());
+        ImageSharpShapeExporter exporter = new(image, new Size(-shape.ShapeBounds.XMin, -shape.ShapeBounds.YMin));
         compiledShape.Export(exporter);
         using MemoryStream ms = new();
         image.SaveAsQoi(ms);
@@ -90,9 +89,6 @@ public class SwfTextureCache
     {
         Cache.Clear();
         _queueSet.Clear();
-        lock (_queue)
-        {
-            _queue.Clear();
-        }
+        lock (_queue) _queue.Clear();
     }
 }

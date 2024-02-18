@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -9,7 +10,7 @@ namespace WallyMapSpinzor2.Raylib;
 
 public class TextureCache
 {
-    public Dictionary<string, Texture2DWrapper> Cache { get; } = new();
+    public ConcurrentDictionary<string, Texture2DWrapper> Cache { get; } = new();
     private readonly Queue<(string, Image)> _queue = new();
     private readonly HashSet<string> _queueSet = new();
 
@@ -24,14 +25,12 @@ public class TextureCache
     {
         if (_queueSet.Contains(path)) return;
         _queueSet.Add(path);
+
         await Task.Run(() =>
         {
             Cache[path] = Texture2DWrapper.Default;
             Image img = Utils.LoadRlImage(path);
-            lock (_queue)
-            {
-                _queue.Enqueue((path, img));
-            }
+            lock (_queue) _queue.Enqueue((path, img));
         });
     }
 
@@ -53,9 +52,6 @@ public class TextureCache
     {
         Cache.Clear();
         _queueSet.Clear();
-        lock (_queue)
-        {
-            _queue.Clear();
-        }
+        lock (_queue) _queue.Clear();
     }
 }
