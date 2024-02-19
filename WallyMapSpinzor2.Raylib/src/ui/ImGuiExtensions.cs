@@ -32,11 +32,11 @@ public static class ImGuiExt
     {
         //find the IntPtr for the values
         //there's a simpler way to do this, but it requires unsafe
-        using PinnedGCHandle valueHandle = PinnedGCHandle.Alloc(value, GCHandleType.Pinned);
+        using SafeGCHandle valueHandle = SafeGCHandle.Alloc(value, GCHandleType.Pinned);
         nint valuePtr = valueHandle;
-        using PinnedGCHandle minValueHandle = PinnedGCHandle.Alloc(minValue, GCHandleType.Pinned);
+        using SafeGCHandle minValueHandle = SafeGCHandle.Alloc(minValue, GCHandleType.Pinned);
         nint minValuePtr = minValueHandle;
-        using PinnedGCHandle maxValueHandle = PinnedGCHandle.Alloc(maxValue, GCHandleType.Pinned);
+        using SafeGCHandle maxValueHandle = SafeGCHandle.Alloc(maxValue, GCHandleType.Pinned);
         nint maxValuePtr = maxValueHandle;
         //create the drag
         ImGui.DragScalar(label, ImGuiDataType.U32, valuePtr, speed, minValuePtr, maxValuePtr);
@@ -85,21 +85,21 @@ public static class ImGuiExt
     }
 
     //wrapper to ensure GCHandle gets freed
-    private sealed class PinnedGCHandle : IDisposable
+    private sealed class SafeGCHandle : IDisposable
     {
         private readonly GCHandle _handle;
 
-        private PinnedGCHandle(GCHandle handle) { _handle = handle; }
-        public static PinnedGCHandle Alloc(object? value, GCHandleType type) => new(GCHandle.Alloc(value, type));
+        private SafeGCHandle(GCHandle handle) { _handle = handle; }
+        public static SafeGCHandle Alloc(object? value, GCHandleType type) => new(GCHandle.Alloc(value, type));
 
-        public static implicit operator IntPtr(PinnedGCHandle pinnedHandle)
+        public static implicit operator IntPtr(SafeGCHandle pinnedHandle)
         {
             if (!pinnedHandle._handle.IsAllocated)
                 throw new InvalidCastException("An attempt was made to obtain a pointer to unallocated memory during conversion");
             return pinnedHandle._handle.AddrOfPinnedObject();
         }
 
-        ~PinnedGCHandle()
+        ~SafeGCHandle()
         {
             Dispose_();
         }
