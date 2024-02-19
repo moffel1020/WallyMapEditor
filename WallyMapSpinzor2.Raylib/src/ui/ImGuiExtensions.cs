@@ -32,12 +32,12 @@ public static class ImGuiExt
     {
         //find the IntPtr for the values
         //there's a simpler way to do this, but it requires unsafe
-        using DisposableHandle valueHandle = DisposableHandle.Alloc(value, GCHandleType.Pinned);
-        nint valuePtr = valueHandle.AddrOfPinnedObject();
-        using DisposableHandle minValueHandle = DisposableHandle.Alloc(minValue, GCHandleType.Pinned);
-        nint minValuePtr = minValueHandle.AddrOfPinnedObject();
-        using DisposableHandle maxValueHandle = DisposableHandle.Alloc(maxValue, GCHandleType.Pinned);
-        nint maxValuePtr = maxValueHandle.AddrOfPinnedObject();
+        using PinnedGCHandle valueHandle = PinnedGCHandle.Alloc(value, GCHandleType.Pinned);
+        nint valuePtr = valueHandle;
+        using PinnedGCHandle minValueHandle = PinnedGCHandle.Alloc(minValue, GCHandleType.Pinned);
+        nint minValuePtr = minValueHandle;
+        using PinnedGCHandle maxValueHandle = PinnedGCHandle.Alloc(maxValue, GCHandleType.Pinned);
+        nint maxValuePtr = maxValueHandle;
         //create the drag
         ImGui.DragScalar(label, ImGuiDataType.U32, valuePtr, speed, minValuePtr, maxValuePtr);
         //extract the value from the pointer
@@ -84,37 +84,41 @@ public static class ImGuiExt
         if (disabled) ImGui.EndDisabled();
     }
 
-    //why isn't this part of the STL?
-    private sealed class DisposableHandle : IDisposable
+    //wrapper to ensure GCHandle gets freed
+    private sealed class PinnedGCHandle : IDisposable
     {
-        private bool disposedValue;
         private readonly GCHandle _handle;
 
-        private DisposableHandle(GCHandle handle) { _handle = handle; }
-        public static DisposableHandle Alloc(object? value, GCHandleType type) => new(GCHandle.Alloc(value, type));
-        public nint AddrOfPinnedObject() => _handle.AddrOfPinnedObject();
+        private PinnedGCHandle(GCHandle handle) { _handle = handle; }
+        public static PinnedGCHandle Alloc(object? value, GCHandleType type) => new(GCHandle.Alloc(value, type));
 
-        private void Dispose(bool disposing)
+        public static implicit operator IntPtr(PinnedGCHandle pinnedHandle)
         {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    _handle.Free();
-                }
-                disposedValue = true;
-            }
+            if (!pinnedHandle._handle.IsAllocated)
+                throw new InvalidCastException("An attempt was made to obtain a pointer to unallocated memory during conversion");
+            return pinnedHandle._handle.AddrOfPinnedObject();
         }
 
-        ~DisposableHandle()
+        ~PinnedGCHandle()
         {
-            Dispose(disposing: false);
+            Dispose_();
         }
 
         public void Dispose()
         {
-            Dispose(disposing: true);
+            Dispose_();
             GC.SuppressFinalize(this);
+        }
+
+        private bool disposedValue;
+        private void Dispose_()
+        {
+            if (!disposedValue)
+            {
+                if (_handle.IsAllocated)
+                    _handle.Free();
+                disposedValue = true;
+            }
         }
     }
 }
