@@ -26,8 +26,6 @@ public static class ImGuiExt
         return value;
     }
 
-
-
     public static uint DragUInt(string label, uint value, uint speed = 1, uint minValue = uint.MinValue, uint maxValue = uint.MaxValue)
     {
         //find the IntPtr for the values

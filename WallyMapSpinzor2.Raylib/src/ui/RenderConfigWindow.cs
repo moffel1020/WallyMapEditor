@@ -39,9 +39,9 @@ public class RenderConfigWindow
 
         ImGui.SeparatorText("Others##config");
         config.NoSkulls = ImGuiExt.Checkbox("NoSkulls##config", config.NoSkulls);
-        config.ScoringType = ImGuiExt.StringEnumCombo("Scoring Type##config", typeof(ScoringTypeEnum), config.ScoringType, true);
-        config.Theme = ImGuiExt.StringEnumCombo("Theme##config", typeof(ThemeEnum), config.Theme, true);
-        config.Hotkey = ImGuiExt.StringEnumCombo("Hotkey##config", typeof(HotkeyEnum), config.Hotkey, false);
+        config.ScoringType = ImGuiExt.EnumCombo("Scoring Type##config", config.ScoringType);
+        config.Theme = ImGuiExt.EnumCombo("Theme##config", config.Theme);
+        config.Hotkey = ImGuiExt.EnumCombo("Hotkey##config", config.Hotkey);
 
         ImGui.Separator();
         if (ImGui.TreeNode("Gamemode Config##config"))

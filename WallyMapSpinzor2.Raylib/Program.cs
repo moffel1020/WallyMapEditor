@@ -5,16 +5,10 @@ using WallyMapSpinzor2;
 static T DeserializeFromPath<T>(string fromPath)
     where T : IDeserializable, new()
 {
-    using FileStream fromFile = new(fromPath, FileMode.Open, FileAccess.Read);
-    using StreamReader fsr = new(fromFile);
     XElement element;
-    if (fromPath.EndsWith("OneUpOneDownFFA3.xml"))
+    using (FileStream fromFile = new(fromPath, FileMode.Open, FileAccess.Read))
     {
-        element = XElement.Parse(MapUtils.FixBmg(fsr.ReadToEnd()));
-    }
-    else
-    {
-        element = XElement.Load(fsr);
+        element = XElement.Load(fromFile);
     }
     return element.DeserializeTo<T>();
 }
