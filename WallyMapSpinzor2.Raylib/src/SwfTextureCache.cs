@@ -27,7 +27,7 @@ public class SwfTextureCache
 {
     public ConcurrentDictionary<TxtId, Texture2DWrapper> Cache { get; } = new();
     private readonly Queue<(TxtId, ImgData)> _queue = new();
-    private readonly HashSet<TxtId> _queueSet = new();
+    private readonly HashSet<TxtId> _queueSet = [];
 
     public void LoadTexture(SwfFileData swf, string name)
     {

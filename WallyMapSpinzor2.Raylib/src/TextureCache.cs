@@ -12,7 +12,7 @@ public class TextureCache
 {
     public ConcurrentDictionary<string, Texture2DWrapper> Cache { get; } = new();
     private readonly Queue<(string, Image)> _queue = new();
-    private readonly HashSet<string> _queueSet = new();
+    private readonly HashSet<string> _queueSet = [];
 
     public void LoadTexture(string path)
     {

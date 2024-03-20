@@ -126,6 +126,7 @@ public class RenderConfigWindow
                 config.ColorItemIgnoreCollision = ImGuiExt.ColorPicker4("Item ignore##configColors", config.ColorItemIgnoreCollision);
                 config.ColorPressurePlateCollision = ImGuiExt.ColorPicker4("Pressure plate##configColors", config.ColorPressurePlateCollision);
                 config.ColorSoftPressurePlateCollision = ImGuiExt.ColorPicker4("Soft pressure plate##configColors", config.ColorSoftPressurePlateCollision);
+                config.ColorLavaCollision = ImGuiExt.ColorPicker4("Lava##configColors", config.ColorLavaCollision);
                 config.ColorCollisionNormal = ImGuiExt.ColorPicker4("Collision normal##configColors", config.ColorCollisionNormal);
                 ImGui.TreePop();
             }
