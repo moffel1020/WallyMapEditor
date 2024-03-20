@@ -80,7 +80,7 @@ public class RenderConfigWindow
                     });
                     ImGuiExt.WithDisabled(config.HordePathType == RenderConfig.PathConfigEnum.CUSTOM, () =>
                     {
-                        config.HordeRandomSeed = ImGuiExt.DragUInt("Horde random seed##config", config.HordeRandomSeed);
+                        config.HordeRandomSeed = (uint)ImGuiExt.DragInt("Horde random seed##config", (int)config.HordeRandomSeed, minValue: 0);
                     });
                 });
 
