@@ -8,7 +8,7 @@ using ImGuiNET;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public class Editor
+public class Editor(string brawlPath, IDrawable toDraw)
 {
     public const float ZOOM_INCREMENT = 0.15f;
     public const float MIN_ZOOM = 0.01f;
@@ -17,20 +17,12 @@ public class Editor
     public const int INITIAL_SCREEN_WIDTH = 800;
     public const int INITIAL_SCREEN_HEIGHT = 480;
 
-    public string BrawlPath { get; set; }
     public RaylibCanvas? Canvas { get; set; }
     private Camera2D _cam = new();
     public TimeSpan Time { get; set; } = TimeSpan.FromSeconds(0);
-    public IDrawable ToDraw { get; set; }
 
     public ViewportWindow ViewportWindow { get; set; } = new();
     public RenderConfigWindow RenderConfigWindow { get; set; } = new();
-
-    public Editor(string brawlPath, IDrawable toDraw)
-    {
-        BrawlPath = brawlPath;
-        ToDraw = toDraw;
-    }
 
     private readonly RenderConfig _config = new()
     {
@@ -70,9 +62,9 @@ public class Editor
         Rl.BeginMode2D(_cam);
 
         Rl.ClearBackground(Raylib_cs.Color.Black);
-        Canvas ??= new(BrawlPath);
+        Canvas ??= new(brawlPath);
         Canvas.CameraMatrix = Rl.GetCameraMatrix2D(_cam);
-        ToDraw.DrawOn(Canvas, _config, Transform.IDENTITY, Time, new RenderData());
+        toDraw.DrawOn(Canvas, _config, Transform.IDENTITY, Time, new RenderData());
         Canvas.FinalizeDraw();
 
         Rl.EndMode2D();
@@ -136,7 +128,7 @@ public class Editor
     private void ResetCam(int surfaceW, int surfaceH)
     {
         _cam.Zoom = 1.0f;
-        CameraBounds? bounds = ToDraw switch
+        CameraBounds? bounds = toDraw switch
         {
             LevelDesc ld => ld.CameraBounds,
             Level l => l.Desc.CameraBounds,

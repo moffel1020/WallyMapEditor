@@ -26,9 +26,9 @@ public class SwfFileData
         SwfFileData swf = new()
         {
             Swf = SwfFile.ReadFrom(stream),
-            SymbolClass = new(),
-            ShapeTags = new(),
-            SpriteTags = new()
+            SymbolClass = [],
+            ShapeTags = [],
+            SpriteTags = []
         };
 
         SymbolClassTag? symbolClass = null;

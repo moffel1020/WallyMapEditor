@@ -8,19 +8,13 @@ using Raylib_cs;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public class RaylibCanvas : ICanvas<Texture2DWrapper>
+public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
 {
-    public string BrawlPath { get; set; }
     public BucketPriorityQueue<Action> DrawingQueue { get; } = new(Enum.GetValues<DrawPriorityEnum>().Length);
     public TextureCache TextureCache { get; } = new();
     public SwfFileCache SwfFileCache { get; } = new();
     public SwfTextureCache SwfTextureCache { get; } = new();
     public Matrix4x4 CameraMatrix { get; set; } = Matrix4x4.Identity;
-
-    public RaylibCanvas(string brawlPath)
-    {
-        BrawlPath = brawlPath;
-    }
 
     public void ClearTextureCache()
     {
@@ -138,8 +132,8 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
         Rlgl.Color4ub(color.R, color.G, color.B, color.A);
         (double xMin, double yMin) = (x, y);
         (double xMax, double yMax) = (x + w, y + h);
-        (double, double)[] texCoords = new (double, double)[] { (0, 0), (0, 1), (1, 1), (1, 0), (0, 0) };
-        (double, double)[] points = new (double, double)[] { trans * (xMin, yMin), trans * (xMin, yMax), trans * (xMax, yMax), trans * (xMax, yMin), trans * (xMin, yMin) };
+        (double, double)[] texCoords = [(0, 0), (0, 1), (1, 1), (1, 0), (0, 0)];
+        (double, double)[] points = [trans * (xMin, yMin), trans * (xMin, yMax), trans * (xMax, yMax), trans * (xMax, yMin), trans * (xMin, yMin)];
         // raylib requires that the points be in counterclockwise order
         if (Utils.IsPolygonClockwise(points))
         {
@@ -163,7 +157,7 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
         Rlgl.Color4ub(color.R, color.G, color.B, color.A);
         (double xMin, double yMin) = (x, y);
         (double xMax, double yMax) = (x + w, y + h);
-        (double, double)[] points = new (double, double)[] { trans * (xMin, yMin), trans * (xMin, yMax), trans * (xMax, yMax), trans * (xMax, yMin), trans * (xMin, yMin) };
+        (double, double)[] points = [trans * (xMin, yMin), trans * (xMin, yMax), trans * (xMax, yMax), trans * (xMax, yMin), trans * (xMin, yMin)];
         // raylib requires that the points be in counterclockwise order
         if (Utils.IsPolygonClockwise(points))
         {
@@ -179,7 +173,7 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
 
     public Texture2DWrapper LoadTextureFromPath(string path)
     {
-        string finalPath = Path.Combine(BrawlPath, "mapArt", path);
+        string finalPath = Path.Combine(brawlPath, "mapArt", path);
         TextureCache.Cache.TryGetValue(finalPath, out Texture2DWrapper? texture);
         if (texture is not null) return texture;
 
@@ -189,7 +183,7 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
 
     public Texture2DWrapper LoadTextureFromSWF(string filePath, string name)
     {
-        string finalPath = Path.Combine(BrawlPath, filePath);
+        string finalPath = Path.Combine(brawlPath, filePath);
         SwfFileCache.Cache.TryGetValue(finalPath, out SwfFileData? swf);
         if (swf is not null)
         {

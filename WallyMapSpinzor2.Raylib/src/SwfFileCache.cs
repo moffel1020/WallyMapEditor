@@ -10,7 +10,7 @@ public class SwfFileCache
 {
     public ConcurrentDictionary<string, SwfFileData?> Cache { get; } = new();
     private readonly Queue<(string, SwfFileData)> _queue = new();
-    private readonly HashSet<string> _queueSet = new();
+    private readonly HashSet<string> _queueSet = [];
 
     public void LoadSwf(string path)
     {
