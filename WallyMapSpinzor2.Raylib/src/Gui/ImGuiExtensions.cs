@@ -33,6 +33,21 @@ public static class ImGuiExt
         return v;
     }
 
+    public static float DragFloat(string label, float value, float speed = 1, float minValue = float.MinValue, float maxValue = float.MaxValue)
+    {
+        float v = value;
+        ImGui.DragFloat(label, ref v, speed, minValue, maxValue);
+        return v;
+    }
+
+    public static Color ColorPicker3(string label, Color col)
+    {
+        Vector3 imCol = new((float)col.R / 255, (float)col.G / 255, (float)col.B / 255);
+        ImGui.ColorEdit3(label, ref imCol, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaBar);
+        var a = new Color((byte)(imCol.X * 255), (byte)(imCol.Y * 255), (byte)(imCol.Z * 255), (255));
+        return a;
+    }
+
     public static Color ColorPicker4(string label, Color col)
     {
         Vector4 imCol = new((float)col.R / 255, (float)col.G / 255, (float)col.B / 255, (float)col.A / 255);

@@ -23,6 +23,12 @@ public class Editor(string brawlPath, IDrawable toDraw)
 
     public ViewportWindow ViewportWindow { get; set; } = new();
     public RenderConfigWindow RenderConfigWindow { get; set; } = new();
+    public MapOverviewWindow MapOverviewWindow { get; set; } = new();
+    public PropertiesWindow PropertiesWindow { get; set; } = new();
+    public HistroyPanel HistoryPanel { get; set; } = new();
+
+    public CommandHistory CommandHistory { get; set; } = new();
+    private object? _selectedObject = null;
 
     private readonly RenderConfig _config = new()
     {
@@ -81,20 +87,42 @@ public class Editor(string brawlPath, IDrawable toDraw)
 
         if (ViewportWindow.Open) ViewportWindow.Show();
         if (RenderConfigWindow.Open) RenderConfigWindow.Show(_config);
+        if (MapOverviewWindow.Open && toDraw is Level l) MapOverviewWindow.Show(l, CommandHistory, ref _selectedObject);
+        if (PropertiesWindow.Open && _selectedObject is not null) PropertiesWindow.Show(_selectedObject, CommandHistory);
+        if (HistoryPanel.Open) HistoryPanel.Show(CommandHistory);
     }
 
     private void ShowMainMenuBar()
     {
         ImGui.BeginMainMenuBar();
 
-        if (ImGui.BeginMenu("Project"))
+        if (ImGui.BeginMenu("File"))
         {
+            ImGui.EndMenu();
+        }
+        if (ImGui.BeginMenu("Edit"))
+        {
+            if (ImGui.MenuItem("Undo", "Ctrl+Z")) CommandHistory.Undo();
+            if (ImGui.MenuItem("Redo", "Ctrl+Y")) CommandHistory.Redo();
             ImGui.EndMenu();
         }
         if (ImGui.BeginMenu("View"))
         {
             if (ImGui.MenuItem("Viewport", null, ViewportWindow.Open)) ViewportWindow.Open = !ViewportWindow.Open;
             if (ImGui.MenuItem("Render Config", null, RenderConfigWindow.Open)) RenderConfigWindow.Open = !RenderConfigWindow.Open;
+            if (ImGui.MenuItem("Map Overview", null, MapOverviewWindow.Open)) MapOverviewWindow.Open = !MapOverviewWindow.Open;
+            if (ImGui.MenuItem("Object Properties", null, PropertiesWindow.Open)) PropertiesWindow.Open = !PropertiesWindow.Open;
+            ImGui.EndMenu();
+        }
+        if (ImGui.BeginMenu("Tools"))
+        {
+            if (ImGui.MenuItem("History", null, HistoryPanel.Open)) HistoryPanel.Open = !HistoryPanel.Open;
+            if (ImGui.MenuItem("Clear Cache"))
+            {
+                Canvas?.TextureCache.Clear();
+                Canvas?.SwfTextureCache.Clear();
+                Canvas?.SwfFileCache.Clear();
+            }
             ImGui.EndMenu();
         }
 
@@ -123,6 +151,9 @@ public class Editor(string brawlPath, IDrawable toDraw)
 
             if (Rl.IsKeyPressed(KeyboardKey.R)) ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
         }
+
+        if (Rl.IsKeyDown(KeyboardKey.LeftControl) && Rl.IsKeyPressed(KeyboardKey.Z)) CommandHistory.Undo();
+        if (Rl.IsKeyDown(KeyboardKey.LeftControl) && Rl.IsKeyPressed(KeyboardKey.Y)) CommandHistory.Redo();
     }
 
     private void ResetCam(int surfaceW, int surfaceH)

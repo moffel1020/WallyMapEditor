@@ -121,7 +121,7 @@ public class RenderConfigWindow
                 config.ColorBouncyHardCollision = ImGuiExt.ColorPicker4("Bouncy hard##configColors", config.ColorBouncyHardCollision);
                 config.ColorBouncySoftCollision = ImGuiExt.ColorPicker4("Bouncy soft##configColors", config.ColorBouncySoftCollision);
                 config.ColorBouncyNoSlideCollision = ImGuiExt.ColorPicker4("No slide##configColors", config.ColorNoSlideCollision);
-                config.ColorTriggerCollision = ImGuiExt.ColorPicker4("Rrigger##configColors", config.ColorTriggerCollision);
+                config.ColorTriggerCollision = ImGuiExt.ColorPicker4("Trigger##configColors", config.ColorTriggerCollision);
                 config.ColorStickyCollision = ImGuiExt.ColorPicker4("Sticky##configColors", config.ColorStickyCollision);
                 config.ColorItemIgnoreCollision = ImGuiExt.ColorPicker4("Item ignore##configColors", config.ColorItemIgnoreCollision);
                 config.ColorPressurePlateCollision = ImGuiExt.ColorPicker4("Pressure plate##configColors", config.ColorPressurePlateCollision);
