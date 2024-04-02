@@ -74,14 +74,24 @@ public class MapOverviewWindow
             }
         }
 
-        if (ImGui.CollapsingHeader("Weapon Spawn Color##overview"))
+        if (ImGui.CollapsingHeader("Weapon Spawn Color##overview") && l.Type.CrateColorA is not null && l.Type.CrateColorB is not null)
         {
-            l.Type.CrateColorA ??= new(0, 0, 0);
-            l.Type.CrateColorB ??= new(0, 0, 0);
             Color colA = ImGuiExt.ColorPicker3("Outer##crateColorA", new(l.Type.CrateColorA.Value.R, l.Type.CrateColorA.Value.G, l.Type.CrateColorA.Value.B, 255));
             Color colB = ImGuiExt.ColorPicker3("Inner##crateColorB", new(l.Type.CrateColorB.Value.R, l.Type.CrateColorB.Value.G, l.Type.CrateColorB.Value.B, 255));
-            l.Type.CrateColorA = new(colA.R, colA.G, colA.B);
-            l.Type.CrateColorB = new(colB.R, colB.G, colB.B);
+            CrateColor crateColA = new(colA.R, colA.G, colA.B);
+            CrateColor crateColB = new(colB.R, colB.G, colB.B);
+
+            if (crateColA != l.Type.CrateColorA)
+            {
+                _propChanged = true;
+                cmd.Add(new CrateColorChange(l.Type, crateColA, false));
+            }
+
+            if (crateColB != l.Type.CrateColorB)
+            {
+                _propChanged = true;
+                cmd.Add(new CrateColorChange(l.Type, crateColB, true));
+            }
         }
 
         // TODO: background and thumbnail
