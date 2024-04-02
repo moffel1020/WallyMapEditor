@@ -77,13 +77,19 @@ public class SwfTextureCache
                 _queueSet.Remove(id);
                 (Raylib_cs.Image img, SwfRect rect) = dat;
                 Cache[id] = new(Rl.LoadTextureFromImage(img), rect);
+                Rl.UnloadImage(img);
             }
         }
     }
 
     public void Clear()
     {
+        // manually dispose textures.
+        // raylib doesn't like it if you do this through GC.
+        foreach ((_, Texture2DWrapper txt) in Cache)
+            txt.Dispose();
         Cache.Clear();
+
         _queueSet.Clear();
         lock (_queue)
         {

@@ -47,13 +47,19 @@ public class TextureCache
                 (string path, Image img) = _queue.Dequeue();
                 _queueSet.Remove(path);
                 Cache[path] = new(Rl.LoadTextureFromImage(img));
+                Rl.UnloadImage(img);
             }
         }
     }
 
     public void Clear()
     {
+        // manually dispose textures.
+        // raylib doesn't like it if you do this through GC.
+        foreach ((_, Texture2DWrapper txt) in Cache)
+            txt.Dispose();
         Cache.Clear();
+
         _queueSet.Clear();
         lock (_queue)
         {
