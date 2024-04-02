@@ -53,12 +53,9 @@ public class Texture2DWrapper : ITexture, IDisposable
     {
         if (!_disposedValue)
         {
-            if (disposing)
+            if (Texture.Id != 0)
             {
-                if (Texture.Id != 0)
-                {
-                    Rl.UnloadTexture(Texture);
-                }
+                Rl.UnloadTexture(Texture);
             }
 
             _disposedValue = true;
