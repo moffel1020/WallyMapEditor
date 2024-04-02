@@ -1,3 +1,4 @@
+using System;
 using Raylib_cs;
 using SwfLib.Data;
 using SwiffCheese.Utils;
@@ -5,8 +6,10 @@ using Rl = Raylib_cs.Raylib;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public class Texture2DWrapper : ITexture
+public class Texture2DWrapper : ITexture, IDisposable
 {
+    private bool _disposedValue = false;
+
     public Texture2D Texture { get; private init; }
     public double XOff { get; private init; }
     public double YOff { get; private init; }
@@ -37,10 +40,7 @@ public class Texture2DWrapper : ITexture
 
     ~Texture2DWrapper()
     {
-        if (Texture.Id != 0)
-        {
-            Rl.UnloadTexture(Texture);
-        }
+        Dispose(disposing: false);
     }
 
     public static Texture2DWrapper Default => new(new() { Id = 0 });
@@ -48,4 +48,26 @@ public class Texture2DWrapper : ITexture
     public int W => (int)Width;
 
     public int H => (int)Height;
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                if (Texture.Id != 0)
+                {
+                    Rl.UnloadTexture(Texture);
+                }
+            }
+
+            _disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
 }
