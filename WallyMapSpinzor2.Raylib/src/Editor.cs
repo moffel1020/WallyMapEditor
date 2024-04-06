@@ -1,5 +1,7 @@
 using System;
 using System.Numerics;
+using System.Xml.Linq;
+using System.IO;
 
 using Raylib_cs;
 using Rl = Raylib_cs.Raylib;
@@ -8,7 +10,7 @@ using ImGuiNET;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public class Editor(string brawlPath, IDrawable toDraw)
+public class Editor(string brawlPath, string dumpPath, string fileName)
 {
     public const float ZOOM_INCREMENT = 0.15f;
     public const float MIN_ZOOM = 0.01f;
@@ -16,6 +18,8 @@ public class Editor(string brawlPath, IDrawable toDraw)
     public const float LINE_WIDTH = 5; // width at Camera zoom = 1
     public const int INITIAL_SCREEN_WIDTH = 800;
     public const int INITIAL_SCREEN_HEIGHT = 480;
+
+    public IDrawable? MapData { get; set; }
 
     public RaylibCanvas? Canvas { get; set; }
     private Camera2D _cam = new();
@@ -35,8 +39,29 @@ public class Editor(string brawlPath, IDrawable toDraw)
 
     };
 
+    private static T DeserializeFromPath<T>(string fromPath)
+    where T : IDeserializable, new()
+    {
+        XElement element;
+        using (FileStream fromFile = new(fromPath, FileMode.Open, FileAccess.Read))
+        {
+            element = XElement.Load(fromFile);
+        }
+        return element.DeserializeTo<T>();
+    }
+
+    public void LoadMap()
+    {
+        LevelDesc ld = DeserializeFromPath<LevelDesc>(Path.Combine(dumpPath, "Dynamic", fileName));
+        LevelTypes lt = DeserializeFromPath<LevelTypes>(Path.Combine(dumpPath, "Init", "LevelTypes.xml"));
+        LevelSetTypes lst = DeserializeFromPath<LevelSetTypes>(Path.Combine(dumpPath, "Game", "LevelSetTypes.xml"));
+        MapData = new Level(ld, lt, lst);
+    }
+
     public void Run()
     {
+        LoadMap();
+
         Rl.SetConfigFlags(ConfigFlags.VSyncHint);
         Rl.InitWindow(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT, "WallyMapSpinzor2.Raylib");
         Rl.SetWindowState(ConfigFlags.ResizableWindow);
@@ -70,7 +95,7 @@ public class Editor(string brawlPath, IDrawable toDraw)
         Rl.ClearBackground(Raylib_cs.Color.Black);
         Canvas ??= new(brawlPath);
         Canvas.CameraMatrix = Rl.GetCameraMatrix2D(_cam);
-        toDraw.DrawOn(Canvas, _config, Transform.IDENTITY, Time, new RenderData());
+        MapData?.DrawOn(Canvas, _config, Transform.IDENTITY, Time, new RenderData());
         Canvas.FinalizeDraw();
 
         Rl.EndMode2D();
@@ -87,7 +112,7 @@ public class Editor(string brawlPath, IDrawable toDraw)
 
         if (ViewportWindow.Open) ViewportWindow.Show();
         if (RenderConfigWindow.Open) RenderConfigWindow.Show(_config);
-        if (MapOverviewWindow.Open && toDraw is Level l) MapOverviewWindow.Show(l, CommandHistory, ref _selectedObject);
+        if (MapOverviewWindow.Open && MapData is Level l) MapOverviewWindow.Show(l, CommandHistory, ref _selectedObject);
         if (PropertiesWindow.Open && _selectedObject is not null) PropertiesWindow.Show(_selectedObject, CommandHistory);
         if (HistoryPanel.Open) HistoryPanel.Show(CommandHistory);
     }
@@ -123,6 +148,10 @@ public class Editor(string brawlPath, IDrawable toDraw)
                 Canvas?.SwfTextureCache.Clear();
                 Canvas?.SwfFileCache.Clear();
             }
+            if (ImGui.MenuItem("Reload Map", "Ctrl+R"))
+            {
+                LoadMap();
+            }
             ImGui.EndMenu();
         }
 
@@ -149,17 +178,23 @@ public class Editor(string brawlPath, IDrawable toDraw)
                 _cam.Target += delta;
             }
 
-            if (Rl.IsKeyPressed(KeyboardKey.R)) ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
+            // R. no ctrl.
+            if (Rl.IsKeyPressed(KeyboardKey.R) && !Rl.IsKeyDown(KeyboardKey.LeftControl))
+                ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
         }
 
-        if (Rl.IsKeyDown(KeyboardKey.LeftControl) && Rl.IsKeyPressed(KeyboardKey.Z)) CommandHistory.Undo();
-        if (Rl.IsKeyDown(KeyboardKey.LeftControl) && Rl.IsKeyPressed(KeyboardKey.Y)) CommandHistory.Redo();
+        if (Rl.IsKeyDown(KeyboardKey.LeftControl))
+        {
+            if (Rl.IsKeyPressed(KeyboardKey.Z)) CommandHistory.Undo();
+            if (Rl.IsKeyPressed(KeyboardKey.Y)) CommandHistory.Redo();
+            if (Rl.IsKeyPressed(KeyboardKey.R)) LoadMap();
+        }
     }
 
     private void ResetCam(int surfaceW, int surfaceH)
     {
         _cam.Zoom = 1.0f;
-        CameraBounds? bounds = toDraw switch
+        CameraBounds? bounds = MapData switch
         {
             LevelDesc ld => ld.CameraBounds,
             Level l => l.Desc.CameraBounds,
