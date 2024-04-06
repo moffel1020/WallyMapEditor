@@ -1,7 +1,9 @@
 using System;
 using System.Numerics;
 using System.Xml.Linq;
+using System.Xml;
 using System.IO;
+using System.Text;
 
 using Raylib_cs;
 using Rl = Raylib_cs.Raylib;
@@ -56,6 +58,35 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         LevelTypes lt = DeserializeFromPath<LevelTypes>(Path.Combine(dumpPath, "Init", "LevelTypes.xml"));
         LevelSetTypes lst = DeserializeFromPath<LevelSetTypes>(Path.Combine(dumpPath, "Game", "LevelSetTypes.xml"));
         MapData = new Level(ld, lt, lst);
+    }
+
+    public void SaveMap()
+    {
+        LevelDesc? ld = MapData switch
+        {
+            Level l => l.Desc,
+            LevelDesc d => d,
+            _ => null
+        };
+
+        if (ld is null) return;
+
+        XElement e = ld.SerializeToXElement();
+        string newFileName = fileName.StartsWith("new_") ? fileName : $"new_{fileName}";
+        string toPath = Path.Combine(dumpPath, "Dynamic", newFileName);
+        using (FileStream toFile = new(toPath, FileMode.Create, FileAccess.Write))
+        {
+            using XmlWriter xmlw = XmlWriter.Create(toFile, new()
+            {
+                OmitXmlDeclaration = true, //no xml header
+                IndentChars = "    ",
+                Indent = true, //indent with four spaces
+                NewLineChars = "\n", //use UNIX line endings
+                Encoding = new UTF8Encoding(false) //use UTF8 (no BOM) encoding
+            });
+            e.Save(xmlw);
+        }
+        fileName = newFileName;
     }
 
     public void Run()
@@ -151,6 +182,14 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
             if (ImGui.MenuItem("Reload Map", "Ctrl+R"))
             {
                 LoadMap();
+            }
+            ImGui.EndMenu();
+        }
+        if (ImGui.BeginMenu("Exporting"))
+        {
+            if (ImGui.MenuItem("Export Map"))
+            {
+                SaveMap();
             }
             ImGui.EndMenu();
         }
