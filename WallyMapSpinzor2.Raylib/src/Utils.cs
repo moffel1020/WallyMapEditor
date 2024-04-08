@@ -2,6 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Numerics;
+using System.Xml;
+using System.Xml.Linq;
+using System.Text;
 
 using Rl = Raylib_cs.Raylib;
 
@@ -65,4 +68,49 @@ public static class Utils
         tag.Tags
             .OfType<PlaceObjectBaseTag>()
             .Select(place => place.CharacterID);
+    
+    public static T DeserializeFromPath<T>(string fromPath)
+        where T : IDeserializable, new()
+    {
+        XElement element;
+        using (FileStream fromFile = new(fromPath, FileMode.Open, FileAccess.Read))
+        {
+            element = XElement.Load(fromFile);
+        }
+        return element.DeserializeTo<T>();
+    }
+
+    public static void SerializeToPath<T>(T serializable, string toPath)
+        where T : ISerializable
+    {
+        XElement e = serializable.SerializeToXElement();
+        using FileStream toFile = new(toPath, FileMode.Create, FileAccess.Write);
+        using XmlWriter xmlw = XmlWriter.Create(toFile, new()
+        {
+            OmitXmlDeclaration = true, //no xml header
+            IndentChars = "    ",
+            Indent = true, //indent with four spaces
+            NewLineChars = "\n", //use UNIX line endings
+            Encoding = new UTF8Encoding(false) //use UTF8 (no BOM) encoding
+        });
+        e.Save(xmlw);
+    }
+
+    public static string? SerializeToString<T>(T serializable)
+        where T : ISerializable
+    {
+        XElement e = serializable.SerializeToXElement();
+        using StringWriter sw = new();
+        using XmlWriter xmlw = XmlWriter.Create(sw, new()
+        {
+            OmitXmlDeclaration = true, //no xml header
+            IndentChars = "    ",
+            Indent = true, //indent with four spaces
+            NewLineChars = "\n", //use UNIX line endings
+            Encoding = new UTF8Encoding(false) //use UTF8 (no BOM) encoding
+        });
+        e.Save(xmlw);
+        xmlw.Flush();
+        return sw.ToString();
+    }
 }

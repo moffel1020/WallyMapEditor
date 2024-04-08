@@ -9,6 +9,7 @@ using Raylib_cs;
 using Rl = Raylib_cs.Raylib;
 using rlImGui_cs;
 using ImGuiNET;
+using System.Collections.Generic;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -32,6 +33,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
     public MapOverviewWindow MapOverviewWindow { get; set; } = new();
     public PropertiesWindow PropertiesWindow { get; set; } = new();
     public HistroyPanel HistoryPanel { get; set; } = new();
+    public List<IDialog> DialogWindows { get; set; } = [];
 
     public CommandHistory CommandHistory { get; set; } = new();
     private object? _selectedObject = null;
@@ -41,52 +43,13 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
 
     };
 
-    private static T DeserializeFromPath<T>(string fromPath)
-    where T : IDeserializable, new()
-    {
-        XElement element;
-        using (FileStream fromFile = new(fromPath, FileMode.Open, FileAccess.Read))
-        {
-            element = XElement.Load(fromFile);
-        }
-        return element.DeserializeTo<T>();
-    }
-
     public void LoadMap()
     {
-        LevelDesc ld = DeserializeFromPath<LevelDesc>(Path.Combine(dumpPath, "Dynamic", fileName));
-        LevelTypes lt = DeserializeFromPath<LevelTypes>(Path.Combine(dumpPath, "Init", "LevelTypes.xml"));
-        LevelSetTypes lst = DeserializeFromPath<LevelSetTypes>(Path.Combine(dumpPath, "Game", "LevelSetTypes.xml"));
+        CommandHistory.Clear();
+        LevelDesc ld = Utils.DeserializeFromPath<LevelDesc>(Path.Combine(dumpPath, "Dynamic", fileName));
+        LevelTypes lt = Utils.DeserializeFromPath<LevelTypes>(Path.Combine(dumpPath, "Init", "LevelTypes.xml"));
+        LevelSetTypes lst = Utils.DeserializeFromPath<LevelSetTypes>(Path.Combine(dumpPath, "Game", "LevelSetTypes.xml"));
         MapData = new Level(ld, lt, lst);
-    }
-
-    public void SaveMap()
-    {
-        LevelDesc? ld = MapData switch
-        {
-            Level l => l.Desc,
-            LevelDesc d => d,
-            _ => null
-        };
-
-        if (ld is null) return;
-
-        XElement e = ld.SerializeToXElement();
-        string newFileName = fileName.StartsWith("new_") ? fileName : $"new_{fileName}";
-        string toPath = Path.Combine(dumpPath, "Dynamic", newFileName);
-        using (FileStream toFile = new(toPath, FileMode.Create, FileAccess.Write))
-        {
-            using XmlWriter xmlw = XmlWriter.Create(toFile, new()
-            {
-                OmitXmlDeclaration = true, //no xml header
-                IndentChars = "    ",
-                Indent = true, //indent with four spaces
-                NewLineChars = "\n", //use UNIX line endings
-                Encoding = new UTF8Encoding(false) //use UTF8 (no BOM) encoding
-            });
-            e.Save(xmlw);
-        }
-        fileName = newFileName;
     }
 
     public void Run()
@@ -140,12 +103,18 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
     {
         ImGui.DockSpaceOverViewport();
         ShowMainMenuBar();
+        ImGui.ShowDemoWindow();
 
         if (ViewportWindow.Open) ViewportWindow.Show();
         if (RenderConfigWindow.Open) RenderConfigWindow.Show(_config);
         if (MapOverviewWindow.Open && MapData is Level l) MapOverviewWindow.Show(l, CommandHistory, ref _selectedObject);
         if (PropertiesWindow.Open && _selectedObject is not null) PropertiesWindow.Show(_selectedObject, CommandHistory);
         if (HistoryPanel.Open) HistoryPanel.Show(CommandHistory);
+
+        DialogWindows.RemoveAll(dialog => dialog.Closed);
+        foreach (IDialog d in DialogWindows)
+            d.Show();
+
     }
 
     private void ShowMainMenuBar()
@@ -154,6 +123,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
 
         if (ImGui.BeginMenu("File"))
         {
+            if (ImGui.MenuItem("Export")) DialogWindows.Add(new ExportDialog(MapData));
             ImGui.EndMenu();
         }
         if (ImGui.BeginMenu("Edit"))
@@ -182,14 +152,6 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
             if (ImGui.MenuItem("Reload Map", "Ctrl+R"))
             {
                 LoadMap();
-            }
-            ImGui.EndMenu();
-        }
-        if (ImGui.BeginMenu("Exporting"))
-        {
-            if (ImGui.MenuItem("Export Map"))
-            {
-                SaveMap();
             }
             ImGui.EndMenu();
         }
