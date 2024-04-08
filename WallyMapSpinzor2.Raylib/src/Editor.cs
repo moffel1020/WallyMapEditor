@@ -103,7 +103,6 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
     {
         ImGui.DockSpaceOverViewport();
         ShowMainMenuBar();
-        ImGui.ShowDemoWindow();
 
         if (ViewportWindow.Open) ViewportWindow.Show();
         if (RenderConfigWindow.Open) RenderConfigWindow.Show(_config);
