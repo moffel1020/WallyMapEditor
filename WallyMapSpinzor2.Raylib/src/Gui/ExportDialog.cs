@@ -8,7 +8,6 @@ namespace WallyMapSpinzor2.Raylib;
 
 public class ExportDialog(IDrawable? mapData) : IDialog
 {
-
     private static string? lastPath;
 
     public bool _open = true;

@@ -110,7 +110,6 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         DialogWindows.RemoveAll(dialog => dialog.Closed);
         foreach (IDialog d in DialogWindows)
             d.Show();
-
     }
 
     private void ShowMainMenuBar()

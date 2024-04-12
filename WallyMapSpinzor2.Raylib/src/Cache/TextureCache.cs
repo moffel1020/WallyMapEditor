@@ -19,6 +19,7 @@ public class TextureCache
         Image img = Utils.LoadRlImage(path);
         Texture2D texture = Rl.LoadTextureFromImage(img);
         Cache[path] = new(texture);
+        Rl.UnloadImage(img);
     }
 
     public async Task LoadImageAsync(string path)

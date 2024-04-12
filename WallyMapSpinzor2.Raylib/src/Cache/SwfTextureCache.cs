@@ -33,6 +33,7 @@ public class SwfTextureCache
     {
         (Raylib_cs.Image img, SwfRect rect) = LoadImageInternal(swf, name);
         Cache[(swf, name)] = new(Rl.LoadTextureFromImage(img), rect);
+        Rl.UnloadImage(img);
     }
 
     public async Task LoadImageAsync(SwfFileData swf, string name)
