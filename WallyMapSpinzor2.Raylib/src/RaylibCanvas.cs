@@ -42,28 +42,10 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
         }, (int)priority);
     }
 
-    public const double MULTI_COLOR_LINE_OFFSET = 5;
     public void DrawLineMultiColor(double x1, double y1, double x2, double y2, Color[] colors, Transform trans, DrawPriorityEnum priority)
     {
-        (x1, y1) = trans * (x1, y1);
-        (x2, y2) = trans * (x2, y2);
-        if (x1 > x2)
-        {
-            (x1, x2) = (x2, x1);
-            (y1, y2) = (y2, y1);
-        }
-        double center = (colors.Length - 1) / 2.0;
-        (double offX, double offY) = (y1 - y2, x2 - x1);
-        (offX, offY) = BrawlhallaMath.Normalize(offX, offY);
-        for (int i = 0; i < colors.Length; ++i)
-        {
-            double mult = MULTI_COLOR_LINE_OFFSET * (i - center);
-            DrawLine(x1 + offX * mult, y1 + offY * mult, x2 + offX * mult, y2 + offY * mult, colors[i], Transform.IDENTITY, priority);
-        }
-        // version that should be camera-independent. doesn't work properly.
-        // line offset ends up being really big when far away
-        /*
-        Debug.Assert(Matrix4x4.Invert(CameraMatrix, out Matrix4x4 invertedMat));
+        if (!Matrix4x4.Invert(CameraMatrix, out Matrix4x4 invertedMat))
+            throw new ArgumentException("Camera transform is not invertible");
         Transform cam = Utils.MatrixToTransform(CameraMatrix);
         Transform inv = Utils.MatrixToTransform(invertedMat);
 
@@ -75,14 +57,15 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
             (y1, y2) = (y2, y1);
         }
         double center = (colors.Length - 1) / 2.0;
+        float baseOffset = Rlgl.GetLineWidth();
         (double offX, double offY) = (y1 - y2, x2 - x1);
         (offX, offY) = BrawlhallaMath.Normalize(offX, offY);
         for (int i = 0; i < colors.Length; ++i)
         {
-            double mult = MULTI_COLOR_LINE_OFFSET * (i - center);
+            double mult = baseOffset * (i - center);
             DrawLine(x1 + offX * mult, y1 + offY * mult, x2 + offX * mult, y2 + offY * mult, colors[i], inv, priority);
         }
-        */
+
     }
 
     public void DrawRect(double x, double y, double w, double h, bool filled, Color color, Transform trans, DrawPriorityEnum priority)
