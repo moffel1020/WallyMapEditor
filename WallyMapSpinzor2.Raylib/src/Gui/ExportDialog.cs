@@ -31,7 +31,8 @@ public class ExportDialog(IDrawable? mapData) : IDialog
             return;
         }
 
-        LevelDesc? ld = _mapData switch {
+        LevelDesc? ld = _mapData switch 
+        {
             Level level => level.Desc,
             LevelDesc desc => desc,
             _ => null
