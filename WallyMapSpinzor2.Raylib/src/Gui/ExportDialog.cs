@@ -1,11 +1,10 @@
-namespace WallyMapSpinzor2.Raylib;
-
 using System.Numerics;
 using System.Threading.Tasks;
 using System.IO;
 using ImGuiNET;
-using WallyMapSpinzor2;
 using NativeFileDialogSharp;
+
+namespace WallyMapSpinzor2.Raylib;
 
 public class ExportDialog(IDrawable? mapData) : IDialog
 {
@@ -31,7 +30,7 @@ public class ExportDialog(IDrawable? mapData) : IDialog
             return;
         }
 
-        LevelDesc? ld = _mapData switch 
+        LevelDesc? ld = _mapData switch
         {
             Level level => level.Desc,
             LevelDesc desc => desc,
@@ -46,15 +45,15 @@ public class ExportDialog(IDrawable? mapData) : IDialog
 
             if (_descPreview is not null)
                 ImGui.InputTextMultiline("leveldesc##preview", ref _descPreview, uint.MaxValue, new Vector2(-1, ImGui.GetTextLineHeight() * PREVIEW_SIZE));
-            else if (ImGui.Button("Generate preview")) 
+            else if (ImGui.Button("Generate preview"))
                 _descPreview = Utils.SerializeToString(ld);
 
             if (ImGui.Button("Export"))
             {
-                Task.Run(() => 
+                Task.Run(() =>
                 {
                     DialogResult result = Dialog.FileSave(filterList: "xml", defaultPath: lastPath);
-                    if (result.IsOk) 
+                    if (result.IsOk)
                     {
                         Utils.SerializeToPath(ld, result.Path);
                         lastPath = Path.GetDirectoryName(result.Path);
@@ -72,16 +71,16 @@ public class ExportDialog(IDrawable? mapData) : IDialog
 
                 if (_typePreview is not null)
                     ImGui.InputTextMultiline("leveltype##preview", ref _typePreview, uint.MaxValue, new Vector2(-1, ImGui.GetTextLineHeight() * PREVIEW_SIZE));
-                else if (ImGui.Button("Generate preview")) 
+                else if (ImGui.Button("Generate preview"))
                     _typePreview = Utils.SerializeToString(l.Type);
 
                 // TODO: exporting this by itself is kinda pointless, add the options to add this leveltype to leveltypes.xml
                 if (ImGui.Button("Export"))
                 {
-                    Task.Run(() => 
+                    Task.Run(() =>
                     {
                         DialogResult result = Dialog.FileSave(filterList: "xml", defaultPath: lastPath);
-                        if (result.IsOk) 
+                        if (result.IsOk)
                         {
                             Utils.SerializeToPath(l.Type, result.Path);
                             lastPath = Path.GetDirectoryName(result.Path);

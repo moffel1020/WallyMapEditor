@@ -1,6 +1,7 @@
 using ImGuiNET;
 
 namespace WallyMapSpinzor2.Raylib;
+
 public static class Style
 {
     public static void Apply()

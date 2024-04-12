@@ -4,7 +4,7 @@ using Rl = Raylib_cs.Raylib;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public partial class PropertiesWindow 
+public partial class PropertiesWindow
 {
     private bool _open = true;
     public bool Open { get => _open; set => _open = value; }
