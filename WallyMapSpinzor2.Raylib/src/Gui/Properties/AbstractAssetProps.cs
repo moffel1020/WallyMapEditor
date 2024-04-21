@@ -11,15 +11,21 @@ partial class PropertiesWindow
         
         // TODO: change image asset here somehow
 
-        a.X = ImGuiExt.DragFloat("x", (float)a.X);
-        a.Y = ImGuiExt.DragFloat("y", (float)a.Y);
+        double dx = ImGuiExt.DragFloat("x", (float)a.X) - (float)a.X;
+        double dy = ImGuiExt.DragFloat("y", (float)a.Y) - (float)a.Y;
 
         ImGui.Separator();
-        a.ScaleX = ImGuiExt.DragFloat("scaleX", (float)a.ScaleX, speed: 0.01);
-        a.ScaleY = ImGuiExt.DragFloat("scaleY", (float)a.ScaleY, speed: 0.01);
+        double scaleX = ImGuiExt.DragFloat("scaleX", (float)a.ScaleX, speed: 0.01) - (float)a.ScaleX;
+        double scaleY = ImGuiExt.DragFloat("scaleY", (float)a.ScaleY, speed: 0.01) - (float)a.ScaleY;
 
         ImGui.Separator();
-        a.Rotation = ImGuiExt.DragFloat("rotation", (float)a.Rotation) % 360;
+        double rot = ImGuiExt.DragFloat("rotation", (float)a.Rotation) % 360 - (float)a.Rotation;
+
+        if (dx != 0 || dy != 0 || scaleX != 0 || scaleY != 0 || rot != 0)
+        {
+            _propChanged = true;
+            cmd.Add(new AssetChange(a, dx, dy, scaleX, scaleY, rot));
+        }
 
         return true;
     }
