@@ -42,6 +42,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
 
     public void LoadMap()
     {
+        _selectedObject = null;
         CommandHistory.Clear();
         LevelDesc ld = Utils.DeserializeFromPath<LevelDesc>(Path.Combine(dumpPath, "Dynamic", fileName));
         LevelTypes lt = Utils.DeserializeFromPath<LevelTypes>(Path.Combine(dumpPath, "Init", "LevelTypes.xml"));
