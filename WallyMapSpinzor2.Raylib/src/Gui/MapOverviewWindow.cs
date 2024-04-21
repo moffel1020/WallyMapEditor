@@ -102,6 +102,9 @@ public class MapOverviewWindow
 
         ImGui.Separator();
 
+        if (ImGui.CollapsingHeader("Platforms##overview"))
+            ShowSelectableList(l.Desc.Assets, ref selected);
+
         if (ImGui.CollapsingHeader("Collisions##overview"))
         {
             ShowSelectableList(l.Desc.Collisions, ref selected);

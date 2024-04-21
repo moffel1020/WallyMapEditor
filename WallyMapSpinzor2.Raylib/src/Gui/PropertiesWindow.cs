@@ -31,9 +31,12 @@ public partial class PropertiesWindow
     // TODO: hardcollision should be edited as a shape rather than an individual collision, if they are not a shape they wont work properly ingame
     private bool ShowProperties(object o, CommandHistory cmd) => o switch
     {
+        Respawn r => ShowRespawnProps(r, cmd),
+        Platform p => ShowPlatformProps(p, cmd),
+        MovingPlatform => false, // currently unimplemented, dont match with AbstractAsset
         AbstractCollision ac => ShowAbstractCollisionProps(ac, cmd),
         AbstractItemSpawn i => ShowItemSpawnProps(i, cmd),
-        Respawn r => ShowRespawnProps(r, cmd),
+        AbstractAsset a => ShowAbstractAssetProps(a, cmd),
         _ => false
     };
 }
