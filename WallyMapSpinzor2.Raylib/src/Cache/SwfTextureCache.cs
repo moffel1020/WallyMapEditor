@@ -77,10 +77,11 @@ public class SwfTextureCache
                 (TxtId id, ImgData dat) = _queue.Dequeue();
                 _queueSet.Remove(id);
                 (Raylib_cs.Image img, SwfRect rect) = dat;
-                if (Cache.TryGetValue(id, out Texture2DWrapper? oldTexture))
-                    oldTexture.Dispose();
-                Texture2D texture = Rl.LoadTextureFromImage(img);
-                Cache[id] = new(texture, rect);
+                if (!Cache.ContainsKey(id))
+                {
+                    Texture2D texture = Rl.LoadTextureFromImage(img);
+                    Cache[id] = new(texture, rect);
+                }
                 Rl.UnloadImage(img);
             }
         }

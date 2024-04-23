@@ -43,10 +43,11 @@ public class TextureCache
             {
                 (string path, Image img) = _queue.Dequeue();
                 _queueSet.Remove(path);
-                if (Cache.TryGetValue(path, out Texture2DWrapper? oldTexture))
-                    oldTexture.Dispose();
-                Texture2D texture = Rl.LoadTextureFromImage(img);
-                Cache[path] = new(texture);
+                if (!Cache.ContainsKey(path))
+                {
+                    Texture2D texture = Rl.LoadTextureFromImage(img);
+                    Cache[path] = new(texture);
+                }
                 Rl.UnloadImage(img);
             }
         }
