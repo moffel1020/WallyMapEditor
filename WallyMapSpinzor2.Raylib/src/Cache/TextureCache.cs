@@ -54,8 +54,6 @@ public class TextureCache
 
     public void Clear()
     {
-        // manually dispose textures.
-        // raylib doesn't like it if you do this through GC.
         foreach ((_, Texture2DWrapper txt) in Cache)
             txt.Dispose();
         Cache.Clear();

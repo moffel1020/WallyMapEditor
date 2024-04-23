@@ -40,7 +40,10 @@ public class Texture2DWrapper : ITexture, IDisposable
 
     ~Texture2DWrapper()
     {
-        Dispose(disposing: false);
+        if (Texture.Id != 0)
+        {
+            Rl.TraceLog(TraceLogLevel.Fatal, "Finalizer called on an unfreed texture. You have a memory leak!");
+        }
     }
 
     public static Texture2DWrapper Default => new(new() { Id = 0 });
