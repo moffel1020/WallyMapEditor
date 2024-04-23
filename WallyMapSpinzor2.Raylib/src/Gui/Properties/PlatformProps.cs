@@ -24,7 +24,10 @@ partial class PropertiesWindow
             foreach (AbstractAsset child in a.AssetChildren)
             {
                 if (ImGui.TreeNode($"{child.GetType().Name}##{child.GetHashCode()}"))
+                {
                     ShowProperties(child, cmd);
+                    ImGui.TreePop();
+                }
             }
         }
 
