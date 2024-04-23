@@ -7,9 +7,11 @@ public class RenderConfigWindow
     private bool _open = false;
     public bool Open { get => _open; set => _open = value; }
 
-    public void Show(RenderConfig config)
+    public void Show(RenderConfig config, ref double renderSpeed)
     {
         ImGui.Begin("Render Config", ref _open);
+        ImGui.SeparatorText("General##config");
+        renderSpeed = ImGuiExt.DragFloat("Render speed##config", renderSpeed, speed: 0.1);
 
         ImGui.SeparatorText("Bounds##config");
         config.ShowCameraBounds = ImGuiExt.Checkbox("Camera bounds##config", config.ShowCameraBounds);

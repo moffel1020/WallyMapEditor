@@ -35,10 +35,8 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
     public CommandHistory CommandHistory { get; set; } = new();
     private object? _selectedObject = null;
 
-    private readonly RenderConfig _config = new()
-    {
-
-    };
+    private readonly RenderConfig _config = new() { };
+    private double _renderSpeed = 1;
 
     public void LoadMap()
     {
@@ -64,7 +62,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
 
         while (!Rl.WindowShouldClose())
         {
-            Time += TimeSpan.FromSeconds(Rl.GetFrameTime());
+            Time += TimeSpan.FromSeconds(_renderSpeed * Rl.GetFrameTime());
             Draw();
             Update();
         }
@@ -103,7 +101,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         ShowMainMenuBar();
 
         if (ViewportWindow.Open) ViewportWindow.Show();
-        if (RenderConfigWindow.Open) RenderConfigWindow.Show(_config);
+        if (RenderConfigWindow.Open) RenderConfigWindow.Show(_config, ref _renderSpeed);
         if (MapOverviewWindow.Open && MapData is Level l) MapOverviewWindow.Show(l, CommandHistory, ref _selectedObject);
         if (PropertiesWindow.Open && _selectedObject is not null) PropertiesWindow.Show(_selectedObject, CommandHistory);
         if (HistoryPanel.Open) HistoryPanel.Show(CommandHistory);
