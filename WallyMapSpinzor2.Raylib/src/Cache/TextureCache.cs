@@ -29,12 +29,8 @@ public class TextureCache
 
         await Task.Run(() =>
         {
-            Cache[path] = Texture2DWrapper.Default;
             Image img = Utils.LoadRlImage(path);
-            lock (_queue)
-            {
-                _queue.Enqueue((path, img));
-            }
+            lock (_queue) _queue.Enqueue((path, img));
         });
     }
 
@@ -47,7 +43,10 @@ public class TextureCache
             {
                 (string path, Image img) = _queue.Dequeue();
                 _queueSet.Remove(path);
-                Cache[path] = new(Rl.LoadTextureFromImage(img));
+                if (Cache.TryGetValue(path, out Texture2DWrapper? oldTexture))
+                    oldTexture.Dispose();
+                Texture2D texture = Rl.LoadTextureFromImage(img);
+                Cache[path] = new(texture);
                 Rl.UnloadImage(img);
             }
         }

@@ -16,6 +16,7 @@ using SwiffCheese.Shapes;
 using SwiffCheese.Utils;
 using SwiffCheese.Wrappers;
 
+using Raylib_cs;
 using Rl = Raylib_cs.Raylib;
 
 using TxtId = System.ValueTuple<WallyMapSpinzor2.Raylib.SwfFileData, string>;
@@ -43,7 +44,6 @@ public class SwfTextureCache
 
         await Task.Run(() =>
         {
-            Cache[(swf, name)] = Texture2DWrapper.Default;
             (Raylib_cs.Image img, SwfRect rect) = LoadImageInternal(swf, name);
             lock (_queue) _queue.Enqueue(((swf, name), (img, rect)));
         });
@@ -77,7 +77,10 @@ public class SwfTextureCache
                 (TxtId id, ImgData dat) = _queue.Dequeue();
                 _queueSet.Remove(id);
                 (Raylib_cs.Image img, SwfRect rect) = dat;
-                Cache[id] = new(Rl.LoadTextureFromImage(img), rect);
+                if (Cache.TryGetValue(id, out Texture2DWrapper? oldTexture))
+                    oldTexture.Dispose();
+                Texture2D texture = Rl.LoadTextureFromImage(img);
+                Cache[id] = new(texture, rect);
                 Rl.UnloadImage(img);
             }
         }
