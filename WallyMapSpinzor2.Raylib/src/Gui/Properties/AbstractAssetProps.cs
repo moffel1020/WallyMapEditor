@@ -1,3 +1,4 @@
+using System.Runtime.Intrinsics.X86;
 using ImGuiNET;
 
 namespace WallyMapSpinzor2.Raylib;
@@ -11,21 +12,13 @@ partial class PropertiesWindow
         
         // TODO: change image asset here somehow
 
-        double dx = ImGuiExt.DragFloat("x", (float)a.X) - (float)a.X;
-        double dy = ImGuiExt.DragFloat("y", (float)a.Y) - (float)a.Y;
-
+        _propChanged |= ImGuiExt.DragFloatHistory("x", a.X, (val) => a.X = val, cmd);
+        _propChanged |= ImGuiExt.DragFloatHistory("y", a.Y, (val) => a.Y = val, cmd);
         ImGui.Separator();
-        double scaleX = ImGuiExt.DragFloat("scaleX", (float)a.ScaleX, speed: 0.01) - (float)a.ScaleX;
-        double scaleY = ImGuiExt.DragFloat("scaleY", (float)a.ScaleY, speed: 0.01) - (float)a.ScaleY;
-
+        _propChanged |= ImGuiExt.DragFloatHistory("scaleX", a.ScaleX, (val) => a.ScaleX = val, cmd, speed: 0.01);
+        _propChanged |= ImGuiExt.DragFloatHistory("scaleY", a.ScaleY, (val) => a.ScaleY = val, cmd, speed: 0.01);
         ImGui.Separator();
-        double rot = ImGuiExt.DragFloat("rotation", (float)a.Rotation) % 360 - (float)a.Rotation;
-
-        if (dx != 0 || dy != 0 || scaleX != 0 || scaleY != 0 || rot != 0)
-        {
-            _propChanged = true;
-            cmd.Add(new AssetChange(a, dx, dy, scaleX, scaleY, rot));
-        }
+        _propChanged |= ImGuiExt.DragFloatHistory("rotation", a.Rotation, (val) => a.Rotation = val, cmd, speed: 0.01, minValue: 0, maxValue: 360);
 
         return true;
     }

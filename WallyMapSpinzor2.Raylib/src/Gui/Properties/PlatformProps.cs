@@ -6,7 +6,7 @@ partial class PropertiesWindow
 {
     public bool ShowPlatformProps(Platform a, CommandHistory cmd)
     {
-        string name = a.InstanceName; // dont know if instance name is supposed to be unique? if so maybe enforce when exporting
+        string name = a.InstanceName;
         ImGui.InputText("Name", ref name, 64);
         a.InstanceName = name;
 
@@ -29,6 +29,7 @@ partial class PropertiesWindow
                     ImGui.TreePop();
                 }
             }
+            ImGui.TreePop();
         }
 
         return true;

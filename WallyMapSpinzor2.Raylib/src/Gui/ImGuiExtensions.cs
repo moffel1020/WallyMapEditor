@@ -79,4 +79,30 @@ public static class ImGuiExt
         a();
         if (disabled) ImGui.EndDisabled();
     }
+
+    public static bool DragFloatHistory(string label, double value, Action<double> changeCommand, CommandHistory cmd, double speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
+    {
+        double oldVal = value;
+        double newVal = DragFloat(label, value, speed, minValue, maxValue);
+        if (newVal != (float)oldVal)
+        {
+            cmd.Add(new PropChangeCommand<double>(changeCommand, oldVal, newVal));
+            return true;
+        }
+
+        return false;
+    }
+
+    public static bool DragIntHistory(string label, int value, Action<int> changeCommand, CommandHistory cmd, int speed = 1, int minValue = int.MinValue, int maxValue = int.MaxValue)
+    {
+        int oldVal = value;
+        int newVal = DragInt(label, value, speed, minValue, maxValue);
+        if (newVal != oldVal)
+        {
+            cmd.Add(new PropChangeCommand<int>(changeCommand, oldVal, newVal));
+            return true;
+        }
+
+        return false;
+    }
 }
