@@ -2,9 +2,9 @@ using System;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public class PropChangeCommand<T>(Action<T> doAction, T oldVal, T newVal) : ICommand
+public class PropChangeCommand<T>(Action<T> changeAction, T oldVal, T newVal) : ICommand
 {
-    private readonly Action<T> _action = doAction;
+    private readonly Action<T> _action = changeAction;
     private readonly T _oldVal = oldVal;
     private T _newVal = newVal;
 

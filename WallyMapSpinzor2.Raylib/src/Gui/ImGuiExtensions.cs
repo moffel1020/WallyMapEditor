@@ -39,6 +39,14 @@ public static class ImGuiExt
         return v;
     }
 
+    // maxlength can't just be set to a really large number, it will actually allocate a byte array of that size
+    public static string InputText(string label, string value, uint maxLength=512, ImGuiInputTextFlags flags = ImGuiInputTextFlags.None)
+    {
+        string v = value;
+        ImGui.InputText(label, ref v, maxLength, flags);
+        return v;
+    }
+
     public static Color ColorPicker3(string label, Color col)
     {
         Vector3 imCol = new((float)col.R / 255, (float)col.G / 255, (float)col.B / 255);

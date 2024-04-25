@@ -26,8 +26,9 @@ public class MapOverviewWindow
 
         ImGui.Text($"LevelName: {l.Type.LevelName}");
         ImGui.Text($"AssetName: {l.Type.AssetName}");
-        ImGui.Text($"DisplayName: {l.Type.DisplayName}");
         ImGui.Text($"FileName: {l.Type.FileName}");
+
+        l.Type.DisplayName = ImGuiExt.InputText("DisplayName", l.Type.DisplayName);
 
         if (ImGui.CollapsingHeader("Kill Bounds##overview") && l.Type.LevelName != "Random")
         {

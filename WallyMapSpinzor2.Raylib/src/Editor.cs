@@ -1,12 +1,12 @@
 using System;
 using System.Numerics;
 using System.IO;
+using System.Collections.Generic;
 
 using Raylib_cs;
 using Rl = Raylib_cs.Raylib;
 using rlImGui_cs;
 using ImGuiNET;
-using System.Collections.Generic;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -47,6 +47,49 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         LevelSetTypes lst = Utils.DeserializeFromPath<LevelSetTypes>(Path.Combine(dumpPath, "Game", "LevelSetTypes.xml"));
         MapData = new Level(ld, lt, lst);
     }
+
+    public void LoadMap(string ldPath, string? ltPath, string? lstPath)
+    {
+        LevelDesc ld = Utils.DeserializeFromPath<LevelDesc>(ldPath);
+        LevelTypes lt =  ltPath is null ? new() { Levels = [] } : Utils.DeserializeFromPath<LevelTypes>(ltPath);
+        LevelSetTypes lst = lstPath is null ? new() { Playlists = [] } : Utils.DeserializeFromPath<LevelSetTypes>(lstPath);
+
+        // scuffed xml parse error handling
+        if (ld.CameraBounds is null) throw new System.Xml.XmlException("LevelDesc xml did not contain essential elements");
+
+        _selectedObject = null;
+        CommandHistory.Clear();
+        Canvas?.TextureCache.Clear();
+        Canvas?.SwfFileCache.Clear();
+        Canvas?.SwfTextureCache.Clear();
+        CommandHistory.Clear();
+
+        Level l = new(ld, lt, lst);
+        l.Type ??= DefaultLevelType;
+        MapData = l;
+        // it's fine if there are no playlists here, they will be selected when exporting
+
+        ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
+    }
+
+    public static LevelType DefaultLevelType => new()
+    {
+        LevelName = "UnknownLevel",
+        DisplayName = "Unkown Level",
+        AssetName = "a_Level_Unknown",
+        FileName = "Level_Wacky.swf",
+        DevOnly = false,
+        TestLevel = false,
+        LevelID = 0,
+        CrateColorA = new(120, 120, 120),
+        CrateColorB = new(120, 120, 120),
+        LeftKill = 500,
+        RightKill = 500,
+        TopKill = 500,
+        BottomKill = 500,
+        BGMusic = "Level09Theme", // certified banger
+        ThumbnailPNGFile = "wally.jpg"
+    };
 
     public void Run()
     {
@@ -118,6 +161,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         if (ImGui.BeginMenu("File"))
         {
             if (ImGui.MenuItem("Export")) DialogWindows.Add(new ExportDialog(MapData));
+            if (ImGui.MenuItem("Import")) DialogWindows.Add(new ImportDialog(this));
             ImGui.EndMenu();
         }
         if (ImGui.BeginMenu("Edit"))
@@ -143,10 +187,8 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
                 Canvas?.SwfTextureCache.Clear();
                 Canvas?.SwfFileCache.Clear();
             }
-            if (ImGui.MenuItem("Reload Map", "Ctrl+R"))
-            {
-                LoadMap();
-            }
+            if (ImGui.MenuItem("Reload Map", "Ctrl+R")) LoadMap();
+            if (ImGui.MenuItem("Center Camera", "R")) ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
             ImGui.EndMenu();
         }
 
