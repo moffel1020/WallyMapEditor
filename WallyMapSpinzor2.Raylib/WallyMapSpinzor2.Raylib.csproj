@@ -10,6 +10,7 @@
   <ItemGroup>
     <ProjectReference Include="..\WallyMapSpinzor2\WallyMapSpinzor2.csproj" />
     <ProjectReference Include="..\SwiffCheese\SwiffCheese.csproj" />
+    <ProjectReference Include="..\BrawlhallaSwz\BrawlhallaSwz/BrawlhallaSwz.csproj" />
   </ItemGroup>
   
   <ItemGroup>

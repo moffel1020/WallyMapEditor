@@ -4,3 +4,6 @@
 [submodule "SwiffCheese"]
 	path = SwiffCheese
 	url = https://github.com/eyalzus12/SwiffCheese.git
+[submodule "BrawlhallaSwz"]
+	path = BrawlhallaSwz
+	url = https://github.com/eyalzus12/BrawlhallaSwz

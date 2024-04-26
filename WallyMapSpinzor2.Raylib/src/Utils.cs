@@ -13,6 +13,8 @@ using SixLabors.ImageSharp;
 using SwfLib.Tags;
 using SwfLib.Tags.DisplayListTags;
 
+using BrawlhallaSwz;
+
 namespace WallyMapSpinzor2.Raylib;
 
 public static class Utils
@@ -112,5 +114,28 @@ public static class Utils
         e.Save(xmlw);
         xmlw.Flush();
         return sw.ToString();
+    }
+
+    public static T DeserializeFromString<T>(string xmldata)
+        where T : IDeserializable, new()
+    {
+        XElement element = XElement.Parse(xmldata);
+        return element.DeserializeTo<T>();
+    }
+
+    public static T? DeserializeSwzFromPath<T>(string swzPath, string filename, uint key)
+        where T : IDeserializable, new()
+    {
+        using FileStream stream = new(swzPath, FileMode.Open, FileAccess.Read);
+        using SwzReader reader = new(stream, key);
+        while (reader.HasNext())
+        {
+            string data = reader.ReadFile();
+            string name = SwzUtils.GetFileName(data);
+            if (name == filename)
+                return DeserializeFromString<T>(data);
+        }
+
+        return default;
     }
 }

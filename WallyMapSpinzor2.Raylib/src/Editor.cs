@@ -20,6 +20,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
     public const int INITIAL_SCREEN_HEIGHT = 480;
 
     public IDrawable? MapData { get; set; }
+    public string BrawlPath { get; set; } = brawlPath;
 
     public RaylibCanvas? Canvas { get; set; }
     private Camera2D _cam = new();
@@ -69,6 +70,19 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         MapData = l;
         // it's fine if there are no playlists here, they will be selected when exporting
 
+        ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
+    }
+
+    public void LoadMap(Level l)
+    {
+        _selectedObject = null;
+        CommandHistory.Clear();
+        Canvas?.TextureCache.Clear();
+        Canvas?.SwfFileCache.Clear();
+        Canvas?.SwfTextureCache.Clear();
+        CommandHistory.Clear();
+
+        MapData = l;
         ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
     }
 
@@ -126,7 +140,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         Rl.BeginMode2D(_cam);
 
         Rl.ClearBackground(Raylib_cs.Color.Black);
-        Canvas ??= new(brawlPath);
+        Canvas ??= new(BrawlPath);
         Canvas.CameraMatrix = Rl.GetCameraMatrix2D(_cam);
         MapData?.DrawOn(Canvas, _config, Transform.IDENTITY, Time, new RenderData());
         Canvas.FinalizeDraw();
@@ -161,7 +175,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         if (ImGui.BeginMenu("File"))
         {
             if (ImGui.MenuItem("Export")) DialogWindows.Add(new ExportDialog(MapData));
-            if (ImGui.MenuItem("Import")) DialogWindows.Add(new ImportDialog(this));
+            if (ImGui.MenuItem("Import")) DialogWindows.Add(new ImportDialog(this, BrawlPath));
             ImGui.EndMenu();
         }
         if (ImGui.BeginMenu("Edit"))
