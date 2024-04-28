@@ -35,7 +35,6 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
 
     public void Show()
     {
-        ImGui.ShowDemoWindow();
         ImGui.SetNextWindowSizeConstraints(new(500, 410), new(int.MaxValue));
         ImGui.Begin("Import", ref _open, ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoCollapse);
 
