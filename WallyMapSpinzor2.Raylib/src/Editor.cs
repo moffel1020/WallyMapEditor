@@ -7,6 +7,7 @@ using Raylib_cs;
 using Rl = Raylib_cs.Raylib;
 using rlImGui_cs;
 using ImGuiNET;
+using System.Runtime.InteropServices;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -52,7 +53,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
     public void LoadMap(string ldPath, string? ltPath, string? lstPath)
     {
         LevelDesc ld = Utils.DeserializeFromPath<LevelDesc>(ldPath);
-        LevelTypes lt =  ltPath is null ? new() { Levels = [] } : Utils.DeserializeFromPath<LevelTypes>(ltPath);
+        LevelTypes lt = ltPath is null ? new() { Levels = [] } : Utils.DeserializeFromPath<LevelTypes>(ltPath);
         LevelSetTypes lst = lstPath is null ? new() { Playlists = [] } : Utils.DeserializeFromPath<LevelSetTypes>(lstPath);
 
         // scuffed xml parse error handling
@@ -105,6 +106,13 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         ThumbnailPNGFile = "wally.jpg"
     };
 
+    internal unsafe static sbyte* ImGuiGetClipText(IntPtr userData) => Rl.GetClipboardText();
+    internal unsafe static void ImGuiSetClipText(IntPtr userData, sbyte* text) => Rl.SetClipboardText(text);
+    private unsafe delegate sbyte* GetClipTextCallback(IntPtr userData);
+    private unsafe delegate void SetClipTextCallback(IntPtr userData, sbyte* text);
+    private GetClipTextCallback? _getClipTextCallback;
+    private SetClipTextCallback? _setClipTextCallback;
+
     public void Run()
     {
         LoadMap();
@@ -114,6 +122,20 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         Rl.SetWindowState(ConfigFlags.ResizableWindow);
         rlImGui.Setup(true, true);
         Style.Apply();
+
+        /*
+        During rlImGui.Setup, GetClipboardText and SetClipboardText are created, and then their function ptr is used for the native callback.
+        However, the library does not keep a reference to them, so those delegates get disposed, causing copy/paste to possibly crash.
+        This is a hacky re-implementation of that part of the code, with the references being kept.
+        */
+        unsafe
+        {
+            ImGuiIOPtr io = ImGui.GetIO();
+            _getClipTextCallback = new(ImGuiGetClipText);
+            _setClipTextCallback = new(ImGuiSetClipText);
+            io.GetClipboardTextFn = Marshal.GetFunctionPointerForDelegate(_getClipTextCallback);
+            io.SetClipboardTextFn = Marshal.GetFunctionPointerForDelegate(_setClipTextCallback);
+        }
 
         ResetCam(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT); // inaccurate, but it will do for now
 
