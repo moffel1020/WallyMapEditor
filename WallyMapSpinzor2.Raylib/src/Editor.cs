@@ -106,12 +106,12 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         ThumbnailPNGFile = "wally.jpg"
     };
 
-    internal unsafe static sbyte* ImGuiGetClipText(IntPtr userData) => Rl.GetClipboardText();
-    internal unsafe static void ImGuiSetClipText(IntPtr userData, sbyte* text) => Rl.SetClipboardText(text);
+    private unsafe static sbyte* ImGuiGetClipText(IntPtr userData) => Rl.GetClipboardText();
+    private unsafe static void ImGuiSetClipText(IntPtr userData, sbyte* text) => Rl.SetClipboardText(text);
     private unsafe delegate sbyte* GetClipTextCallback(IntPtr userData);
     private unsafe delegate void SetClipTextCallback(IntPtr userData, sbyte* text);
-    private GetClipTextCallback? _getClipTextCallback;
-    private SetClipTextCallback? _setClipTextCallback;
+    private unsafe static readonly GetClipTextCallback _getClipTextCallback = new(ImGuiGetClipText);
+    private unsafe static readonly SetClipTextCallback _setClipTextCallback = new(ImGuiSetClipText);
 
     public void Run()
     {
@@ -131,8 +131,6 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         unsafe
         {
             ImGuiIOPtr io = ImGui.GetIO();
-            _getClipTextCallback = new(ImGuiGetClipText);
-            _setClipTextCallback = new(ImGuiSetClipText);
             io.GetClipboardTextFn = Marshal.GetFunctionPointerForDelegate(_getClipTextCallback);
             io.SetClipboardTextFn = Marshal.GetFunctionPointerForDelegate(_setClipTextCallback);
         }
