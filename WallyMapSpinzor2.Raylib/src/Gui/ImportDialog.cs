@@ -4,11 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 
+using SwfLib.Tags.ActionsTags;
 using ImGuiNET;
 using NativeFileDialogSharp;
 using Raylib_cs;
 using Rl = Raylib_cs.Raylib;
+
 using BrawlhallaSwz;
+using AbcDisassembler;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -22,6 +25,7 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
 
     private static string _swzKey = ""; 
     private string _gamePath = brawlPath;
+    private string _bhairPath = Path.Join(brawlPath, "BrawlhallaAir.swf");
 
     private readonly Dictionary<string, string> levelDescFiles = [];
     private int _pickedFileNum;
@@ -92,7 +96,7 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
             }
         }
 
-        if (_decryptedLt is not null && _decryptedLst is not null)
+        if (levelDescFiles.Count > 0 && _decryptedLt is not null && _decryptedLst is not null)
         {
             ImGui.ListBox("Pick level file", ref _pickedFileNum, [.. levelDescFiles.Keys], levelDescFiles.Count, 12);
             if (ImGui.Button("Import"))
@@ -101,6 +105,39 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
                 LevelDesc ld = Utils.DeserializeFromString<LevelDesc>(levelDescFiles[name]);
                 editor.LoadMap(new Level(ld, _decryptedLt, _decryptedLst));
             }
+        }
+
+        ImGui.Separator();
+        if (ImGui.Button("Select BrawlhallaAir.swf"))
+        {
+            Task.Run(() =>
+            {
+                DialogResult result = Dialog.FileOpen("swf", _gamePath);
+                if (result.IsOk)
+                    _bhairPath = result.Path;
+            });
+        }
+        ImGui.Text($"{_bhairPath}");
+
+        if (ImGui.Button("Find decryption key"))
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    if (Utils.GetDoABCDefineTag(_bhairPath) is DoABCDefineTag abcTag)
+                    {
+                        AbcFile abc = AbcFile.Read(abcTag.ABCData);
+                        _swzKey = Utils.FindDecryptionKey(abc).ToString() ?? "";
+                        _loadingError = null;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Rl.TraceLog(TraceLogLevel.Error, e.Message);
+                    _loadingError = "Could not find decryption key. " + e.Message;
+                }
+            });
         }
     }
 

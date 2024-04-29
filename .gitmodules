@@ -7,3 +7,6 @@
 [submodule "BrawlhallaSwz"]
 	path = BrawlhallaSwz
 	url = https://github.com/eyalzus12/BrawlhallaSwz
+[submodule "AbcDisassembler"]
+	path = AbcDisassembler
+	url = https://github.com/moffel1020/AbcDisassembler
