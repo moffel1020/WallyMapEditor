@@ -40,7 +40,7 @@ public static class ImGuiExt
     }
 
     // maxlength can't just be set to a really large number, it will actually allocate a byte array of that size
-    public static string InputText(string label, string value, uint maxLength=512, ImGuiInputTextFlags flags = ImGuiInputTextFlags.None)
+    public static string InputText(string label, string value, uint maxLength = 512, ImGuiInputTextFlags flags = ImGuiInputTextFlags.None)
     {
         string v = value;
         ImGui.InputText(label, ref v, maxLength, flags);

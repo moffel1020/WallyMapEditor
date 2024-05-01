@@ -23,7 +23,7 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
     private static string? lastLtPath;
     private static string? lastLstPath;
 
-    private static string _swzKey = ""; 
+    private static string _swzKey = "";
     private string _gamePath = brawlPath;
     private string _bhairPath = Path.Join(brawlPath, "BrawlhallaAir.swf");
 
