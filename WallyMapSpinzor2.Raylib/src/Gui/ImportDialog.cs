@@ -33,6 +33,10 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
     private LevelSetTypes? _decryptedLst;
 
     private string? _loadingError;
+    private string? _loadingStatus;
+
+    private bool _decrypting = false;
+    private bool _keySearching = false;
 
     private bool _open = true;
     public bool Closed => !_open;
@@ -53,6 +57,13 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
         {
             ShowXmlImportTab();
             ImGui.EndTabItem();
+        }
+
+        if (_loadingStatus is not null)
+        {
+            ImGui.PushTextWrapPos();
+            ImGui.Text(_loadingStatus);
+            ImGui.PopTextWrapPos();
         }
 
         if (_loadingError is not null)
@@ -82,18 +93,29 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
         ImGui.Text($"Path: {_gamePath}");
 
         ImGui.InputText("Decryption key", ref _swzKey, MAX_KEY_LENGTH, ImGuiInputTextFlags.CharsDecimal);
-        if (_swzKey.Length > 0 && _decryptedLt is null && ImGui.Button("Decrypt"))
+        if (_swzKey.Length > 0 && _decryptedLt is null && ImGuiExt.WithDisabledButton(_decrypting, "Decrypt"))
         {
-            try
+            _decrypting = true;
+            Task.Run(() =>
             {
-                DecryptSwzFiles(_gamePath);
-                _loadingError = null;
-            }
-            catch (Exception e)
-            {
-                Rl.TraceLog(TraceLogLevel.Error, e.Message);
-                _loadingError = $"Could not decrypt swz files. {e.Message}";
-            }
+                _loadingStatus = "decrypting...";
+                try
+                {
+                    DecryptSwzFiles(_gamePath);
+                    _loadingStatus = null;
+                    _loadingError = null;
+                }
+                catch (Exception e)
+                {
+                    Rl.TraceLog(TraceLogLevel.Error, e.Message);
+                    _loadingStatus = null;
+                    _loadingError = $"Could not decrypt swz files. {e.Message}";
+                }
+                finally
+                {
+                    _decrypting = false;
+                }
+            });
         }
 
         if (levelDescFiles.Count > 0 && _decryptedLt is not null && _decryptedLst is not null)
@@ -101,9 +123,23 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
             ImGui.ListBox("Pick level file", ref _pickedFileNum, [.. levelDescFiles.Keys], levelDescFiles.Count, 12);
             if (ImGui.Button("Import"))
             {
-                string name = levelDescFiles.Keys.ElementAt(_pickedFileNum);
-                LevelDesc ld = Utils.DeserializeFromString<LevelDesc>(levelDescFiles[name]);
-                editor.LoadMap(new Level(ld, _decryptedLt, _decryptedLst));
+                //TODO: figure out how to make this async
+                //the main problem is ContinueWith doesn't run in main thread
+                _loadingStatus = "loading...";
+                try
+                {
+                    string name = levelDescFiles.Keys.ElementAt(_pickedFileNum);
+                    LevelDesc ld = Utils.DeserializeFromString<LevelDesc>(levelDescFiles[name]);
+                    _loadingStatus = null;
+                    _loadingError = null;
+                    editor.LoadMap(new Level(ld, _decryptedLt, _decryptedLst));
+                }
+                catch (Exception e)
+                {
+                    Rl.TraceLog(TraceLogLevel.Error, e.Message);
+                    _loadingStatus = null;
+                    _loadingError = $"Failed to load map file. {e.Message}";
+                }
             }
         }
 
@@ -119,8 +155,10 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
         }
         ImGui.Text($"{_bhairPath}");
 
-        if (ImGui.Button("Find decryption key"))
+        if (ImGuiExt.WithDisabledButton(_keySearching, "Find decryption key"))
         {
+            _keySearching = true;
+            _loadingStatus = "searching...";
             Task.Run(() =>
             {
                 try
@@ -129,13 +167,24 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
                     {
                         AbcFile abc = AbcFile.Read(abcTag.ABCData);
                         _swzKey = Utils.FindDecryptionKey(abc).ToString() ?? "";
+                        _loadingStatus = null;
                         _loadingError = null;
+                    }
+                    else
+                    {
+                        _loadingStatus = null;
+                        _loadingError = "Could not find decryption key.";
                     }
                 }
                 catch (Exception e)
                 {
                     Rl.TraceLog(TraceLogLevel.Error, e.Message);
+                    _loadingStatus = null;
                     _loadingError = "Could not find decryption key. " + e.Message;
+                }
+                finally
+                {
+                    _keySearching = false;
                 }
             });
         }
@@ -192,15 +241,18 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
         ImGui.Separator();
         if (lastLdPath is not null && ImGui.Button("Import"))
         {
+            _loadingStatus = "loading...";
             try
             {
                 editor.LoadMap(lastLdPath, lastLtPath, lastLstPath);
                 _open = false;
+                _loadingStatus = null;
                 _loadingError = null;
             }
             catch (Exception e)
             {
                 Rl.TraceLog(TraceLogLevel.Error, e.Message);
+                _loadingStatus = null;
                 _loadingError = $"Could not load xml file. {e.Message}";
             }
         }

@@ -88,6 +88,19 @@ public static class ImGuiExt
         if (disabled) ImGui.EndDisabled();
     }
 
+    public static bool WithDisabled(bool disabled, Func<bool> a)
+    {
+        if (disabled) ImGui.BeginDisabled();
+        bool res = a();
+        if (disabled) ImGui.EndDisabled();
+        return !disabled && res;
+    }
+
+    public static bool WithDisabledButton(bool disabled, string label)
+    {
+        return WithDisabled(disabled, () => ImGui.Button(label));
+    }
+
     public static bool DragFloatHistory(string label, double value, Action<double> changeCommand, CommandHistory cmd, double speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
     {
         double oldVal = value;
