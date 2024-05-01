@@ -28,7 +28,8 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
     private string _bhairPath = Path.Join(brawlPath, "BrawlhallaAir.swf");
 
     private readonly Dictionary<string, string> levelDescFiles = [];
-    private int _pickedFileNum;
+    private string _levelDescFileFilter = "";
+    private string? _pickedFileName;
     private LevelTypes? _decryptedLt;
     private LevelSetTypes? _decryptedLst;
 
@@ -120,16 +121,24 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
 
         if (levelDescFiles.Count > 0 && _decryptedLt is not null && _decryptedLst is not null)
         {
-            ImGui.ListBox("Pick level file", ref _pickedFileNum, [.. levelDescFiles.Keys], levelDescFiles.Count, 12);
-            if (ImGui.Button("Import"))
+            _levelDescFileFilter = ImGuiExt.InputText("Filter map names", _levelDescFileFilter);
+            string[] levelDescs = levelDescFiles.Keys
+                .Where(s => s.Contains(_levelDescFileFilter, StringComparison.InvariantCultureIgnoreCase))
+                .ToArray();
+            int pickedItem = Array.FindIndex(levelDescs, s => s == _pickedFileName);
+            if (ImGui.ListBox("Pick level file", ref pickedItem, levelDescs, levelDescs.Length, 12))
+            {
+                _pickedFileName = levelDescs[pickedItem];
+            }
+
+            if (ImGuiExt.WithDisabledButton(_pickedFileName is null, "Import"))
             {
                 //TODO: figure out how to make this async
                 //the main problem is ContinueWith doesn't run in main thread
                 _loadingStatus = "loading...";
                 try
                 {
-                    string name = levelDescFiles.Keys.ElementAt(_pickedFileNum);
-                    LevelDesc ld = Utils.DeserializeFromString<LevelDesc>(levelDescFiles[name]);
+                    LevelDesc ld = Utils.DeserializeFromString<LevelDesc>(levelDescFiles[_pickedFileName!]);
                     _loadingStatus = null;
                     _loadingError = null;
                     editor.LoadMap(new Level(ld, _decryptedLt, _decryptedLst));
