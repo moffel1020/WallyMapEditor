@@ -108,10 +108,6 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
 
     private unsafe static sbyte* ImGuiGetClipText(IntPtr userData) => Rl.GetClipboardText();
     private unsafe static void ImGuiSetClipText(IntPtr userData, sbyte* text) => Rl.SetClipboardText(text);
-    private unsafe delegate sbyte* GetClipTextCallback(IntPtr userData);
-    private unsafe delegate void SetClipTextCallback(IntPtr userData, sbyte* text);
-    private unsafe static readonly GetClipTextCallback _getClipTextCallback = new(ImGuiGetClipText);
-    private unsafe static readonly SetClipTextCallback _setClipTextCallback = new(ImGuiSetClipText);
 
     public void Run()
     {
@@ -131,8 +127,8 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         unsafe
         {
             ImGuiIOPtr io = ImGui.GetIO();
-            io.GetClipboardTextFn = Marshal.GetFunctionPointerForDelegate(_getClipTextCallback);
-            io.SetClipboardTextFn = Marshal.GetFunctionPointerForDelegate(_setClipTextCallback);
+            io.GetClipboardTextFn = Marshal.GetFunctionPointerForDelegate(ImGuiGetClipText);
+            io.SetClipboardTextFn = Marshal.GetFunctionPointerForDelegate(ImGuiSetClipText);
         }
 
         ResetCam(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT); // inaccurate, but it will do for now
