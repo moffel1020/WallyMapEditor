@@ -4,8 +4,9 @@ namespace WallyMapSpinzor2.Raylib;
 
 partial class PropertiesWindow 
 {
-    public bool ShowPlatformProps(Platform a, CommandHistory cmd)
+    public static bool ShowPlatformProps(Platform a, CommandHistory cmd)
     {
+        bool propChanged = false;
         string name = a.InstanceName;
         ImGui.InputText("Name", ref name, 64);
         a.InstanceName = name;
@@ -25,13 +26,13 @@ partial class PropertiesWindow
             {
                 if (ImGui.TreeNode($"{child.GetType().Name}##{child.GetHashCode()}"))
                 {
-                    ShowProperties(child, cmd);
+                    propChanged = ShowProperties(child, cmd);
                     ImGui.TreePop();
                 }
             }
             ImGui.TreePop();
         }
 
-        return true;
+        return propChanged;
     }
 }
