@@ -4,7 +4,7 @@ namespace WallyMapSpinzor2.Raylib;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowUnimplementedProp()
+    public static bool ShowUnimplementedProps()
     {
         ImGui.PushTextWrapPos();
         ImGui.Text("Properties gui not implemented for this object");

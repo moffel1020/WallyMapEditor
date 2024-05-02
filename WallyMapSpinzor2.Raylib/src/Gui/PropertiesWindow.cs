@@ -21,7 +21,7 @@ public partial class PropertiesWindow
             cmd.SetAllowMerge(false);
         }
 
-        _propChanged = ShowProperties(o, cmd);
+        _propChanged |= ShowProperties(o, cmd);
 
         ImGui.End();
     }
@@ -32,10 +32,12 @@ public partial class PropertiesWindow
     {
         Respawn r => ShowRespawnProps(r, cmd),
         Platform p => ShowPlatformProps(p, cmd),
-        MovingPlatform => ShowUnimplementedProp(), // currently unimplemented, dont match with AbstractAsset
+        MovingPlatform => ShowUnimplementedProps(), // currently unimplemented, dont match with AbstractAsset
+        CameraBounds cb => ShowCameraBoundsProps(cb, cmd),
+        SpawnBotBounds sb => ShowSpawnBotBoundsProps(sb, cmd),
         AbstractCollision ac => ShowAbstractCollisionProps(ac, cmd),
         AbstractItemSpawn i => ShowItemSpawnProps(i, cmd),
         AbstractAsset a => ShowAbstractAssetProps(a, cmd),
-        _ => ShowUnimplementedProp() 
+        _ => ShowUnimplementedProps() 
     };
 }

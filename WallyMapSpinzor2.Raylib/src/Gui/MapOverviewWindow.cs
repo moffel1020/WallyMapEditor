@@ -40,18 +40,12 @@ public class MapOverviewWindow
 
         if (ImGui.CollapsingHeader("Camera Bounds##overview"))
         {
-            _propChanged |= ImGuiExt.DragFloatHistory("x##cambounds", l.Desc.CameraBounds.X, (val) => l.Desc.CameraBounds.X = val, cmd);
-            _propChanged |= ImGuiExt.DragFloatHistory("y##cambounds", l.Desc.CameraBounds.Y, (val) => l.Desc.CameraBounds.Y = val, cmd);
-            _propChanged |= ImGuiExt.DragFloatHistory("w##cambounds", l.Desc.CameraBounds.W, (val) => l.Desc.CameraBounds.W = val, cmd, minValue: 1);
-            _propChanged |= ImGuiExt.DragFloatHistory("h##cambounds", l.Desc.CameraBounds.H, (val) => l.Desc.CameraBounds.H = val, cmd, minValue: 1);
+            _propChanged |= PropertiesWindow.ShowCameraBoundsProps(l.Desc.CameraBounds, cmd);
         }
 
         if (ImGui.CollapsingHeader("Spawn Bot Bounds"))
         {
-            _propChanged |= ImGuiExt.DragFloatHistory("x##botbounds", l.Desc.SpawnBotBounds.X, (val) => l.Desc.SpawnBotBounds.X = val, cmd);
-            _propChanged |= ImGuiExt.DragFloatHistory("y##botbounds", l.Desc.SpawnBotBounds.Y, (val) => l.Desc.SpawnBotBounds.Y = val, cmd);
-            _propChanged |= ImGuiExt.DragFloatHistory("w##botbounds", l.Desc.SpawnBotBounds.W, (val) => l.Desc.SpawnBotBounds.W = val, cmd, minValue: 1);
-            _propChanged |= ImGuiExt.DragFloatHistory("h##botbounds", l.Desc.SpawnBotBounds.H, (val) => l.Desc.SpawnBotBounds.H = val, cmd, minValue: 1);
+            _propChanged |= PropertiesWindow.ShowSpawnBotBoundsProps(l.Desc.SpawnBotBounds, cmd);
         }
 
         if (ImGui.CollapsingHeader("Weapon Spawn Color##overview") && l.Type.CrateColorA is not null && l.Type.CrateColorB is not null)
