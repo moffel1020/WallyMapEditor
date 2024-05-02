@@ -191,7 +191,7 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
 
         while (DrawingQueue.Count > 0)
         {
-            (object? _, Action drawAction) = DrawingQueue.PopMin();
+            (_, Action drawAction) = DrawingQueue.PopMin();
             drawAction();
         }
     }
