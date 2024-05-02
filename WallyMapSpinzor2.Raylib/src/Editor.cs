@@ -40,6 +40,8 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
     private readonly RenderConfig _config = new() { };
     private double _renderSpeed = 1;
 
+    public MousePickingFramebuffer PickingFramebuffer { get; set; }= new();
+
     public void LoadMap()
     {
         _selectedObject = null;
@@ -131,7 +133,8 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
             io.SetClipboardTextFn = Marshal.GetFunctionPointerForDelegate(ImGuiSetClipText);
         }
 
-        ResetCam(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT); // inaccurate, but it will do for now
+        ResetCam(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT);
+        PickingFramebuffer.Load(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT);
 
         while (!Rl.WindowShouldClose())
         {
@@ -232,10 +235,17 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
             float wheel = Rl.GetMouseWheelMove();
             if (wheel != 0)
             {
-                Vector2 mousePos = Rl.GetScreenToWorld2D(Rl.GetMousePosition() - ViewportWindow.Bounds.P1, _cam);
+                _cam.Target = ScreenToWorld(Rl.GetMousePosition());
                 _cam.Offset = Rl.GetMousePosition() - ViewportWindow.Bounds.P1;
-                _cam.Target = mousePos;
                 _cam.Zoom = Math.Clamp(_cam.Zoom + wheel * ZOOM_INCREMENT * _cam.Zoom, MIN_ZOOM, MAX_ZOOM);
+            }
+
+            if (Rl.IsMouseButtonPressed(MouseButton.Left))
+            {
+                PickingFramebuffer.MatchSize(ViewportWindow);
+                _selectedObject = PickingFramebuffer.GetObjectAtCoords(Rl.GetMousePosition() - ViewportWindow.Bounds.P1, Canvas, MapData, _config, _cam, Time);
+                // TODO: we might want a way to associate objects with their parents. 
+                // for example when selecting a hard collision we probably want to get the parent dynamic collision if it exists, when selecting an asset we want the platform
             }
 
             if (Rl.IsMouseButtonDown(MouseButton.Right))
@@ -257,6 +267,9 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
             if (Rl.IsKeyPressed(KeyboardKey.R)) LoadMap();
         }
     }
+
+    public Vector2 ScreenToWorld(Vector2 screenPos) =>
+        Rl.GetScreenToWorld2D(screenPos - ViewportWindow.Bounds.P1, _cam);
 
     private void ResetCam(int surfaceW, int surfaceH)
     {

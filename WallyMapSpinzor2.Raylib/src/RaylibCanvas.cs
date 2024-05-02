@@ -9,7 +9,7 @@ namespace WallyMapSpinzor2.Raylib;
 
 public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
 {
-    public BucketPriorityQueue<Action> DrawingQueue { get; } = new(Enum.GetValues<DrawPriorityEnum>().Length);
+    public BucketPriorityQueue<(object?, Action)> DrawingQueue { get; } = new(Enum.GetValues<DrawPriorityEnum>().Length);
     public TextureCache TextureCache { get; } = new();
     public SwfFileCache SwfFileCache { get; } = new();
     public SwfTextureCache SwfTextureCache { get; } = new();
@@ -20,29 +20,29 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
         TextureCache.Clear();
     }
 
-    public void DrawCircle(double x, double y, double radius, Color color, Transform trans, DrawPriorityEnum priority)
+    public void DrawCircle(double x, double y, double radius, Color color, Transform trans, DrawPriorityEnum priority, object? caller)
     {
         // FIXME: doesn't account for transformations affecting radius (could be turned into an ellipse)
         (x, y) = trans * (x, y);
 
-        DrawingQueue.Push(() =>
+        DrawingQueue.Push((caller, () =>
         {
             Rl.DrawCircle((int)x, (int)y, (float)radius, Utils.ToRlColor(color));
-        }, (int)priority);
+        }), (int)priority);
     }
 
-    public void DrawLine(double x1, double y1, double x2, double y2, Color color, Transform trans, DrawPriorityEnum priority)
+    public void DrawLine(double x1, double y1, double x2, double y2, Color color, Transform trans, DrawPriorityEnum priority, object? caller)
     {
         (x1, y1) = trans * (x1, y1);
         (x2, y2) = trans * (x2, y2);
 
-        DrawingQueue.Push(() =>
+        DrawingQueue.Push((caller, () =>
         {
             Rl.DrawLine((int)x1, (int)y1, (int)x2, (int)y2, Utils.ToRlColor(color));
-        }, (int)priority);
+        }), (int)priority);
     }
 
-    public void DrawLineMultiColor(double x1, double y1, double x2, double y2, Color[] colors, Transform trans, DrawPriorityEnum priority)
+    public void DrawLineMultiColor(double x1, double y1, double x2, double y2, Color[] colors, Transform trans, DrawPriorityEnum priority, object? caller)
     {
         if (!Matrix4x4.Invert(CameraMatrix, out Matrix4x4 invertedMat))
             throw new ArgumentException("Camera transform is not invertible");
@@ -63,14 +63,13 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
         for (int i = 0; i < colors.Length; ++i)
         {
             double mult = baseOffset * (i - center);
-            DrawLine(x1 + offX * mult, y1 + offY * mult, x2 + offX * mult, y2 + offY * mult, colors[i], inv, priority);
+            DrawLine(x1 + offX * mult, y1 + offY * mult, x2 + offX * mult, y2 + offY * mult, colors[i], inv, priority, caller);
         }
-
     }
 
-    public void DrawRect(double x, double y, double w, double h, bool filled, Color color, Transform trans, DrawPriorityEnum priority)
+    public void DrawRect(double x, double y, double w, double h, bool filled, Color color, Transform trans, DrawPriorityEnum priority, object? caller)
     {
-        DrawingQueue.Push(() =>
+        DrawingQueue.Push((caller, new Action(() =>
         {
             if (filled)
             {
@@ -78,33 +77,33 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
             }
             else
             {
-                DrawLine(x, y, x + w, y, color, trans, priority);
-                DrawLine(x + w, y, x + w, y + h, color, trans, priority);
-                DrawLine(x + w, y + h, x, y + h, color, trans, priority);
-                DrawLine(x, y + h, x, y, color, trans, priority);
+                DrawLine(x, y, x + w, y, color, trans, priority, caller);
+                DrawLine(x + w, y, x + w, y + h, color, trans, priority, caller);
+                DrawLine(x + w, y + h, x, y + h, color, trans, priority, caller);
+                DrawLine(x, y + h, x, y, color, trans, priority, caller);
             }
-        }, (int)priority);
+        })), (int)priority);
     }
 
-    public void DrawString(double x, double y, string text, double fontSize, Color color, Transform trans, DrawPriorityEnum priority)
+    public void DrawString(double x, double y, string text, double fontSize, Color color, Transform trans, DrawPriorityEnum priority, object? caller)
     {
 
     }
 
-    public void DrawTexture(double x, double y, Texture2DWrapper texture, Transform trans, DrawPriorityEnum priority)
+    public void DrawTexture(double x, double y, Texture2DWrapper texture, Transform trans, DrawPriorityEnum priority, object? caller)
     {
-        DrawingQueue.Push(() =>
+        DrawingQueue.Push((caller, new Action(() =>
         {
             DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, texture.W, texture.H, trans, Color.FromHex(0xFFFFFFFF));
-        }, (int)priority);
+        })), (int)priority);
     }
 
-    public void DrawTextureRect(double x, double y, double w, double h, Texture2DWrapper texture, Transform trans, DrawPriorityEnum priority)
+    public void DrawTextureRect(double x, double y, double w, double h, Texture2DWrapper texture, Transform trans, DrawPriorityEnum priority, object? caller)
     {
-        DrawingQueue.Push(() =>
+        DrawingQueue.Push((caller, new Action(() =>
         {
             DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, w, h, trans, Color.FromHex(0xFFFFFFFF));
-        }, (int)priority);
+        })), (int)priority);
     }
 
     private static void DrawTextureWithTransform(Texture2D texture, double x, double y, double w, double h, Transform trans, Color color)
@@ -192,7 +191,7 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
 
         while (DrawingQueue.Count > 0)
         {
-            Action drawAction = DrawingQueue.PopMin();
+            (object? _ ,Action drawAction) = DrawingQueue.PopMin();
             drawAction();
         }
     }
