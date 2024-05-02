@@ -69,7 +69,7 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
 
     public void DrawRect(double x, double y, double w, double h, bool filled, Color color, Transform trans, DrawPriorityEnum priority, object? caller)
     {
-        DrawingQueue.Push((caller, new Action(() =>
+        DrawingQueue.Push((caller, () =>
         {
             if (filled)
             {
@@ -82,7 +82,7 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
                 DrawLine(x + w, y + h, x, y + h, color, trans, priority, caller);
                 DrawLine(x, y + h, x, y, color, trans, priority, caller);
             }
-        })), (int)priority);
+        }), (int)priority);
     }
 
     public void DrawString(double x, double y, string text, double fontSize, Color color, Transform trans, DrawPriorityEnum priority, object? caller)
@@ -92,18 +92,18 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
 
     public void DrawTexture(double x, double y, Texture2DWrapper texture, Transform trans, DrawPriorityEnum priority, object? caller)
     {
-        DrawingQueue.Push((caller, new Action(() =>
+        DrawingQueue.Push((caller, () =>
         {
             DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, texture.W, texture.H, trans, Color.FromHex(0xFFFFFFFF));
-        })), (int)priority);
+        }), (int)priority);
     }
 
     public void DrawTextureRect(double x, double y, double w, double h, Texture2DWrapper texture, Transform trans, DrawPriorityEnum priority, object? caller)
     {
-        DrawingQueue.Push((caller, new Action(() =>
+        DrawingQueue.Push((caller, () =>
         {
             DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, w, h, trans, Color.FromHex(0xFFFFFFFF));
-        })), (int)priority);
+        }), (int)priority);
     }
 
     private static void DrawTextureWithTransform(Texture2D texture, double x, double y, double w, double h, Transform trans, Color color)
@@ -191,7 +191,7 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
 
         while (DrawingQueue.Count > 0)
         {
-            (object? _ ,Action drawAction) = DrawingQueue.PopMin();
+            (object? _, Action drawAction) = DrawingQueue.PopMin();
             drawAction();
         }
     }

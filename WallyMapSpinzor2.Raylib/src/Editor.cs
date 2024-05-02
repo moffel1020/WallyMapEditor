@@ -40,7 +40,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
     private readonly RenderConfig _config = new() { };
     private double _renderSpeed = 1;
 
-    public MousePickingFramebuffer PickingFramebuffer { get; set; }= new();
+    public MousePickingFramebuffer PickingFramebuffer { get; set; } = new();
 
     public void LoadMap()
     {

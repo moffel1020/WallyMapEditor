@@ -56,7 +56,7 @@ public class MousePickingFramebuffer : IDisposable
 
     public void Load(int w, int h)
     {
-        if (!Rl.IsShaderReady(Shader)) 
+        if (!Rl.IsShaderReady(Shader))
             Shader = Rl.LoadShaderFromMemory(vertex, fragment);
 
         if (_framebuffer.Id != 0)
@@ -91,13 +91,13 @@ public class MousePickingFramebuffer : IDisposable
 
     public object? GetObjectAtCoords(Vector2 screenPos, RaylibCanvas? canvas, IDrawable? mapData, RenderConfig config, Camera2D cam, TimeSpan time)
     {
-        if (canvas is null ||  mapData is null) return null;
+        if (canvas is null || mapData is null) return null;
 
         Rl.BeginTextureMode(_framebuffer);
         Rl.BeginShaderMode(Shader);
         Rl.BeginMode2D(cam);
         Rlgl.DisableColorBlend();
-        
+
         Rl.ClearBackground(Raylib_cs.Color.Black);
         canvas.CameraMatrix = Rl.GetCameraMatrix2D(cam);
         mapData.DrawOn(canvas, config, Transform.IDENTITY, time, new RenderData());
