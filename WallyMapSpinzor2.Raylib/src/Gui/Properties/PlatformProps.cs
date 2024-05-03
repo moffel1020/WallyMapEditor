@@ -12,10 +12,10 @@ partial class PropertiesWindow
         a.InstanceName = name;
 
         ImGui.Separator();
-        ShowAbstractAssetProps(a, cmd);
+        propChanged |= ShowAbstractAssetProps(a, cmd);
 
         ImGui.Separator();
-        int? blue = a.Blue; 
+        int? blue = a.Blue;
         int? red = a.Red;
         ImGui.Text($"Blue: {(blue is not null ? blue : "No")}");
         ImGui.Text($"Red: {(red is not null ? red : "No")}");
@@ -26,7 +26,7 @@ partial class PropertiesWindow
             {
                 if (ImGui.TreeNode($"{child.GetType().Name}##{child.GetHashCode()}"))
                 {
-                    propChanged = ShowProperties(child, cmd);
+                    propChanged |= ShowProperties(child, cmd);
                     ImGui.TreePop();
                 }
             }
