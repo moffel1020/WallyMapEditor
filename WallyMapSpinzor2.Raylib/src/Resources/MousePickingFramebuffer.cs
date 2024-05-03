@@ -89,9 +89,11 @@ public class MousePickingFramebuffer : IDisposable
             Load(viewport.Framebuffer.Texture.Width, viewport.Framebuffer.Texture.Height);
     }
 
-    public object? GetObjectAtCoords(Vector2 screenPos, RaylibCanvas? canvas, IDrawable? mapData, RenderConfig config, Camera2D cam, TimeSpan time)
+    public object? GetObjectAtCoords(ViewportWindow viewport, RaylibCanvas? canvas, IDrawable? mapData, RenderConfig config, Camera2D cam, TimeSpan time)
     {
         if (canvas is null || mapData is null) return null;
+
+        MatchSize(viewport);
 
         Rl.BeginTextureMode(_framebuffer);
         Rl.BeginShaderMode(Shader);
@@ -121,12 +123,16 @@ public class MousePickingFramebuffer : IDisposable
 
         object? selected = null;
         Image img = Rl.LoadImageFromTexture(_framebuffer.Texture);
-        if (Rl.IsImageReady(img))
+
+        Vector2 pos = Rl.GetMousePosition() - viewport.Bounds.P1;
+        if (pos.X >= 0 && pos.X < img.Width && pos.Y >= 0 && pos.Y < img.Height && Rl.IsImageReady(img))
         {
             float val = 0;
-            unsafe { val = ((float*)img.Data)[(int)screenPos.X + (img.Height - (int)screenPos.Y) * img.Width]; }
-            if (val > 0 && val <= _drawables.Count)
-                selected = _drawables[(int)Math.Round(val, 0) - 1]; // round just to be safe
+            unsafe { val = ((float*)img.Data)[(int)pos.X + (img.Height - (int)pos.Y) * img.Width]; }
+
+            int index = (int)Math.Round(val, 0);
+            if (index > 0 && index <= _drawables.Count)
+                selected = _drawables[index - 1];
         }
         Rl.UnloadImage(img);
         return selected;

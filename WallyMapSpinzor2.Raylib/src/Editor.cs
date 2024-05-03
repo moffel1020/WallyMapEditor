@@ -242,8 +242,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
 
             if (Rl.IsMouseButtonPressed(MouseButton.Left))
             {
-                PickingFramebuffer.MatchSize(ViewportWindow);
-                _selectedObject = PickingFramebuffer.GetObjectAtCoords(Rl.GetMousePosition() - ViewportWindow.Bounds.P1, Canvas, MapData, _config, _cam, Time);
+                    _selectedObject = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, MapData, _config, _cam, Time);
                 // TODO: we might want a way to associate objects with their parents. 
                 // for example when selecting a hard collision we probably want to get the parent dynamic collision if it exists, when selecting an asset we want the platform
             }
