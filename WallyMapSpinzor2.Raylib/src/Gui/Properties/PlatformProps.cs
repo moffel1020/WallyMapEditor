@@ -2,7 +2,7 @@ using ImGuiNET;
 
 namespace WallyMapSpinzor2.Raylib;
 
-partial class PropertiesWindow 
+partial class PropertiesWindow
 {
     public static bool ShowPlatformProps(Platform a, CommandHistory cmd)
     {

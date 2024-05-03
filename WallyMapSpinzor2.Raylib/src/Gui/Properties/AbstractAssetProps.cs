@@ -2,7 +2,7 @@ using ImGuiNET;
 
 namespace WallyMapSpinzor2.Raylib;
 
-partial class PropertiesWindow 
+partial class PropertiesWindow
 {
     public static bool ShowAbstractAssetProps(AbstractAsset a, CommandHistory cmd)
     {
@@ -10,7 +10,7 @@ partial class PropertiesWindow
             ImGui.Text("AssetName" + a.AssetName);
 
         // TODO: change image asset here somehow
-        
+
         bool propChanged = ImGuiExt.DragFloatHistory("x", a.X, (val) => a.X = val, cmd);
         propChanged |= ImGuiExt.DragFloatHistory("y", a.Y, (val) => a.Y = val, cmd);
         ImGui.Separator();

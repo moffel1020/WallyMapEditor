@@ -12,7 +12,7 @@ public class CommandHistory
         cmd.Execute();
         Undone.Clear();
 
-        if (Commands.TryPeek(out ICommand? prev) && prev.AllowMerge && prev.Merge(cmd)) 
+        if (Commands.TryPeek(out ICommand? prev) && prev.AllowMerge && prev.Merge(cmd))
             return;
 
         Commands.Push(cmd);

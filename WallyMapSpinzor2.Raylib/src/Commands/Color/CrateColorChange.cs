@@ -1,6 +1,6 @@
 namespace WallyMapSpinzor2.Raylib;
 
-public class CrateColorChange(LevelType lt, CrateColor newColor, bool inner): ICommand
+public class CrateColorChange(LevelType lt, CrateColor newColor, bool inner) : ICommand
 {
     public CrateColor NewColor { get; set; } = newColor;
     private readonly LevelType _levelType = lt;

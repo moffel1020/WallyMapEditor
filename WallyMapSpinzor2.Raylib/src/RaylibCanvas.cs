@@ -28,7 +28,8 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
         DrawingQueue.Push((caller, () =>
         {
             Rl.DrawCircle((int)x, (int)y, (float)radius, Utils.ToRlColor(color));
-        }), (int)priority);
+        }
+        ), (int)priority);
     }
 
     public void DrawLine(double x1, double y1, double x2, double y2, Color color, Transform trans, DrawPriorityEnum priority, object? caller)
@@ -39,7 +40,8 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
         DrawingQueue.Push((caller, () =>
         {
             Rl.DrawLine((int)x1, (int)y1, (int)x2, (int)y2, Utils.ToRlColor(color));
-        }), (int)priority);
+        }
+        ), (int)priority);
     }
 
     public void DrawLineMultiColor(double x1, double y1, double x2, double y2, Color[] colors, Transform trans, DrawPriorityEnum priority, object? caller)
@@ -82,7 +84,8 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
                 DrawLine(x + w, y + h, x, y + h, color, trans, priority, caller);
                 DrawLine(x, y + h, x, y, color, trans, priority, caller);
             }
-        }), (int)priority);
+        }
+        ), (int)priority);
     }
 
     public void DrawString(double x, double y, string text, double fontSize, Color color, Transform trans, DrawPriorityEnum priority, object? caller)
@@ -95,7 +98,8 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
         DrawingQueue.Push((caller, () =>
         {
             DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, texture.W, texture.H, trans, Color.FromHex(0xFFFFFFFF));
-        }), (int)priority);
+        }
+        ), (int)priority);
     }
 
     public void DrawTextureRect(double x, double y, double w, double h, Texture2DWrapper texture, Transform trans, DrawPriorityEnum priority, object? caller)
@@ -103,7 +107,8 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
         DrawingQueue.Push((caller, () =>
         {
             DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, w, h, trans, Color.FromHex(0xFFFFFFFF));
-        }), (int)priority);
+        }
+        ), (int)priority);
     }
 
     private static void DrawTextureWithTransform(Texture2D texture, double x, double y, double w, double h, Transform trans, Color color)

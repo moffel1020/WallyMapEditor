@@ -38,6 +38,6 @@ public partial class PropertiesWindow
         AbstractCollision ac => ShowAbstractCollisionProps(ac, cmd),
         AbstractItemSpawn i => ShowItemSpawnProps(i, cmd),
         AbstractAsset a => ShowAbstractAssetProps(a, cmd),
-        _ => ShowUnimplementedProps() 
+        _ => ShowUnimplementedProps()
     };
 }
