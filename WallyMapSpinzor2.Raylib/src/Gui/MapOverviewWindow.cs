@@ -116,6 +116,12 @@ public class MapOverviewWindow
         Respawn r => $"({r.X}, {r.Y})",
         AbstractItemSpawn i => $"({i.X}, {i.Y}, {i.W}, {i.H})",
         AbstractCollision c => $"({c.X1}, {c.Y1}, {c.X2}, {c.Y2})",
+
+        DynamicCollision dc => $"({dc.PlatID})",
+        DynamicItemSpawn di => $"({di.PlatID})",
+        DynamicRespawn dr => $"({dr.PlatID})",
+        DynamicNavNode dn => $"({dn.PlatID})",
+
         _ => ""
     };
 }
