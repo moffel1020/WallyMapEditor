@@ -17,7 +17,7 @@ partial class PropertiesWindow
         propChanged |= ImGuiExt.DragFloatHistory("scaleX", a.ScaleX, (val) => a.ScaleX = val, cmd, speed: 0.01);
         propChanged |= ImGuiExt.DragFloatHistory("scaleY", a.ScaleY, (val) => a.ScaleY = val, cmd, speed: 0.01);
         ImGui.Separator();
-        propChanged |= ImGuiExt.DragFloatHistory("rotation", a.Rotation, (val) => a.Rotation = val, cmd, speed: 0.1, minValue: 0, maxValue: 360);
+        propChanged |= ImGuiExt.DragFloatHistory("rotation", a.Rotation, (val) => a.Rotation = BrawlhallaMath.SafeMod(val, 360.0), cmd, speed: 0.1);
 
         return propChanged;
     }
