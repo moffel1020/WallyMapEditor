@@ -126,4 +126,17 @@ public static class ImGuiExt
 
         return false;
     }
+
+    public static bool CheckboxHistory(string label, bool value, Action<bool> changeCommand, CommandHistory cmd)
+    {
+        bool oldVal = value;
+        bool newVal = Checkbox(label, value);
+        if (newVal != oldVal)
+        {
+            cmd.Add(new PropChangeCommand<bool>(changeCommand, oldVal, newVal));
+            return true;
+        }
+
+        return false;
+    }
 }

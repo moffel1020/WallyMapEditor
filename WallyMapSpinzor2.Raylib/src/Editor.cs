@@ -66,7 +66,6 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         Canvas?.TextureCache.Clear();
         Canvas?.SwfFileCache.Clear();
         Canvas?.SwfTextureCache.Clear();
-        CommandHistory.Clear();
 
         Level l = new(ld, lt, lst);
         l.Type ??= DefaultLevelType;
@@ -83,7 +82,6 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         Canvas?.TextureCache.Clear();
         Canvas?.SwfFileCache.Clear();
         Canvas?.SwfTextureCache.Clear();
-        CommandHistory.Clear();
 
         MapData = l;
         ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
@@ -240,7 +238,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
                 _cam.Zoom = Math.Clamp(_cam.Zoom + wheel * ZOOM_INCREMENT * _cam.Zoom, MIN_ZOOM, MAX_ZOOM);
             }
 
-            if (Rl.IsMouseButtonPressed(MouseButton.Left))
+            if (Rl.IsMouseButtonReleased(MouseButton.Left))
             {
                 _selectedObject = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, MapData, _config, _cam, Time);
                 // TODO: we might want a way to associate objects with their parents. 

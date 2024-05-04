@@ -32,7 +32,7 @@ public partial class PropertiesWindow
     {
         Respawn r => ShowRespawnProps(r, cmd),
         Platform p => ShowPlatformProps(p, cmd),
-        MovingPlatform => ShowUnimplementedProps(), // currently unimplemented, dont match with AbstractAsset
+        MovingPlatform mp => ShowMovingPlatformProps(mp, cmd),
         CameraBounds cb => ShowCameraBoundsProps(cb, cmd),
         SpawnBotBounds sb => ShowSpawnBotBoundsProps(sb, cmd),
         AbstractCollision ac => ShowAbstractCollisionProps(ac, cmd),

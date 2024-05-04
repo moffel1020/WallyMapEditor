@@ -20,7 +20,7 @@ partial class PropertiesWindow
         ImGui.Text($"Blue: {(blue is not null ? blue : "No")}");
         ImGui.Text($"Red: {(red is not null ? red : "No")}");
 
-        if (a.AssetName is null && ImGui.TreeNode("Children"))
+        if (a.AssetName is null && ImGui.CollapsingHeader("Children"))
         {
             foreach (AbstractAsset child in a.AssetChildren)
             {
@@ -30,7 +30,6 @@ partial class PropertiesWindow
                     ImGui.TreePop();
                 }
             }
-            ImGui.TreePop();
         }
 
         return propChanged;

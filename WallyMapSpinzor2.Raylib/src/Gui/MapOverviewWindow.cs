@@ -109,7 +109,7 @@ public class MapOverviewWindow
         }
     }
 
-    private static string GetExtraObjectInfo(object o) => o switch
+    public static string GetExtraObjectInfo(object o) => o switch
     {
         Platform p => $"({p.InstanceName})",
         MovingPlatform mp => $"({mp.PlatID})",
@@ -122,6 +122,7 @@ public class MapOverviewWindow
         DynamicRespawn dr => $"({dr.PlatID})",
         DynamicNavNode dn => $"({dn.PlatID})",
 
+        AbstractKeyFrame kf => $"({PropertiesWindow.FirstKeyFrameNum(kf)})",
         _ => ""
     };
 }
