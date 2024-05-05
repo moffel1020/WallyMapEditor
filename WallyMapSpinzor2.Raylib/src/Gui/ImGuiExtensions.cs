@@ -233,12 +233,12 @@ public static class ImGuiExt
         bool propChanged = false;
         if (value1 is not null && value2 is not null)
         {
-            propChanged |= DragFloatHistory(label1, value1.Value, (val) => changeCommand(val, value2.Value), cmd, speed: speed1, minValue: minValue1, maxValue: maxValue1);
-            propChanged |= DragFloatHistory(label2, value2.Value, (val) => changeCommand(value1.Value, val), cmd, speed: speed2, minValue: minValue2, maxValue: maxValue2);
+            propChanged |= DragFloatHistory(label1, value1.Value, val => changeCommand(val, value2.Value), cmd, speed: speed1, minValue: minValue1, maxValue: maxValue1);
+            propChanged |= DragFloatHistory(label2, value2.Value, val => changeCommand(value1.Value, val), cmd, speed: speed2, minValue: minValue2, maxValue: maxValue2);
             if (ImGui.Button($"Remove##{mainLabel}"))
             {
                 cmd.Add(new PropChangeCommand<(double?, double?)>(
-                    (val) => changeCommand(val.Item1, val.Item2),
+                    val => changeCommand(val.Item1, val.Item2),
                     (value1, value2),
                     (null, null)
                 ));
@@ -252,7 +252,7 @@ public static class ImGuiExt
             if (ImGui.Button("Add##" + mainLabel))
             {
                 cmd.Add(new PropChangeCommand<(double?, double?)>(
-                    (val) => changeCommand(val.Item1, val.Item2),
+                    val => changeCommand(val.Item1, val.Item2),
                     (value1, value2),
                     (default1, default2)
                 ));
