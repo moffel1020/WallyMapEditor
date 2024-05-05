@@ -16,12 +16,12 @@ public class SwfFileCache
         Cache[path] = SwfFileData.CreateFrom(stream);
     }
 
-    public async Task LoadSwfAsync(string path)
+    public void LoadSwfAsync(string path)
     {
         if (_loadingSwf.Contains(path) || Cache.ContainsKey(path)) return;
         _loadingSwf.Add(path);
 
-        await Task.Run(() =>
+        Task.Run(() =>
         {
             using FileStream stream = new(path, FileMode.Open, FileAccess.Read);
             SwfFileData swf = SwfFileData.CreateFrom(stream);

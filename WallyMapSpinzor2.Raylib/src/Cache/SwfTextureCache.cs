@@ -37,12 +37,12 @@ public class SwfTextureCache
         Rl.UnloadImage(img);
     }
 
-    public async Task LoadImageAsync(SwfFileData swf, string name)
+    public void LoadImageAsync(SwfFileData swf, string name)
     {
         if (_queueSet.Contains((swf, name))) return;
         _queueSet.Add((swf, name));
 
-        await Task.Run(() =>
+        Task.Run(() =>
         {
             (Raylib_cs.Image img, SwfRect rect) = LoadImageInternal(swf, name);
             lock (_queue) _queue.Enqueue(((swf, name), (img, rect)));

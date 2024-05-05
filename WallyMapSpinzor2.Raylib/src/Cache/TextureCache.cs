@@ -22,12 +22,12 @@ public class TextureCache
         Rl.UnloadImage(img);
     }
 
-    public async Task LoadImageAsync(string path)
+    public void LoadImageAsync(string path)
     {
         if (_queueSet.Contains(path)) return;
         _queueSet.Add(path);
 
-        await Task.Run(() =>
+        Task.Run(() =>
         {
             Image img = Utils.LoadRlImage(path);
             lock (_queue) _queue.Enqueue((path, img));

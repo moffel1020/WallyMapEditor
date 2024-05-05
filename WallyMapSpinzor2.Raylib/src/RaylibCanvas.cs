@@ -163,7 +163,7 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
         TextureCache.Cache.TryGetValue(finalPath, out Texture2DWrapper? texture);
         if (texture is not null) return texture;
 
-        _ = TextureCache.LoadImageAsync(finalPath);
+        TextureCache.LoadImageAsync(finalPath);
         return Texture2DWrapper.Default; // placeholder white texture until the image is read from disk
     }
 
@@ -179,11 +179,11 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
                 return texture;
             }
 
-            _ = SwfTextureCache.LoadImageAsync(swf, name);
+            SwfTextureCache.LoadImageAsync(swf, name);
             return Texture2DWrapper.Default;
         }
 
-        _ = SwfFileCache.LoadSwfAsync(finalPath);
+        SwfFileCache.LoadSwfAsync(finalPath);
         return Texture2DWrapper.Default;
     }
 
