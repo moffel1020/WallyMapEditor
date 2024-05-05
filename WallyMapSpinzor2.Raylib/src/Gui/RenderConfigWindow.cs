@@ -21,6 +21,9 @@ public class RenderConfigWindow
         ImGui.SeparatorText("Collisions##config");
         config.ShowCollision = ImGuiExt.Checkbox("Collisions##config", config.ShowCollision);
         config.ShowCollisionNormalOverride = ImGuiExt.Checkbox("Normal overrides##config", config.ShowCollisionNormalOverride);
+        config.ShowFireOffsetLocation = ImGuiExt.Checkbox("Pressure plate fire offset##config", config.ShowFireOffsetLocation);
+        config.ShowFireOffsetLine = ImGuiExt.Checkbox("Pressure plate line to fire offset##config", config.ShowFireOffsetLine);
+        config.ShowFireDirection = ImGuiExt.Checkbox("Pressure plate fire direction##config", config.ShowFireDirection);
 
         ImGui.SeparatorText("Spawns##config");
         config.ShowRespawn = ImGuiExt.Checkbox("Respawns##config", config.ShowRespawn);
@@ -98,11 +101,15 @@ public class RenderConfigWindow
             config.RadiusZombieSpawn = ImGuiExt.DragFloat("Zombie spawn radius##config", config.RadiusZombieSpawn, minValue: 0);
             config.RadiusNavNode = ImGuiExt.DragFloat("NavNode radius##config", config.RadiusNavNode, minValue: 0);
             config.RadiusHordePathPoint = ImGuiExt.DragFloat("Horde path point radius##config", config.RadiusHordePathPoint, minValue: 0);
+            config.RadiusFireOffsetLocation = ImGuiExt.DragFloat("Fire offset location radius##config", config.RadiusFireOffsetLocation, minValue: 0);
             config.LengthCollisionNormal = ImGuiExt.DragFloat("Collision normal length##config", config.LengthCollisionNormal, minValue: 0);
+            config.LengthFireDirectionArrow = ImGuiExt.DragFloat("Fire direction arrow length##config", config.LengthFireDirectionArrow, minValue: 0);
             config.OffsetNavLineArrowSide = ImGuiExt.DragFloat("Offset navnode arrow side##config", config.OffsetNavLineArrowSide, minValue: 0);
             config.OffsetNavLineArrowBack = ImGuiExt.DragFloat("Offset navnode arrow back##config", config.OffsetNavLineArrowBack);
             config.OffsetHordePathArrowSide = ImGuiExt.DragFloat("Offset horde path arrow side##config", config.OffsetHordePathArrowSide, minValue: 0);
             config.OffsetHordePathArrowBack = ImGuiExt.DragFloat("Offset horde path arrow back##config", config.OffsetHordePathArrowBack);
+            config.OffsetFireDirectionArrowSide = ImGuiExt.DragFloat("Offset fire direction arrow side##config", config.OffsetFireDirectionArrowSide, minValue: 0);
+            config.OffsetFireDirectionArrowBack = ImGuiExt.DragFloat("Offset fire direction arrow back##config", config.OffsetFireDirectionArrowBack);
             ImGui.TreePop();
         }
 
@@ -129,7 +136,11 @@ public class RenderConfigWindow
                 config.ColorPressurePlateCollision = ImGuiExt.ColorPicker4("Pressure plate##configColors", config.ColorPressurePlateCollision);
                 config.ColorSoftPressurePlateCollision = ImGuiExt.ColorPicker4("Soft pressure plate##configColors", config.ColorSoftPressurePlateCollision);
                 config.ColorLavaCollision = ImGuiExt.ColorPicker4("Lava##configColors", config.ColorLavaCollision);
+                ImGui.Spacing();
                 config.ColorCollisionNormal = ImGuiExt.ColorPicker4("Collision normal##configColors", config.ColorCollisionNormal);
+                config.ColorFireOffset = ImGuiExt.ColorPicker4("Pressure plate fire offset##configColors", config.ColorFireOffset);
+                config.ColorFireOffsetLine = ImGuiExt.ColorPicker4("Pressure plate line to fire location##configColors", config.ColorFireOffsetLine);
+                config.ColorFireDirection = ImGuiExt.ColorPicker4("Pressure plate fire direction arrow##configColors", config.ColorFireDirection);
                 ImGui.TreePop();
             }
             if (ImGui.TreeNode("Respawns##configColors"))
