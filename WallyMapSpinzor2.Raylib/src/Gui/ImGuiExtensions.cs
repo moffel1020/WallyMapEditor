@@ -218,13 +218,23 @@ public static class ImGuiExt
         return false;
     }
 
-    public static bool DragNullableFloatPairHistory(string mainLabel, string label1, string label2, double? value1, double? value2, double default1, double default2, Action<double?, double?> changeCommand, CommandHistory cmd)
+    public static bool DragNullableFloatPairHistory(
+        string mainLabel,
+        string label1, string label2,
+        double? value1, double? value2,
+        double default1, double default2,
+        Action<double?, double?> changeCommand,
+        CommandHistory cmd,
+        double speed1 = 1, double speed2 = 1,
+        double minValue1 = double.MinValue, double minValue2 = double.MaxValue,
+        double maxValue1 = double.MinValue, double maxValue2 = double.MaxValue
+    )
     {
         bool propChanged = false;
         if (value1 is not null && value2 is not null)
         {
-            propChanged |= DragFloatHistory(label1, value1.Value, (val) => changeCommand(val, value2.Value), cmd);
-            propChanged |= DragFloatHistory(label2, value2.Value, (val) => changeCommand(value1.Value, val), cmd);
+            propChanged |= DragFloatHistory(label1, value1.Value, (val) => changeCommand(val, value2.Value), cmd, speed: speed1, minValue: minValue1, maxValue: maxValue1);
+            propChanged |= DragFloatHistory(label2, value2.Value, (val) => changeCommand(value1.Value, val), cmd, speed: speed2, minValue: minValue2, maxValue: maxValue2);
             if (ImGui.Button($"Remove##{mainLabel}"))
             {
                 cmd.Add(new PropChangeCommand<(double?, double?)>(
