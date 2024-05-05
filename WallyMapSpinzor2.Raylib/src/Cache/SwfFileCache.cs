@@ -23,8 +23,9 @@ public class SwfFileCache
 
         Task.Run(() =>
         {
-            using FileStream stream = new(path, FileMode.Open, FileAccess.Read);
-            SwfFileData swf = SwfFileData.CreateFrom(stream);
+            SwfFileData swf;
+            using (FileStream stream = new(path, FileMode.Open, FileAccess.Read))
+                swf = SwfFileData.CreateFrom(stream);
             Cache[path] = swf;
             _loadingSwf.Remove(path);
         });
