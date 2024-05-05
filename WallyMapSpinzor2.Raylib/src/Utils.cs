@@ -12,11 +12,12 @@ using SixLabors.ImageSharp;
 
 using SwfLib.Tags;
 using SwfLib.Tags.DisplayListTags;
-
-using BrawlhallaSwz;
-using AbcDisassembler;
 using SwfLib.Tags.ActionsTags;
 using SwfLib;
+
+using BrawlhallaSwz;
+
+using AbcDisassembler;
 
 namespace WallyMapSpinzor2.Raylib;
 
