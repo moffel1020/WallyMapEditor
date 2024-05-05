@@ -30,7 +30,7 @@ public partial class PropertiesWindow
             cmd
         );
 
-        ImGui.SeparatorText("Normal##props{ac.GetHashCode()}");
+        ImGui.SeparatorText($"Normal##props{ac.GetHashCode()}");
         propChanged |= ImGuiExt.DragFloatHistory($"normal x##props{ac.GetHashCode()}", ac.NormalX, val => ac.NormalX = val, cmd, speed: 0.01, minValue: -1, maxValue: 1);
         propChanged |= ImGuiExt.DragFloatHistory($"normal y##props{ac.GetHashCode()}", ac.NormalY, val => ac.NormalY = val, cmd, speed: 0.01, minValue: -1, maxValue: 1);
 
