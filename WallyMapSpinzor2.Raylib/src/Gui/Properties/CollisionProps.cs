@@ -21,17 +21,18 @@ public partial class PropertiesWindow
         ImGui.SeparatorText("Anchor");
         propChanged |= ImGuiExt.DragNullableFloatPairHistory(
             "anchor",
-            $"anchor x##props{ac.GetHashCode()}",
-            $"anchor y##props{ac.GetHashCode()}",
-            ac.AnchorX,
-            ac.AnchorY,
+            $"anchor x##props{ac.GetHashCode()}", $"anchor y##props{ac.GetHashCode()}",
+            ac.AnchorX, ac.AnchorY,
             // these default values look weird when the collision is on a moving platform
             // but the user will adjust it anyways so it's ok
-            (ac.X1 + ac.X2) / 2,
-            (ac.Y1 + ac.Y2) / 2,
+            (ac.X1 + ac.X2) / 2, (ac.Y1 + ac.Y2) / 2,
             (val1, val2) => (ac.AnchorX, ac.AnchorY) = (val1, val2),
             cmd
         );
+
+        ImGui.SeparatorText("Normal");
+        propChanged |= ImGuiExt.DragFloatHistory($"normal x##props{ac.GetHashCode()}", ac.NormalX, (val) => ac.NormalX = val, cmd, speed: 0.01, minValue: -1, maxValue: 1);
+        propChanged |= ImGuiExt.DragFloatHistory($"normal y##props{ac.GetHashCode()}", ac.NormalY, (val) => ac.NormalY = val, cmd, speed: 0.01, minValue: -1, maxValue: 1);
 
         return propChanged;
     }
