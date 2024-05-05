@@ -7,6 +7,7 @@ public partial class PropertiesWindow
     public static bool ShowCollisionProps(AbstractCollision ac, CommandHistory cmd) => ac switch
     {
         AbstractPressurePlateCollision pc => ShowAbstractPressurePlateCollisionProps(pc, cmd),
+        LavaCollision lc => ShowLavaCollisionProps(lc, cmd),
         _ => ShowAbstractCollisionProps(ac, cmd)
     };
 
@@ -23,15 +24,25 @@ public partial class PropertiesWindow
     public static bool ShowAbstractPressurePlateCollisionProps(AbstractPressurePlateCollision pc, CommandHistory cmd)
     {
         bool propChanged = ShowAbstractCollisionProps(pc, cmd);
-        
+
         ImGui.SeparatorText("Pressure plate props");
-        ImGui.Text("AssetName: " + pc.AssetName);
+        ImGui.Text("AssetName: " + pc.AssetName); //TODO: allow modifying
         propChanged |= ImGuiExt.DragFloatHistory($"anim offset x##props{pc.GetHashCode()}", pc.AnimOffsetX, (val) => pc.AnimOffsetX = val, cmd);
         propChanged |= ImGuiExt.DragFloatHistory($"anim offset y##props{pc.GetHashCode()}", pc.AnimOffsetY, (val) => pc.AnimOffsetY = val, cmd);
         propChanged |= ImGuiExt.DragFloatHistory($"anim rotation##props{pc.GetHashCode()}", pc.AnimRotation, (val) => pc.AnimRotation = BrawlhallaMath.SafeMod(val, 360.0), cmd);
         propChanged |= ImGuiExt.DragIntHistory($"cooldown##props{pc.GetHashCode()}", pc.Cooldown, (val) => pc.Cooldown = val, cmd, minValue: 0);
         propChanged |= ImGuiExt.CheckboxHistory($"facing left##props{pc.GetHashCode()}", pc.FaceLeft, (val) => pc.FaceLeft = val, cmd);
         //TODO: add FireOffsetX, FireOffsetY, TrapPowers
+
+        return propChanged;
+    }
+
+    public static bool ShowLavaCollisionProps(LavaCollision lc, CommandHistory cmd)
+    {
+        bool propChanged = ShowAbstractCollisionProps(lc, cmd);
+
+        ImGui.SeparatorText("Lava collision props");
+        ImGui.Text("LavaPower: " + lc.LavaPower); //TODO: allow modifying
 
         return propChanged;
     }
