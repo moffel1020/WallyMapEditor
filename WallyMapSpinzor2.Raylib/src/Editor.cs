@@ -106,9 +106,6 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         ThumbnailPNGFile = "wally.jpg"
     };
 
-    private unsafe static sbyte* ImGuiGetClipText(IntPtr userData) => Rl.GetClipboardText();
-    private unsafe static void ImGuiSetClipText(IntPtr userData, sbyte* text) => Rl.SetClipboardText(text);
-
     public void Run()
     {
         LoadMap();
@@ -122,13 +119,13 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         /*
         During rlImGui.Setup, GetClipboardText and SetClipboardText are created, and then their function ptr is used for the native callback.
         However, the library does not keep a reference to them, so those delegates get disposed, causing copy/paste to possibly crash.
-        This is a hacky re-implementation of that part of the code, with the references being kept.
+        This re-implements that part of the code without the issue.
         */
         unsafe
         {
             ImGuiIOPtr io = ImGui.GetIO();
-            io.GetClipboardTextFn = Marshal.GetFunctionPointerForDelegate(ImGuiGetClipText);
-            io.SetClipboardTextFn = Marshal.GetFunctionPointerForDelegate(ImGuiSetClipText);
+            io.GetClipboardTextFn = Marshal.GetFunctionPointerForDelegate(static (IntPtr userData) => Rl.GetClipboardText());
+            io.SetClipboardTextFn = Marshal.GetFunctionPointerForDelegate(static (IntPtr userData, sbyte* text) => Rl.SetClipboardText(text));
         }
 
         ResetCam(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT);
