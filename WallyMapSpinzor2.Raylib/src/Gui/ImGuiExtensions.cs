@@ -119,17 +119,23 @@ public static class ImGuiExt
         if (value is not null)
         {
             bool dragged = DragFloatHistory(label, (double)value, x => changeCommand(x), cmd, speed, minValue, maxValue);
-            if (ImGui.Button("Remove " + label))
+            ImGui.SameLine();
+            if (ImGui.Button("Remove##" + label))
             {
                 cmd.Add(new PropChangeCommand<double?>(changeCommand, value, null));
                 return true;
             }
             return dragged;
         }
-        else if (ImGui.Button("Add " + label))
+        else
         {
-            cmd.Add(new PropChangeCommand<double?>(changeCommand, value, defaultValue));
-            return true;
+            ImGui.Text(label);
+            ImGui.SameLine();
+            if (ImGui.Button("Add##" + label))
+            {
+                cmd.Add(new PropChangeCommand<double?>(changeCommand, value, defaultValue));
+                return true;
+            }
         }
         return false;
     }
@@ -152,17 +158,23 @@ public static class ImGuiExt
         if (value is not null)
         {
             bool dragged = DragIntHistory(label, (int)value, val => changeCommand(val), cmd, speed, minValue, maxValue);
-            if (ImGui.Button("Remove " + label))
+            ImGui.SameLine();
+            if (ImGui.Button("Remove##" + label))
             {
                 cmd.Add(new PropChangeCommand<int?>(changeCommand, value, null));
                 return true;
             }
             return dragged;
         }
-        else if (ImGui.Button("Add " + label))
+        else
         {
-            cmd.Add(new PropChangeCommand<int?>(changeCommand, value, defaultValue));
-            return true;
+            ImGui.Text(label);
+            ImGui.SameLine();
+            if (ImGui.Button("Add##" + label))
+            {
+                cmd.Add(new PropChangeCommand<int?>(changeCommand, value, defaultValue));
+                return true;
+            }
         }
         return false;
     }
@@ -185,17 +197,23 @@ public static class ImGuiExt
         if (value is not null)
         {
             bool changed = CheckboxHistory(label, (bool)value, val => changeCommand(val), cmd);
-            if (ImGui.Button("Remove " + label))
+            ImGui.SameLine();
+            if (ImGui.Button("Remove##" + label))
             {
                 cmd.Add(new PropChangeCommand<bool?>(changeCommand, value, null));
                 return true;
             }
             return changed;
         }
-        else if (ImGui.Button("Add " + label))
+        else
         {
-            cmd.Add(new PropChangeCommand<bool?>(changeCommand, value, defaultValue));
-            return true;
+            ImGui.Text(label);
+            ImGui.SameLine();
+            if (ImGui.Button("Add##" + label))
+            {
+                cmd.Add(new PropChangeCommand<bool?>(changeCommand, value, defaultValue));
+                return true;
+            }
         }
         return false;
     }

@@ -11,48 +11,8 @@ public partial class PropertiesWindow
     {
         bool propChanged = false;
 
-        if (anim.NumFrames is null)
-        {
-            ImGui.Text("NumFrames");
-            ImGui.SameLine();
-            if (ImGui.Button("Add##numframes"))
-            {
-                propChanged = true;
-                cmd.Add(new PropChangeCommand<int?>((val) => anim.NumFrames = val, anim.NumFrames, LastKeyFrameNum(anim.KeyFrames)));
-            }
-        }
-        else
-        {
-            propChanged |= ImGuiExt.DragIntHistory("NumFrames", anim.NumFrames!.Value, (val) => anim.NumFrames = val, cmd, minValue: LastKeyFrameNum(anim.KeyFrames));
-            ImGui.SameLine();
-            if (ImGui.Button("Remove##numframes"))
-            {
-                propChanged = true;
-                cmd.Add(new PropChangeCommand<int?>((val) => anim.NumFrames = val, anim.NumFrames, null));
-            }
-        }
-
-        if (anim.SlowMult is null)
-        {
-            ImGui.Text("SlowMult");
-            ImGui.SameLine();
-            if (ImGui.Button("Add##slowmult"))
-            {
-                propChanged = true;
-                cmd.Add(new PropChangeCommand<double?>((val) => anim.SlowMult = val, anim.SlowMult, 1));
-            }
-        }
-        else
-        {
-            propChanged |= ImGuiExt.DragFloatHistory("SlowMult", anim.SlowMult!.Value, (val) => anim.SlowMult = val, cmd, speed: 0.05);
-            ImGui.SameLine();
-            if (ImGui.Button("Remove##slowmult"))
-            {
-                propChanged = true;
-                cmd.Add(new PropChangeCommand<double?>((val) => anim.SlowMult = val, anim.SlowMult, null));
-            }
-        }
-
+        propChanged |= ImGuiExt.DragNullableIntHistory("NumFrames", anim.NumFrames, LastKeyFrameNum(anim.KeyFrames), (val) => anim.NumFrames = val, cmd, minValue: LastKeyFrameNum(anim.KeyFrames));
+        propChanged |= ImGuiExt.DragNullableFloatHistory("SlowMult", anim.SlowMult, 1, (val) => anim.SlowMult = val, cmd, speed: 0.05);
         propChanged |= ImGuiExt.DragIntHistory("Start frame", anim.StartFrame, (val) => anim.StartFrame = val, cmd, minValue: 0, maxValue: anim.NumFrames ?? int.MaxValue); // FIXME: probably needs to be max of leveldesc if not present here
         propChanged |= ImGuiExt.CheckboxHistory("Ease in", anim.EaseIn, (val) => anim.EaseIn = val, cmd);
         propChanged |= ImGuiExt.CheckboxHistory("Ease out", anim.EaseOut, (val) => anim.EaseOut = val, cmd);
@@ -88,10 +48,10 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
-    public static int LastKeyFrameNum(IEnumerable<AbstractKeyFrame> keyFrames) => keyFrames.Last() switch
+    public static int LastKeyFrameNum(List<AbstractKeyFrame> keyFrames) => keyFrames[^1] switch
     {
         KeyFrame kf => kf.FrameNum,
-        Phase p => LastKeyFrameNum(p.KeyFrames),
+        Phase p => p.StartFrame + LastKeyFrameNum(p.KeyFrames),
         _ => throw new InvalidOperationException("Could not find the last keyframenum. type of abstract keyframe type is not implemented")
     };
 

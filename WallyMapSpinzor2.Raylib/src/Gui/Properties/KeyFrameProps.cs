@@ -18,14 +18,10 @@ public partial class PropertiesWindow
         //propChanged |= ImGuiExt.DragFloatHistory("Rotation", k.Rotation, (val) => k.Rotation = BrawlhallaMath.SafeMod(val, 360.0), cmd, speed: 0.2);
 
         propChanged |= ImGuiExt.DragNullableFloatHistory("CenterX", k.CenterX, 0, (val) => k.CenterX = val, cmd);
-        ImGui.Spacing();
         propChanged |= ImGuiExt.DragNullableFloatHistory("CenterY", k.CenterY, 0, (val) => k.CenterY = val, cmd);
         ImGui.Spacing();
-        ImGui.Spacing();
         propChanged |= ImGuiExt.NullableCheckboxHistory("EaseIn", k.EaseIn, false, (val) => k.EaseIn = val, cmd);
-        ImGui.Spacing();
         propChanged |= ImGuiExt.NullableCheckboxHistory("EaseOut", k.EaseOut, false, (val) => k.EaseOut = val, cmd);
-        ImGui.Spacing();
         propChanged |= ImGuiExt.DragNullableIntHistory("EasePower", k.EasePower, 2, (val) => k.EasePower = val, cmd, minValue: 2);
 
         return propChanged;
