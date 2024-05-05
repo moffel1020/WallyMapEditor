@@ -176,12 +176,12 @@ public static class Utils
 
             for (int i = 0; i < getlexPos.Count; i++)
             {
-                int? callpropvoidPos = getlexPos[i] == getlexPos[^1]
+                int callpropvoidPos = getlexPos[i] == getlexPos[^1]
                     ? FindCallpropvoidPos(abc.ConstantPool, "Init", mb.Code[getlexPos[i]..])
                     : FindCallpropvoidPos(abc.ConstantPool, "Init", mb.Code[getlexPos[i]..getlexPos[i + 1]]);
 
                 if (callpropvoidPos != -1)
-                    return FindLastPushuintArg(mb.Code[0..(int)callpropvoidPos]);
+                    return FindLastPushuintArg(mb.Code[0..callpropvoidPos]);
             }
         }
 
