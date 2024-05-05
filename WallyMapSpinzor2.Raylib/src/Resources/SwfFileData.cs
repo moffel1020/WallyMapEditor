@@ -14,7 +14,7 @@ namespace WallyMapSpinzor2.Raylib;
 
 public class SwfFileData
 {
-    public SwfFile? Swf { get; private init; } = null!;
+    public SwfFile Swf { get; private init; } = null!;
     public Dictionary<string, ushort> SymbolClass { get; private init; } = null!;
     public Dictionary<ushort, DefineSpriteTag> SpriteTags { get; private init; } = null!;
     public Dictionary<ushort, DefineShapeXTag> ShapeTags { get; private init; } = null!;
