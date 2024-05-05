@@ -118,7 +118,7 @@ public static class ImGuiExt
     {
         if (value is not null)
         {
-            bool dragged = DragFloatHistory(label, (double)value, x => changeCommand(x), cmd, speed, minValue, maxValue);
+            bool dragged = DragFloatHistory(label, value.Value, x => changeCommand(x), cmd, speed, minValue, maxValue);
             ImGui.SameLine();
             if (ImGui.Button("Remove##" + label))
             {
@@ -157,7 +157,7 @@ public static class ImGuiExt
     {
         if (value is not null)
         {
-            bool dragged = DragIntHistory(label, (int)value, val => changeCommand(val), cmd, speed, minValue, maxValue);
+            bool dragged = DragIntHistory(label, value.Value, val => changeCommand(val), cmd, speed, minValue, maxValue);
             ImGui.SameLine();
             if (ImGui.Button("Remove##" + label))
             {
@@ -196,7 +196,7 @@ public static class ImGuiExt
     {
         if (value is not null)
         {
-            bool changed = CheckboxHistory(label, (bool)value, val => changeCommand(val), cmd);
+            bool changed = CheckboxHistory(label, value.Value, val => changeCommand(val), cmd);
             ImGui.SameLine();
             if (ImGui.Button("Remove##" + label))
             {
@@ -216,5 +216,39 @@ public static class ImGuiExt
             }
         }
         return false;
+    }
+
+    public static bool DragNullableFloatPairHistory(string mainLabel, string label1, string label2, double? value1, double? value2, double default1, double default2, Action<double?, double?> changeCommand, CommandHistory cmd)
+    {
+        bool propChanged = false;
+        if (value1 is not null && value2 is not null)
+        {
+            propChanged |= DragFloatHistory(label1, value1.Value, (val) => changeCommand(val, value2.Value), cmd);
+            propChanged |= DragFloatHistory(label2, value2.Value, (val) => changeCommand(value1.Value, val), cmd);
+            if (ImGui.Button($"Remove##{mainLabel}"))
+            {
+                cmd.Add(new PropChangeCommand<(double?, double?)>(
+                    (val) => changeCommand(val.Item1, val.Item2),
+                    (value1, value2),
+                    (null, null)
+                ));
+                return true;
+            }
+        }
+        else
+        {
+            ImGui.Text(mainLabel);
+            ImGui.SameLine();
+            if (ImGui.Button("Add##" + mainLabel))
+            {
+                cmd.Add(new PropChangeCommand<(double?, double?)>(
+                    (val) => changeCommand(val.Item1, val.Item2),
+                    (value1, value2),
+                    (default1, default2)
+                ));
+                return true;
+            }
+        }
+        return propChanged;
     }
 }
