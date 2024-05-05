@@ -22,20 +22,27 @@ public class MapOverviewWindow
             cmd.SetAllowMerge(false);
         }
 
-        if (l.Type is null) return;
-
-        ImGui.Text($"LevelName: {l.Type.LevelName}");
-        ImGui.Text($"AssetName: {l.Type.AssetName}");
-        ImGui.Text($"FileName: {l.Type.FileName}");
-
-        l.Type.DisplayName = ImGuiExt.InputText("DisplayName", l.Type.DisplayName);
-
-        if (ImGui.CollapsingHeader("Kill Bounds##overview") && l.Type.LevelName != "Random")
+        if (l.Type is not null)
         {
-            _propChanged |= ImGuiExt.DragIntHistory("Top##killbounds", (int)l.Type.TopKill!, (val) => l.Type.TopKill = val, cmd, minValue: 1);
-            _propChanged |= ImGuiExt.DragIntHistory("Bottom##killbounds", (int)l.Type.BottomKill!, (val) => l.Type.BottomKill = val, cmd, minValue: 1);
-            _propChanged |= ImGuiExt.DragIntHistory("Left##killbounds", (int)l.Type.LeftKill!, (val) => l.Type.LeftKill = val, cmd, minValue: 1);
-            _propChanged |= ImGuiExt.DragIntHistory("Right##killbounds", (int)l.Type.RightKill!, (val) => l.Type.RightKill = val, cmd, minValue: 1);
+            ImGui.Text($"LevelName: {l.Type.LevelName}");
+            ImGui.Text($"AssetName: {l.Type.AssetName}");
+            ImGui.Text($"FileName: {l.Type.FileName}");
+
+            l.Type.DisplayName = ImGuiExt.InputText("DisplayName", l.Type.DisplayName);
+        }
+
+        _propChanged |= ImGuiExt.DragFloatHistory("default SlowMult##overview", l.Desc.SlowMult, val => l.Desc.SlowMult = val, cmd, speed: 0.05);
+        _propChanged |= ImGuiExt.DragIntHistory("default NumFrames##overview", l.Desc.NumFrames, val => l.Desc.NumFrames = val, cmd, minValue: 0);
+
+        if (l.Type is not null && l.Type.LevelName != "Random")
+        {
+            if (ImGui.CollapsingHeader("Kill Bounds##overview"))
+            {
+                _propChanged |= ImGuiExt.DragIntHistory("Top##killbounds", l.Type.TopKill!.Value, val => l.Type.TopKill = val, cmd, minValue: 1);
+                _propChanged |= ImGuiExt.DragIntHistory("Bottom##killbounds", l.Type.BottomKill!.Value, val => l.Type.BottomKill = val, cmd, minValue: 1);
+                _propChanged |= ImGuiExt.DragIntHistory("Left##killbounds", l.Type.LeftKill!.Value, val => l.Type.LeftKill = val, cmd, minValue: 1);
+                _propChanged |= ImGuiExt.DragIntHistory("Right##killbounds", l.Type.RightKill!.Value, val => l.Type.RightKill = val, cmd, minValue: 1);
+            }
         }
 
         if (ImGui.CollapsingHeader("Camera Bounds##overview"))
@@ -43,12 +50,12 @@ public class MapOverviewWindow
             _propChanged |= PropertiesWindow.ShowCameraBoundsProps(l.Desc.CameraBounds, cmd);
         }
 
-        if (ImGui.CollapsingHeader("Spawn Bot Bounds"))
+        if (ImGui.CollapsingHeader("Spawn Bot Bounds##overview"))
         {
             _propChanged |= PropertiesWindow.ShowSpawnBotBoundsProps(l.Desc.SpawnBotBounds, cmd);
         }
 
-        if (ImGui.CollapsingHeader("Weapon Spawn Color##overview") && l.Type.CrateColorA is not null && l.Type.CrateColorB is not null)
+        if (l.Type is not null && ImGui.CollapsingHeader("Weapon Spawn Color##overview") && l.Type.CrateColorA is not null && l.Type.CrateColorB is not null)
         {
             Color colA = ImGuiExt.ColorPicker3("Outer##crateColorA", new(l.Type.CrateColorA.Value.R, l.Type.CrateColorA.Value.G, l.Type.CrateColorA.Value.B, 255));
             Color colB = ImGuiExt.ColorPicker3("Inner##crateColorB", new(l.Type.CrateColorB.Value.R, l.Type.CrateColorB.Value.G, l.Type.CrateColorB.Value.B, 255));
@@ -69,7 +76,7 @@ public class MapOverviewWindow
         }
 
         // TODO: background and thumbnail
-        if (ImGui.CollapsingHeader("Images"))
+        if (ImGui.CollapsingHeader("Images##overview"))
         {
 
         }
