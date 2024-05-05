@@ -8,8 +8,8 @@ public partial class PropertiesWindow
     {
         bool propChanged = false;
 
-        propChanged |= ImGuiExt.DragFloatHistory("x##mp", mp.X, (val) => mp.X = val, cmd);
-        propChanged |= ImGuiExt.DragFloatHistory("y##mp", mp.Y, (val) => mp.Y = val, cmd);
+        propChanged |= ImGuiExt.DragFloatHistory("x##mp", mp.X, val => mp.X = val, cmd);
+        propChanged |= ImGuiExt.DragFloatHistory("y##mp", mp.Y, val => mp.Y = val, cmd);
 
         if (ImGui.CollapsingHeader("Animation"))
             propChanged |= ShowAnimationProps(mp.Animation, cmd);
