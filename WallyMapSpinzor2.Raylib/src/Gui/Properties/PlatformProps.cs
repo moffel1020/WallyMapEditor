@@ -15,10 +15,8 @@ partial class PropertiesWindow
         propChanged |= ShowAbstractAssetProps(a, cmd);
 
         ImGui.Separator();
-        int? blue = a.Blue;
-        int? red = a.Red;
-        ImGui.Text($"Blue: {(blue is not null ? blue : "No")}");
-        ImGui.Text($"Red: {(red is not null ? red : "No")}");
+        ImGui.Text($"Blue: {a.Blue.ToString() ?? "No"}");
+        ImGui.Text($"Red: {a.Red.ToString() ?? "No"}");
 
         if (a.AssetName is null && ImGui.CollapsingHeader("Children"))
         {
