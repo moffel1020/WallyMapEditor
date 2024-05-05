@@ -156,7 +156,15 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         Rl.ClearBackground(Raylib_cs.Color.Black);
         Canvas ??= new(BrawlPath);
         Canvas.CameraMatrix = Rl.GetCameraMatrix2D(_cam);
-        MapData?.DrawOn(Canvas, _config, Transform.IDENTITY, Time, new RenderData());
+
+        try
+        {
+            MapData?.DrawOn(Canvas, _config, Transform.IDENTITY, Time, new RenderData());
+        }
+        catch (Exception e)
+        {
+            Rl.TraceLog(TraceLogLevel.Error, "Rendering failed: " + e.Message);
+        }
         Canvas.FinalizeDraw();
 
         Rl.EndMode2D();
