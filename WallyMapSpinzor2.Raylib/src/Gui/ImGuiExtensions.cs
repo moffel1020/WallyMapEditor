@@ -51,7 +51,7 @@ public static class ImGuiExt
     {
         Vector3 imCol = new((float)col.R / 255, (float)col.G / 255, (float)col.B / 255);
         ImGui.ColorEdit3(label, ref imCol, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaBar);
-        var a = new Color((byte)(imCol.X * 255), (byte)(imCol.Y * 255), (byte)(imCol.Z * 255), (255));
+        var a = new Color((byte)(imCol.X * 255), (byte)(imCol.Y * 255), (byte)(imCol.Z * 255), 255);
         return a;
     }
 
@@ -235,7 +235,7 @@ public static class ImGuiExt
         {
             propChanged |= DragFloatHistory(label1, value1.Value, val => changeCommand(val, value2.Value), cmd, speed: speed1, minValue: minValue1, maxValue: maxValue1);
             propChanged |= DragFloatHistory(label2, value2.Value, val => changeCommand(value1.Value, val), cmd, speed: speed2, minValue: minValue2, maxValue: maxValue2);
-            if (ImGui.Button($"Remove##{mainLabel}"))
+            if (ImGui.Button("Remove##" + mainLabel))
             {
                 cmd.Add(new PropChangeCommand<(double?, double?)>(
                     val => changeCommand(val.Item1, val.Item2),
