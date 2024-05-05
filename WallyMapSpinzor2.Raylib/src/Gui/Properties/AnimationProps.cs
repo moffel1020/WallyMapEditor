@@ -56,7 +56,7 @@ public partial class PropertiesWindow
         propChanged |= ImGuiExt.DragIntHistory("Start frame", anim.StartFrame, (val) => anim.StartFrame = val, cmd, minValue: 0, maxValue: anim.NumFrames ?? int.MaxValue); // FIXME: probably needs to be max of leveldesc if not present here
         propChanged |= ImGuiExt.CheckboxHistory("Ease in", anim.EaseIn, (val) => anim.EaseIn = val, cmd);
         propChanged |= ImGuiExt.CheckboxHistory("Ease out", anim.EaseOut, (val) => anim.EaseOut = val, cmd);
-        propChanged |= ImGuiExt.DragIntHistory("Ease power", anim.EasePower, (val) => anim.EasePower = val, cmd, minValue: 0);
+        propChanged |= ImGuiExt.DragIntHistory("Ease power", anim.EasePower, (val) => anim.EasePower = val, cmd, minValue: 2);
 
         if (anim.HasCenter)
         {

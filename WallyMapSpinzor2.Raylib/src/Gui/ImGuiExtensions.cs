@@ -114,6 +114,26 @@ public static class ImGuiExt
         return false;
     }
 
+    public static bool DragNullableFloatHistory(string label, double? value, double defaultValue, Action<double?> changeCommand, CommandHistory cmd, double speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
+    {
+        if (value is not null)
+        {
+            bool dragged = DragFloatHistory(label, (double)value, x => changeCommand(x), cmd, speed, minValue, maxValue);
+            if (ImGui.Button("Remove " + label))
+            {
+                cmd.Add(new PropChangeCommand<double?>(changeCommand, value, null));
+                return true;
+            }
+            return dragged;
+        }
+        else if (ImGui.Button("Add " + label))
+        {
+            cmd.Add(new PropChangeCommand<double?>(changeCommand, value, defaultValue));
+            return true;
+        }
+        return false;
+    }
+
     public static bool DragIntHistory(string label, int value, Action<int> changeCommand, CommandHistory cmd, int speed = 1, int minValue = int.MinValue, int maxValue = int.MaxValue)
     {
         int oldVal = value;
@@ -127,6 +147,26 @@ public static class ImGuiExt
         return false;
     }
 
+    public static bool DragNullableIntHistory(string label, int? value, int defaultValue, Action<int?> changeCommand, CommandHistory cmd, int speed = 1, int minValue = int.MinValue, int maxValue = int.MaxValue)
+    {
+        if (value is not null)
+        {
+            bool dragged = DragIntHistory(label, (int)value, val => changeCommand(val), cmd, speed, minValue, maxValue);
+            if (ImGui.Button("Remove " + label))
+            {
+                cmd.Add(new PropChangeCommand<int?>(changeCommand, value, null));
+                return true;
+            }
+            return dragged;
+        }
+        else if (ImGui.Button("Add " + label))
+        {
+            cmd.Add(new PropChangeCommand<int?>(changeCommand, value, defaultValue));
+            return true;
+        }
+        return false;
+    }
+
     public static bool CheckboxHistory(string label, bool value, Action<bool> changeCommand, CommandHistory cmd)
     {
         bool oldVal = value;
@@ -137,6 +177,26 @@ public static class ImGuiExt
             return true;
         }
 
+        return false;
+    }
+
+    public static bool NullableCheckboxHistory(string label, bool? value, bool defaultValue, Action<bool?> changeCommand, CommandHistory cmd)
+    {
+        if (value is not null)
+        {
+            bool changed = CheckboxHistory(label, (bool)value, val => changeCommand(val), cmd);
+            if (ImGui.Button("Remove " + label))
+            {
+                cmd.Add(new PropChangeCommand<bool?>(changeCommand, value, null));
+                return true;
+            }
+            return changed;
+        }
+        else if (ImGui.Button("Add " + label))
+        {
+            cmd.Add(new PropChangeCommand<bool?>(changeCommand, value, defaultValue));
+            return true;
+        }
         return false;
     }
 }
