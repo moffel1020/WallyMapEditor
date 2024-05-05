@@ -35,7 +35,7 @@ public partial class PropertiesWindow
         MovingPlatform mp => ShowMovingPlatformProps(mp, cmd),
         CameraBounds cb => ShowCameraBoundsProps(cb, cmd),
         SpawnBotBounds sb => ShowSpawnBotBoundsProps(sb, cmd),
-        AbstractCollision ac => ShowAbstractCollisionProps(ac, cmd),
+        AbstractCollision ac => ShowCollisionProps(ac, cmd),
         AbstractItemSpawn i => ShowItemSpawnProps(i, cmd),
         AbstractAsset a => ShowAbstractAssetProps(a, cmd),
         _ => ShowUnimplementedProps()
