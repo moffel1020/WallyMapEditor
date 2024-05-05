@@ -7,7 +7,7 @@ partial class PropertiesWindow
     public static bool ShowAbstractAssetProps(AbstractAsset a, CommandHistory cmd)
     {
         if (a.AssetName is not null)
-            ImGui.Text("AssetName" + a.AssetName);
+            ImGui.Text("AssetName: " + a.AssetName);
 
         // TODO: change image asset here somehow
 
