@@ -7,7 +7,7 @@ public partial class PropertiesWindow
     public static bool ShowMovingPlatformProps(MovingPlatform mp, CommandHistory cmd)
     {
         bool propChanged = false;
-
+        ImGui.Text("PlatID: " + mp.PlatID);
         propChanged |= ImGuiExt.DragFloatHistory("x##mp", mp.X, val => mp.X = val, cmd);
         propChanged |= ImGuiExt.DragFloatHistory("y##mp", mp.Y, val => mp.Y = val, cmd);
 

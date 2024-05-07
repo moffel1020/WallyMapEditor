@@ -35,9 +35,15 @@ public partial class PropertiesWindow
         MovingPlatform mp => ShowMovingPlatformProps(mp, cmd),
         CameraBounds cb => ShowCameraBoundsProps(cb, cmd),
         SpawnBotBounds sb => ShowSpawnBotBoundsProps(sb, cmd),
+
         AbstractCollision ac => ShowCollisionProps(ac, cmd),
         AbstractItemSpawn i => ShowItemSpawnProps(i, cmd),
         AbstractAsset a => ShowAbstractAssetProps(a, cmd),
+
+        DynamicCollision dc => ShowDynamicProps(dc, cmd),
+        DynamicItemSpawn di => ShowDynamicProps(di, cmd),
+        DynamicRespawn dr => ShowDynamicProps(dr, cmd),
+        DynamicNavNode dn => ShowDynamicProps(dn, cmd),
         _ => ShowUnimplementedProps()
     };
 }
