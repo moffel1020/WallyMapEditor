@@ -241,7 +241,7 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
         Texture2DWrapper texture = LoadTextureFromSWF(swfPath, spriteName);
         DrawingQueue.Push((caller, () =>
         {
-            DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, texture.W, texture.H, trans, Color.FromHex(0xFFFFFFFF));
+            DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, texture.W, texture.H, trans, Color.FromHex(0xFFFFFFFF) with { A = (byte)(255 * opacity) });
         }
         ), (int)priority);
     }
@@ -271,6 +271,6 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
 
     private static readonly Regex BONE_FILE_REGEX = CreateBoneFileRegex();
 
-    [GeneratedRegex(@"^(?:Animation|SFX|SFX_Tekken)_((?:\w|_)+?)\.swf$")]
+    [GeneratedRegex(@"^Animation_((?:\w|_)+)\.swf$")]
     private static partial Regex CreateBoneFileRegex();
 }
