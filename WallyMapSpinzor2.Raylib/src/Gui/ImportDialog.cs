@@ -27,7 +27,7 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
 
     private static string _swzKey = "";
     private string _gamePath = brawlPath;
-    private string _bhairPath = Path.Join(brawlPath, "BrawlhallaAir.swf");
+    private string _bhairPath = Path.Combine(brawlPath, "BrawlhallaAir.swf");
 
     private readonly Dictionary<string, string> levelDescFiles = [];
     private string _levelDescFileFilter = "";
@@ -230,9 +230,9 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
                 if (result.IsOk)
                     lastBtPath = result.Path;
             });
-            ImGui.SameLine();
-            ImGui.Text(lastBtPath ?? "None");
         }
+        ImGui.SameLine();
+        ImGui.Text(lastBtPath ?? "None");
 
         if (ImGui.Button("LevelTypes.xml (optional)"))
         {
@@ -284,9 +284,9 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
 
     private void DecryptSwzFiles(string folder)
     {
-        string gamePath = Path.Join(folder, "Game.swz");
-        string dynamicPath = Path.Join(folder, "Dynamic.swz");
-        string initPath = Path.Join(folder, "Init.swz");
+        string gamePath = Path.Combine(folder, "Game.swz");
+        string dynamicPath = Path.Combine(folder, "Dynamic.swz");
+        string initPath = Path.Combine(folder, "Init.swz");
         uint key = uint.Parse(_swzKey);
 
         using (FileStream stream = new(dynamicPath, FileMode.Open, FileAccess.Read))

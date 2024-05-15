@@ -53,8 +53,6 @@ public class SwfTextureCache
     {
         ushort spriteId = swf.SymbolClass[name];
         DefineSpriteTag sprite = swf.SpriteTags[spriteId];
-        //we currently only load the first shape
-        //NOTE: this will need to be changed in the future. fine for now.
         ushort shapeId = sprite.GetShapeIds().FirstOrDefault();
         DefineShapeXTag shape = swf.ShapeTags[shapeId];
         SwfShape compiledShape = new(shape);

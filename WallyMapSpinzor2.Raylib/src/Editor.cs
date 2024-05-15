@@ -53,7 +53,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         LevelTypes lt = Utils.DeserializeFromPath<LevelTypes>(Path.Combine(dumpPath, "Init", "LevelTypes.xml"));
         LevelSetTypes lst = Utils.DeserializeFromPath<LevelSetTypes>(Path.Combine(dumpPath, "Game", "LevelSetTypes.xml"));
         MapData = new Level(ld, lt, lst);
-        using FileStream bonesFile = new(Path.Join(dumpPath, "Init", "BoneTypes.xml"), FileMode.Open, FileAccess.Read);
+        using FileStream bonesFile = new(Path.Combine(dumpPath, "Init", "BoneTypes.xml"), FileMode.Open, FileAccess.Read);
         BoneNames = XElement.Load(bonesFile).Elements("Bone").Select(e => e.Value).ToArray();
     }
 
@@ -173,14 +173,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         Canvas ??= new(BrawlPath, BoneNames);
         Canvas.CameraMatrix = Rl.GetCameraMatrix2D(_cam);
 
-        try
-        {
-            MapData?.DrawOn(Canvas, _config, Transform.IDENTITY, Time, new RenderData());
-        }
-        catch (Exception e)
-        {
-            Rl.TraceLog(TraceLogLevel.Error, "Rendering failed: " + e.Message);
-        }
+        MapData?.DrawOn(Canvas, _config, Transform.IDENTITY, Time, new RenderData());
         Canvas.FinalizeDraw();
 
         Rl.EndMode2D();

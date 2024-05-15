@@ -33,7 +33,7 @@ public class Texture2DWrapper : ITexture, IDisposable
         Height = h;
     }
 
-    public Texture2DWrapper(Texture2D texture, SwfRect rect) : this(texture, rect.XMin / 20, rect.YMin / 20, rect.Width() / 20, rect.Height() / 20)
+    public Texture2DWrapper(Texture2D texture, SwfRect rect) : this(texture, rect.XMin / 20.0, rect.YMin / 20.0, rect.Width() / 20.0, rect.Height() / 20.0)
     {
 
     }

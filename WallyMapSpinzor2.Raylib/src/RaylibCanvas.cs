@@ -7,12 +7,12 @@ using Raylib_cs;
 
 using WallyAnmSpinzor;
 using System.Threading.Tasks;
-using System.Linq;
 using System.Collections.Concurrent;
+using System.Text.RegularExpressions;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public class RaylibCanvas : ICanvas<Texture2DWrapper>
+public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
 {
     private readonly string brawlPath;
     public string[] BoneNames { get; set; }
@@ -37,9 +37,11 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
     {
         Task.Run(() =>
         {
-            using FileStream file = new(Path.Join(brawlPath, "anims", $"Animation_{name}"), FileMode.Open, FileAccess.Read);
-            AnmFile anm = AnmFile.CreateFrom(file);
-            foreach ((string groupName, AnmGroup group) in anm.AnimationGroups)
+            string anmPath = Path.Combine(brawlPath, "anims", $"Animation_{name}.anm");
+            AnmFile anm;
+            using (FileStream file = new(anmPath, FileMode.Open, FileAccess.Read))
+                anm = AnmFile.CreateFrom(file);
+            foreach ((string groupName, AnmGroup group) in anm.Groups)
             {
                 AnmGroups[groupName] = group;
             }
@@ -221,7 +223,7 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
     }
 
     public const int MAX_TEXTURE_UPLOADS_PER_FRAME = 5;
-    public const int MAX_SWF_TEXTURE_UPLOADS_PER_FRAME = 5;
+    public const int MAX_SWF_TEXTURE_UPLOADS_PER_FRAME = 1;
     public void FinalizeDraw()
     {
         TextureCache.UploadImages(MAX_TEXTURE_UPLOADS_PER_FRAME);
@@ -234,7 +236,7 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
         }
     }
 
-    public void DrawSwfTexture(string swfPath, string spriteName, double x, double y, Transform trans, DrawPriorityEnum priority, object? caller)
+    public void DrawSwfTexture(string swfPath, string spriteName, double x, double y, double opacity, Transform trans, DrawPriorityEnum priority, object? caller)
     {
         Texture2DWrapper texture = LoadTextureFromSWF(swfPath, spriteName);
         DrawingQueue.Push((caller, () =>
@@ -246,19 +248,29 @@ public class RaylibCanvas : ICanvas<Texture2DWrapper>
 
     public void DrawAnim(string animGroup, string animName, int frame, double x, double y, Transform trans, DrawPriorityEnum priority, object? caller)
     {
-        Rl.TraceLog(TraceLogLevel.Info, "amongus1");
         if (!AnmGroups.TryGetValue(animGroup, out AnmGroup? anmGroup))
             return;
-        Rl.TraceLog(TraceLogLevel.Info, "amongus2");
-        AnmAnimation animation = anmGroup.Animations.First(a => a.Name == animName);
-        AnmFrame anmFrame = animation.Frames[frame];
+        AnmAnimation animation = anmGroup.Animations[animName];
+        AnmFrame anmFrame = animation.Frames[frame % animation.Frames.Count];
         foreach (AnmBone bone in anmFrame.Bones)
         {
             Transform boneTrans = Transform.CreateFrom(x: bone.X, y: bone.Y, skewX: bone.RotateSkew0, skewY: bone.RotateSkew1, scaleX: bone.ScaleX, scaleY: bone.ScaleY);
-            //TODO: the 10.. is not correct in the general sense. how does the game do this?
-            string swfBonePath = Path.Join(brawlPath, "bones", $"Bones_{anmGroup.FileName[10..]}");
-            string spriteName = BoneNames[bone.Id];
-            DrawSwfTexture(swfBonePath, spriteName, x, y, trans * boneTrans, priority, caller);
+            // this is a hacky fix. need to see how the game does this.
+            Match boneMatch = BONE_FILE_REGEX.Match(anmGroup.FileName);
+            if (!boneMatch.Success)
+            {
+                Rl.TraceLog(TraceLogLevel.Error, $"Bone regex could not handle {anmGroup.FileName}");
+                continue;
+            }
+            string boneFileName = boneMatch.Groups[1].Value;
+            string swfBonePath = Path.Combine(brawlPath, "bones", $"Bones_{boneFileName}.swf");
+            string spriteName = BoneNames[bone.Id - 1]; // bone id is 1 indexed
+            DrawSwfTexture(swfBonePath, spriteName, x, y, bone.Opacity, trans * boneTrans, priority, caller);
         }
     }
+
+    private static readonly Regex BONE_FILE_REGEX = CreateBoneFileRegex();
+
+    [GeneratedRegex(@"^(?:Animation|SFX|SFX_Tekken)_((?:\w|_)+?)\.swf$")]
+    private static partial Regex CreateBoneFileRegex();
 }
