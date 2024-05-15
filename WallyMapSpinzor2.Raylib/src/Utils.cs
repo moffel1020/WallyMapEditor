@@ -141,8 +141,7 @@ public static class Utils
         return element.DeserializeTo<T>();
     }
 
-    public static T? DeserializeSwzFromPath<T>(string swzPath, string filename, uint key)
-        where T : IDeserializable, new()
+    public static string? GetFileInSwzFromPath(string swzPath, string filename, uint key)
     {
         using FileStream stream = new(swzPath, FileMode.Open, FileAccess.Read);
         using SwzReader reader = new(stream, key);
@@ -151,10 +150,17 @@ public static class Utils
             string data = reader.ReadFile();
             string name = SwzUtils.GetFileName(data);
             if (name == filename)
-                return DeserializeFromString<T>(data);
+                return data;
         }
+        return null;
+    }
 
-        return default;
+    public static T? DeserializeSwzFromPath<T>(string swzPath, string filename, uint key)
+        where T : IDeserializable, new()
+    {
+        string? content = GetFileInSwzFromPath(swzPath, filename, key);
+        if (content is null) return default;
+        return DeserializeFromString<T>(content);
     }
 
     private static List<int> FindGetlexPositions(CPoolInfo cpool, string lexName, List<Instruction> code) => code

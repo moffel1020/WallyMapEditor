@@ -10,3 +10,6 @@
 [submodule "AbcDisassembler"]
 	path = AbcDisassembler
 	url = https://github.com/moffel1020/AbcDisassembler
+[submodule "WallyAnmSpinzor"]
+	path = WallyAnmSpinzor
+	url = https://github.com/eyalzus12/WallyAnmSpinzor.git

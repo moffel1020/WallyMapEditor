@@ -5,15 +5,46 @@ using System.Numerics;
 using Rl = Raylib_cs.Raylib;
 using Raylib_cs;
 
+using WallyAnmSpinzor;
+using System.Threading.Tasks;
+using System.Linq;
+using System.Collections.Concurrent;
+
 namespace WallyMapSpinzor2.Raylib;
 
-public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
+public class RaylibCanvas : ICanvas<Texture2DWrapper>
 {
+    private readonly string brawlPath;
+    public string[] BoneNames { get; set; }
+
     public BucketPriorityQueue<(object?, Action)> DrawingQueue { get; } = new(Enum.GetValues<DrawPriorityEnum>().Length);
     public TextureCache TextureCache { get; } = new();
     public SwfFileCache SwfFileCache { get; } = new();
     public SwfTextureCache SwfTextureCache { get; } = new();
+    public ConcurrentDictionary<string, AnmGroup> AnmGroups { get; set; } = [];
     public Matrix4x4 CameraMatrix { get; set; } = Matrix4x4.Identity;
+
+    public RaylibCanvas(string brawlPath, string[] boneNames)
+    {
+        this.brawlPath = brawlPath;
+        this.BoneNames = boneNames;
+        LoadAnm("MapArtAnims");
+        LoadAnm("ATLA_MapArtAnims");
+        LoadAnm("GameModes");
+    }
+
+    private void LoadAnm(string name)
+    {
+        Task.Run(() =>
+        {
+            using FileStream file = new(Path.Join(brawlPath, "anims", $"Animation_{name}"), FileMode.Open, FileAccess.Read);
+            AnmFile anm = AnmFile.CreateFrom(file);
+            foreach ((string groupName, AnmGroup group) in anm.AnimationGroups)
+            {
+                AnmGroups[groupName] = group;
+            }
+        });
+    }
 
     public void ClearTextureCache()
     {
@@ -93,8 +124,9 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
 
     }
 
-    public void DrawTexture(double x, double y, Texture2DWrapper texture, Transform trans, DrawPriorityEnum priority, object? caller)
+    public void DrawTexture(string path, double x, double y, Transform trans, DrawPriorityEnum priority, object? caller)
     {
+        Texture2DWrapper texture = LoadTextureFromPath(path);
         DrawingQueue.Push((caller, () =>
         {
             DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, texture.W, texture.H, trans, Color.FromHex(0xFFFFFFFF));
@@ -102,8 +134,9 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
         ), (int)priority);
     }
 
-    public void DrawTextureRect(double x, double y, double w, double h, Texture2DWrapper texture, Transform trans, DrawPriorityEnum priority, object? caller)
+    public void DrawTextureRect(string path, double x, double y, double w, double h, Transform trans, DrawPriorityEnum priority, object? caller)
     {
+        Texture2DWrapper texture = LoadTextureFromPath(path);
         DrawingQueue.Push((caller, () =>
         {
             DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, w, h, trans, Color.FromHex(0xFFFFFFFF));
@@ -198,6 +231,34 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
         {
             (_, Action drawAction) = DrawingQueue.PopMin();
             drawAction();
+        }
+    }
+
+    public void DrawSwfTexture(string swfPath, string spriteName, double x, double y, Transform trans, DrawPriorityEnum priority, object? caller)
+    {
+        Texture2DWrapper texture = LoadTextureFromSWF(swfPath, spriteName);
+        DrawingQueue.Push((caller, () =>
+        {
+            DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, texture.W, texture.H, trans, Color.FromHex(0xFFFFFFFF));
+        }
+        ), (int)priority);
+    }
+
+    public void DrawAnim(string animGroup, string animName, int frame, double x, double y, Transform trans, DrawPriorityEnum priority, object? caller)
+    {
+        Rl.TraceLog(TraceLogLevel.Info, "amongus1");
+        if (!AnmGroups.TryGetValue(animGroup, out AnmGroup? anmGroup))
+            return;
+        Rl.TraceLog(TraceLogLevel.Info, "amongus2");
+        AnmAnimation animation = anmGroup.Animations.First(a => a.Name == animName);
+        AnmFrame anmFrame = animation.Frames[frame];
+        foreach (AnmBone bone in anmFrame.Bones)
+        {
+            Transform boneTrans = Transform.CreateFrom(x: bone.X, y: bone.Y, skewX: bone.RotateSkew0, skewY: bone.RotateSkew1, scaleX: bone.ScaleX, scaleY: bone.ScaleY);
+            //TODO: the 10.. is not correct in the general sense. how does the game do this?
+            string swfBonePath = Path.Join(brawlPath, "bones", $"Bones_{anmGroup.FileName[10..]}");
+            string spriteName = BoneNames[bone.Id];
+            DrawSwfTexture(swfBonePath, spriteName, x, y, trans * boneTrans, priority, caller);
         }
     }
 }

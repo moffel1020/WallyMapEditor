@@ -8,6 +8,8 @@ using Rl = Raylib_cs.Raylib;
 using rlImGui_cs;
 using ImGuiNET;
 using System.Runtime.InteropServices;
+using System.Xml.Linq;
+using System.Linq;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -22,6 +24,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
 
     public IDrawable? MapData { get; set; }
     public string BrawlPath { get; set; } = brawlPath;
+    public string[] BoneNames { get; set; } = null!;
 
     public RaylibCanvas? Canvas { get; set; }
     private Camera2D _cam = new();
@@ -50,10 +53,14 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         LevelTypes lt = Utils.DeserializeFromPath<LevelTypes>(Path.Combine(dumpPath, "Init", "LevelTypes.xml"));
         LevelSetTypes lst = Utils.DeserializeFromPath<LevelSetTypes>(Path.Combine(dumpPath, "Game", "LevelSetTypes.xml"));
         MapData = new Level(ld, lt, lst);
+        using FileStream bonesFile = new(Path.Join(dumpPath, "Init", "BoneTypes.xml"), FileMode.Open, FileAccess.Read);
+        BoneNames = XElement.Load(bonesFile).Elements("Bone").Select(e => e.Value).ToArray();
     }
 
-    public void LoadMap(string ldPath, string? ltPath, string? lstPath)
+    public void LoadMap(string ldPath, string? ltPath, string? lstPath, string btPath)
     {
+        using (FileStream bonesFile = new(btPath, FileMode.Open, FileAccess.Read))
+            BoneNames = XElement.Load(bonesFile).Elements("Bone").Select(e => e.Value).ToArray();
         LevelDesc ld = Utils.DeserializeFromPath<LevelDesc>(ldPath);
         LevelTypes lt = ltPath is null ? new() { Levels = [] } : Utils.DeserializeFromPath<LevelTypes>(ltPath);
         LevelSetTypes lst = lstPath is null ? new() { Playlists = [] } : Utils.DeserializeFromPath<LevelSetTypes>(lstPath);
@@ -63,9 +70,13 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
 
         _selectedObject = null;
         CommandHistory.Clear();
-        Canvas?.TextureCache.Clear();
-        Canvas?.SwfFileCache.Clear();
-        Canvas?.SwfTextureCache.Clear();
+        if (Canvas is not null)
+        {
+            Canvas.BoneNames = BoneNames;
+            Canvas.TextureCache.Clear();
+            Canvas.SwfFileCache.Clear();
+            Canvas.SwfTextureCache.Clear();
+        }
 
         Level l = new(ld, lt, lst);
         l.Type ??= DefaultLevelType;
@@ -75,13 +86,18 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
     }
 
-    public void LoadMap(Level l)
+    public void LoadMap(Level l, string[] boneNames)
     {
+        BoneNames = boneNames;
         _selectedObject = null;
         CommandHistory.Clear();
-        Canvas?.TextureCache.Clear();
-        Canvas?.SwfFileCache.Clear();
-        Canvas?.SwfTextureCache.Clear();
+        if (Canvas is not null)
+        {
+            Canvas.BoneNames = boneNames;
+            Canvas.TextureCache.Clear();
+            Canvas.SwfFileCache.Clear();
+            Canvas.SwfTextureCache.Clear();
+        }
 
         MapData = l;
         ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
@@ -154,7 +170,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         Rl.BeginMode2D(_cam);
 
         Rl.ClearBackground(Raylib_cs.Color.Black);
-        Canvas ??= new(BrawlPath);
+        Canvas ??= new(BrawlPath, BoneNames);
         Canvas.CameraMatrix = Rl.GetCameraMatrix2D(_cam);
 
         try

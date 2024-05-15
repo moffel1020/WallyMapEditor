@@ -13,6 +13,7 @@
     <ProjectReference Include="..\SwiffCheese\SwiffCheese.csproj" />
     <ProjectReference Include="..\BrawlhallaSwz\BrawlhallaSwz\BrawlhallaSwz.csproj" />
     <ProjectReference Include="..\AbcDisassembler\AbcDisassembler\AbcDisassembler.csproj" />
+    <ProjectReference Include="..\WallyAnmSpinzor\WallyAnmSpinzor.csproj" />
   </ItemGroup>
   
   <ItemGroup>

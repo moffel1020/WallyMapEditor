@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AbcDisassembler", "AbcDisas
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbcDisassembler", "AbcDisassembler\AbcDisassembler\AbcDisassembler.csproj", "{A327C656-460B-42CB-A790-6F306B61505E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WallyAnmSpinzor", "WallyAnmSpinzor\WallyAnmSpinzor.csproj", "{E5DC14AF-997F-4FA9-AA61-680A5E2A05F1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,6 +48,10 @@ Global
 		{A327C656-460B-42CB-A790-6F306B61505E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A327C656-460B-42CB-A790-6F306B61505E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A327C656-460B-42CB-A790-6F306B61505E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5DC14AF-997F-4FA9-AA61-680A5E2A05F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5DC14AF-997F-4FA9-AA61-680A5E2A05F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5DC14AF-997F-4FA9-AA61-680A5E2A05F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5DC14AF-997F-4FA9-AA61-680A5E2A05F1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{4241C888-CA35-481B-BC39-2653C28C74F5} = {C0BF1495-F47B-47BC-8217-B5D953A840A2}
