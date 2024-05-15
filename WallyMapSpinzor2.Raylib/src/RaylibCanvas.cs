@@ -251,7 +251,7 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
         if (!AnmGroups.TryGetValue(animGroup, out AnmGroup? anmGroup))
             return;
         AnmAnimation animation = anmGroup.Animations[animName];
-        AnmFrame anmFrame = animation.Frames[frame % animation.Frames.Count];
+        AnmFrame anmFrame = animation.Frames[BrawlhallaMath.SafeMod(frame, animation.Frames.Count)];
         foreach (AnmBone bone in anmFrame.Bones)
         {
             Transform boneTrans = Transform.CreateFrom(x: bone.X, y: bone.Y, skewX: bone.RotateSkew0, skewY: bone.RotateSkew1, scaleX: bone.ScaleX, scaleY: bone.ScaleY);
