@@ -1,0 +1,40 @@
+using System.Collections.Generic;
+using SwfLib.Tags;
+using SwfLib.Tags.DisplayListTags;
+
+namespace WallyMapSpinzor2.Raylib;
+
+public class SwfSprite
+{
+    public SwfSpriteFrame[] Frames { get; set; } = [];
+
+    public static SwfSprite CompileFrom(DefineSpriteTag spriteTag)
+    {
+        List<SwfSpriteFrame> frames = [new()];
+        foreach (SwfTagBase tag in spriteTag.Tags)
+        {
+            if (tag is PlaceObjectBaseTag placeObject)
+            {
+                frames[^1] ??= new();
+                if (frames[^1].Layers.TryGetValue(placeObject.Depth, out SwfSpriteFrameLayer? layer))
+                {
+                    layer.ModifyBy(placeObject);
+                }
+                else
+                {
+                    frames[^1].Layers[placeObject.Depth] = new() { FrameOffset = 0, Matrix = placeObject.Matrix, CharacterId = placeObject.CharacterID };
+                }
+            }
+            else if (tag is RemoveObject2Tag removeObject)
+            {
+                frames[^1].Layers.Remove(removeObject.Depth);
+            }
+            else if (tag is ShowFrameTag)
+            {
+                frames.Add(frames[^1].Clone());
+            }
+        }
+
+        return new() { Frames = [.. frames] };
+    }
+}

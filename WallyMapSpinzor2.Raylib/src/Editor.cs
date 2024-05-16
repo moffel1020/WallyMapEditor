@@ -75,7 +75,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
             Canvas.BoneNames = BoneNames;
             Canvas.TextureCache.Clear();
             Canvas.SwfFileCache.Clear();
-            Canvas.SwfTextureCache.Clear();
+            Canvas.SwfShapeCache.Clear();
         }
 
         Level l = new(ld, lt, lst);
@@ -96,7 +96,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
             Canvas.BoneNames = boneNames;
             Canvas.TextureCache.Clear();
             Canvas.SwfFileCache.Clear();
-            Canvas.SwfTextureCache.Clear();
+            Canvas.SwfShapeCache.Clear();
         }
 
         MapData = l;
@@ -229,7 +229,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
             if (ImGui.MenuItem("Clear Cache"))
             {
                 Canvas?.TextureCache.Clear();
-                Canvas?.SwfTextureCache.Clear();
+                Canvas?.SwfShapeCache.Clear();
                 Canvas?.SwfFileCache.Clear();
             }
             if (ImGui.MenuItem("Reload Map", "Ctrl+R")) LoadMap();

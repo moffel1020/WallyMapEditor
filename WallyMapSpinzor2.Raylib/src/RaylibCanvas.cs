@@ -8,7 +8,9 @@ using Raylib_cs;
 using WallyAnmSpinzor;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
-using System.Text.RegularExpressions;
+using System.Linq;
+using SwiffCheese.Wrappers;
+using SwfLib.Tags;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -20,7 +22,8 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
     public BucketPriorityQueue<(object?, Action)> DrawingQueue { get; } = new(Enum.GetValues<DrawPriorityEnum>().Length);
     public TextureCache TextureCache { get; } = new();
     public SwfFileCache SwfFileCache { get; } = new();
-    public SwfTextureCache SwfTextureCache { get; } = new();
+    public SwfShapeCache SwfShapeCache { get; } = new();
+    public SwfSpriteCache SwfSpriteCache { get; } = new();
     public ConcurrentDictionary<string, AnmGroup> AnmGroups { get; set; } = [];
     public Matrix4x4 CameraMatrix { get; set; } = Matrix4x4.Identity;
 
@@ -202,24 +205,38 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
         return Texture2DWrapper.Default; // placeholder white texture until the image is read from disk
     }
 
-    public Texture2DWrapper LoadTextureFromSWF(string filePath, string name)
+    public SwfFileData? LoadSwf(string filePath)
     {
         string finalPath = Path.Combine(brawlPath, filePath);
         SwfFileCache.Cache.TryGetValue(finalPath, out SwfFileData? swf);
         if (swf is not null)
-        {
-            SwfTextureCache.Cache.TryGetValue((swf, name), out Texture2DWrapper? texture);
-            if (texture is not null)
-            {
-                return texture;
-            }
-
-            SwfTextureCache.LoadImageAsync(swf, name);
-            return Texture2DWrapper.Default;
-        }
-
+            return swf;
         SwfFileCache.LoadSwfAsync(finalPath);
-        return Texture2DWrapper.Default;
+        return null;
+    }
+
+    public Texture2DWrapper? LoadShapeFromSwf(string filePath, ushort shapeId)
+    {
+        SwfFileData? swf = LoadSwf(filePath);
+        if (swf is null)
+            return null;
+        SwfShapeCache.Cache.TryGetValue((swf, shapeId), out Texture2DWrapper? texture);
+        if (texture is not null)
+            return texture;
+        SwfShapeCache.LoadShapeAsync(swf, shapeId);
+        return null;
+    }
+
+    public SwfSprite? LoadSpriteFromSwf(string filePath, ushort spriteId)
+    {
+        SwfFileData? swf = LoadSwf(filePath);
+        if (swf is null)
+            return null;
+        SwfSpriteCache.Cache.TryGetValue((swf, spriteId), out SwfSprite? sprite);
+        if (sprite is not null)
+            return sprite;
+        SwfSpriteCache.LoadSpriteAsync(swf, spriteId);
+        return null;
     }
 
     public const int MAX_TEXTURE_UPLOADS_PER_FRAME = 5;
@@ -227,7 +244,7 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
     public void FinalizeDraw()
     {
         TextureCache.UploadImages(MAX_TEXTURE_UPLOADS_PER_FRAME);
-        SwfTextureCache.UploadImages(MAX_SWF_TEXTURE_UPLOADS_PER_FRAME);
+        SwfShapeCache.UploadImages(MAX_SWF_TEXTURE_UPLOADS_PER_FRAME);
 
         while (DrawingQueue.Count > 0)
         {
@@ -238,7 +255,48 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
 
     public void DrawSwfTexture(string swfPath, string spriteName, double x, double y, double opacity, Transform trans, DrawPriorityEnum priority, object? caller)
     {
-        Texture2DWrapper texture = LoadTextureFromSWF(swfPath, spriteName);
+        SwfFileData? swf = LoadSwf(swfPath);
+        if (swf is null) return;
+        ushort spriteId = swf.SymbolClass[spriteName];
+        DrawSwfSprite(swfPath, spriteId, 0, x, y, opacity, trans, priority, caller);
+    }
+
+    public void DrawAnim(string animFile, string animClass, string animName, int frame, double x, double y, Transform trans, DrawPriorityEnum priority, object? caller)
+    {
+        // swf animation
+        if (animFile.StartsWith("SFX_"))
+        {
+            string swfFileName = animFile["SFX_".Length..^".swf".Length];
+            string swfFilePath = $"SFX_{swfFileName}.swf";
+            SwfFileData? swfFile = LoadSwf(swfFilePath);
+            if (swfFile is null)
+                return;
+            ushort spriteId = swfFile.SymbolClass[animClass];
+            DrawSwfSprite(swfFilePath, spriteId, frame, x, y, 1, trans, priority, caller);
+        }
+        // anm animation
+        else if (animFile.StartsWith("Animation_"))
+        {
+            if (!AnmGroups.TryGetValue($"{animFile}/{animClass}", out AnmGroup? anmGroup))
+                return;
+            // anm animation
+            AnmAnimation animation = anmGroup.Animations[animName];
+            AnmFrame anmFrame = animation.Frames[BrawlhallaMath.SafeMod(frame, animation.Frames.Count)];
+            foreach (AnmBone bone in anmFrame.Bones)
+            {
+                Transform boneTrans = Transform.CreateFrom(x: bone.X, y: bone.Y, skewX: bone.RotateSkew0, skewY: bone.RotateSkew1, scaleX: bone.ScaleX, scaleY: bone.ScaleY);
+                string boneFileName = anmGroup.FileName["Animation_".Length..^".swf".Length];
+                string swfBonePath = Path.Combine("bones", $"Bones_{boneFileName}.swf");
+                string spriteName = BoneNames[bone.Id - 1]; // bone id is 1 indexed
+                DrawSwfTexture(swfBonePath, spriteName, x, y, bone.Opacity, trans * boneTrans, priority, caller);
+            }
+        }
+    }
+
+    public void DrawSwfShape(string filePath, ushort shapeId, double x, double y, double opacity, Transform trans, DrawPriorityEnum priority, object? caller)
+    {
+        Texture2DWrapper? texture = LoadShapeFromSwf(filePath, shapeId);
+        if (texture is null) return;
         DrawingQueue.Push((caller, () =>
         {
             DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, texture.W, texture.H, trans, Color.FromHex(0xFFFFFFFF) with { A = (byte)(255 * opacity) });
@@ -246,31 +304,27 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
         ), (int)priority);
     }
 
-    public void DrawAnim(string animGroup, string animName, int frame, double x, double y, Transform trans, DrawPriorityEnum priority, object? caller)
+    public void DrawSwfSprite(string filePath, ushort spriteId, int frame, double x, double y, double opacity, Transform trans, DrawPriorityEnum priority, object? caller)
     {
-        if (!AnmGroups.TryGetValue(animGroup, out AnmGroup? anmGroup))
-            return;
-        AnmAnimation animation = anmGroup.Animations[animName];
-        AnmFrame anmFrame = animation.Frames[BrawlhallaMath.SafeMod(frame, animation.Frames.Count)];
-        foreach (AnmBone bone in anmFrame.Bones)
+        SwfFileData? file = LoadSwf(filePath);
+        if (file is null) return;
+        SwfSprite? sprite = LoadSpriteFromSwf(filePath, spriteId);
+        if (sprite is null) return;
+        SwfSpriteFrame spriteFrame = sprite.Frames[frame % sprite.Frames.Length];
+        foreach ((_, SwfSpriteFrameLayer layer) in spriteFrame.Layers)
         {
-            Transform boneTrans = Transform.CreateFrom(x: bone.X, y: bone.Y, skewX: bone.RotateSkew0, skewY: bone.RotateSkew1, scaleX: bone.ScaleX, scaleY: bone.ScaleY);
-            // this is a hacky fix. need to see how the game does this.
-            Match boneMatch = BONE_FILE_REGEX.Match(anmGroup.FileName);
-            if (!boneMatch.Success)
+            // is a shape
+            if (file.ShapeTags.TryGetValue(layer.CharacterId, out DefineShapeXTag? shape))
             {
-                Rl.TraceLog(TraceLogLevel.Error, $"Bone regex could not handle {anmGroup.FileName}");
-                continue;
+                ushort shapeId = shape.ShapeID;
+                DrawSwfShape(filePath, shapeId, x, y, opacity, Utils.SwfMatrixToTransform(layer.Matrix) * trans, priority, caller);
             }
-            string boneFileName = boneMatch.Groups[1].Value;
-            string swfBonePath = Path.Combine(brawlPath, "bones", $"Bones_{boneFileName}.swf");
-            string spriteName = BoneNames[bone.Id - 1]; // bone id is 1 indexed
-            DrawSwfTexture(swfBonePath, spriteName, x, y, bone.Opacity, trans * boneTrans, priority, caller);
+            // is a sprite
+            else if (file.SpriteTags.TryGetValue(layer.CharacterId, out DefineSpriteTag? childSprite))
+            {
+                ushort childSpriteId = childSprite.SpriteID;
+                DrawSwfSprite(filePath, childSpriteId, frame + layer.FrameOffset, x, y, opacity, Utils.SwfMatrixToTransform(layer.Matrix) * trans, priority, caller);
+            }
         }
     }
-
-    private static readonly Regex BONE_FILE_REGEX = CreateBoneFileRegex();
-
-    [GeneratedRegex(@"^Animation_((?:\w|_)+)\.swf$")]
-    private static partial Regex CreateBoneFileRegex();
 }

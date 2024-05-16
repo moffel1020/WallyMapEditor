@@ -1,14 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Linq;
 using System.Threading.Tasks;
 
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using IMS = SixLabors.ImageSharp;
 
-using SwfLib.Tags;
 using SwfLib.Data;
 
 using SwiffCheese.Exporting;
@@ -19,41 +17,39 @@ using SwiffCheese.Wrappers;
 using Raylib_cs;
 using Rl = Raylib_cs.Raylib;
 
-using TxtId = System.ValueTuple<WallyMapSpinzor2.Raylib.SwfFileData, string>;
+using TxtId = System.ValueTuple<WallyMapSpinzor2.Raylib.SwfFileData, ushort>;
 using ImgData = System.ValueTuple<Raylib_cs.Image, SwfLib.Data.SwfRect>;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public class SwfTextureCache
+public class SwfShapeCache
 {
     public ConcurrentDictionary<TxtId, Texture2DWrapper> Cache { get; } = new();
     private readonly Queue<(TxtId, ImgData)> _queue = new();
     private readonly HashSet<TxtId> _queueSet = [];
 
-    public void LoadTexture(SwfFileData swf, string name)
+    public void LoadShape(SwfFileData swf, ushort shapeId)
     {
-        (Raylib_cs.Image img, SwfRect rect) = LoadImageInternal(swf, name);
-        Cache[(swf, name)] = new(Rl.LoadTextureFromImage(img), rect);
+        (Raylib_cs.Image img, SwfRect rect) = LoadShapeInternal(swf, shapeId);
+        Cache[(swf, shapeId)] = new(Rl.LoadTextureFromImage(img), rect);
         Rl.UnloadImage(img);
     }
 
-    public void LoadImageAsync(SwfFileData swf, string name)
+    public void LoadShapeAsync(SwfFileData swf, ushort shapeId)
     {
-        if (_queueSet.Contains((swf, name))) return;
-        _queueSet.Add((swf, name));
+        //HACK: too many shapes get loaded, causing the GPU to die. need to figure out a better way to do this.
+        if (Random.Shared.Next(0, 100) != 6 || _queueSet.Count > 0 || _queueSet.Contains((swf, shapeId))) return;
+        _queueSet.Add((swf, shapeId));
 
         Task.Run(() =>
         {
-            (Raylib_cs.Image img, SwfRect rect) = LoadImageInternal(swf, name);
-            lock (_queue) _queue.Enqueue(((swf, name), (img, rect)));
+            (Raylib_cs.Image img, SwfRect rect) = LoadShapeInternal(swf, shapeId);
+            lock (_queue) _queue.Enqueue(((swf, shapeId), (img, rect)));
         });
     }
 
-    private static ImgData LoadImageInternal(SwfFileData swf, string name)
+    private static ImgData LoadShapeInternal(SwfFileData swf, ushort shapeId)
     {
-        ushort spriteId = swf.SymbolClass[name];
-        DefineSpriteTag sprite = swf.SpriteTags[spriteId];
-        ushort shapeId = sprite.GetShapeIds().FirstOrDefault();
         DefineShapeXTag shape = swf.ShapeTags[shapeId];
         SwfShape compiledShape = new(shape);
         int width = shape.ShapeBounds.Width();
