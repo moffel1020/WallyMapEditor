@@ -37,8 +37,7 @@ public class SwfShapeCache
 
     public void LoadShapeAsync(SwfFileData swf, ushort shapeId)
     {
-        //HACK: too many shapes get loaded, causing the GPU to die. need to figure out a better way to do this.
-        if (Random.Shared.Next(0, 100) != 6 || _queueSet.Count > 0 || _queueSet.Contains((swf, shapeId))) return;
+        if (_queueSet.Contains((swf, shapeId))) return;
         _queueSet.Add((swf, shapeId));
 
         Task.Run(() =>
@@ -54,8 +53,8 @@ public class SwfShapeCache
         SwfShape compiledShape = new(shape);
         int width = shape.ShapeBounds.Width();
         int height = shape.ShapeBounds.Height();
-        using Image<Rgba32> image = new(width, height, IMS.Color.Transparent.ToPixel<Rgba32>());
-        ImageSharpShapeExporter exporter = new(image, new Size(-shape.ShapeBounds.XMin, -shape.ShapeBounds.YMin));
+        using Image<Rgba32> image = new(width / 20 + 1, height / 20 + 1, IMS.Color.Transparent.ToPixel<Rgba32>());
+        ImageSharpShapeExporter exporter = new(image, new Size(-shape.ShapeBounds.XMin, -shape.ShapeBounds.YMin), 20);
         compiledShape.Export(exporter);
         Raylib_cs.Image img = Utils.ImageSharpImageToRl(image);
         return (img, shape.ShapeBounds);

@@ -18,14 +18,20 @@ public class SwfSpriteCache
 
     public void LoadSpriteAsync(SwfFileData data, ushort spriteId)
     {
-        if (_loadingSprites.Contains((data, spriteId)) || Cache.ContainsKey((data, spriteId))) return;
-        _loadingSprites.Add((data, spriteId));
+        lock (_loadingSprites)
+        {
+            if (_loadingSprites.Contains((data, spriteId)) || Cache.ContainsKey((data, spriteId))) return;
+            _loadingSprites.Add((data, spriteId));
+        }
 
         Task.Run(() =>
         {
             SwfSprite sprite = SwfSprite.CompileFrom(data.SpriteTags[spriteId]);
             Cache[(data, spriteId)] = sprite;
-            _loadingSprites.Remove((data, spriteId));
+            lock (_loadingSprites)
+            {
+                _loadingSprites.Remove((data, spriteId));
+            }
         });
     }
 

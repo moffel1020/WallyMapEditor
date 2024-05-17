@@ -266,13 +266,11 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
         // swf animation
         if (animFile.StartsWith("SFX_"))
         {
-            string swfFileName = animFile["SFX_".Length..^".swf".Length];
-            string swfFilePath = $"SFX_{swfFileName}.swf";
-            SwfFileData? swfFile = LoadSwf(swfFilePath);
+            SwfFileData? swfFile = LoadSwf(animFile);
             if (swfFile is null)
                 return;
             ushort spriteId = swfFile.SymbolClass[animClass];
-            DrawSwfSprite(swfFilePath, spriteId, frame, x, y, 1, trans, priority, caller);
+            DrawSwfSprite(animFile, spriteId, frame, x, y, 1, trans, priority, caller);
         }
         // anm animation
         else if (animFile.StartsWith("Animation_"))
@@ -285,8 +283,7 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
             foreach (AnmBone bone in anmFrame.Bones)
             {
                 Transform boneTrans = Transform.CreateFrom(x: bone.X, y: bone.Y, skewX: bone.RotateSkew0, skewY: bone.RotateSkew1, scaleX: bone.ScaleX, scaleY: bone.ScaleY);
-                string boneFileName = anmGroup.FileName["Animation_".Length..^".swf".Length];
-                string swfBonePath = Path.Combine("bones", $"Bones_{boneFileName}.swf");
+                string swfBonePath = Path.Combine("bones", $"Bones{anmGroup.FileName["Animation".Length..]}");
                 string spriteName = BoneNames[bone.Id - 1]; // bone id is 1 indexed
                 DrawSwfTexture(swfBonePath, spriteName, x, y, bone.Opacity, trans * boneTrans, priority, caller);
             }
