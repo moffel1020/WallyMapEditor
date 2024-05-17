@@ -11,10 +11,20 @@ public class SwfSpriteFrameLayer
 
     public void ModifyBy(PlaceObjectBaseTag placeObject)
     {
-        if (placeObject.CharacterID != 0)
-            CharacterId = placeObject.CharacterID;
-        //MAYBE: need to check if HasMatrix
-        Matrix = placeObject.Matrix;
+        if (placeObject is PlaceObject2Tag placeObject2)
+        {
+            if (placeObject2.HasCharacter)
+                CharacterId = placeObject.CharacterID;
+            if (placeObject2.HasMatrix)
+                Matrix = placeObject.Matrix;
+        }
+        else if (placeObject is PlaceObject3Tag placeObject3)
+        {
+            if (placeObject3.HasCharacter)
+                CharacterId = placeObject.CharacterID;
+            if (placeObject3.HasMatrix)
+                Matrix = placeObject.Matrix;
+        }
     }
 
     public SwfSpriteFrameLayer Clone() => new() { FrameOffset = FrameOffset + 1, Matrix = Matrix, CharacterId = CharacterId };

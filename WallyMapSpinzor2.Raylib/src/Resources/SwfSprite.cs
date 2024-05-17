@@ -34,6 +34,8 @@ public class SwfSprite
                 frames.Add(frames[^1].Clone());
             }
         }
+        // we're adding a redundant frame at the end
+        frames.RemoveAt(frames.Count - 1);
 
         return new() { Frames = [.. frames] };
     }

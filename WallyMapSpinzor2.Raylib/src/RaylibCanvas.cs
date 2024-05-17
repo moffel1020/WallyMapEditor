@@ -314,13 +314,13 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
             if (file.ShapeTags.TryGetValue(layer.CharacterId, out DefineShapeXTag? shape))
             {
                 ushort shapeId = shape.ShapeID;
-                DrawSwfShape(filePath, shapeId, x, y, opacity, Utils.SwfMatrixToTransform(layer.Matrix) * trans, priority, caller);
+                DrawSwfShape(filePath, shapeId, x, y, opacity, trans * Utils.SwfMatrixToTransform(layer.Matrix), priority, caller);
             }
             // is a sprite
             else if (file.SpriteTags.TryGetValue(layer.CharacterId, out DefineSpriteTag? childSprite))
             {
                 ushort childSpriteId = childSprite.SpriteID;
-                DrawSwfSprite(filePath, childSpriteId, frame + layer.FrameOffset, x, y, opacity, Utils.SwfMatrixToTransform(layer.Matrix) * trans, priority, caller);
+                DrawSwfSprite(filePath, childSpriteId, frame + layer.FrameOffset, x, y, opacity, trans * Utils.SwfMatrixToTransform(layer.Matrix), priority, caller);
             }
         }
     }
