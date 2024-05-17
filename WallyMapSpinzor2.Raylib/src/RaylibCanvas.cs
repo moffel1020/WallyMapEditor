@@ -255,8 +255,12 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
 
     public void DrawSwf(string swfPath, string spriteName, int frame, double x, double y, double opacity, Transform trans, DrawPriorityEnum priority, object? caller)
     {
+        // wtf
+        if (spriteName == "flash.display::MovieClip")
+            return;
         SwfFileData? swf = LoadSwf(swfPath);
-        if (swf is null) return;
+        if (swf is null)
+            return;
         ushort spriteId = swf.SymbolClass[spriteName];
         DrawSwfSprite(swfPath, spriteId, frame, x, y, opacity, trans, priority, caller);
     }
