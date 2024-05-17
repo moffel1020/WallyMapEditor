@@ -253,12 +253,12 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
         }
     }
 
-    public void DrawSwfTexture(string swfPath, string spriteName, double x, double y, double opacity, Transform trans, DrawPriorityEnum priority, object? caller)
+    public void DrawSwf(string swfPath, string spriteName, int frame, double x, double y, double opacity, Transform trans, DrawPriorityEnum priority, object? caller)
     {
         SwfFileData? swf = LoadSwf(swfPath);
         if (swf is null) return;
         ushort spriteId = swf.SymbolClass[spriteName];
-        DrawSwfSprite(swfPath, spriteId, 0, x, y, opacity, trans, priority, caller);
+        DrawSwfSprite(swfPath, spriteId, frame, x, y, opacity, trans, priority, caller);
     }
 
     public void DrawAnim(string animFile, string animClass, string animName, int frame, double x, double y, Transform trans, DrawPriorityEnum priority, object? caller)
@@ -285,7 +285,7 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
                 Transform boneTrans = Transform.CreateFrom(x: bone.X, y: bone.Y, skewX: bone.RotateSkew0, skewY: bone.RotateSkew1, scaleX: bone.ScaleX, scaleY: bone.ScaleY);
                 string swfBonePath = Path.Combine("bones", $"Bones{anmGroup.FileName["Animation".Length..]}");
                 string spriteName = BoneNames[bone.Id - 1]; // bone id is 1 indexed
-                DrawSwfTexture(swfBonePath, spriteName, x, y, bone.Opacity, trans * boneTrans, priority, caller);
+                DrawSwf(swfBonePath, spriteName, bone.Frame, x, y, bone.Opacity, trans * boneTrans, priority, caller);
             }
         }
     }
