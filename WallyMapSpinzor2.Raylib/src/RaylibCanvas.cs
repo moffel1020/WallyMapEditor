@@ -240,7 +240,7 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
     }
 
     public const int MAX_TEXTURE_UPLOADS_PER_FRAME = 5;
-    public const int MAX_SWF_TEXTURE_UPLOADS_PER_FRAME = 1;
+    public const int MAX_SWF_TEXTURE_UPLOADS_PER_FRAME = 5;
     public void FinalizeDraw()
     {
         TextureCache.UploadImages(MAX_TEXTURE_UPLOADS_PER_FRAME);
