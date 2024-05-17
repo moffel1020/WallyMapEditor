@@ -286,7 +286,7 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
             AnmFrame anmFrame = animation.Frames[BrawlhallaMath.SafeMod(frame, animation.Frames.Count)];
             foreach (AnmBone bone in anmFrame.Bones)
             {
-                Transform boneTrans = new(bone.ScaleX, bone.RotateSkew0, bone.RotateSkew1, bone.ScaleY, bone.X, bone.Y);
+                Transform boneTrans = new(bone.ScaleX, bone.RotateSkew1, bone.RotateSkew0, bone.ScaleY, bone.X, bone.Y);
                 string swfBonePath = Path.Combine("bones", $"Bones{anmGroup.FileName["Animation".Length..]}");
                 string spriteName = BoneNames[bone.Id - 1]; // bone id is 1 indexed
                 DrawSwf(swfBonePath, spriteName, bone.Frame - 1, x, y, bone.Opacity, trans * boneTrans, priority, caller);

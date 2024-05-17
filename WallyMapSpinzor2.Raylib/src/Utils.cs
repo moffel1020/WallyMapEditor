@@ -36,7 +36,7 @@ public static class Utils
     );
 
     public static Transform MatrixToTransform(Matrix4x4 m) => new(m.M11, m.M21, m.M12, m.M22, m.M41, m.M42);
-    public static Transform SwfMatrixToTransform(SwfMatrix m) => new(m.ScaleX, m.RotateSkew0, m.RotateSkew1, m.ScaleY, m.TranslateX / 20.0, m.TranslateY / 20.0);
+    public static Transform SwfMatrixToTransform(SwfMatrix m) => new(m.ScaleX, m.RotateSkew1, m.RotateSkew0, m.ScaleY, m.TranslateX / 20.0, m.TranslateY / 20.0);
 
     public static Raylib_cs.Color ToRlColor(Color c) => new(c.R, c.G, c.B, c.A);
 
