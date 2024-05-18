@@ -145,6 +145,8 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
     public void DrawTextureRect(string path, double x, double y, double w, double h, Transform trans, DrawPriorityEnum priority, object? caller)
     {
         Texture2DWrapper texture = LoadTextureFromPath(path);
+        if (w == 0) w = texture.Texture.Width;
+        if (h == 0) h = texture.Texture.Height;
         DrawingQueue.Push((caller, () =>
         {
             DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, w, h, trans, Color.FromHex(0xFFFFFFFF));
