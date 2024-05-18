@@ -44,7 +44,9 @@ public static class Utils
     {
         using MemoryStream ms = new();
         image.SaveAsQoi(ms);
-        return Rl.LoadImageFromMemory(".qoi", ms.ToArray());
+        Raylib_cs.Image img = Rl.LoadImageFromMemory(".qoi", ms.ToArray());
+        Rl.ImageAlphaPremultiply(ref img);
+        return img;
     }
 
     public static Raylib_cs.Image LoadRlImage(string path)
@@ -56,7 +58,9 @@ public static class Utils
             return ImageSharpImageToRl(image);
         }
 
-        return Rl.LoadImage(path);
+        Raylib_cs.Image img = Rl.LoadImage(path);
+        Rl.ImageAlphaPremultiply(ref img);
+        return img;
     }
 
     public static bool IsPolygonClockwise(IReadOnlyList<(double, double)> poly)

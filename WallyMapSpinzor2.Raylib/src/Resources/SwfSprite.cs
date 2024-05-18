@@ -15,7 +15,6 @@ public class SwfSprite
         {
             if (tag is PlaceObjectBaseTag placeObject)
             {
-                frames[^1] ??= new();
                 if (frames[^1].Layers.TryGetValue(placeObject.Depth, out SwfSpriteFrameLayer? layer))
                 {
                     layer.ModifyBy(placeObject);

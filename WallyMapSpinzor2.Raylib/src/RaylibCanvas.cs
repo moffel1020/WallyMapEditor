@@ -246,11 +246,13 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
         TextureCache.UploadImages(MAX_TEXTURE_UPLOADS_PER_FRAME);
         SwfShapeCache.UploadImages(MAX_SWF_TEXTURE_UPLOADS_PER_FRAME);
 
+        Rl.BeginBlendMode(BlendMode.AlphaPremultiply);
         while (DrawingQueue.Count > 0)
         {
             (_, Action drawAction) = DrawingQueue.PopMin();
             drawAction();
         }
+        Rl.EndBlendMode();
     }
 
     public void DrawSwf(string swfPath, string spriteName, int frame, double x, double y, double opacity, Transform trans, DrawPriorityEnum priority, object? caller)
