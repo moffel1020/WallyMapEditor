@@ -305,7 +305,7 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
         if (texture is null) return;
         DrawingQueue.Push((caller, () =>
         {
-            DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, texture.W, texture.H, trans, Color.FromHex(0xFFFFFFFF) with { A = (byte)(255 * opacity) });
+            DrawTextureWithTransform(texture.Texture, x, y, texture.W, texture.H, trans * Transform.CreateTranslate(texture.XOff, texture.YOff), Color.FromHex(0xFFFFFFFF) with { A = (byte)(255 * opacity) });
         }
         ), (int)priority);
     }

@@ -18,7 +18,7 @@ using Raylib_cs;
 using Rl = Raylib_cs.Raylib;
 
 using TxtId = System.ValueTuple<WallyMapSpinzor2.Raylib.SwfFileData, ushort>;
-using ImgData = System.ValueTuple<Raylib_cs.Image, SwfLib.Data.SwfRect>;
+using ImgData = System.ValueTuple<Raylib_cs.Image, int, int>;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -30,8 +30,9 @@ public class SwfShapeCache
 
     public void LoadShape(SwfFileData swf, ushort shapeId)
     {
-        (Raylib_cs.Image img, SwfRect rect) = LoadShapeInternal(swf, shapeId);
-        Cache[(swf, shapeId)] = new(Rl.LoadTextureFromImage(img), rect);
+        (Raylib_cs.Image img, int offsetX, int offsetY) = LoadShapeInternal(swf, shapeId);
+        Texture2D texture = Rl.LoadTextureFromImage(img);
+        Cache[(swf, shapeId)] = new(texture, offsetX, offsetY);
         Rl.UnloadImage(img);
     }
 
@@ -42,22 +43,32 @@ public class SwfShapeCache
 
         Task.Run(() =>
         {
-            (Raylib_cs.Image img, SwfRect rect) = LoadShapeInternal(swf, shapeId);
-            lock (_queue) _queue.Enqueue(((swf, shapeId), (img, rect)));
+            (Raylib_cs.Image img, int offsetX, int offsetY) = LoadShapeInternal(swf, shapeId);
+            lock (_queue) _queue.Enqueue(((swf, shapeId), (img, offsetX, offsetY)));
         });
     }
+
+    // this can actually change per GfxType (AnimScale property multiplies this). later.
+    public const double QUALITY_MULTIPLIER = 1.2;
 
     private static ImgData LoadShapeInternal(SwfFileData swf, ushort shapeId)
     {
         DefineShapeXTag shape = swf.ShapeTags[shapeId];
         SwfShape compiledShape = new(shape);
-        int width = shape.ShapeBounds.Width();
-        int height = shape.ShapeBounds.Height();
-        using Image<Rgba32> image = new(width / 20 + 1, height / 20 + 1, IMS.Color.Transparent.ToPixel<Rgba32>());
-        ImageSharpShapeExporter exporter = new(image, new Size(-shape.ShapeBounds.XMin, -shape.ShapeBounds.YMin), 20);
+        // logic follows game
+        double x = shape.ShapeBounds.XMin / 20.0;
+        double y = shape.ShapeBounds.YMin / 20.0;
+        double w = shape.ShapeBounds.Width() * QUALITY_MULTIPLIER / 20.0;
+        double h = shape.ShapeBounds.Height() * QUALITY_MULTIPLIER / 20.0;
+        int offsetX = (int)Math.Floor(x);
+        int offsetY = (int)Math.Floor(y);
+        int imageW = (int)Math.Floor(w + (x - offsetX) + QUALITY_MULTIPLIER) + 2;
+        int imageH = (int)Math.Floor(h + (y - offsetY) + QUALITY_MULTIPLIER) + 2;
+        using Image<Rgba32> image = new(imageW, imageH, IMS.Color.Transparent.ToPixel<Rgba32>());
+        ImageSharpShapeExporter exporter = new(image, new Size(-20 * offsetX, -20 * offsetY), 20);
         compiledShape.Export(exporter);
         Raylib_cs.Image img = Utils.ImageSharpImageToRl(image);
-        return (img, shape.ShapeBounds);
+        return (img, offsetX, offsetY);
     }
 
     public void UploadImages(int amount)
@@ -69,11 +80,11 @@ public class SwfShapeCache
             {
                 (TxtId id, ImgData dat) = _queue.Dequeue();
                 _queueSet.Remove(id);
-                (Raylib_cs.Image img, SwfRect rect) = dat;
+                (Raylib_cs.Image img, int offsetX, int offsetY) = dat;
                 if (!Cache.ContainsKey(id))
                 {
                     Texture2D texture = Rl.LoadTextureFromImage(img);
-                    Cache[id] = new(texture, rect);
+                    Cache[id] = new(texture, offsetX, offsetY);
                 }
                 Rl.UnloadImage(img);
             }
@@ -91,7 +102,7 @@ public class SwfShapeCache
         {
             while (_queue.Count > 0)
             {
-                (_, (Raylib_cs.Image img, _)) = _queue.Dequeue();
+                (_, (Raylib_cs.Image img, _, _)) = _queue.Dequeue();
                 Rl.UnloadImage(img);
             }
         }
