@@ -267,7 +267,7 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
         if (swf is null)
             return;
         ushort spriteId = swf.SymbolClass[spriteName];
-        DrawSwfSprite(swfPath, spriteId, frame, x, y, opacity, trans, priority, caller);
+        DrawSwfSprite(swfPath, spriteId, frame, opacity, Transform.CreateTranslate(x, y) * trans, priority, caller);
     }
 
     public void DrawAnim(string animFile, string animClass, string animName, int frame, double x, double y, Transform trans, DrawPriorityEnum priority, object? caller)
@@ -279,7 +279,7 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
             if (swfFile is null)
                 return;
             ushort spriteId = swfFile.SymbolClass[animClass];
-            DrawSwfSprite(animFile, spriteId, frame, x, y, 1, trans, priority, caller);
+            DrawSwfSprite(animFile, spriteId, frame, 1, Transform.CreateFrom(x, y) * trans, priority, caller);
         }
         // anm animation
         else if (animFile.StartsWith("Animation_"))
@@ -310,7 +310,7 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
         ), (int)priority);
     }
 
-    public void DrawSwfSprite(string filePath, ushort spriteId, int frame, double x, double y, double opacity, Transform trans, DrawPriorityEnum priority, object? caller)
+    public void DrawSwfSprite(string filePath, ushort spriteId, int frame, double opacity, Transform trans, DrawPriorityEnum priority, object? caller)
     {
         SwfFileData? file = LoadSwf(filePath);
         if (file is null) return;
@@ -323,13 +323,13 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
             if (file.ShapeTags.TryGetValue(layer.CharacterId, out DefineShapeXTag? shape))
             {
                 ushort shapeId = shape.ShapeID;
-                DrawSwfShape(filePath, shapeId, x, y, opacity, trans * Utils.SwfMatrixToTransform(layer.Matrix), priority, caller);
+                DrawSwfShape(filePath, shapeId, 0, 0, opacity, trans * Utils.SwfMatrixToTransform(layer.Matrix), priority, caller);
             }
             // is a sprite
             else if (file.SpriteTags.TryGetValue(layer.CharacterId, out DefineSpriteTag? childSprite))
             {
                 ushort childSpriteId = childSprite.SpriteID;
-                DrawSwfSprite(filePath, childSpriteId, frame + layer.FrameOffset, x, y, opacity, trans * Utils.SwfMatrixToTransform(layer.Matrix), priority, caller);
+                DrawSwfSprite(filePath, childSpriteId, frame + layer.FrameOffset, opacity, trans * Utils.SwfMatrixToTransform(layer.Matrix), priority, caller);
             }
         }
     }
