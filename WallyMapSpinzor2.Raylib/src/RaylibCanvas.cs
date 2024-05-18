@@ -54,6 +54,9 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
     public void ClearTextureCache()
     {
         TextureCache.Clear();
+        SwfShapeCache.Clear();
+        SwfSpriteCache.Clear();
+        SwfFileCache.Clear();
     }
 
     public void DrawCircle(double x, double y, double radius, Color color, Transform trans, DrawPriorityEnum priority, object? caller)

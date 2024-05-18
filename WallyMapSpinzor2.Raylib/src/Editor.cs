@@ -73,9 +73,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         if (Canvas is not null)
         {
             Canvas.BoneNames = BoneNames;
-            Canvas.TextureCache.Clear();
-            Canvas.SwfFileCache.Clear();
-            Canvas.SwfShapeCache.Clear();
+            Canvas.ClearTextureCache();
         }
 
         Level l = new(ld, lt, lst);
@@ -94,9 +92,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         if (Canvas is not null)
         {
             Canvas.BoneNames = boneNames;
-            Canvas.TextureCache.Clear();
-            Canvas.SwfFileCache.Clear();
-            Canvas.SwfShapeCache.Clear();
+            Canvas.ClearTextureCache();
         }
 
         MapData = l;
@@ -228,9 +224,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
             if (ImGui.MenuItem("History", null, HistoryPanel.Open)) HistoryPanel.Open = !HistoryPanel.Open;
             if (ImGui.MenuItem("Clear Cache"))
             {
-                Canvas?.TextureCache.Clear();
-                Canvas?.SwfShapeCache.Clear();
-                Canvas?.SwfFileCache.Clear();
+                Canvas?.ClearTextureCache();
             }
             if (ImGui.MenuItem("Reload Map", "Ctrl+R")) LoadMap();
             if (ImGui.MenuItem("Center Camera", "R")) ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
