@@ -48,24 +48,25 @@ public class SwfShapeCache
         });
     }
 
+    private const int SWF_UNIT_DIVISOR = 20;
     // this can actually change per GfxType (AnimScale property multiplies this). later.
-    public const double QUALITY_MULTIPLIER = 1.2;
+    private const double QUALITY_MULTIPLIER = 1.2;
 
     private static ImgData LoadShapeInternal(SwfFileData swf, ushort shapeId)
     {
         DefineShapeXTag shape = swf.ShapeTags[shapeId];
         SwfShape compiledShape = new(shape);
         // logic follows game
-        double x = shape.ShapeBounds.XMin / 20.0;
-        double y = shape.ShapeBounds.YMin / 20.0;
-        double w = shape.ShapeBounds.Width() * QUALITY_MULTIPLIER / 20.0;
-        double h = shape.ShapeBounds.Height() * QUALITY_MULTIPLIER / 20.0;
+        double x = shape.ShapeBounds.XMin * 1.0 / SWF_UNIT_DIVISOR;
+        double y = shape.ShapeBounds.YMin * 1.0 / SWF_UNIT_DIVISOR;
+        double w = shape.ShapeBounds.Width() * QUALITY_MULTIPLIER / SWF_UNIT_DIVISOR;
+        double h = shape.ShapeBounds.Height() * QUALITY_MULTIPLIER / SWF_UNIT_DIVISOR;
         int offsetX = (int)Math.Floor(x);
         int offsetY = (int)Math.Floor(y);
         int imageW = (int)Math.Floor(w + (x - offsetX) + QUALITY_MULTIPLIER) + 2;
         int imageH = (int)Math.Floor(h + (y - offsetY) + QUALITY_MULTIPLIER) + 2;
         using Image<Rgba32> image = new(imageW, imageH, IMS.Color.Transparent.ToPixel<Rgba32>());
-        ImageSharpShapeExporter exporter = new(image, new Size(-20 * offsetX, -20 * offsetY), 20);
+        ImageSharpShapeExporter exporter = new(image, new Size(SWF_UNIT_DIVISOR * -offsetX, SWF_UNIT_DIVISOR * -offsetY), SWF_UNIT_DIVISOR);
         compiledShape.Export(exporter);
         Raylib_cs.Image img = Utils.ImageSharpImageToRl(image);
         return (img, offsetX, offsetY);
