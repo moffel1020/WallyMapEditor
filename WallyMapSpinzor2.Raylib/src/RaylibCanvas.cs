@@ -151,6 +151,7 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
 
     private static void DrawTextureWithTransform(Texture2D texture, double x, double y, double w, double h, Transform trans, Color color)
     {
+        Rl.BeginBlendMode(BlendMode.AlphaPremultiply);
         Rlgl.SetTexture(texture.Id);
         Rlgl.Begin(DrawMode.Quads);
         Rlgl.Color4ub(color.R, color.G, color.B, color.A);
@@ -173,6 +174,7 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
         }
         Rlgl.End();
         Rlgl.SetTexture(0);
+        Rl.EndBlendMode();
     }
 
     private static void DrawRectWithTransform(double x, double y, double w, double h, Transform trans, Color color)
@@ -246,13 +248,11 @@ public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
         TextureCache.UploadImages(MAX_TEXTURE_UPLOADS_PER_FRAME);
         SwfShapeCache.UploadImages(MAX_SWF_TEXTURE_UPLOADS_PER_FRAME);
 
-        Rl.BeginBlendMode(BlendMode.AlphaPremultiply);
         while (DrawingQueue.Count > 0)
         {
             (_, Action drawAction) = DrawingQueue.PopMin();
             drawAction();
         }
-        Rl.EndBlendMode();
     }
 
     public void DrawSwf(string swfPath, string spriteName, int frame, double x, double y, double opacity, Transform trans, DrawPriorityEnum priority, object? caller)
