@@ -18,6 +18,7 @@ using SwfLib;
 using BrawlhallaSwz;
 
 using AbcDisassembler;
+using SwfLib.Data;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -35,6 +36,7 @@ public static class Utils
     );
 
     public static Transform MatrixToTransform(Matrix4x4 m) => new(m.M11, m.M21, m.M12, m.M22, m.M41, m.M42);
+    public static Transform SwfMatrixToTransform(SwfMatrix m) => new(m.ScaleX, m.RotateSkew1, m.RotateSkew0, m.ScaleY, m.TranslateX / 20.0, m.TranslateY / 20.0);
 
     public static Raylib_cs.Color ToRlColor(Color c) => new(c.R, c.G, c.B, c.A);
 
@@ -42,7 +44,9 @@ public static class Utils
     {
         using MemoryStream ms = new();
         image.SaveAsQoi(ms);
-        return Rl.LoadImageFromMemory(".qoi", ms.ToArray());
+        Raylib_cs.Image img = Rl.LoadImageFromMemory(".qoi", ms.ToArray());
+        Rl.ImageAlphaPremultiply(ref img);
+        return img;
     }
 
     public static Raylib_cs.Image LoadRlImage(string path)
@@ -54,7 +58,9 @@ public static class Utils
             return ImageSharpImageToRl(image);
         }
 
-        return Rl.LoadImage(path);
+        Raylib_cs.Image img = Rl.LoadImage(path);
+        Rl.ImageAlphaPremultiply(ref img);
+        return img;
     }
 
     public static bool IsPolygonClockwise(IReadOnlyList<(double, double)> poly)
@@ -141,8 +147,7 @@ public static class Utils
         return element.DeserializeTo<T>();
     }
 
-    public static T? DeserializeSwzFromPath<T>(string swzPath, string filename, uint key)
-        where T : IDeserializable, new()
+    public static string? GetFileInSwzFromPath(string swzPath, string filename, uint key)
     {
         using FileStream stream = new(swzPath, FileMode.Open, FileAccess.Read);
         using SwzReader reader = new(stream, key);
@@ -151,10 +156,17 @@ public static class Utils
             string data = reader.ReadFile();
             string name = SwzUtils.GetFileName(data);
             if (name == filename)
-                return DeserializeFromString<T>(data);
+                return data;
         }
+        return null;
+    }
 
-        return default;
+    public static T? DeserializeSwzFromPath<T>(string swzPath, string filename, uint key)
+        where T : IDeserializable, new()
+    {
+        string? content = GetFileInSwzFromPath(swzPath, filename, key);
+        if (content is null) return default;
+        return DeserializeFromString<T>(content);
     }
 
     private static List<int> FindGetlexPositions(CPoolInfo cpool, string lexName, List<Instruction> code) => code

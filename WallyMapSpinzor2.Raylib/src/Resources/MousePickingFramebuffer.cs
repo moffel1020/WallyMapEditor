@@ -103,15 +103,7 @@ public class MousePickingFramebuffer : IDisposable
         Rl.ClearBackground(Raylib_cs.Color.Black);
         canvas.CameraMatrix = Rl.GetCameraMatrix2D(cam);
 
-        try
-        {
-            mapData.DrawOn(canvas, config, Transform.IDENTITY, time, new RenderData());
-        }
-        catch (Exception e)
-        {
-            Rl.TraceLog(TraceLogLevel.Error, "Rendering failed: " + e.Message);
-            return null;
-        }
+        mapData.DrawOn(canvas, config, Transform.IDENTITY, time, new RenderData());
 
         _drawables.Clear();
         while (canvas.DrawingQueue.Count > 0)

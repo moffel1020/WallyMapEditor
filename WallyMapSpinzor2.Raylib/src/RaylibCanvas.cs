@@ -5,19 +5,58 @@ using System.Numerics;
 using Rl = Raylib_cs.Raylib;
 using Raylib_cs;
 
+using WallyAnmSpinzor;
+using System.Threading.Tasks;
+using System.Collections.Concurrent;
+using System.Linq;
+using SwiffCheese.Wrappers;
+using SwfLib.Tags;
+
 namespace WallyMapSpinzor2.Raylib;
 
-public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
+public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
 {
+    private readonly string brawlPath;
+    public string[] BoneNames { get; set; }
+
     public BucketPriorityQueue<(object?, Action)> DrawingQueue { get; } = new(Enum.GetValues<DrawPriorityEnum>().Length);
     public TextureCache TextureCache { get; } = new();
     public SwfFileCache SwfFileCache { get; } = new();
-    public SwfTextureCache SwfTextureCache { get; } = new();
+    public SwfShapeCache SwfShapeCache { get; } = new();
+    public SwfSpriteCache SwfSpriteCache { get; } = new();
+    public ConcurrentDictionary<string, AnmGroup> AnmGroups { get; set; } = [];
     public Matrix4x4 CameraMatrix { get; set; } = Matrix4x4.Identity;
+
+    public RaylibCanvas(string brawlPath, string[] boneNames)
+    {
+        this.brawlPath = brawlPath;
+        this.BoneNames = boneNames;
+        LoadAnm("MapArtAnims");
+        LoadAnm("ATLA_MapArtAnims");
+        LoadAnm("GameModes");
+    }
+
+    private void LoadAnm(string name)
+    {
+        Task.Run(() =>
+        {
+            string anmPath = Path.Combine(brawlPath, "anims", $"Animation_{name}.anm");
+            AnmFile anm;
+            using (FileStream file = new(anmPath, FileMode.Open, FileAccess.Read))
+                anm = AnmFile.CreateFrom(file);
+            foreach ((string groupName, AnmGroup group) in anm.Groups)
+            {
+                AnmGroups[groupName] = group;
+            }
+        });
+    }
 
     public void ClearTextureCache()
     {
         TextureCache.Clear();
+        SwfShapeCache.Clear();
+        SwfSpriteCache.Clear();
+        SwfFileCache.Clear();
     }
 
     public void DrawCircle(double x, double y, double radius, Color color, Transform trans, DrawPriorityEnum priority, object? caller)
@@ -93,8 +132,9 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
 
     }
 
-    public void DrawTexture(double x, double y, Texture2DWrapper texture, Transform trans, DrawPriorityEnum priority, object? caller)
+    public void DrawTexture(string path, double x, double y, Transform trans, DrawPriorityEnum priority, object? caller)
     {
+        Texture2DWrapper texture = LoadTextureFromPath(path);
         DrawingQueue.Push((caller, () =>
         {
             DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, texture.W, texture.H, trans, Color.FromHex(0xFFFFFFFF));
@@ -102,8 +142,11 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
         ), (int)priority);
     }
 
-    public void DrawTextureRect(double x, double y, double w, double h, Texture2DWrapper texture, Transform trans, DrawPriorityEnum priority, object? caller)
+    public void DrawTextureRect(string path, double x, double y, double w, double h, Transform trans, DrawPriorityEnum priority, object? caller)
     {
+        Texture2DWrapper texture = LoadTextureFromPath(path);
+        if (w == 0) w = texture.Texture.Width;
+        if (h == 0) h = texture.Texture.Height;
         DrawingQueue.Push((caller, () =>
         {
             DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, w, h, trans, Color.FromHex(0xFFFFFFFF));
@@ -113,6 +156,7 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
 
     private static void DrawTextureWithTransform(Texture2D texture, double x, double y, double w, double h, Transform trans, Color color)
     {
+        Rl.BeginBlendMode(BlendMode.AlphaPremultiply);
         Rlgl.SetTexture(texture.Id);
         Rlgl.Begin(DrawMode.Quads);
         Rlgl.Color4ub(color.R, color.G, color.B, color.A);
@@ -135,6 +179,7 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
         }
         Rlgl.End();
         Rlgl.SetTexture(0);
+        Rl.EndBlendMode();
     }
 
     private static void DrawRectWithTransform(double x, double y, double w, double h, Transform trans, Color color)
@@ -167,24 +212,38 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
         return Texture2DWrapper.Default; // placeholder white texture until the image is read from disk
     }
 
-    public Texture2DWrapper LoadTextureFromSWF(string filePath, string name)
+    public SwfFileData? LoadSwf(string filePath)
     {
         string finalPath = Path.Combine(brawlPath, filePath);
         SwfFileCache.Cache.TryGetValue(finalPath, out SwfFileData? swf);
         if (swf is not null)
-        {
-            SwfTextureCache.Cache.TryGetValue((swf, name), out Texture2DWrapper? texture);
-            if (texture is not null)
-            {
-                return texture;
-            }
-
-            SwfTextureCache.LoadImageAsync(swf, name);
-            return Texture2DWrapper.Default;
-        }
-
+            return swf;
         SwfFileCache.LoadSwfAsync(finalPath);
-        return Texture2DWrapper.Default;
+        return null;
+    }
+
+    public Texture2DWrapper? LoadShapeFromSwf(string filePath, ushort shapeId)
+    {
+        SwfFileData? swf = LoadSwf(filePath);
+        if (swf is null)
+            return null;
+        SwfShapeCache.Cache.TryGetValue((swf, shapeId), out Texture2DWrapper? texture);
+        if (texture is not null)
+            return texture;
+        SwfShapeCache.LoadShapeAsync(swf, shapeId);
+        return null;
+    }
+
+    public SwfSprite? LoadSpriteFromSwf(string filePath, ushort spriteId)
+    {
+        SwfFileData? swf = LoadSwf(filePath);
+        if (swf is null)
+            return null;
+        SwfSpriteCache.Cache.TryGetValue((swf, spriteId), out SwfSprite? sprite);
+        if (sprite is not null)
+            return sprite;
+        SwfSpriteCache.LoadSpriteAsync(swf, spriteId);
+        return null;
     }
 
     public const int MAX_TEXTURE_UPLOADS_PER_FRAME = 5;
@@ -192,12 +251,88 @@ public class RaylibCanvas(string brawlPath) : ICanvas<Texture2DWrapper>
     public void FinalizeDraw()
     {
         TextureCache.UploadImages(MAX_TEXTURE_UPLOADS_PER_FRAME);
-        SwfTextureCache.UploadImages(MAX_SWF_TEXTURE_UPLOADS_PER_FRAME);
+        SwfShapeCache.UploadImages(MAX_SWF_TEXTURE_UPLOADS_PER_FRAME);
 
         while (DrawingQueue.Count > 0)
         {
             (_, Action drawAction) = DrawingQueue.PopMin();
             drawAction();
+        }
+    }
+
+    public void DrawSwf(string swfPath, string spriteName, int frame, double x, double y, double opacity, Transform trans, DrawPriorityEnum priority, object? caller)
+    {
+        // wtf
+        if (spriteName == "flash.display::MovieClip")
+            return;
+        SwfFileData? swf = LoadSwf(swfPath);
+        if (swf is null)
+            return;
+        ushort spriteId = swf.SymbolClass[spriteName];
+        DrawSwfSprite(swfPath, spriteId, frame, opacity, Transform.CreateTranslate(x, y) * trans, priority, caller);
+    }
+
+    public void DrawAnim(string animFile, string animClass, string animName, int frame, double x, double y, Transform trans, DrawPriorityEnum priority, object? caller)
+    {
+        // swf animation
+        if (animFile.StartsWith("SFX_"))
+        {
+            SwfFileData? swfFile = LoadSwf(animFile);
+            if (swfFile is null)
+                return;
+            ushort spriteId = swfFile.SymbolClass[animClass];
+            DrawSwfSprite(animFile, spriteId, frame, 1, Transform.CreateFrom(x, y) * trans, priority, caller);
+        }
+        // anm animation
+        else if (animFile.StartsWith("Animation_"))
+        {
+            if (!AnmGroups.TryGetValue($"{animFile}/{animClass}", out AnmGroup? anmGroup))
+                return;
+            // anm animation
+            AnmAnimation animation = anmGroup.Animations[animName];
+            AnmFrame anmFrame = animation.Frames[BrawlhallaMath.SafeMod(frame, animation.Frames.Count)];
+            foreach (AnmBone bone in anmFrame.Bones)
+            {
+                Transform boneTrans = new(bone.ScaleX, bone.RotateSkew1, bone.RotateSkew0, bone.ScaleY, bone.X, bone.Y);
+                string swfBonePath = Path.Combine("bones", $"Bones{anmGroup.FileName["Animation".Length..]}");
+                string spriteName = BoneNames[bone.Id - 1]; // bone id is 1 indexed
+                DrawSwf(swfBonePath, spriteName, bone.Frame - 1, x, y, bone.Opacity, trans * boneTrans, priority, caller);
+            }
+        }
+    }
+
+    public void DrawSwfShape(string filePath, ushort shapeId, double x, double y, double opacity, Transform trans, DrawPriorityEnum priority, object? caller)
+    {
+        Texture2DWrapper? texture = LoadShapeFromSwf(filePath, shapeId);
+        if (texture is null) return;
+        DrawingQueue.Push((caller, () =>
+        {
+            DrawTextureWithTransform(texture.Texture, x, y, texture.W, texture.H, trans * Transform.CreateTranslate(texture.XOff, texture.YOff), Color.FromHex(0xFFFFFFFF) with { A = (byte)(255 * opacity) });
+        }
+        ), (int)priority);
+    }
+
+    public void DrawSwfSprite(string filePath, ushort spriteId, int frame, double opacity, Transform trans, DrawPriorityEnum priority, object? caller)
+    {
+        SwfFileData? file = LoadSwf(filePath);
+        if (file is null) return;
+        SwfSprite? sprite = LoadSpriteFromSwf(filePath, spriteId);
+        if (sprite is null) return;
+        SwfSpriteFrame spriteFrame = sprite.Frames[frame % sprite.Frames.Length];
+        foreach ((_, SwfSpriteFrameLayer layer) in spriteFrame.Layers)
+        {
+            // is a shape
+            if (file.ShapeTags.TryGetValue(layer.CharacterId, out DefineShapeXTag? shape))
+            {
+                ushort shapeId = shape.ShapeID;
+                DrawSwfShape(filePath, shapeId, 0, 0, opacity, trans * Utils.SwfMatrixToTransform(layer.Matrix), priority, caller);
+            }
+            // is a sprite
+            else if (file.SpriteTags.TryGetValue(layer.CharacterId, out DefineSpriteTag? childSprite))
+            {
+                ushort childSpriteId = childSprite.SpriteID;
+                DrawSwfSprite(filePath, childSpriteId, frame + layer.FrameOffset, opacity, trans * Utils.SwfMatrixToTransform(layer.Matrix), priority, caller);
+            }
         }
     }
 }

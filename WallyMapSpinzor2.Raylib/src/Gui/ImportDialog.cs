@@ -12,6 +12,7 @@ using Rl = Raylib_cs.Raylib;
 
 using BrawlhallaSwz;
 using AbcDisassembler;
+using System.Xml.Linq;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -22,16 +23,18 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
     private static string? lastLdPath;
     private static string? lastLtPath;
     private static string? lastLstPath;
+    private static string? lastBtPath;
 
     private static string _swzKey = "";
     private string _gamePath = brawlPath;
-    private string _bhairPath = Path.Join(brawlPath, "BrawlhallaAir.swf");
+    private string _bhairPath = Path.Combine(brawlPath, "BrawlhallaAir.swf");
 
     private readonly Dictionary<string, string> levelDescFiles = [];
     private string _levelDescFileFilter = "";
     private string? _pickedFileName;
     private LevelTypes? _decryptedLt;
     private LevelSetTypes? _decryptedLst;
+    private string[]? _boneNames;
 
     private string? _loadingError;
     private string? _loadingStatus;
@@ -119,7 +122,7 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
             });
         }
 
-        if (levelDescFiles.Count > 0 && _decryptedLt is not null && _decryptedLst is not null)
+        if (levelDescFiles.Count > 0 && _decryptedLt is not null && _decryptedLst is not null && _boneNames is not null)
         {
             _levelDescFileFilter = ImGuiExt.InputText("Filter map names", _levelDescFileFilter);
             string[] levelDescs = levelDescFiles.Keys
@@ -141,7 +144,7 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
                     LevelDesc ld = Utils.DeserializeFromString<LevelDesc>(levelDescFiles[_pickedFileName!]);
                     _loadingStatus = null;
                     _loadingError = null;
-                    editor.LoadMap(new Level(ld, _decryptedLt, _decryptedLst));
+                    editor.LoadMap(new Level(ld, _decryptedLt, _decryptedLst), _boneNames);
                 }
                 catch (Exception e)
                 {
@@ -219,6 +222,18 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
         ImGui.SameLine();
         ImGui.Text(lastLdPath ?? "None");
 
+        if (ImGui.Button("BoneTypes"))
+        {
+            Task.Run(() =>
+            {
+                DialogResult result = Dialog.FileOpen("xml", Path.GetDirectoryName(lastBtPath));
+                if (result.IsOk)
+                    lastBtPath = result.Path;
+            });
+        }
+        ImGui.SameLine();
+        ImGui.Text(lastBtPath ?? "None");
+
         if (ImGui.Button("LevelTypes.xml (optional)"))
         {
             Task.Run(() =>
@@ -248,12 +263,12 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
         ImGui.Text(lastLstPath ?? "None");
 
         ImGui.Separator();
-        if (lastLdPath is not null && ImGui.Button("Import"))
+        if (lastLdPath is not null && lastBtPath is not null && ImGui.Button("Import"))
         {
             _loadingStatus = "loading...";
             try
             {
-                editor.LoadMap(lastLdPath, lastLtPath, lastLstPath);
+                editor.LoadMap(lastLdPath, lastLtPath, lastLstPath, lastBtPath);
                 _open = false;
                 _loadingStatus = null;
                 _loadingError = null;
@@ -269,9 +284,9 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
 
     private void DecryptSwzFiles(string folder)
     {
-        string gamePath = Path.Join(folder, "Game.swz");
-        string dynamicPath = Path.Join(folder, "Dynamic.swz");
-        string initPath = Path.Join(folder, "Init.swz");
+        string gamePath = Path.Combine(folder, "Game.swz");
+        string dynamicPath = Path.Combine(folder, "Dynamic.swz");
+        string initPath = Path.Combine(folder, "Init.swz");
         uint key = uint.Parse(_swzKey);
 
         using (FileStream stream = new(dynamicPath, FileMode.Open, FileAccess.Read))
@@ -287,5 +302,12 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
 
         _decryptedLt = Utils.DeserializeSwzFromPath<LevelTypes>(initPath, "LevelTypes.xml", key);
         _decryptedLst = Utils.DeserializeSwzFromPath<LevelSetTypes>(gamePath, "LevelSetTypes.xml", key);
+        string? boneFileContent = Utils.GetFileInSwzFromPath(initPath, "BoneTypes.xml", key);
+        if (boneFileContent is null)
+            _boneNames = null;
+        else
+        {
+            _boneNames = XElement.Parse(boneFileContent).Elements("Bone").Select(e => e.Value).ToArray();
+        }
     }
 }

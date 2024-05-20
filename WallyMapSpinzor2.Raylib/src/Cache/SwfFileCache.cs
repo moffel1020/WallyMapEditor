@@ -18,8 +18,11 @@ public class SwfFileCache
 
     public void LoadSwfAsync(string path)
     {
-        if (_loadingSwf.Contains(path) || Cache.ContainsKey(path)) return;
-        _loadingSwf.Add(path);
+        lock (_loadingSwf)
+        {
+            if (_loadingSwf.Contains(path) || Cache.ContainsKey(path)) return;
+            _loadingSwf.Add(path);
+        }
 
         Task.Run(() =>
         {
@@ -27,7 +30,10 @@ public class SwfFileCache
             using (FileStream stream = new(path, FileMode.Open, FileAccess.Read))
                 swf = SwfFileData.CreateFrom(stream);
             Cache[path] = swf;
-            _loadingSwf.Remove(path);
+            lock (_loadingSwf)
+            {
+                _loadingSwf.Remove(path);
+            }
         });
     }
 
