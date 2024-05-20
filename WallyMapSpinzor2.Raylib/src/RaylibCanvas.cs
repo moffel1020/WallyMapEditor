@@ -137,7 +137,7 @@ public partial class RaylibCanvas : ICanvas
         Texture2DWrapper texture = LoadTextureFromPath(path);
         DrawingQueue.Push((caller, () =>
         {
-            DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, texture.W, texture.H, trans, Color.FromHex(0xFFFFFFFF));
+            DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, texture.W, texture.H, trans);
         }
         ), (int)priority);
     }
@@ -149,17 +149,17 @@ public partial class RaylibCanvas : ICanvas
         if (h == 0) h = texture.Texture.Height;
         DrawingQueue.Push((caller, () =>
         {
-            DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, w, h, trans, Color.FromHex(0xFFFFFFFF));
+            DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, w, h, trans);
         }
         ), (int)priority);
     }
 
-    private static void DrawTextureWithTransform(Texture2D texture, double x, double y, double w, double h, Transform trans, Color color)
+    private static void DrawTextureWithTransform(Texture2D texture, double x, double y, double w, double h, Transform trans, float tintR = 1, float tintG = 1, float tintB = 1, float tintA = 1)
     {
         Rl.BeginBlendMode(BlendMode.AlphaPremultiply);
         Rlgl.SetTexture(texture.Id);
         Rlgl.Begin(DrawMode.Quads);
-        Rlgl.Color4ub(color.R, color.G, color.B, color.A);
+        Rlgl.Color4f(tintR * tintA, tintG * tintA, tintB * tintA, tintA);
         (double xMin, double yMin) = (x, y);
         (double xMax, double yMax) = (x + w, y + h);
         (double, double)[] texCoords = [(0, 0), (0, 1), (1, 1), (1, 0), (0, 0)];
@@ -307,7 +307,7 @@ public partial class RaylibCanvas : ICanvas
         if (texture is null) return;
         DrawingQueue.Push((caller, () =>
         {
-            DrawTextureWithTransform(texture.Texture, x, y, texture.W, texture.H, trans * Transform.CreateTranslate(texture.XOff, texture.YOff), Color.FromHex(0xFFFFFFFF) with { A = (byte)(255 * opacity) });
+            DrawTextureWithTransform(texture.Texture, x, y, texture.W, texture.H, trans * Transform.CreateTranslate(texture.XOff, texture.YOff), tintA: (float)opacity);
         }
         ), (int)priority);
     }
