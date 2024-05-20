@@ -28,22 +28,22 @@ public class SwfShapeCache
     private readonly Queue<(TxtId, ImgData)> _queue = new();
     private readonly HashSet<TxtId> _queueSet = [];
 
-    public void LoadShape(SwfFileData swf, ushort shapeId)
+    public void LoadShape(SwfFileData swf, ushort shapeId, double quality)
     {
-        (Raylib_cs.Image img, int offsetX, int offsetY) = LoadShapeInternal(swf, shapeId);
+        (Raylib_cs.Image img, int offsetX, int offsetY) = LoadShapeInternal(swf, shapeId, quality);
         Texture2D texture = Rl.LoadTextureFromImage(img);
         Cache[(swf, shapeId)] = new(texture, offsetX, offsetY);
         Rl.UnloadImage(img);
     }
 
-    public void LoadShapeAsync(SwfFileData swf, ushort shapeId)
+    public void LoadShapeAsync(SwfFileData swf, ushort shapeId, double quality)
     {
         if (_queueSet.Contains((swf, shapeId))) return;
         _queueSet.Add((swf, shapeId));
 
         Task.Run(() =>
         {
-            (Raylib_cs.Image img, int offsetX, int offsetY) = LoadShapeInternal(swf, shapeId);
+            (Raylib_cs.Image img, int offsetX, int offsetY) = LoadShapeInternal(swf, shapeId, quality);
             lock (_queue) _queue.Enqueue(((swf, shapeId), (img, offsetX, offsetY)));
         });
     }
@@ -52,19 +52,20 @@ public class SwfShapeCache
     // this can actually change per GfxType (AnimScale property multiplies this). later.
     private const double QUALITY_MULTIPLIER = 1.2;
 
-    private static ImgData LoadShapeInternal(SwfFileData swf, ushort shapeId)
+    private static ImgData LoadShapeInternal(SwfFileData swf, ushort shapeId, double quality)
     {
+        quality *= QUALITY_MULTIPLIER;
         DefineShapeXTag shape = swf.ShapeTags[shapeId];
         SwfShape compiledShape = new(shape);
         // logic follows game
         double x = shape.ShapeBounds.XMin * 1.0 / SWF_UNIT_DIVISOR;
         double y = shape.ShapeBounds.YMin * 1.0 / SWF_UNIT_DIVISOR;
-        double w = shape.ShapeBounds.Width() * QUALITY_MULTIPLIER / SWF_UNIT_DIVISOR;
-        double h = shape.ShapeBounds.Height() * QUALITY_MULTIPLIER / SWF_UNIT_DIVISOR;
+        double w = shape.ShapeBounds.Width() * quality / SWF_UNIT_DIVISOR;
+        double h = shape.ShapeBounds.Height() * quality / SWF_UNIT_DIVISOR;
         int offsetX = (int)Math.Floor(x);
         int offsetY = (int)Math.Floor(y);
-        int imageW = (int)Math.Floor(w + (x - offsetX) + QUALITY_MULTIPLIER) + 2;
-        int imageH = (int)Math.Floor(h + (y - offsetY) + QUALITY_MULTIPLIER) + 2;
+        int imageW = (int)Math.Floor(w + (x - offsetX) + quality) + 2;
+        int imageH = (int)Math.Floor(h + (y - offsetY) + quality) + 2;
         using Image<Rgba32> image = new(imageW, imageH, IMS.Color.Transparent.ToPixel<Rgba32>());
         ImageSharpShapeExporter exporter = new(image, new Size(SWF_UNIT_DIVISOR * -offsetX, SWF_UNIT_DIVISOR * -offsetY), SWF_UNIT_DIVISOR);
         compiledShape.Export(exporter);
