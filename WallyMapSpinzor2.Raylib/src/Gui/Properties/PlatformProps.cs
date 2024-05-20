@@ -20,7 +20,7 @@ partial class PropertiesWindow
 
         if (a.AssetName is null && ImGui.CollapsingHeader("Children"))
         {
-            foreach (AbstractAsset child in a.AssetChildren)
+            foreach (AbstractAsset child in a.AssetChildren!)
             {
                 if (ImGui.TreeNode($"{child.GetType().Name}##{child.GetHashCode()}"))
                 {

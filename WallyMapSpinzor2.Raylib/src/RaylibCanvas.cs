@@ -14,7 +14,7 @@ using SwfLib.Tags;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public partial class RaylibCanvas : ICanvas<Texture2DWrapper>
+public partial class RaylibCanvas : ICanvas
 {
     private readonly string brawlPath;
     public string[] BoneNames { get; set; }

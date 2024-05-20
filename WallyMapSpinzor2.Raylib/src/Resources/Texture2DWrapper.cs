@@ -1,12 +1,10 @@
 using System;
 using Raylib_cs;
-using SwfLib.Data;
-using SwiffCheese.Utils;
 using Rl = Raylib_cs.Raylib;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public class Texture2DWrapper : ITexture, IDisposable
+public class Texture2DWrapper : IDisposable
 {
     private bool _disposedValue = false;
 
