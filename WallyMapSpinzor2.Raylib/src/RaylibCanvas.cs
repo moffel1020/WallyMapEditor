@@ -8,7 +8,6 @@ using Raylib_cs;
 using WallyAnmSpinzor;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
-using System.Linq;
 using SwiffCheese.Wrappers;
 using SwfLib.Tags;
 
