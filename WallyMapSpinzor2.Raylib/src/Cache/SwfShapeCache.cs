@@ -7,8 +7,6 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using IMS = SixLabors.ImageSharp;
 
-using SwfLib.Data;
-
 using SwiffCheese.Exporting;
 using SwiffCheese.Shapes;
 using SwiffCheese.Utils;
@@ -18,7 +16,7 @@ using Raylib_cs;
 using Rl = Raylib_cs.Raylib;
 
 using TxtId = System.ValueTuple<WallyMapSpinzor2.Raylib.SwfFileData, ushort>;
-using ImgData = System.ValueTuple<Raylib_cs.Image, int, int>;
+using ImgData = System.ValueTuple<Raylib_cs.Image, int, int, double>;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -30,9 +28,9 @@ public class SwfShapeCache
 
     public void LoadShape(SwfFileData swf, ushort shapeId, double quality)
     {
-        (Raylib_cs.Image img, int offsetX, int offsetY) = LoadShapeInternal(swf, shapeId, quality);
+        (Raylib_cs.Image img, int offsetX, int offsetY, _) = LoadShapeInternal(swf, shapeId, quality);
         Texture2D texture = Rl.LoadTextureFromImage(img);
-        Cache[(swf, shapeId)] = new(texture, offsetX, offsetY);
+        Cache[(swf, shapeId)] = new(texture, offsetX, offsetY, quality);
         Rl.UnloadImage(img);
     }
 
@@ -43,8 +41,8 @@ public class SwfShapeCache
 
         Task.Run(() =>
         {
-            (Raylib_cs.Image img, int offsetX, int offsetY) = LoadShapeInternal(swf, shapeId, quality);
-            lock (_queue) _queue.Enqueue(((swf, shapeId), (img, offsetX, offsetY)));
+            (Raylib_cs.Image img, int offsetX, int offsetY, _) = LoadShapeInternal(swf, shapeId, quality);
+            lock (_queue) _queue.Enqueue(((swf, shapeId), (img, offsetX, offsetY, quality)));
         });
     }
 
@@ -70,7 +68,7 @@ public class SwfShapeCache
         ImageSharpShapeExporter exporter = new(image, new Size(SWF_UNIT_DIVISOR * -offsetX, SWF_UNIT_DIVISOR * -offsetY), SWF_UNIT_DIVISOR);
         compiledShape.Export(exporter);
         Raylib_cs.Image img = Utils.ImageSharpImageToRl(image);
-        return (img, offsetX, offsetY);
+        return (img, offsetX, offsetY, quality);
     }
 
     public void UploadImages(int amount)
@@ -82,11 +80,11 @@ public class SwfShapeCache
             {
                 (TxtId id, ImgData dat) = _queue.Dequeue();
                 _queueSet.Remove(id);
-                (Raylib_cs.Image img, int offsetX, int offsetY) = dat;
+                (Raylib_cs.Image img, int offsetX, int offsetY, double animScale) = dat;
                 if (!Cache.ContainsKey(id))
                 {
                     Texture2D texture = Rl.LoadTextureFromImage(img);
-                    Cache[id] = new(texture, offsetX, offsetY);
+                    Cache[id] = new(texture, offsetX, offsetY, animScale);
                 }
                 Rl.UnloadImage(img);
             }
@@ -104,7 +102,7 @@ public class SwfShapeCache
         {
             while (_queue.Count > 0)
             {
-                (_, (Raylib_cs.Image img, _, _)) = _queue.Dequeue();
+                (_, (Raylib_cs.Image img, _, _, _)) = _queue.Dequeue();
                 Rl.UnloadImage(img);
             }
         }

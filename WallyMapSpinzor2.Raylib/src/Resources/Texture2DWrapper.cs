@@ -31,7 +31,7 @@ public class Texture2DWrapper : IDisposable
         Height = h;
     }
 
-    public Texture2DWrapper(Texture2D texture, int offsetX, int offsetY) : this(texture, offsetX, offsetY, texture.Width, texture.Height)
+    public Texture2DWrapper(Texture2D texture, int offsetX, int offsetY, double animScale) : this(texture, offsetX * animScale, offsetY * animScale, texture.Width * animScale, texture.Height * animScale)
     {
 
     }
