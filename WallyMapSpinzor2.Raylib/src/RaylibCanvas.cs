@@ -261,11 +261,6 @@ public partial class RaylibCanvas : ICanvas
 
     public void DrawAnim(Gfx gfx, string animName, int frame, Transform trans, DrawPriorityEnum priority, object? caller)
     {
-        // this 256 isn't a mistake
-        float tintR = gfx.Tint == 0 ? 1 : ((byte)(gfx.Tint >> 16) / 256f);
-        float tintG = gfx.Tint == 0 ? 1 : ((byte)(gfx.Tint >> 8) / 256f);
-        float tintB = gfx.Tint == 0 ? 1 : ((byte)(gfx.Tint >> 0) / 256f);
-
         /*
         NOTE: the game goes over the list from the end until it finds a CustomArt that matches
         this only matters for CustomArt with RIGHT and for AsymmetrySwapFlags.
