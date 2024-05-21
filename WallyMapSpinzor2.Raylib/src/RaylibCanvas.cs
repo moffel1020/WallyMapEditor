@@ -218,7 +218,7 @@ public partial class RaylibCanvas : ICanvas
         SwfFileCache.Cache.TryGetValue(finalPath, out SwfFileData? swf);
         if (swf is not null)
             return swf;
-        SwfFileCache.LoadSwfAsync(finalPath);
+        SwfFileCache.LoadAsync(finalPath);
         return null;
     }
 
@@ -242,7 +242,7 @@ public partial class RaylibCanvas : ICanvas
         SwfSpriteCache.Cache.TryGetValue((swf, spriteId), out SwfSprite? sprite);
         if (sprite is not null)
             return sprite;
-        SwfSpriteCache.LoadSpriteAsync(swf, spriteId);
+        SwfSpriteCache.LoadAsync(swf, spriteId);
         return null;
     }
 
