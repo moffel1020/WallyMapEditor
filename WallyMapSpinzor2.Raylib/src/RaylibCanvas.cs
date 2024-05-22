@@ -25,7 +25,7 @@ public partial class RaylibCanvas : ICanvas
     public SwfFileCache SwfFileCache { get; } = new();
     public SwfShapeCache SwfShapeCache { get; } = new();
     public SwfSpriteCache SwfSpriteCache { get; } = new();
-    public ConcurrentDictionary<string, AnmGroup> AnmGroups { get; set; } = [];
+    public ConcurrentDictionary<string, AnmClass> AnmClasses { get; set; } = [];
     public Matrix4x4 CameraMatrix { get; set; } = Matrix4x4.Identity;
 
     public RaylibCanvas(string brawlPath, string[] boneNames)
@@ -45,9 +45,9 @@ public partial class RaylibCanvas : ICanvas
             AnmFile anm;
             using (FileStream file = new(anmPath, FileMode.Open, FileAccess.Read))
                 anm = AnmFile.CreateFrom(file);
-            foreach ((string groupName, AnmGroup group) in anm.Groups)
+            foreach ((string className, AnmClass @class) in anm.Classes)
             {
-                AnmGroups[groupName] = group;
+                AnmClasses[className] = @class;
             }
         });
     }
@@ -282,15 +282,15 @@ public partial class RaylibCanvas : ICanvas
         // anm animation
         else if (gfx.AnimFile.StartsWith("Animation_"))
         {
-            if (!AnmGroups.TryGetValue($"{gfx.AnimFile}/{gfx.AnimClass}", out AnmGroup? anmGroup))
+            if (!AnmClasses.TryGetValue($"{gfx.AnimFile}/{gfx.AnimClass}", out AnmClass? anmClass))
                 return;
             // anm animation
-            AnmAnimation animation = anmGroup.Animations[animName];
+            AnmAnimation animation = anmClass.Animations[animName];
             AnmFrame anmFrame = animation.Frames[BrawlhallaMath.SafeMod(frame, animation.Frames.Count)];
             foreach (AnmBone bone in anmFrame.Bones)
             {
                 Transform boneTrans = new(bone.ScaleX, bone.RotateSkew1, bone.RotateSkew0, bone.ScaleY, bone.X, bone.Y);
-                string swfPath = Path.Combine("bones", $"Bones{anmGroup.FileName["Animation".Length..]}");
+                string swfPath = Path.Combine("bones", $"Bones{anmClass.FileName["Animation".Length..]}");
                 string spriteName = BoneNames[bone.Id - 1] + customArtSuffix; // bone id is 1 indexed
                 // wtf
                 if (spriteName == "flash.display::MovieClip")
