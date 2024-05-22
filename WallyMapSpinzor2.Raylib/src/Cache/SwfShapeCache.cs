@@ -47,7 +47,6 @@ public class SwfShapeCache
     }
 
     private const int SWF_UNIT_DIVISOR = 20;
-    // this can actually change per GfxType (AnimScale property multiplies this). later.
     private const double QUALITY_MULTIPLIER = 1.2;
 
     private static ImgData LoadShapeInternal(SwfFileData swf, ushort shapeId, double quality)
@@ -68,7 +67,8 @@ public class SwfShapeCache
         ImageSharpShapeExporter exporter = new(image, new Size(SWF_UNIT_DIVISOR * -offsetX, SWF_UNIT_DIVISOR * -offsetY), SWF_UNIT_DIVISOR);
         compiledShape.Export(exporter);
         Raylib_cs.Image img = Utils.ImageSharpImageToRl(image);
-        return (img, offsetX, offsetY, quality);
+        // brawlhalla uses the un-multiplied AnimScale for the actual scaling
+        return (img, offsetX, offsetY, quality / QUALITY_MULTIPLIER);
     }
 
     public void UploadImages(int amount)

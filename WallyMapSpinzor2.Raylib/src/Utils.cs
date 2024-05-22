@@ -10,15 +10,15 @@ using Rl = Raylib_cs.Raylib;
 
 using SixLabors.ImageSharp;
 
+using SwfLib;
 using SwfLib.Tags;
 using SwfLib.Tags.DisplayListTags;
 using SwfLib.Tags.ActionsTags;
-using SwfLib;
+using SwfLib.Data;
 
 using BrawlhallaSwz;
 
 using AbcDisassembler;
-using SwfLib.Data;
 
 namespace WallyMapSpinzor2.Raylib;
 
