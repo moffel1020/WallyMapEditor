@@ -86,21 +86,7 @@ public static class Utils
     {
         XElement element;
         using (FileStream fromFile = new(fromPath, FileMode.Open, FileAccess.Read))
-        {
-            // bmg moment
-            if (fromPath.EndsWith("RefineryDoors.xml"))
-            {
-                string content;
-                using (StreamReader reader = new(fromFile))
-                    content = reader.ReadToEnd();
-                content = content.Replace("--->", "-->");
-                element = XElement.Parse(content);
-            }
-            else
-            {
-                element = XElement.Load(fromFile);
-            }
-        }
+            element = XElement.Load(fromFile);
         return element.DeserializeTo<T>();
     }
 
@@ -141,25 +127,19 @@ public static class Utils
     public static T DeserializeFromString<T>(string xmldata)
         where T : IDeserializable, new()
     {
-        // bmg moment
-        xmldata = xmldata.Replace("--->", "-->");
-        XElement element = XElement.Parse(xmldata);
-        return element.DeserializeTo<T>();
+        return XElement.Parse(xmldata).DeserializeTo<T>();
     }
 
-    public static string? GetFileInSwzFromPath(string swzPath, string filename, uint key)
+    public static IEnumerable<string> GetFilesInSwz(string swzPath, uint key)
     {
         using FileStream stream = new(swzPath, FileMode.Open, FileAccess.Read);
         using SwzReader reader = new(stream, key);
         while (reader.HasNext())
-        {
-            string data = reader.ReadFile();
-            string name = SwzUtils.GetFileName(data);
-            if (name == filename)
-                return data;
-        }
-        return null;
+            yield return reader.ReadFile();
     }
+
+    public static string? GetFileInSwzFromPath(string swzPath, string filename, uint key) =>
+        GetFilesInSwz(swzPath, key).FirstOrDefault(file => SwzUtils.GetFileName(file) == filename);
 
     public static T? DeserializeSwzFromPath<T>(string swzPath, string filename, uint key)
         where T : IDeserializable, new()

@@ -289,15 +289,12 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
         string initPath = Path.Combine(folder, "Init.swz");
         uint key = uint.Parse(_swzKey);
 
-        using (FileStream stream = new(dynamicPath, FileMode.Open, FileAccess.Read))
+        foreach (string file in Utils.GetFilesInSwz(dynamicPath, key))
         {
-            using SwzReader reader = new(stream, key);
-            while (reader.HasNext())
-            {
-                string data = reader.ReadFile();
-                string name = SwzUtils.GetFileName(data);
-                levelDescFiles.Add(name, data);
-            }
+            string name = SwzUtils.GetFileName(file);
+            if (!name.StartsWith("LevelDesc_"))
+                continue;
+            levelDescFiles.Add(name["LevelDesc_".Length..], file);
         }
 
         _decryptedLt = Utils.DeserializeSwzFromPath<LevelTypes>(initPath, "LevelTypes.xml", key);
