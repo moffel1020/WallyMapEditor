@@ -86,7 +86,21 @@ public static class Utils
     {
         XElement element;
         using (FileStream fromFile = new(fromPath, FileMode.Open, FileAccess.Read))
-            element = XElement.Load(fromFile);
+        {
+            // bmg moment
+            if (fromPath.EndsWith("RefineryDoors.xml"))
+            {
+                string content;
+                using (StreamReader reader = new(fromFile))
+                    content = reader.ReadToEnd();
+                content = content.Replace("--->", "-->");
+                element = XElement.Parse(content);
+            }
+            else
+            {
+                element = XElement.Load(fromFile);
+            }
+        }
         return element.DeserializeTo<T>();
     }
 
@@ -127,7 +141,10 @@ public static class Utils
     public static T DeserializeFromString<T>(string xmldata)
         where T : IDeserializable, new()
     {
-        return XElement.Parse(xmldata).DeserializeTo<T>();
+        // bmg moment
+        xmldata = xmldata.Replace("--->", "-->");
+        XElement element = XElement.Parse(xmldata);
+        return element.DeserializeTo<T>();
     }
 
     public static IEnumerable<string> GetFilesInSwz(string swzPath, uint key)

@@ -89,7 +89,7 @@ public class MousePickingFramebuffer : IDisposable
             Load(viewport.Framebuffer.Texture.Width, viewport.Framebuffer.Texture.Height);
     }
 
-    public object? GetObjectAtCoords(ViewportWindow viewport, RaylibCanvas? canvas, IDrawable? mapData, RenderConfig config, Camera2D cam, TimeSpan time)
+    public object? GetObjectAtCoords(ViewportWindow viewport, RaylibCanvas? canvas, IDrawable? mapData, Camera2D cam, RenderConfig config, RenderState state)
     {
         if (canvas is null || mapData is null) return null;
 
@@ -103,7 +103,7 @@ public class MousePickingFramebuffer : IDisposable
         Rl.ClearBackground(Raylib_cs.Color.Black);
         canvas.CameraMatrix = Rl.GetCameraMatrix2D(cam);
 
-        mapData.DrawOn(canvas, config, Transform.IDENTITY, time, new RenderData());
+        mapData.DrawOn(canvas, Transform.IDENTITY, config, new RenderContext(), state);
 
         _drawables.Clear();
         while (canvas.DrawingQueue.Count > 0)

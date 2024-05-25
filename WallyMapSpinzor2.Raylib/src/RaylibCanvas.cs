@@ -261,7 +261,7 @@ public partial class RaylibCanvas : ICanvas
         }
     }
 
-    public void DrawAnim(Gfx gfx, string animName, int frame, Transform trans, DrawPriorityEnum priority, object? caller)
+    public void DrawAnim(Gfx gfx, string animName, int frame, Transform trans, DrawPriorityEnum priority, object? caller, int loopLimit = -1)
     {
         /*
         NOTE: the game goes over the list from the end until it finds a CustomArt that matches
@@ -277,7 +277,7 @@ public partial class RaylibCanvas : ICanvas
             if (swf is null)
                 return;
             ushort spriteId = swf.SymbolClass[gfx.AnimClass + customArtSuffix];
-            DrawSwfSprite(gfx.AnimFile, spriteId, frame, gfx.AnimScale, gfx.Tint, 1, trans, priority, caller);
+            DrawSwfSprite(gfx.AnimFile, spriteId, frame, gfx.AnimScale, gfx.Tint, 1, trans, priority, caller, loopLimit);
         }
         // anm animation
         else if (gfx.AnimFile.StartsWith("Animation_"))
@@ -286,6 +286,10 @@ public partial class RaylibCanvas : ICanvas
                 return;
             // anm animation
             AnmAnimation animation = anmClass.Animations[animName];
+
+            if (loopLimit != -1 && Math.Abs(frame) >= loopLimit * animation.Frames.Count)
+                return;
+
             AnmFrame anmFrame = animation.Frames[BrawlhallaMath.SafeMod(frame, animation.Frames.Count)];
             foreach (AnmBone bone in anmFrame.Bones)
             {
@@ -320,13 +324,17 @@ public partial class RaylibCanvas : ICanvas
         ), (int)priority);
     }
 
-    public void DrawSwfSprite(string filePath, ushort spriteId, int frame, double animScale, uint tint, double opacity, Transform trans, DrawPriorityEnum priority, object? caller)
+    public void DrawSwfSprite(string filePath, ushort spriteId, int frame, double animScale, uint tint, double opacity, Transform trans, DrawPriorityEnum priority, object? caller, int loopLimit = -1)
     {
         SwfFileData? file = LoadSwf(filePath);
         if (file is null) return;
         SwfSprite? sprite = LoadSpriteFromSwf(filePath, spriteId);
         if (sprite is null) return;
-        SwfSpriteFrame spriteFrame = sprite.Frames[frame % sprite.Frames.Length];
+
+        if (loopLimit != -1 && Math.Abs(frame) >= loopLimit * sprite.Frames.Length)
+            return;
+
+        SwfSpriteFrame spriteFrame = sprite.Frames[BrawlhallaMath.SafeMod(frame, sprite.Frames.Length)];
         foreach ((_, SwfSpriteFrameLayer layer) in spriteFrame.Layers)
         {
             // is a shape

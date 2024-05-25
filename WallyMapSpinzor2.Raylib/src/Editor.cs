@@ -41,6 +41,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
     private object? _selectedObject = null;
 
     private readonly RenderConfig _config = new() { };
+    private readonly RenderState _state = new();
     private double _renderSpeed = 1;
 
     public MousePickingFramebuffer PickingFramebuffer { get; set; } = new();
@@ -55,6 +56,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         MapData = new Level(ld, lt, lst);
         using FileStream bonesFile = new(Path.Combine(dumpPath, "Init", "BoneTypes.xml"), FileMode.Open, FileAccess.Read);
         BoneNames = XElement.Load(bonesFile).Elements("Bone").Select(e => e.Value).ToArray();
+        _state.Reset();
     }
 
     public void LoadMap(string ldPath, string? ltPath, string? lstPath, string btPath)
@@ -82,6 +84,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         // it's fine if there are no playlists here, they will be selected when exporting
 
         ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
+        _state.Reset();
     }
 
     public void LoadMap(Level l, string[] boneNames)
@@ -97,6 +100,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
 
         MapData = l;
         ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
+        _state.Reset();
     }
 
     public static LevelType DefaultLevelType => new()
@@ -145,7 +149,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
 
         while (!Rl.WindowShouldClose())
         {
-            Time += TimeSpan.FromSeconds(_renderSpeed * Rl.GetFrameTime());
+            _config.Time += TimeSpan.FromSeconds(_renderSpeed * Rl.GetFrameTime());
             Draw();
             Update();
         }
@@ -169,7 +173,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         Canvas ??= new(BrawlPath, BoneNames);
         Canvas.CameraMatrix = Rl.GetCameraMatrix2D(_cam);
 
-        MapData?.DrawOn(Canvas, _config, Transform.IDENTITY, Time, new RenderData());
+        MapData?.DrawOn(Canvas, Transform.IDENTITY, _config, new RenderContext(), _state);
         Canvas.FinalizeDraw();
 
         Rl.EndMode2D();
@@ -248,7 +252,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
 
             if (Rl.IsMouseButtonReleased(MouseButton.Left))
             {
-                _selectedObject = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, MapData, _config, _cam, Time);
+                _selectedObject = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, MapData, _cam, _config, _state);
                 if (_selectedObject is not null)
                     PropertiesWindow.Open = true;
                 // TODO: we might want a way to associate objects with their parents. 
