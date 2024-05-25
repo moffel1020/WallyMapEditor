@@ -31,8 +31,14 @@ public partial class PropertiesWindow
     private static bool ShowProperties(object o, CommandHistory cmd) => o switch
     {
         Respawn r => ShowRespawnProps(r, cmd),
+
         Platform p => ShowPlatformProps(p, cmd),
+        AnimatedBackground ab => ShowAnimatedBackgroundProps(ab, cmd),
+        LevelAnim la => ShowLevelAnimProps(la, cmd),
+        LevelAnimation la => ShowLevelAnimationProps(la, cmd),
+
         MovingPlatform mp => ShowMovingPlatformProps(mp, cmd),
+
         CameraBounds cb => ShowCameraBoundsProps(cb, cmd),
         SpawnBotBounds sb => ShowSpawnBotBoundsProps(sb, cmd),
 

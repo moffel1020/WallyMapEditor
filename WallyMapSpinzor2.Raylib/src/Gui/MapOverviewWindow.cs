@@ -83,8 +83,13 @@ public class MapOverviewWindow
 
         ImGui.Separator();
 
-        if (ImGui.CollapsingHeader("Platforms##overview"))
+        if (ImGui.CollapsingHeader("Assets##overview"))
+        {
             ShowSelectableList(l.Desc.Assets, ref selected);
+            ShowSelectableList(l.Desc.LevelAnims, ref selected);
+            ShowSelectableList(l.Desc.AnimatedBackgrounds, ref selected);
+            ShowSelectableList(l.Desc.LevelAnimations, ref selected);
+        }
 
         if (ImGui.CollapsingHeader("Collisions##overview"))
         {
@@ -119,6 +124,13 @@ public class MapOverviewWindow
     public static string GetExtraObjectInfo(object o) => o switch
     {
         Platform p => $"({p.InstanceName})",
+        AnimatedBackground ab => $"({ab.Gfx.AnimClass})",
+        Gfx g => $"({g.AnimClass})",
+        CustomArt ca => $"({ca.Name})",
+        //TODO: test if this actually works correctly
+        ColorSwap cs => $"({cs.OldColor:X08}->{cs.NewColor:X08})",
+        LevelAnim la => $"({la.InstanceName})",
+
         MovingPlatform mp => $"({mp.PlatID})",
         Respawn r => $"({r.X}, {r.Y})",
         AbstractItemSpawn i => $"({i.X}, {i.Y}, {i.W}, {i.H})",

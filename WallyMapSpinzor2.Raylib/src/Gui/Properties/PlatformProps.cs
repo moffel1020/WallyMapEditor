@@ -8,7 +8,7 @@ partial class PropertiesWindow
     {
         bool propChanged = false;
         string name = a.InstanceName;
-        ImGui.InputText("Name", ref name, 64);
+        ImGui.InputText("InstanceName", ref name, 64);
         a.InstanceName = name;
 
         ImGui.Separator();
