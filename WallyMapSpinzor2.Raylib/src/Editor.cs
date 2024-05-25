@@ -191,12 +191,19 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         if (ViewportWindow.Open) ViewportWindow.Show();
         if (RenderConfigWindow.Open) RenderConfigWindow.Show(_config, ref _renderSpeed);
         if (MapOverviewWindow.Open && MapData is Level l) MapOverviewWindow.Show(l, CommandHistory, ref _selectedObject);
+
+        if (_selectedObject is not null)
+            PropertiesWindow.Open = true;
         if (PropertiesWindow.Open && _selectedObject is not null) PropertiesWindow.Show(_selectedObject, CommandHistory);
+        if (!PropertiesWindow.Open)
+            _selectedObject = null;
+
         if (HistoryPanel.Open) HistoryPanel.Show(CommandHistory);
 
         DialogWindows.RemoveAll(dialog => dialog.Closed);
         foreach (IDialog d in DialogWindows)
             d.Show();
+
     }
 
     private void ShowMainMenuBar()
@@ -253,8 +260,6 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
             if (Rl.IsMouseButtonReleased(MouseButton.Left))
             {
                 _selectedObject = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, MapData, _cam, _config, _state);
-                if (_selectedObject is not null)
-                    PropertiesWindow.Open = true;
                 // TODO: we might want a way to associate objects with their parents. 
                 // for example when selecting a hard collision we probably want to get the parent dynamic collision if it exists, when selecting an asset we want the platform
             }
