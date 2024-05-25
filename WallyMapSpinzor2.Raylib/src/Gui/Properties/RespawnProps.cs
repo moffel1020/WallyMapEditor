@@ -4,7 +4,8 @@ public partial class PropertiesWindow
 {
     public static bool ShowRespawnProps(Respawn r, CommandHistory cmd)
     {
-        bool propChanged = ImGuiExt.DragFloatHistory("X", r.X, val => r.X = val, cmd);
+        bool propChanged = false;
+        propChanged |= ImGuiExt.DragFloatHistory("X", r.X, val => r.X = val, cmd);
         propChanged |= ImGuiExt.DragFloatHistory("Y", r.Y, val => r.Y = val, cmd);
 
         if (r.ExpandedInit && r.Initial) r.Initial = false;

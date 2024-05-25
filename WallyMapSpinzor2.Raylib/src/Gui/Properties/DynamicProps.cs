@@ -9,8 +9,8 @@ public partial class PropertiesWindow
     {
         bool propChanged = false;
         ImGui.Text("PlatID: " + ad.PlatID);
-        propChanged |= ImGuiExt.DragFloatHistory("x", ad.X, val => ad.X = val, cmd);
-        propChanged |= ImGuiExt.DragFloatHistory("y", ad.Y, val => ad.Y = val, cmd);
+        propChanged |= ImGuiExt.DragFloatHistory("X", ad.X, val => ad.X = val, cmd);
+        propChanged |= ImGuiExt.DragFloatHistory("Y", ad.Y, val => ad.Y = val, cmd);
 
         if (ImGui.CollapsingHeader("Children"))
         {

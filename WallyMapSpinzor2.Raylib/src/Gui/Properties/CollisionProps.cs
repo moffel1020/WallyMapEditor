@@ -13,15 +13,16 @@ public partial class PropertiesWindow
 
     public static bool ShowAbstractCollisionProps(AbstractCollision ac, CommandHistory cmd)
     {
-        bool propChanged = ImGuiExt.DragFloatHistory($"x1##props{ac.GetHashCode()}", ac.X1, val => ac.X1 = val, cmd);
-        propChanged |= ImGuiExt.DragFloatHistory($"y1##props{ac.GetHashCode()}", ac.Y1, val => ac.Y1 = val, cmd);
-        propChanged |= ImGuiExt.DragFloatHistory($"x2##props{ac.GetHashCode()}", ac.X2, val => ac.X2 = val, cmd);
-        propChanged |= ImGuiExt.DragFloatHistory($"y2##props{ac.GetHashCode()}", ac.Y2, val => ac.Y2 = val, cmd);
+        bool propChanged = false;
+        propChanged |= ImGuiExt.DragFloatHistory($"X1##props{ac.GetHashCode()}", ac.X1, val => ac.X1 = val, cmd);
+        propChanged |= ImGuiExt.DragFloatHistory($"Y1##props{ac.GetHashCode()}", ac.Y1, val => ac.Y1 = val, cmd);
+        propChanged |= ImGuiExt.DragFloatHistory($"X2##props{ac.GetHashCode()}", ac.X2, val => ac.X2 = val, cmd);
+        propChanged |= ImGuiExt.DragFloatHistory($"Y2##props{ac.GetHashCode()}", ac.Y2, val => ac.Y2 = val, cmd);
 
         ImGui.SeparatorText($"Anchor##props{ac.GetHashCode()}");
         propChanged |= ImGuiExt.DragNullableFloatPairHistory(
             "anchor",
-            $"anchor x##props{ac.GetHashCode()}", $"anchor y##props{ac.GetHashCode()}",
+            $"AnchorX##props{ac.GetHashCode()}", $"AnchorY##props{ac.GetHashCode()}",
             ac.AnchorX, ac.AnchorY,
             // these default values look weird when the collision is on a moving platform
             // but the user will adjust it anyways so it's ok
@@ -31,27 +32,27 @@ public partial class PropertiesWindow
         );
 
         ImGui.SeparatorText($"Normal##props{ac.GetHashCode()}");
-        propChanged |= ImGuiExt.DragFloatHistory($"normal x##props{ac.GetHashCode()}", ac.NormalX, val => ac.NormalX = val, cmd, speed: 0.01, minValue: -1, maxValue: 1);
-        propChanged |= ImGuiExt.DragFloatHistory($"normal y##props{ac.GetHashCode()}", ac.NormalY, val => ac.NormalY = val, cmd, speed: 0.01, minValue: -1, maxValue: 1);
+        propChanged |= ImGuiExt.DragFloatHistory($"NormalX##props{ac.GetHashCode()}", ac.NormalX, val => ac.NormalX = val, cmd, speed: 0.01, minValue: -1, maxValue: 1);
+        propChanged |= ImGuiExt.DragFloatHistory($"NormalY##props{ac.GetHashCode()}", ac.NormalY, val => ac.NormalY = val, cmd, speed: 0.01, minValue: -1, maxValue: 1);
 
         return propChanged;
     }
 
     public static bool ShowAbstractPressurePlateCollisionProps(AbstractPressurePlateCollision pc, CommandHistory cmd)
     {
-        bool propChanged = ShowAbstractCollisionProps(pc, cmd);
-
+        bool propChanged = false;
+        propChanged |= ShowAbstractCollisionProps(pc, cmd);
         ImGui.SeparatorText($"Pressure plate props##props{pc.GetHashCode()}");
         ImGui.Text("AssetName: " + pc.AssetName); //TODO: allow modifying
-        propChanged |= ImGuiExt.DragFloatHistory($"anim offset x##props{pc.GetHashCode()}", pc.AnimOffsetX, val => pc.AnimOffsetX = val, cmd);
-        propChanged |= ImGuiExt.DragFloatHistory($"anim offset y##props{pc.GetHashCode()}", pc.AnimOffsetY, val => pc.AnimOffsetY = val, cmd);
-        propChanged |= ImGuiExt.DragFloatHistory($"anim rotation##props{pc.GetHashCode()}", pc.AnimRotation, val => pc.AnimRotation = BrawlhallaMath.SafeMod(val, 360.0), cmd);
-        propChanged |= ImGuiExt.DragIntHistory($"cooldown##props{pc.GetHashCode()}", pc.Cooldown, val => pc.Cooldown = val, cmd, minValue: 0);
-        propChanged |= ImGuiExt.CheckboxHistory($"facing left##props{pc.GetHashCode()}", pc.FaceLeft, val => pc.FaceLeft = val, cmd);
+        propChanged |= ImGuiExt.DragFloatHistory($"AnimOffseyX##props{pc.GetHashCode()}", pc.AnimOffsetX, val => pc.AnimOffsetX = val, cmd);
+        propChanged |= ImGuiExt.DragFloatHistory($"AnimOffsetY##props{pc.GetHashCode()}", pc.AnimOffsetY, val => pc.AnimOffsetY = val, cmd);
+        propChanged |= ImGuiExt.DragFloatHistory($"AnimRotation##props{pc.GetHashCode()}", pc.AnimRotation, val => pc.AnimRotation = BrawlhallaMath.SafeMod(val, 360.0), cmd);
+        propChanged |= ImGuiExt.DragIntHistory($"Cooldown##props{pc.GetHashCode()}", pc.Cooldown, val => pc.Cooldown = val, cmd, minValue: 0);
+        propChanged |= ImGuiExt.CheckboxHistory($"FaceLeft##props{pc.GetHashCode()}", pc.FaceLeft, val => pc.FaceLeft = val, cmd);
         //TODO: add FireOffsetX, FireOffsetY
 
         //TODO: allow modifying
-        if (ImGui.BeginListBox($"powers##props{pc.GetHashCode()}"))
+        if (ImGui.BeginListBox($"TrapPowers##props{pc.GetHashCode()}"))
         {
             foreach (string power in pc.TrapPowers)
                 ImGui.Text(power);
