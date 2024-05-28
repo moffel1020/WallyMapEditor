@@ -16,18 +16,14 @@ using System.Xml.Linq;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public class ImportDialog(Editor editor, string brawlPath) : IDialog
+public class ImportDialog(Editor editor, PathPreferences prefs) : IDialog
 {
     private const int MAX_KEY_LENGTH = 9;
 
-    private static string? lastLdPath;
-    private static string? lastLtPath;
-    private static string? lastLstPath;
-    private static string? lastBtPath;
-
-    private static string _swzKey = "";
-    private string _gamePath = brawlPath;
-    private string _bhairPath = Path.Combine(brawlPath, "BrawlhallaAir.swf");
+    private string? savedLdPath = prefs.LevelDescPath;
+    private string? savedLtPath = prefs.LevelTypePath;
+    private string? savedLstPath = prefs.LevelSetTypesPath;
+    private string? savedBtPath = prefs.BoneTypesPath;
 
     private readonly Dictionary<string, string> levelDescFiles = [];
     private string _levelDescFileFilter = "";
@@ -89,15 +85,16 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
         {
             Task.Run(() =>
             {
-                DialogResult result = Dialog.FolderPicker(_gamePath);
+                DialogResult result = Dialog.FolderPicker(prefs.BrawlhallaPath);
                 if (result.IsOk)
-                    _gamePath = result.Path;
+                    prefs.BrawlhallaPath = result.Path;
             });
         }
-        ImGui.Text($"Path: {_gamePath}");
+        ImGui.Text($"Path: {prefs.BrawlhallaPath}");
 
-        ImGui.InputText("Decryption key", ref _swzKey, MAX_KEY_LENGTH, ImGuiInputTextFlags.CharsDecimal);
-        if (_swzKey.Length > 0 && _decryptedLt is null && ImGuiExt.WithDisabledButton(_decrypting, "Decrypt"))
+        string swzKey = prefs.DecryptionKey ?? "";
+        ImGui.InputText("Decryption key", ref swzKey, MAX_KEY_LENGTH, ImGuiInputTextFlags.CharsDecimal);
+        if (swzKey.Length > 0 && _decryptedLt is null && ImGuiExt.WithDisabledButton(_decrypting, "Decrypt"))
         {
             _decrypting = true;
             Task.Run(() =>
@@ -105,7 +102,9 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
                 _loadingStatus = "decrypting...";
                 try
                 {
-                    DecryptSwzFiles(_gamePath);
+                    DecryptSwzFiles(prefs.BrawlhallaPath!);
+                    prefs.DecryptionKey = swzKey;
+                    prefs.Save();
                     _loadingStatus = null;
                     _loadingError = null;
                 }
@@ -160,12 +159,15 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
         {
             Task.Run(() =>
             {
-                DialogResult result = Dialog.FileOpen("swf", _gamePath);
+                DialogResult result = Dialog.FileOpen("swf", prefs.BrawlhallaPath);
                 if (result.IsOk)
-                    _bhairPath = result.Path;
+                {
+                    prefs.BrawlhallaAirPath = result.Path;
+                    prefs.Save();
+                }
             });
         }
-        ImGui.Text($"{_bhairPath}");
+        ImGui.Text($"{prefs.BrawlhallaAirPath}");
 
         if (ImGuiExt.WithDisabledButton(_keySearching, "Find decryption key"))
         {
@@ -175,10 +177,16 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
             {
                 try
                 {
-                    if (Utils.GetDoABCDefineTag(_bhairPath) is DoABCDefineTag abcTag)
+                    if (Utils.GetDoABCDefineTag(prefs.BrawlhallaAirPath!) is DoABCDefineTag abcTag)
                     {
                         AbcFile abc = AbcFile.Read(abcTag.ABCData);
-                        _swzKey = Utils.FindDecryptionKey(abc).ToString() ?? "";
+                        uint? key = Utils.FindDecryptionKey(abc);
+                        if (key is not null)
+                        {
+                            prefs.DecryptionKey = key.ToString();
+                            prefs.Save();
+                        }
+
                         _loadingStatus = null;
                         _loadingError = null;
                     }
@@ -214,64 +222,69 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
         {
             Task.Run(() =>
             {
-                DialogResult result = Dialog.FileOpen("xml", Path.GetDirectoryName(lastLdPath));
+                DialogResult result = Dialog.FileOpen("xml", Path.GetDirectoryName(savedLdPath));
                 if (result.IsOk)
-                    lastLdPath = result.Path;
+                    savedLdPath = result.Path;
             });
         }
         ImGui.SameLine();
-        ImGui.Text(lastLdPath ?? "None");
+        ImGui.Text(savedLdPath ?? "None");
 
         if (ImGui.Button("BoneTypes"))
         {
             Task.Run(() =>
             {
-                DialogResult result = Dialog.FileOpen("xml", Path.GetDirectoryName(lastBtPath));
+                DialogResult result = Dialog.FileOpen("xml", Path.GetDirectoryName(savedBtPath));
                 if (result.IsOk)
-                    lastBtPath = result.Path;
+                    savedBtPath = result.Path;
             });
         }
         ImGui.SameLine();
-        ImGui.Text(lastBtPath ?? "None");
+        ImGui.Text(savedBtPath ?? "None");
 
         if (ImGui.Button("LevelTypes.xml (optional)"))
         {
             Task.Run(() =>
             {
-                DialogResult result = Dialog.FileOpen("xml", Path.GetDirectoryName(lastLtPath));
+                DialogResult result = Dialog.FileOpen("xml", Path.GetDirectoryName(savedLtPath));
                 if (result.IsOk)
-                    lastLtPath = result.Path;
+                    savedLtPath = result.Path;
             });
         }
         ImGui.SameLine();
-        if (lastLtPath is not null && ImGui.Button("x##lt")) lastLtPath = null;
+        if (savedLtPath is not null && ImGui.Button("x##lt")) savedLtPath = null;
         ImGui.SameLine();
-        ImGui.Text(lastLtPath ?? "None");
+        ImGui.Text(savedLtPath ?? "None");
 
         if (ImGui.Button("LevelSetTypes.xml (optional)"))
         {
             Task.Run(() =>
             {
-                DialogResult result = Dialog.FileOpen("xml", Path.GetDirectoryName(lastLstPath));
+                DialogResult result = Dialog.FileOpen("xml", Path.GetDirectoryName(savedLstPath));
                 if (result.IsOk)
-                    lastLstPath = result.Path;
+                    savedLstPath = result.Path;
             });
         }
         ImGui.SameLine();
-        if (lastLstPath is not null && ImGui.Button("x##lst")) lastLstPath = null;
+        if (savedLstPath is not null && ImGui.Button("x##lst")) savedLstPath = null;
         ImGui.SameLine();
-        ImGui.Text(lastLstPath ?? "None");
+        ImGui.Text(savedLstPath ?? "None");
 
         ImGui.Separator();
-        if (lastLdPath is not null && lastBtPath is not null && ImGui.Button("Import"))
+        if (savedLdPath is not null && savedBtPath is not null && ImGui.Button("Import"))
         {
             _loadingStatus = "loading...";
             try
             {
-                editor.LoadMap(lastLdPath, lastLtPath, lastLstPath, lastBtPath);
+                editor.LoadMap(savedLdPath, savedLtPath, savedLstPath, savedBtPath);
                 _open = false;
                 _loadingStatus = null;
                 _loadingError = null;
+                prefs.LevelDescPath = savedLdPath;
+                prefs.LevelTypePath = savedLtPath;
+                prefs.LevelSetTypesPath = savedLstPath;
+                prefs.BoneTypesPath = savedBtPath;
+                prefs.Save();
             }
             catch (Exception e)
             {
@@ -287,7 +300,7 @@ public class ImportDialog(Editor editor, string brawlPath) : IDialog
         string gamePath = Path.Combine(folder, "Game.swz");
         string dynamicPath = Path.Combine(folder, "Dynamic.swz");
         string initPath = Path.Combine(folder, "Init.swz");
-        uint key = uint.Parse(_swzKey);
+        uint key = uint.Parse(prefs.DecryptionKey!);
 
         foreach (string file in Utils.GetFilesInSwz(dynamicPath, key))
         {

@@ -222,7 +222,7 @@ public class Editor(PathPreferences pathPrefs)
         if (ImGui.BeginMenu("File"))
         {
             if (ImGui.MenuItem("Export")) DialogWindows.Add(new ExportDialog(MapData));
-            // if (ImGui.MenuItem("Import")) DialogWindows.Add(new ImportDialog(this, BrawlPath));
+            if (ImGui.MenuItem("Import")) DialogWindows.Add(new ImportDialog(this, PathPrefs));
             ImGui.EndMenu();
         }
         if (ImGui.BeginMenu("Edit"))
