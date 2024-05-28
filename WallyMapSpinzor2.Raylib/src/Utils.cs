@@ -215,4 +215,20 @@ public static class Utils
 
         return null;
     }
+
+    public static bool IsValidBrawlPath(string? path)
+    {
+        if (path is null) return false;
+
+        string[] requiredFiles = ["BrawlhallaAir.swf", "Dynamic.swz", "Game.swz", "Engine.swz"];
+        foreach (string name in requiredFiles)
+        {
+            if (!File.Exists(Path.Combine(path, name)))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

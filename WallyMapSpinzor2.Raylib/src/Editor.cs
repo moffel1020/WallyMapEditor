@@ -13,7 +13,7 @@ using ImGuiNET;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public class Editor(string brawlPath, string dumpPath, string fileName)
+public class Editor(PathPreferences pathPrefs)
 {
     public const float ZOOM_INCREMENT = 0.15f;
     public const float MIN_ZOOM = 0.01f;
@@ -23,7 +23,8 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
     public const int INITIAL_SCREEN_HEIGHT = 480;
 
     public IDrawable? MapData { get; set; }
-    public string BrawlPath { get; set; } = brawlPath;
+    PathPreferences PathPrefs { get; } = pathPrefs;
+    // public string BrawlPath { get; set; } = ;
     public string[] BoneNames { get; set; } = null!;
 
     public RaylibCanvas? Canvas { get; set; }
@@ -46,18 +47,18 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
 
     public MousePickingFramebuffer PickingFramebuffer { get; set; } = new();
 
-    public void LoadMap()
-    {
-        _selectedObject = null;
-        CommandHistory.Clear();
-        LevelDesc ld = Utils.DeserializeFromPath<LevelDesc>(Path.Combine(dumpPath, "Dynamic", fileName));
-        LevelTypes lt = Utils.DeserializeFromPath<LevelTypes>(Path.Combine(dumpPath, "Init", "LevelTypes.xml"));
-        LevelSetTypes lst = Utils.DeserializeFromPath<LevelSetTypes>(Path.Combine(dumpPath, "Game", "LevelSetTypes.xml"));
-        MapData = new Level(ld, lt, lst);
-        using FileStream bonesFile = new(Path.Combine(dumpPath, "Init", "BoneTypes.xml"), FileMode.Open, FileAccess.Read);
-        BoneNames = XElement.Load(bonesFile).Elements("Bone").Select(e => e.Value).ToArray();
-        _state.Reset();
-    }
+    // public void LoadMap()
+    // {
+    //     _selectedObject = null;
+    //     CommandHistory.Clear();
+    //     LevelDesc ld = Utils.DeserializeFromPath<LevelDesc>(Path.Combine(dumpPath, "Dynamic", fileName));
+    //     LevelTypes lt = Utils.DeserializeFromPath<LevelTypes>(Path.Combine(dumpPath, "Init", "LevelTypes.xml"));
+    //     LevelSetTypes lst = Utils.DeserializeFromPath<LevelSetTypes>(Path.Combine(dumpPath, "Game", "LevelSetTypes.xml"));
+    //     MapData = new Level(ld, lt, lst);
+    //     using FileStream bonesFile = new(Path.Combine(dumpPath, "Init", "BoneTypes.xml"), FileMode.Open, FileAccess.Read);
+    //     BoneNames = XElement.Load(bonesFile).Elements("Bone").Select(e => e.Value).ToArray();
+    //     _state.Reset();
+    // }
 
     public void LoadMap(string ldPath, string? ltPath, string? lstPath, string btPath)
     {
@@ -124,7 +125,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
 
     public void Run()
     {
-        LoadMap();
+        // LoadMap();
 
         Rl.SetConfigFlags(ConfigFlags.VSyncHint);
         Rl.InitWindow(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT, "WallyMapSpinzor2.Raylib");
@@ -154,6 +155,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
             Update();
         }
 
+        PathPrefs.Save();
         Rl.CloseWindow();
     }
 
@@ -170,11 +172,14 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         Rl.BeginMode2D(_cam);
 
         Rl.ClearBackground(Raylib_cs.Color.Black);
-        Canvas ??= new(BrawlPath, BoneNames);
-        Canvas.CameraMatrix = Rl.GetCameraMatrix2D(_cam);
+        if (PathPrefs.BrawlhallaPath is not null)
+        {
+            Canvas ??= new(PathPrefs.BrawlhallaPath, BoneNames);
+            Canvas.CameraMatrix = Rl.GetCameraMatrix2D(_cam);
 
-        MapData?.DrawOn(Canvas, Transform.IDENTITY, _config, new RenderContext(), _state);
-        Canvas.FinalizeDraw();
+            MapData?.DrawOn(Canvas, Transform.IDENTITY, _config, new RenderContext(), _state);
+            Canvas.FinalizeDraw();
+        }
 
         Rl.EndMode2D();
         Rl.EndTextureMode();
@@ -187,6 +192,11 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
     {
         ImGui.DockSpaceOverViewport();
         ShowMainMenuBar();
+
+        if (!Utils.IsValidBrawlPath(PathPrefs.BrawlhallaPath))
+        {
+            InitialSetupWindow.ShowInitialFileSelect(PathPrefs);
+        }
 
         if (ViewportWindow.Open) ViewportWindow.Show();
         if (RenderConfigWindow.Open) RenderConfigWindow.Show(_config, ref _renderSpeed);
@@ -203,7 +213,6 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         DialogWindows.RemoveAll(dialog => dialog.Closed);
         foreach (IDialog d in DialogWindows)
             d.Show();
-
     }
 
     private void ShowMainMenuBar()
@@ -213,7 +222,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         if (ImGui.BeginMenu("File"))
         {
             if (ImGui.MenuItem("Export")) DialogWindows.Add(new ExportDialog(MapData));
-            if (ImGui.MenuItem("Import")) DialogWindows.Add(new ImportDialog(this, BrawlPath));
+            // if (ImGui.MenuItem("Import")) DialogWindows.Add(new ImportDialog(this, BrawlPath));
             ImGui.EndMenu();
         }
         if (ImGui.BeginMenu("Edit"))
@@ -237,7 +246,13 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
             {
                 Canvas?.ClearTextureCache();
             }
-            if (ImGui.MenuItem("Reload Map", "Ctrl+R")) LoadMap();
+            if (ImGui.MenuItem("Reload Map", "Ctrl+R"))
+            {
+                if (PathPrefs.LevelDescPath is not null)
+                {
+                    LoadMap(PathPrefs.LevelDescPath, PathPrefs.LevelTypePath, PathPrefs.LevelSetTypesPath, PathPrefs.BoneTypesPath);
+                }
+            }
             if (ImGui.MenuItem("Center Camera", "R")) ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
             ImGui.EndMenu();
         }
@@ -280,7 +295,7 @@ public class Editor(string brawlPath, string dumpPath, string fileName)
         {
             if (Rl.IsKeyPressed(KeyboardKey.Z)) CommandHistory.Undo();
             if (Rl.IsKeyPressed(KeyboardKey.Y)) CommandHistory.Redo();
-            if (Rl.IsKeyPressed(KeyboardKey.R)) LoadMap();
+            // if (Rl.IsKeyPressed(KeyboardKey.R)) LoadMap();
         }
     }
 

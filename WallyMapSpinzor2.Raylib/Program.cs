@@ -1,6 +1,8 @@
-string brawlPath = args[0];
-string dumpPath = args[1];
-string fileName = args[2];
+using WallyMapSpinzor2.Raylib;
 
-WallyMapSpinzor2.Raylib.Editor editor = new(brawlPath, dumpPath, fileName);
+// string brawlPath = args[0];
+// string dumpPath = args[1];
+// string fileName = args[2];
+
+Editor editor = new(PathPreferences.Load());
 editor.Run();
