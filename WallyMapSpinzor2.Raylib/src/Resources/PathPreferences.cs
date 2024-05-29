@@ -9,7 +9,8 @@ public class PathPreferences : IDeserializable, ISerializable
     public const string APPDATA_DIR_NAME = "WallyMapSpinzor2.Raylib";
     public const string FILE_NAME = "PathPreferences.xml";
 
-    public string? BrawlhallaPath { get; set; }
+    private string? _brawlhallaPath;
+    public string? BrawlhallaPath { get => _brawlhallaPath; set => SetBrawlhallaPath(value); }
     public string? BrawlhallaAirPath { get; set; }
 
     public string? LevelDescPath { get; set; }
@@ -66,5 +67,17 @@ public class PathPreferences : IDeserializable, ISerializable
         e.AddIfNotNull(nameof(LevelSetTypesPath), LevelSetTypesPath);
         e.AddIfNotNull(nameof(BoneTypesPath), BoneTypesPath);
         e.AddIfNotNull(nameof(DecryptionKey), DecryptionKey);
+    }
+
+    public void SetBrawlhallaPath(string? path)
+    {
+        if (path is null)
+        {
+            _brawlhallaPath = null;
+            return;
+        }
+
+        _brawlhallaPath = path;
+        BrawlhallaAirPath ??= Path.Combine(_brawlhallaPath, "BrawlhallaAir.swf");
     }
 }

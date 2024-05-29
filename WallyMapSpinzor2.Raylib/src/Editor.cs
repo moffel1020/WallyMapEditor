@@ -24,7 +24,6 @@ public class Editor(PathPreferences pathPrefs)
 
     public IDrawable? MapData { get; set; }
     PathPreferences PathPrefs { get; } = pathPrefs;
-    // public string BrawlPath { get; set; } = ;
     public string[] BoneNames { get; set; } = null!;
 
     public RaylibCanvas? Canvas { get; set; }
@@ -46,19 +45,6 @@ public class Editor(PathPreferences pathPrefs)
     private double _renderSpeed = 1;
 
     public MousePickingFramebuffer PickingFramebuffer { get; set; } = new();
-
-    // public void LoadMap()
-    // {
-    //     _selectedObject = null;
-    //     CommandHistory.Clear();
-    //     LevelDesc ld = Utils.DeserializeFromPath<LevelDesc>(Path.Combine(dumpPath, "Dynamic", fileName));
-    //     LevelTypes lt = Utils.DeserializeFromPath<LevelTypes>(Path.Combine(dumpPath, "Init", "LevelTypes.xml"));
-    //     LevelSetTypes lst = Utils.DeserializeFromPath<LevelSetTypes>(Path.Combine(dumpPath, "Game", "LevelSetTypes.xml"));
-    //     MapData = new Level(ld, lt, lst);
-    //     using FileStream bonesFile = new(Path.Combine(dumpPath, "Init", "BoneTypes.xml"), FileMode.Open, FileAccess.Read);
-    //     BoneNames = XElement.Load(bonesFile).Elements("Bone").Select(e => e.Value).ToArray();
-    //     _state.Reset();
-    // }
 
     public void LoadMap(string ldPath, string? ltPath, string? lstPath, string btPath)
     {
@@ -125,7 +111,14 @@ public class Editor(PathPreferences pathPrefs)
 
     public void Run()
     {
-        // LoadMap();
+        if (PathPrefs.LevelDescPath is not null && PathPrefs.BoneTypesPath is not null)
+        {
+            LoadMap(PathPrefs.LevelDescPath, PathPrefs.LevelTypePath, PathPrefs.LevelSetTypesPath, PathPrefs.BoneTypesPath);
+        }
+        else
+        {
+            DialogWindows.Add(new ImportDialog(this, PathPrefs));
+        }
 
         Rl.SetConfigFlags(ConfigFlags.VSyncHint);
         Rl.InitWindow(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT, "WallyMapSpinzor2.Raylib");
@@ -193,11 +186,6 @@ public class Editor(PathPreferences pathPrefs)
         ImGui.DockSpaceOverViewport();
         ShowMainMenuBar();
 
-        if (!Utils.IsValidBrawlPath(PathPrefs.BrawlhallaPath))
-        {
-            InitialSetupWindow.ShowInitialFileSelect(PathPrefs);
-        }
-
         if (ViewportWindow.Open) ViewportWindow.Show();
         if (RenderConfigWindow.Open) RenderConfigWindow.Show(_config, ref _renderSpeed);
         if (MapOverviewWindow.Open && MapData is Level l) MapOverviewWindow.Show(l, CommandHistory, ref _selectedObject);
@@ -246,12 +234,9 @@ public class Editor(PathPreferences pathPrefs)
             {
                 Canvas?.ClearTextureCache();
             }
-            if (ImGui.MenuItem("Reload Map", "Ctrl+R"))
+            if (ImGui.MenuItem("Reload Map", "Ctrl+R") && PathPrefs.LevelDescPath is not null && PathPrefs.BoneTypesPath is not null)
             {
-                if (PathPrefs.LevelDescPath is not null)
-                {
-                    LoadMap(PathPrefs.LevelDescPath, PathPrefs.LevelTypePath, PathPrefs.LevelSetTypesPath, PathPrefs.BoneTypesPath);
-                }
+                LoadMap(PathPrefs.LevelDescPath, PathPrefs.LevelTypePath, PathPrefs.LevelSetTypesPath, PathPrefs.BoneTypesPath);
             }
             if (ImGui.MenuItem("Center Camera", "R")) ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
             ImGui.EndMenu();
