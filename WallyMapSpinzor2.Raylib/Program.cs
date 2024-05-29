@@ -1,8 +1,13 @@
 using WallyMapSpinzor2.Raylib;
 
-// string brawlPath = args[0];
-// string dumpPath = args[1];
-// string fileName = args[2];
+PathPreferences prefs = PathPreferences.Load();
+if (args.Length >= 4)
+{
+    prefs.BrawlhallaPath = args[0];
+    prefs.LevelDescPath = args[1];
+    prefs.LevelTypePath = args[2];
+    prefs.BoneTypesPath = args[3];
+}
 
-Editor editor = new(PathPreferences.Load());
+Editor editor = new(prefs);
 editor.Run();
