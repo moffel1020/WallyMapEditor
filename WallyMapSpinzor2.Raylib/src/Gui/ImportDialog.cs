@@ -167,7 +167,7 @@ public class ImportDialog(Editor editor, PathPreferences prefs) : IDialog
         }
         ImGui.Text($"{prefs.BrawlhallaAirPath}");
 
-        if (ImGuiExt.WithDisabledButton(_keySearching, "Find decryption key"))
+        if (prefs.BrawlhallaAirPath is not null && ImGuiExt.WithDisabledButton(_keySearching, "Find decryption key"))
         {
             _keySearching = true;
             _loadingStatus = "searching...";
@@ -175,7 +175,7 @@ public class ImportDialog(Editor editor, PathPreferences prefs) : IDialog
             {
                 try
                 {
-                    if (Utils.GetDoABCDefineTag(prefs.BrawlhallaAirPath!) is DoABCDefineTag abcTag)
+                    if (Utils.GetDoABCDefineTag(prefs.BrawlhallaAirPath) is DoABCDefineTag abcTag)
                     {
                         AbcFile abc = AbcFile.Read(abcTag.ABCData);
                         uint? key = Utils.FindDecryptionKey(abc);
