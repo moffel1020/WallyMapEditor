@@ -104,7 +104,6 @@ public class ImportDialog(Editor editor, PathPreferences prefs) : IDialog
                 {
                     DecryptSwzFiles(prefs.BrawlhallaPath!);
                     prefs.DecryptionKey = swzKey;
-                    prefs.Save();
                     _loadingStatus = null;
                     _loadingError = null;
                 }
@@ -163,7 +162,6 @@ public class ImportDialog(Editor editor, PathPreferences prefs) : IDialog
                 if (result.IsOk)
                 {
                     prefs.BrawlhallaAirPath = result.Path;
-                    prefs.Save();
                 }
             });
         }
@@ -184,7 +182,6 @@ public class ImportDialog(Editor editor, PathPreferences prefs) : IDialog
                         if (key is not null)
                         {
                             prefs.DecryptionKey = key.ToString();
-                            prefs.Save();
                         }
 
                         _loadingStatus = null;
@@ -284,7 +281,6 @@ public class ImportDialog(Editor editor, PathPreferences prefs) : IDialog
                 prefs.LevelTypePath = savedLtPath;
                 prefs.LevelSetTypesPath = savedLstPath;
                 prefs.BoneTypesPath = savedBtPath;
-                prefs.Save();
             }
             catch (Exception e)
             {

@@ -6,10 +6,8 @@ using NativeFileDialogSharp;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public class ExportDialog(IDrawable? mapData) : IDialog
+public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
 {
-    private static string? lastPath;
-
     public bool _open = true;
     public bool Closed { get => !_open; }
     private readonly IDrawable? _mapData = mapData;
@@ -51,11 +49,11 @@ public class ExportDialog(IDrawable? mapData) : IDialog
             {
                 Task.Run(() =>
                 {
-                    DialogResult result = Dialog.FileSave(filterList: "xml", defaultPath: lastPath);
+                    DialogResult result = Dialog.FileSave("xml", Path.GetDirectoryName(prefs.LevelDescPath));
                     if (result.IsOk)
                     {
                         Utils.SerializeToPath(ld, result.Path);
-                        lastPath = Path.GetDirectoryName(result.Path);
+                        prefs.LevelDescPath = result.Path;
                     }
                 });
             }
@@ -78,11 +76,11 @@ public class ExportDialog(IDrawable? mapData) : IDialog
                 {
                     Task.Run(() =>
                     {
-                        DialogResult result = Dialog.FileSave(filterList: "xml", defaultPath: lastPath);
+                        DialogResult result = Dialog.FileSave("xml", Path.GetDirectoryName(prefs.LevelTypePath));
                         if (result.IsOk)
                         {
                             Utils.SerializeToPath(l.Type, result.Path);
-                            lastPath = Path.GetDirectoryName(result.Path);
+                            prefs.LevelTypePath = result.Path;
                         }
                     });
                 }
