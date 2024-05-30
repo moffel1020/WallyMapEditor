@@ -24,8 +24,19 @@ public partial class PropertiesWindow
         int newTeam = newTeamString == "None" ? 0 : int.Parse(newTeamString);
         if (ac.Team != newTeam)
         {
-            propChanged = true;
             cmd.Add(new PropChangeCommand<int>(val => ac.Team = val, ac.Team, newTeam));
+            propChanged = true;
+        }
+
+        propChanged |= ImGuiExt.NullableEnumComboHistory($"Flag##{ac.GetHashCode()}", ac.Flag, val => ac.Flag = val, cmd);
+        propChanged |= ImGuiExt.NullableEnumComboHistory($"ColorFlag##{ac.GetHashCode()}", ac.ColorFlag, val => ac.ColorFlag = val, cmd);
+
+        string tauntEventString = ac.TauntEvent ?? "";
+        string newTauntEventString = ImGuiExt.InputText($"TauntEvent##{ac.GetHashCode()}", tauntEventString);
+        if (tauntEventString != newTauntEventString)
+        {
+            cmd.Add(new PropChangeCommand<string?>(val => ac.TauntEvent = val, ac.TauntEvent, newTauntEventString == "" ? null : newTauntEventString));
+            propChanged = true;
         }
 
         ImGui.SeparatorText($"Anchor##props{ac.GetHashCode()}");

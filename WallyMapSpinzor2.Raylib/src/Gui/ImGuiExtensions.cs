@@ -86,6 +86,14 @@ public static class ImGuiExt
         return Enum.Parse<T>(StringCombo(label, Enum.GetName(currentValue)!, Enum.GetNames<T>()));
     }
 
+    public static T? EnumComboWithNone<T>(string label, T? currentValue) where T : struct, Enum
+    {
+        return
+        Enum.TryParse(StringCombo(label, currentValue is null ? "None" : Enum.GetName(currentValue.Value)!, ["None", .. Enum.GetNames<T>()]), out T e)
+            ? e
+            : null;
+    }
+
     public static void WithDisabled(bool disabled, Action a)
     {
         if (disabled) ImGui.BeginDisabled();
@@ -265,5 +273,27 @@ public static class ImGuiExt
             }
         }
         return propChanged;
+    }
+
+    public static bool EnumComboHistory<T>(string label, T value, Action<T> changeCommand, CommandHistory cmd) where T : struct, Enum
+    {
+        T newValue = EnumCombo(label, value);
+        if (!value.Equals(newValue))
+        {
+            cmd.Add(new PropChangeCommand<T>(changeCommand, value, newValue));
+            return true;
+        }
+        return false;
+    }
+
+    public static bool NullableEnumComboHistory<T>(string label, T? value, Action<T?> changeCommand, CommandHistory cmd) where T : struct, Enum
+    {
+        T? newValue = EnumComboWithNone(label, value);
+        if (!value.Equals(newValue))
+        {
+            cmd.Add(new PropChangeCommand<T?>(changeCommand, value, newValue));
+            return true;
+        }
+        return false;
     }
 }
