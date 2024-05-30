@@ -72,12 +72,9 @@ public partial class PropertiesWindow
         //TODO: add FireOffsetX, FireOffsetY
 
         //TODO: allow modifying
-        if (ImGui.BeginListBox($"TrapPowers##props{pc.GetHashCode()}"))
-        {
-            foreach (string power in pc.TrapPowers)
-                ImGui.Text(power);
-            ImGui.EndListBox();
-        }
+        ImGui.Text("TrapPowers:");
+        foreach (string power in pc.TrapPowers)
+            ImGui.BulletText(power);
 
         return propChanged;
     }

@@ -10,12 +10,9 @@ partial class PropertiesWindow
         bool propChanged = false;
 
         ImGui.Text("FileName: " + la.FileName);
-        if (ImGui.BeginListBox($"AnimationName##props{la.GetHashCode()}"))
-        {
-            foreach (string anim in la.AnimationName)
-                ImGui.Text(anim);
-            ImGui.EndListBox();
-        }
+        ImGui.Text($"AnimationName:");
+        foreach (string anim in la.AnimationName)
+            ImGui.BulletText(anim);
         if (la.PlatID is not null)
             ImGui.Text("PlatID: " + la.PlatID);
         ImGui.Separator();
