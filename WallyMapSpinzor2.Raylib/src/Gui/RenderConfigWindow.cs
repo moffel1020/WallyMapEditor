@@ -1,4 +1,12 @@
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using System.Xml.Linq;
+
 using ImGuiNET;
+using NativeFileDialogSharp;
+using Raylib_cs;
+using Rl = Raylib_cs.Raylib;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -7,11 +15,68 @@ public class RenderConfigWindow
     private bool _open = false;
     public bool Open { get => _open; set => _open = value; }
 
-    public void Show(RenderConfig config, ref double renderSpeed)
+    private static void LoadConfig(RenderConfig config, string path)
+    {
+        XElement element;
+        using (FileStream stream = new(path, FileMode.Open, FileAccess.Read))
+            element = XElement.Load(path);
+        config.Deserialize(element);
+    }
+
+    private static void SaveConfig(RenderConfig config, string path)
+    {
+        Utils.SerializeToPath(config, path);
+    }
+
+    public void Show(RenderConfig config, PathPreferences prefs)
     {
         ImGui.Begin("Render Config", ref _open);
+
+        ImGui.SeparatorText("Loading##config");
+        if (ImGui.Button("Load config from file"))
+        {
+            //TODO: give a reasonable default folder (a Config folder inside the appdata?)
+            Task.Run(() =>
+            {
+                DialogResult result = Dialog.FileOpen("xml", prefs.ConfigFolderPath);
+                if (result.IsOk)
+                {
+                    prefs.ConfigFolderPath = Path.GetDirectoryName(result.Path);
+                    try
+                    {
+                        LoadConfig(config, result.Path);
+                    }
+                    catch (Exception e)
+                    {
+                        Rl.TraceLog(TraceLogLevel.Error, $"Loading config failed with error: {e.Message}");
+                    }
+                }
+            });
+        }
+
+        if (ImGui.Button("Save config to file"))
+        {
+            //TODO: give a reasonable default folder (a Config folder inside the appdata?)
+            Task.Run(() =>
+            {
+                DialogResult result = Dialog.FileSave("xml", prefs.ConfigFolderPath);
+                if (result.IsOk)
+                {
+                    prefs.ConfigFolderPath = Path.GetDirectoryName(result.Path);
+                    try
+                    {
+                        SaveConfig(config, result.Path);
+                    }
+                    catch (Exception e)
+                    {
+                        Rl.TraceLog(TraceLogLevel.Error, $"Saving config failed with error: {e.Message}");
+                    }
+                }
+            });
+        }
+
         ImGui.SeparatorText("General##config");
-        renderSpeed = ImGuiExt.DragFloat("Render speed##config", renderSpeed, speed: 0.1);
+        config.RenderSpeed = ImGuiExt.DragFloat("Render speed##config", config.RenderSpeed, speed: 0.1);
 
         ImGui.SeparatorText("Bounds##config");
         config.ShowCameraBounds = ImGuiExt.Checkbox("Camera bounds##config", config.ShowCameraBounds);
@@ -198,4 +263,6 @@ public class RenderConfigWindow
 
         ImGui.End();
     }
+
+
 }

@@ -42,7 +42,6 @@ public class Editor(PathPreferences pathPrefs)
 
     private readonly RenderConfig _config = new() { };
     private readonly RenderState _state = new();
-    private double _renderSpeed = 1;
 
     public MousePickingFramebuffer PickingFramebuffer { get; set; } = new();
 
@@ -143,7 +142,7 @@ public class Editor(PathPreferences pathPrefs)
 
         while (!Rl.WindowShouldClose())
         {
-            _config.Time += TimeSpan.FromSeconds(_renderSpeed * Rl.GetFrameTime());
+            _config.Time += TimeSpan.FromSeconds(_config.RenderSpeed * Rl.GetFrameTime());
             Draw();
             Update();
         }
@@ -187,7 +186,7 @@ public class Editor(PathPreferences pathPrefs)
         ShowMainMenuBar();
 
         if (ViewportWindow.Open) ViewportWindow.Show();
-        if (RenderConfigWindow.Open) RenderConfigWindow.Show(_config, ref _renderSpeed);
+        if (RenderConfigWindow.Open) RenderConfigWindow.Show(_config, PathPrefs);
         if (MapOverviewWindow.Open && MapData is Level l) MapOverviewWindow.Show(l, CommandHistory, ref _selectedObject);
 
         if (_selectedObject is not null)

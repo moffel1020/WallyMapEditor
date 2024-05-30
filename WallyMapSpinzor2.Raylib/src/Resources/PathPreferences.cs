@@ -20,6 +20,8 @@ public class PathPreferences : IDeserializable, ISerializable
 
     public string? DecryptionKey { get; set; }
 
+    public string? ConfigFolderPath { get; set; }
+
     public static string FilePath => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         APPDATA_DIR_NAME,
@@ -56,6 +58,7 @@ public class PathPreferences : IDeserializable, ISerializable
         LevelSetTypesPath = e.GetElementValue(nameof(LevelSetTypesPath));
         BoneTypesPath = e.GetElementValue(nameof(BoneTypesPath));
         DecryptionKey = e.GetElementValue(nameof(DecryptionKey));
+        ConfigFolderPath = e.GetElementValue(nameof(ConfigFolderPath));
     }
 
     public void Serialize(XElement e)
@@ -67,6 +70,7 @@ public class PathPreferences : IDeserializable, ISerializable
         e.AddIfNotNull(nameof(LevelSetTypesPath), LevelSetTypesPath);
         e.AddIfNotNull(nameof(BoneTypesPath), BoneTypesPath);
         e.AddIfNotNull(nameof(DecryptionKey), DecryptionKey);
+        e.AddIfNotNull(nameof(ConfigFolderPath), ConfigFolderPath);
     }
 
     public void SetBrawlhallaPath(string? path)
