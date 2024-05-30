@@ -19,6 +19,15 @@ public partial class PropertiesWindow
         propChanged |= ImGuiExt.DragFloatHistory($"X2##props{ac.GetHashCode()}", ac.X2, val => ac.X2 = val, cmd);
         propChanged |= ImGuiExt.DragFloatHistory($"Y2##props{ac.GetHashCode()}", ac.Y2, val => ac.Y2 = val, cmd);
 
+        string teamString = ac.Team == 0 ? "None" : ac.Team.ToString();
+        string newTeamString = ImGuiExt.StringCombo($"Team##props{ac.GetHashCode()}", teamString, ["None", "1", "2", "3", "4", "5"]);
+        int newTeam = newTeamString == "None" ? 0 : int.Parse(newTeamString);
+        if (ac.Team != newTeam)
+        {
+            propChanged = true;
+            cmd.Add(new PropChangeCommand<int>(val => ac.Team = val, ac.Team, newTeam));
+        }
+
         ImGui.SeparatorText($"Anchor##props{ac.GetHashCode()}");
         propChanged |= ImGuiExt.DragNullableFloatPairHistory(
             "anchor",

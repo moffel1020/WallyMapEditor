@@ -13,8 +13,10 @@
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+
     <DebugSymbols>false</DebugSymbols>
     <DebugType>None</DebugType>
+
     <Optimize>true</Optimize>
     <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>full</TrimMode>

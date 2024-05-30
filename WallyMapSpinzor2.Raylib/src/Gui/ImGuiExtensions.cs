@@ -63,6 +63,14 @@ public static class ImGuiExt
         return a;
     }
 
+    public static string StringCombo(string label, string value, string[] options)
+    {
+        int valueIndex = Array.FindIndex(options, s => s == value);
+        if (valueIndex == -1) valueIndex = 0; // prevent out of bounds if value is not in options
+        ImGui.Combo(label, ref valueIndex, options, options.Length);
+        return options[valueIndex];
+    }
+
     public static string StringEnumCombo(string label, Type type, string currentName, bool includeNone)
     {
         int current = Enum.TryParse(type, currentName, out object? result) ? (int)result : 0;
@@ -75,10 +83,7 @@ public static class ImGuiExt
 
     public static T EnumCombo<T>(string label, T currentValue) where T : struct, Enum
     {
-        string[] names = Enum.GetNames<T>();
-        int valueIndex = Array.FindIndex(names, s => s == Enum.GetName(currentValue));
-        ImGui.Combo(label, ref valueIndex, names, names.Length);
-        return Enum.Parse<T>(names[valueIndex]);
+        return Enum.Parse<T>(StringCombo(label, Enum.GetName(currentValue)!, Enum.GetNames<T>()));
     }
 
     public static void WithDisabled(bool disabled, Action a)
