@@ -34,6 +34,7 @@ public partial class PropertiesWindow
 
         Platform p => ShowPlatformProps(p, cmd),
         AnimatedBackground ab => ShowAnimatedBackgroundProps(ab, cmd),
+        Gfx gfx => ShowGfxProps(gfx, cmd),
         LevelAnim la => ShowLevelAnimProps(la, cmd),
         LevelAnimation la => ShowLevelAnimationProps(la, cmd),
 
@@ -48,6 +49,11 @@ public partial class PropertiesWindow
         AbstractVolume v => ShowAbstractVolumeProps(v, cmd),
 
         LevelSound ls => ShowLevelSoundProps(ls, cmd),
+
+        WaveData w => ShowWaveDataProps(w, cmd),
+        CustomPath cp => ShowCustomPathProps(cp, cmd),
+        Point p => ShowPointProps(p, cmd),
+        Group g => ShowGroupProps(g, cmd),
 
         DynamicCollision dc => ShowDynamicProps(dc, cmd),
         DynamicItemSpawn di => ShowDynamicProps(di, cmd),

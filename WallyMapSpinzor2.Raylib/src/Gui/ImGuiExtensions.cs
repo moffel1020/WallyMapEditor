@@ -81,15 +81,15 @@ public static class ImGuiExt
         return Enum.GetName(type, current) ?? "";
     }
 
-    public static T EnumCombo<T>(string label, T currentValue) where T : struct, Enum
+    public static E EnumCombo<E>(string label, E currentValue) where E : struct, Enum
     {
-        return Enum.Parse<T>(StringCombo(label, Enum.GetName(currentValue)!, Enum.GetNames<T>()));
+        return Enum.Parse<E>(StringCombo(label, Enum.GetName(currentValue)!, Enum.GetNames<E>()));
     }
 
-    public static T? EnumComboWithNone<T>(string label, T? currentValue) where T : struct, Enum
+    public static E? EnumComboWithNone<E>(string label, E? currentValue) where E : struct, Enum
     {
         return
-        Enum.TryParse(StringCombo(label, currentValue is null ? "None" : Enum.GetName(currentValue.Value)!, ["None", .. Enum.GetNames<T>()]), out T e)
+        Enum.TryParse(StringCombo(label, currentValue is null ? "None" : Enum.GetName(currentValue.Value)!, ["None", .. Enum.GetNames<E>()]), out E e)
             ? e
             : null;
     }
