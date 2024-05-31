@@ -47,6 +47,8 @@ public partial class PropertiesWindow
         AbstractAsset a => ShowAbstractAssetProps(a, cmd),
         AbstractVolume v => ShowAbstractVolumeProps(v, cmd),
 
+        LevelSound ls => ShowLevelSoundProps(ls, cmd),
+
         DynamicCollision dc => ShowDynamicProps(dc, cmd),
         DynamicItemSpawn di => ShowDynamicProps(di, cmd),
         DynamicRespawn dr => ShowDynamicProps(dr, cmd),
