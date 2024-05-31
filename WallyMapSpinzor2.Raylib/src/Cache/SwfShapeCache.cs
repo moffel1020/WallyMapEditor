@@ -15,7 +15,7 @@ using SwiffCheese.Wrappers;
 using Raylib_cs;
 using Rl = Raylib_cs.Raylib;
 
-using TxtId = System.ValueTuple<WallyMapSpinzor2.Raylib.SwfFileData, ushort>;
+using TxtId = System.ValueTuple<WallyMapSpinzor2.Raylib.SwfFileData, ushort, double>;
 using ImgData = System.ValueTuple<Raylib_cs.Image, int, int, double>;
 
 namespace WallyMapSpinzor2.Raylib;
@@ -30,19 +30,19 @@ public class SwfShapeCache
     {
         (Raylib_cs.Image img, int offsetX, int offsetY, _) = LoadShapeInternal(swf, shapeId, quality);
         Texture2D texture = Rl.LoadTextureFromImage(img);
-        Cache[(swf, shapeId)] = new(texture, offsetX, offsetY, quality);
+        Cache[(swf, shapeId, quality)] = new(texture, offsetX, offsetY, quality);
         Rl.UnloadImage(img);
     }
 
     public void LoadShapeAsync(SwfFileData swf, ushort shapeId, double quality)
     {
-        if (_queueSet.Contains((swf, shapeId))) return;
-        _queueSet.Add((swf, shapeId));
+        if (_queueSet.Contains((swf, shapeId, quality))) return;
+        _queueSet.Add((swf, shapeId, quality));
 
         Task.Run(() =>
         {
             (Raylib_cs.Image img, int offsetX, int offsetY, _) = LoadShapeInternal(swf, shapeId, quality);
-            lock (_queue) _queue.Enqueue(((swf, shapeId), (img, offsetX, offsetY, quality)));
+            lock (_queue) _queue.Enqueue(((swf, shapeId, quality), (img, offsetX, offsetY, quality)));
         });
     }
 

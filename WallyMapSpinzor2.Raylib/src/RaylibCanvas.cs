@@ -228,7 +228,7 @@ public partial class RaylibCanvas : ICanvas
         SwfFileData? swf = LoadSwf(filePath);
         if (swf is null)
             return null;
-        SwfShapeCache.Cache.TryGetValue((swf, shapeId), out Texture2DWrapper? texture);
+        SwfShapeCache.Cache.TryGetValue((swf, shapeId, animScale), out Texture2DWrapper? texture);
         if (texture is not null)
             return texture;
         SwfShapeCache.LoadShapeAsync(swf, shapeId, animScale);

@@ -130,6 +130,7 @@ public class RenderConfigWindow
             config.ShowRingRopes = ImGuiExt.Checkbox("Show brawldown ropes##config", config.ShowRingRopes);
             ImGui.Separator();
             config.ShowBombsketballTargets = ImGuiExt.Checkbox("Show bombsketball targets##config", config.ShowBombsketballTargets);
+            config.UseBombsketballDigitSize = ImGuiExt.Checkbox("Bombsketball digit size fix##config", config.UseBombsketballDigitSize);
             ImGui.Separator();
             if (ImGui.TreeNode("Horde##config"))
             {
