@@ -109,6 +109,11 @@ public class MapOverviewWindow
             ShowSelectableList(l.Desc.DynamicItemSpawns, ref selected);
         }
 
+        if (ImGui.CollapsingHeader("Volumes##overivew"))
+        {
+            ShowSelectableList(l.Desc.Volumes, ref selected);
+        }
+
         ImGui.End();
     }
 
@@ -135,6 +140,7 @@ public class MapOverviewWindow
         Respawn r => $"({r.X}, {r.Y})",
         AbstractItemSpawn i => $"({i.X}, {i.Y}, {i.W}, {i.H})",
         AbstractCollision c => $"({c.X1}, {c.Y1}, {c.X2}, {c.Y2})",
+        AbstractVolume v => $"(team {v.Team} - {v.X}, {v.Y}, {v.W}, {v.H})",
 
         DynamicCollision dc => $"({dc.PlatID})",
         DynamicItemSpawn di => $"({di.PlatID})",

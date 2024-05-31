@@ -45,6 +45,7 @@ public partial class PropertiesWindow
         AbstractCollision ac => ShowCollisionProps(ac, cmd),
         AbstractItemSpawn i => ShowItemSpawnProps(i, cmd),
         AbstractAsset a => ShowAbstractAssetProps(a, cmd),
+        AbstractVolume v => ShowAbstractVolumeProps(v, cmd),
 
         DynamicCollision dc => ShowDynamicProps(dc, cmd),
         DynamicItemSpawn di => ShowDynamicProps(di, cmd),
