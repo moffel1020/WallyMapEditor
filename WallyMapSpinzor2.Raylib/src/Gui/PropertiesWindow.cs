@@ -32,6 +32,7 @@ public partial class PropertiesWindow
     {
         Respawn r => ShowRespawnProps(r, cmd),
 
+        TeamScoreboard ts => ShowTeamScoreboardProps(ts, cmd),
         Platform p => ShowPlatformProps(p, cmd),
         AnimatedBackground ab => ShowAnimatedBackgroundProps(ab, cmd),
         Gfx gfx => ShowGfxProps(gfx, cmd),

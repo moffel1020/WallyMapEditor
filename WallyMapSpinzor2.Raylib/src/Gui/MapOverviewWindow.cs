@@ -85,6 +85,11 @@ public class MapOverviewWindow
 
         if (ImGui.CollapsingHeader("Assets##overview"))
         {
+            TeamScoreboard? ts = l.Desc.TeamScoreboard;
+            if (ts is not null && ImGui.Selectable($"{ts.GetType().Name} {GetExtraObjectInfo(ts)}##selectable{ts.GetHashCode()}", selected == ts))
+            {
+                selected = ts;
+            }
             ShowSelectableList(l.Desc.Assets, ref selected);
             ShowSelectableList(l.Desc.LevelAnims, ref selected);
             ShowSelectableList(l.Desc.AnimatedBackgrounds, ref selected);
