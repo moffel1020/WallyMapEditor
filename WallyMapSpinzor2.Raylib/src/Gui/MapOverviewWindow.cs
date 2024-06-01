@@ -75,10 +75,9 @@ public class MapOverviewWindow
             }
         }
 
-        // TODO: background and thumbnail
         if (ImGui.CollapsingHeader("Images##overview"))
         {
-
+            ShowSelectableList(l.Desc.Backgrounds, ref selected);
         }
 
         ImGui.Separator();
@@ -149,6 +148,7 @@ public class MapOverviewWindow
 
     public static string GetExtraObjectInfo(object o) => o switch
     {
+        Background b => $"({b.AssetName ?? b.AnimatedAssetName})",
         Platform p => $"({p.InstanceName})",
         AnimatedBackground ab => $"({ab.Gfx.AnimClass})",
         Gfx g => $"({g.AnimClass})",
