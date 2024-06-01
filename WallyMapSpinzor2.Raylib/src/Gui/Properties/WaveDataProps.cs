@@ -13,7 +13,7 @@ public partial class PropertiesWindow
         propChanged |= ImGuiExt.DragNullableFloatHistory("Speed3", w.Speed3, w.Speed ?? 8, val => w.Speed3 = val, cmd, minValue: 0);
         propChanged |= ImGuiExt.DragNullableFloatHistory("Speed4", w.Speed4, w.Speed3 ?? w.Speed ?? 8, val => w.Speed4 = val, cmd, minValue: 0);
         // use nullable-like editing to be more user friendly (0 means no loop)
-        propChanged |= ImGuiExt.DragNullableIntHistory("LoopIdx", w.LoopIdx == 0 ? null : w.LoopIdx, 1, val => w.LoopIdx = val ?? 0, cmd, minValue: 1, maxValue: w.Groups.Count - 1);
+        propChanged |= ImGuiExt.DragNullableIntHistory("LoopIdx", w.LoopIdx == 0 ? null : w.LoopIdx, 1, val => w.LoopIdx = val ?? 0, cmd, minValue: 1, maxValue: w.Groups.Length - 1);
         if (ImGui.CollapsingHeader($"CustomPaths##props{w.GetHashCode()}"))
         {
             foreach (CustomPath cp in w.CustomPaths)

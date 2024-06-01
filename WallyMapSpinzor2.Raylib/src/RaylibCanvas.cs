@@ -268,7 +268,7 @@ public partial class RaylibCanvas : ICanvas
         this only matters for CustomArt with RIGHT and for AsymmetrySwapFlags.
         we don't need that yet so just take last.
         */
-        CustomArt? customArt = gfx.CustomArts.Count == 0 ? null : gfx.CustomArts[^1];
+        CustomArt? customArt = gfx.CustomArts.Length == 0 ? null : gfx.CustomArts[^1];
         string customArtSuffix = customArt is not null ? $"_{customArt.Name}" : "";
         // swf animation
         if (gfx.AnimFile.StartsWith("SFX_"))

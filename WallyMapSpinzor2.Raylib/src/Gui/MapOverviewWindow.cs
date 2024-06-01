@@ -155,7 +155,7 @@ public class MapOverviewWindow
         LevelSound ls => $"({ls.SoundEventName})",
 
         WaveData w => $"({w.ID})",
-        CustomPath cp => $"({cp.Points.Count} points)",
+        CustomPath cp => $"({cp.Points.Length} points)",
         Point p => $"({p.X}, {p.Y})",
         Group g => $"({g.GetCount(2)}/{g.GetCount(3)}/{g.GetCount(4)} {(g.Behavior == BehaviorEnum._ ? "Normal" : g.Behavior.ToString())})",
 

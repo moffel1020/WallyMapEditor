@@ -47,7 +47,7 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
-    public static int LastKeyFrameNum(List<AbstractKeyFrame> keyFrames) => keyFrames[^1] switch
+    public static int LastKeyFrameNum(AbstractKeyFrame[] keyFrames) => keyFrames[^1] switch
     {
         KeyFrame kf => kf.FrameNum,
         Phase p => p.StartFrame + LastKeyFrameNum(p.KeyFrames),
