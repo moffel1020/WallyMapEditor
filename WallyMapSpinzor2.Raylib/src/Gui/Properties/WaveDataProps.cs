@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using ImGuiNET;
 
 namespace WallyMapSpinzor2.Raylib;
@@ -102,9 +103,11 @@ public partial class PropertiesWindow
             propChanged |= ImGuiExt.EnumComboHistory("Path##enum", g.Path, val => g.Path = val, cmd);
         }
 
-        string behaviorString = g.Behavior == BehaviorEnum._ ? "Normal" : g.Behavior.ToString();
-        string newBehaviorString = ImGuiExt.StringCombo("Behavior", behaviorString, ["Normal", .. Enum.GetNames<BehaviorEnum>()[1..]]);
-        BehaviorEnum newBehavior = newBehaviorString == "Normal" ? BehaviorEnum._ : Enum.Parse<BehaviorEnum>(newBehaviorString);
+
+
+        string behaviorString = GetBehaviorString(g.Behavior);
+        string newBehaviorString = ImGuiExt.StringCombo("Behavior", behaviorString, [.. Enum.GetValues<BehaviorEnum>().Select(GetBehaviorString)]);
+        BehaviorEnum newBehavior = ParseBehavior(newBehaviorString);
         if (g.Behavior != newBehavior)
         {
             cmd.Add(new PropChangeCommand<BehaviorEnum>(val => g.Behavior = val, g.Behavior, newBehavior));
@@ -125,4 +128,20 @@ public partial class PropertiesWindow
 
         return propChanged;
     }
+
+    public static string GetBehaviorString(BehaviorEnum behavior) => behavior switch
+    {
+        BehaviorEnum.FAST => "yellow",
+        BehaviorEnum.TANKY => "red",
+        BehaviorEnum.ANY => "random",
+        _ => "blue",
+    };
+
+    public static BehaviorEnum ParseBehavior(string behavior) => behavior switch
+    {
+        "yellow" => BehaviorEnum.FAST,
+        "red" => BehaviorEnum.TANKY,
+        "random" => BehaviorEnum.ANY,
+        _ => BehaviorEnum._,
+    };
 }

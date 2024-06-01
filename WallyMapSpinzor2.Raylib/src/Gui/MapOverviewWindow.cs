@@ -142,8 +142,7 @@ public class MapOverviewWindow
         AnimatedBackground ab => $"({ab.Gfx.AnimClass})",
         Gfx g => $"({g.AnimClass})",
         CustomArt ca => $"({ca.Name})",
-        //TODO: test if this actually works correctly
-        ColorSwap cs => $"({cs.OldColor:X08}->{cs.NewColor:X08})",
+        ColorSwap cs => $"({cs.OldColor:X8}->{cs.NewColor:X8})",
         LevelAnim la => $"({la.InstanceName})",
 
         MovingPlatform mp => $"({mp.PlatID})",
@@ -157,7 +156,7 @@ public class MapOverviewWindow
         WaveData w => $"({w.ID})",
         CustomPath cp => $"({cp.Points.Length} points)",
         Point p => $"({p.X}, {p.Y})",
-        Group g => $"({g.GetCount(2)}/{g.GetCount(3)}/{g.GetCount(4)} {(g.Behavior == BehaviorEnum._ ? "Normal" : g.Behavior.ToString())})",
+        Group g => $"({g.GetCount(2)}/{g.GetCount(3)}/{g.GetCount(4)} {PropertiesWindow.GetBehaviorString(g.Behavior)})",
 
         DynamicCollision dc => $"({dc.PlatID})",
         DynamicItemSpawn di => $"({di.PlatID})",
