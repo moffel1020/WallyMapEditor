@@ -40,7 +40,7 @@ public class Editor(PathPreferences pathPrefs)
     public CommandHistory CommandHistory { get; set; } = new();
     private object? _selectedObject = null;
 
-    private readonly RenderConfig _config = new() { };
+    private readonly RenderConfig _config = RenderConfig.Default;
     private readonly RenderState _state = new();
 
     public MousePickingFramebuffer PickingFramebuffer { get; set; } = new();
