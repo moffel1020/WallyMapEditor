@@ -47,6 +47,7 @@ public partial class PropertiesWindow
         AbstractItemSpawn i => ShowItemSpawnProps(i, cmd),
         AbstractAsset a => ShowAbstractAssetProps(a, cmd),
         AbstractVolume v => ShowAbstractVolumeProps(v, cmd),
+        NavNode n => ShowNavNodeProps(n, cmd),
 
         LevelSound ls => ShowLevelSoundProps(ls, cmd),
 

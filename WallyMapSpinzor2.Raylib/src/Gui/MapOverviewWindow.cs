@@ -114,6 +114,12 @@ public class MapOverviewWindow
             ShowSelectableList(l.Desc.Volumes, ref selected);
         }
 
+        if (ImGui.CollapsingHeader("Nav Nodes##overview"))
+        {
+            ShowSelectableList(l.Desc.NavNodes, ref selected);
+            ShowSelectableList(l.Desc.DynamicNavNodes, ref selected);
+        }
+
         if (ImGui.CollapsingHeader("Sounds##overview"))
         {
             ShowSelectableList(l.Desc.LevelSounds, ref selected);
@@ -150,6 +156,7 @@ public class MapOverviewWindow
         AbstractItemSpawn i => $"({i.X}, {i.Y}, {i.W}, {i.H})",
         AbstractCollision c => $"({c.X1}, {c.Y1}, {c.X2}, {c.Y2})",
         AbstractVolume v => $"(team {v.Team} - {v.X}, {v.Y}, {v.W}, {v.H})",
+        NavNode n => $"({PropertiesWindow.GetNavTypeString(n.Type)}{n.NavID})",
 
         LevelSound ls => $"({ls.SoundEventName})",
 

@@ -107,7 +107,7 @@ public partial class PropertiesWindow
 
         string behaviorString = GetBehaviorString(g.Behavior);
         string newBehaviorString = ImGuiExt.StringCombo("Behavior", behaviorString, [.. Enum.GetValues<BehaviorEnum>().Select(GetBehaviorString)]);
-        BehaviorEnum newBehavior = ParseBehavior(newBehaviorString);
+        BehaviorEnum newBehavior = ParseBehaviorString(newBehaviorString);
         if (g.Behavior != newBehavior)
         {
             cmd.Add(new PropChangeCommand<BehaviorEnum>(val => g.Behavior = val, g.Behavior, newBehavior));
@@ -137,7 +137,7 @@ public partial class PropertiesWindow
         _ => "blue",
     };
 
-    public static BehaviorEnum ParseBehavior(string behavior) => behavior switch
+    public static BehaviorEnum ParseBehaviorString(string behavior) => behavior switch
     {
         "yellow" => BehaviorEnum.FAST,
         "red" => BehaviorEnum.TANKY,
