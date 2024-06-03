@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -7,7 +6,7 @@ namespace WallyMapSpinzor2.Raylib;
 
 public abstract class UploadCache<K, I, V> where K : notnull
 {
-    public ConcurrentDictionary<K, V> Cache { get; } = new();
+    public Dictionary<K, V> Cache { get; } = [];
     private readonly Queue<(K, I)> _queue = [];
     private readonly HashSet<K> _queueSet = [];
 

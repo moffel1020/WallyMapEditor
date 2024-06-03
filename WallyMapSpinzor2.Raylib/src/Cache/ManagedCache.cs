@@ -6,7 +6,7 @@ namespace WallyMapSpinzor2.Raylib;
 
 public abstract class ManagedCache<K, V> where K : notnull
 {
-    public ConcurrentDictionary<K, V> Cache { get; } = new();
+    public ConcurrentDictionary<K, V> Cache { get; } = [];
     private readonly HashSet<K> _loading = [];
 
     protected abstract V LoadInternal(K k);
