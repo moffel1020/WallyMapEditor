@@ -15,6 +15,7 @@ public class PathPreferences : IDeserializable, ISerializable
 
     public string? LevelDescPath { get; set; }
     public string? LevelTypePath { get; set; }
+    public string? LevelTypesPath { get; set; }
     public string? LevelSetTypesPath { get; set; }
     public string? BoneTypesPath { get; set; }
 
@@ -55,6 +56,7 @@ public class PathPreferences : IDeserializable, ISerializable
         BrawlhallaAirPath = e.GetElementValue(nameof(BrawlhallaAirPath));
         LevelDescPath = e.GetElementValue(nameof(LevelDescPath));
         LevelTypePath = e.GetElementValue(nameof(LevelTypePath));
+        LevelTypesPath = e.GetElementValue(nameof(LevelTypesPath));
         LevelSetTypesPath = e.GetElementValue(nameof(LevelSetTypesPath));
         BoneTypesPath = e.GetElementValue(nameof(BoneTypesPath));
         DecryptionKey = e.GetElementValue(nameof(DecryptionKey));
@@ -67,6 +69,7 @@ public class PathPreferences : IDeserializable, ISerializable
         e.AddIfNotNull(nameof(BrawlhallaAirPath), BrawlhallaAirPath);
         e.AddIfNotNull(nameof(LevelDescPath), LevelDescPath);
         e.AddIfNotNull(nameof(LevelTypePath), LevelTypePath);
+        e.AddIfNotNull(nameof(LevelTypesPath), LevelTypesPath);
         e.AddIfNotNull(nameof(LevelSetTypesPath), LevelSetTypesPath);
         e.AddIfNotNull(nameof(BoneTypesPath), BoneTypesPath);
         e.AddIfNotNull(nameof(DecryptionKey), DecryptionKey);
