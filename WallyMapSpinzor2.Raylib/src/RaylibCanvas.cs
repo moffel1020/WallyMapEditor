@@ -209,7 +209,7 @@ public partial class RaylibCanvas : ICanvas
         TextureCache.Cache.TryGetValue(finalPath, out Texture2DWrapper? texture);
         if (texture is not null) return texture;
 
-        TextureCache.LoadImageAsync(finalPath);
+        TextureCache.LoadAsync(finalPath);
         return Texture2DWrapper.Default; // placeholder white texture until the image is read from disk
     }
 
@@ -231,7 +231,7 @@ public partial class RaylibCanvas : ICanvas
         SwfShapeCache.Cache.TryGetValue((swf, shapeId, animScale), out Texture2DWrapper? texture);
         if (texture is not null)
             return texture;
-        SwfShapeCache.LoadShapeAsync(swf, shapeId, animScale);
+        SwfShapeCache.LoadAsync(swf, shapeId, animScale);
         return null;
     }
 
@@ -251,8 +251,8 @@ public partial class RaylibCanvas : ICanvas
     public const int MAX_SWF_TEXTURE_UPLOADS_PER_FRAME = 5;
     public void FinalizeDraw()
     {
-        TextureCache.UploadImages(MAX_TEXTURE_UPLOADS_PER_FRAME);
-        SwfShapeCache.UploadImages(MAX_SWF_TEXTURE_UPLOADS_PER_FRAME);
+        TextureCache.Upload(MAX_TEXTURE_UPLOADS_PER_FRAME);
+        SwfShapeCache.Upload(MAX_SWF_TEXTURE_UPLOADS_PER_FRAME);
 
         while (DrawingQueue.Count > 0)
         {

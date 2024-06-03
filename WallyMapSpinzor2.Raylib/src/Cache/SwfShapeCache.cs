@@ -1,8 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Threading.Tasks;
-
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using IMS = SixLabors.ImageSharp;
@@ -20,91 +16,54 @@ using ImgData = System.ValueTuple<Raylib_cs.Image, int, int, double>;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public class SwfShapeCache
+public class SwfShapeCache : UploadCache<TxtId, ImgData, Texture2DWrapper>
 {
-    public ConcurrentDictionary<TxtId, Texture2DWrapper> Cache { get; } = new();
-    private readonly Queue<(TxtId, ImgData)> _queue = new();
-    private readonly HashSet<TxtId> _queueSet = [];
-
-    public void LoadShape(SwfFileData swf, ushort shapeId, double quality)
-    {
-        (Raylib_cs.Image img, int offsetX, int offsetY, _) = LoadShapeInternal(swf, shapeId, quality);
-        Texture2D texture = Rl.LoadTextureFromImage(img);
-        Cache[(swf, shapeId, quality)] = new(texture, offsetX, offsetY, quality);
-        Rl.UnloadImage(img);
-    }
-
-    public void LoadShapeAsync(SwfFileData swf, ushort shapeId, double quality)
-    {
-        if (_queueSet.Contains((swf, shapeId, quality))) return;
-        _queueSet.Add((swf, shapeId, quality));
-
-        Task.Run(() =>
-        {
-            (Raylib_cs.Image img, int offsetX, int offsetY, _) = LoadShapeInternal(swf, shapeId, quality);
-            lock (_queue) _queue.Enqueue(((swf, shapeId, quality), (img, offsetX, offsetY, quality)));
-        });
-    }
-
     private const int SWF_UNIT_DIVISOR = 20;
-    private const double QUALITY_MULTIPLIER = 1.2;
+    private const double ANIM_SCALE_MULTIPLIER = 1.2;
 
-    private static ImgData LoadShapeInternal(SwfFileData swf, ushort shapeId, double quality)
+    protected override ImgData LoadIntermediate(TxtId data)
     {
-        quality *= QUALITY_MULTIPLIER;
+        (SwfFileData swf, ushort shapeId, double animScale) = data;
+        animScale *= ANIM_SCALE_MULTIPLIER;
         DefineShapeXTag shape = swf.ShapeTags[shapeId];
         SwfShape compiledShape = new(shape);
         // logic follows game
         double x = shape.ShapeBounds.XMin * 1.0 / SWF_UNIT_DIVISOR;
         double y = shape.ShapeBounds.YMin * 1.0 / SWF_UNIT_DIVISOR;
-        double w = shape.ShapeBounds.Width() * quality / SWF_UNIT_DIVISOR;
-        double h = shape.ShapeBounds.Height() * quality / SWF_UNIT_DIVISOR;
+        double w = shape.ShapeBounds.Width() * animScale / SWF_UNIT_DIVISOR;
+        double h = shape.ShapeBounds.Height() * animScale / SWF_UNIT_DIVISOR;
         int offsetX = (int)Math.Floor(x);
         int offsetY = (int)Math.Floor(y);
-        int imageW = (int)Math.Floor(w + (x - offsetX) + quality) + 2;
-        int imageH = (int)Math.Floor(h + (y - offsetY) + quality) + 2;
+        int imageW = (int)Math.Floor(w + (x - offsetX) + animScale) + 2;
+        int imageH = (int)Math.Floor(h + (y - offsetY) + animScale) + 2;
         using Image<Rgba32> image = new(imageW, imageH, IMS.Color.Transparent.ToPixel<Rgba32>());
         ImageSharpShapeExporter exporter = new(image, new Size(SWF_UNIT_DIVISOR * -offsetX, SWF_UNIT_DIVISOR * -offsetY), SWF_UNIT_DIVISOR);
         compiledShape.Export(exporter);
         Raylib_cs.Image img = Utils.ImageSharpImageToRl(image);
         // brawlhalla uses the un-multiplied AnimScale for the actual scaling
-        return (img, offsetX, offsetY, quality / QUALITY_MULTIPLIER);
+        return (img, offsetX, offsetY, animScale / ANIM_SCALE_MULTIPLIER);
     }
 
-    public void UploadImages(int amount)
+    protected override Texture2DWrapper IntermediateToValue(ImgData intermediate)
     {
-        lock (_queue)
-        {
-            amount = Math.Clamp(amount, 0, _queue.Count);
-            for (int i = 0; i < amount; i++)
-            {
-                (TxtId id, ImgData dat) = _queue.Dequeue();
-                _queueSet.Remove(id);
-                (Raylib_cs.Image img, int offsetX, int offsetY, double animScale) = dat;
-                if (!Cache.ContainsKey(id))
-                {
-                    Texture2D texture = Rl.LoadTextureFromImage(img);
-                    Cache[id] = new(texture, offsetX, offsetY, animScale);
-                }
-                Rl.UnloadImage(img);
-            }
-        }
+        (Raylib_cs.Image img, int offsetX, int offsetY, double animScale) = intermediate;
+        Texture2D texture = Rl.LoadTextureFromImage(img);
+        return new(texture, offsetX, offsetY, animScale);
     }
 
-    public void Clear()
+    protected override void UnloadIntermediate(ImgData intermediate)
     {
-        foreach ((_, Texture2DWrapper txt) in Cache)
-            txt.Dispose();
-        Cache.Clear();
+        (Raylib_cs.Image img, _, _, _) = intermediate;
+        Rl.UnloadImage(img);
+    }
 
-        _queueSet.Clear();
-        lock (_queue)
-        {
-            while (_queue.Count > 0)
-            {
-                (_, (Raylib_cs.Image img, _, _, _)) = _queue.Dequeue();
-                Rl.UnloadImage(img);
-            }
-        }
+    protected override void UnloadValue(Texture2DWrapper texture)
+    {
+        texture.Dispose();
+    }
+
+    public void LoadAsync(SwfFileData swf, ushort shapeId, double animScale)
+    {
+        LoadAsync((swf, shapeId, animScale));
     }
 }
