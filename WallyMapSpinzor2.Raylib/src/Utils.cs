@@ -166,6 +166,14 @@ public static class Utils
         return DeserializeFromString<T>(content);
     }
 
+    public static void SerializeSwzFilesToPath(string swzPath, IEnumerable<string> swzFiles, uint key)
+    {
+        using FileStream stream = new(swzPath, FileMode.OpenOrCreate, FileAccess.Write);
+        using SwzWriter writer = new(stream, key);
+        foreach (string file in swzFiles)
+            writer.WriteFile(file);
+    }
+
     private static List<int> FindGetlexPositions(CPoolInfo cpool, string lexName, List<Instruction> code) => code
         .Select((o, i) => new { Item = o, Index = i })
         .Where(o => o.Item.Name == "getlex" && o.Item.Args[0].Value is INamedMultiname name && cpool.Strings[(int)name.Name] == lexName)
