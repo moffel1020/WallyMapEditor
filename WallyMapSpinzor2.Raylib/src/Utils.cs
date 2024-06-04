@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
@@ -238,5 +239,27 @@ public static class Utils
         }
 
         return true;
+    }
+
+    public static string ChangePathName(string path, Func<string, string> modifier)
+    {
+        string ext = Path.GetExtension(path);
+        string name = Path.GetFileNameWithoutExtension(path);
+        string dir = Path.GetDirectoryName(path) ?? "";
+        return Path.Combine(dir, Path.ChangeExtension(modifier(name), ext));
+    }
+
+    public static void CreateBackupOfFile(string path)
+    {
+        int suffix = 0;
+        string backupPath;
+        do
+        {
+            backupPath = ChangePathName(path, s => $"{s}_Backup{(suffix == 0 ? "" : suffix.ToString())}");
+            suffix++;
+        } while (File.Exists(backupPath));
+        using FileStream read = new(path, FileMode.Open, FileAccess.Read);
+        using FileStream write = new(backupPath, FileMode.CreateNew, FileAccess.Write);
+        read.CopyTo(write);
     }
 }

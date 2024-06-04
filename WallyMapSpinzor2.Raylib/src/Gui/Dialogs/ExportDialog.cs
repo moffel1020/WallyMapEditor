@@ -21,6 +21,7 @@ public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
     private string? _descPreview;
     private string? _typePreview;
     private bool _addToLt = false;
+    private bool _backup = true;
 
     private string? _exportError;
     private string? _exportStatus;
@@ -101,14 +102,15 @@ public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
         }
         ImGui.Text($"Path: {prefs.BrawlhallaPath}");
 
+        ImGui.Checkbox("Create backup for swz files", ref _backup);
+
         if (ImGui.Button("Export"))
         {
             Task.Run(() =>
             {
                 try
                 {
-                    _exportStatus = "exporting to game...";
-                    ExportToGameSwzFiles(l);
+                    ExportToGameSwzFiles(l, _backup);
                     _exportError = null;
                     _exportStatus = null;
                 }
@@ -233,41 +235,49 @@ public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
             ImGui.BulletText(playlist);
     }
 
-    public void ExportToGameSwzFiles(Level l)
+    public void ExportToGameSwzFiles(Level l, bool backup)
     {
         if (!Utils.IsValidBrawlPath(prefs.BrawlhallaPath))
             throw new InvalidDataException("Selected brawlhalla path is invalid");
+        _exportStatus = "finding swz key...";
+        if (Utils.GetDoABCDefineTag(Path.Combine(prefs.BrawlhallaPath!, "BrawlhallaAir.swf")) is not DoABCDefineTag abcTag)
+            throw new InvalidDataException("Could not find decryption key");
+        AbcFile abcFile = AbcFile.Read(abcTag.ABCData);
 
-        if (Utils.GetDoABCDefineTag(Path.Combine(prefs.BrawlhallaPath!, "BrawlhallaAir.swf")) is DoABCDefineTag abcTag)
+        uint key = Utils.FindDecryptionKey(abcFile) ?? throw new InvalidDataException("Could not find decryption key");
+        prefs.DecryptionKey = key.ToString();
+        _exportStatus = "found!";
+        string? ldData = Utils.SerializeToString(l.Desc) ?? throw new SerializationException("Could not serialize leveldesc to string");
+
+        string dynamicPath = Path.Combine(prefs.BrawlhallaPath!, "Dynamic.swz");
+        string initPath = Path.Combine(prefs.BrawlhallaPath!, "Init.swz");
+        //string gamePath = Path.Combine(prefs.BrawlhallaPath!, "Game.swz");
+
+        if (backup)
         {
-            AbcFile abcFile = AbcFile.Read(abcTag.ABCData);
-
-            uint key = Utils.FindDecryptionKey(abcFile) ?? throw new InvalidDataException("Could not find decryption key");
-            prefs.DecryptionKey = key.ToString();
-
-            string? ldData = Utils.SerializeToString(l.Desc) ?? throw new SerializationException("Could not serialize leveldesc to string");
-
-            string dynamicPath = Path.Combine(prefs.BrawlhallaPath!, "Dynamic.swz");
-            string initPath = Path.Combine(prefs.BrawlhallaPath!, "Init.swz");
-            // string gamePath = Path.Combine(prefs.BrawlhallaPath!, "Game.swz");
-
-            Dictionary<string, string> dynamicFiles = [];
-            foreach (string content in Utils.GetFilesInSwz(dynamicPath, key))
-                dynamicFiles.Add(SwzUtils.GetFileName(content), content);
-
-            dynamicFiles[SwzUtils.GetFileName(ldData)] = ldData;
-
-            Dictionary<string, string> initFiles = [];
-            foreach (string content in Utils.GetFilesInSwz(initPath, key))
-                initFiles.Add(SwzUtils.GetFileName(content), content);
-
-            LevelTypes lts = Utils.DeserializeFromString<LevelTypes>(initFiles["LevelTypes.xml"]);
-            lts.AddOrUpdateLevelType(l.Type ?? throw new ArgumentNullException("l.Type"));
-            dynamicFiles["LevelTypes.xml"] = Utils.SerializeToString(lts) ?? throw new SerializationException("Could not serialize leveltypes to string");
-
-            Utils.SerializeSwzFilesToPath(dynamicPath, dynamicFiles.Values, key);
-            Utils.SerializeSwzFilesToPath(initPath, initFiles.Values, key);
-            // TODO: playlists
+            _exportStatus = "creating backup...";
+            Utils.CreateBackupOfFile(dynamicPath);
+            Utils.CreateBackupOfFile(initPath);
+            //Utils.CreateBackupOfFile(gamePath);
         }
+
+        _exportStatus = "reading swz...";
+
+        Dictionary<string, string> dynamicFiles = [];
+        foreach (string content in Utils.GetFilesInSwz(dynamicPath, key))
+            dynamicFiles.Add(SwzUtils.GetFileName(content), content);
+        dynamicFiles[SwzUtils.GetFileName(ldData)] = ldData;
+
+        Dictionary<string, string> initFiles = [];
+        foreach (string content in Utils.GetFilesInSwz(initPath, key))
+            initFiles.Add(SwzUtils.GetFileName(content), content);
+        LevelTypes lts = Utils.DeserializeFromString<LevelTypes>(initFiles["LevelTypes.xml"]);
+        lts.AddOrUpdateLevelType(l.Type ?? throw new ArgumentNullException("l.Type"));
+        initFiles["LevelTypes.xml"] = Utils.SerializeToString(lts) ?? throw new SerializationException("Could not serialize leveltypes to string");
+
+        _exportStatus = "creating new swz...";
+        Utils.SerializeSwzFilesToPath(dynamicPath, dynamicFiles.Values, key);
+        Utils.SerializeSwzFilesToPath(initPath, initFiles.Values, key);
+        // TODO: playlists
     }
 }
