@@ -226,7 +226,7 @@ public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
         }
     }
 
-    public void ShowPlaylistsExportTab(Level l)
+    public static void ShowPlaylistsExportTab(Level l)
     {
         ImGui.Text($"{l.Desc.LevelName} is in playlists:");
         foreach (string playlist in l.Playlists)
