@@ -143,14 +143,14 @@ public partial class RaylibCanvas : ICanvas
         ), (int)priority);
     }
 
-    public void DrawTextureRect(string path, double x, double y, double w, double h, Transform trans, DrawPriorityEnum priority, object? caller)
+    public void DrawTextureRect(string path, double x, double y, double? w, double? h, Transform trans, DrawPriorityEnum priority, object? caller)
     {
         Texture2DWrapper texture = LoadTextureFromPath(path);
-        if (w == 0) w = texture.Texture.Width;
-        if (h == 0) h = texture.Texture.Height;
+        w ??= texture.Texture.Width;
+        h ??= texture.Texture.Height;
         DrawingQueue.Push((caller, () =>
         {
-            DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, w, h, trans);
+            DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, w.Value, h.Value, trans);
         }
         ), (int)priority);
     }
