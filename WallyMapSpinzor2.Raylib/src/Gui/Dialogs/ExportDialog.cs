@@ -88,7 +88,7 @@ public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
     {
         ImGui.Text("Export to game swz files");
         ImGui.PushTextWrapPos();
-        ImGui.Text("This will override the game swz files and you will not be able to play online. To play online again verify integrity of game files");
+        ImGui.Text("This will override the game swz files and you will not be able to play online (even if you changed nothing). To play online again verify integrity of game files");
         ImGui.PopTextWrapPos();
         ImGui.Separator();
         if (ImGui.Button("Select Brawlhalla path"))
