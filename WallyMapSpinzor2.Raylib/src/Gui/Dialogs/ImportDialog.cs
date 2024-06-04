@@ -314,7 +314,7 @@ public class ImportDialog(Editor editor, PathPreferences prefs) : IDialog
             _boneNames = null;
         else
         {
-            _boneNames = XElement.Parse(boneFileContent).Elements("Bone").Select(e => e.Value).ToArray();
+            _boneNames = [.. XElement.Parse(boneFileContent).Elements("Bone").Select(e => e.Value)];
         }
     }
 }

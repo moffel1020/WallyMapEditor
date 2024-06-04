@@ -48,7 +48,7 @@ public class Editor(PathPreferences pathPrefs)
     public void LoadMap(string ldPath, string? ltPath, string? lstPath, string btPath)
     {
         using (FileStream bonesFile = new(btPath, FileMode.Open, FileAccess.Read))
-            BoneNames = XElement.Load(bonesFile).Elements("Bone").Select(e => e.Value).ToArray();
+            BoneNames = [.. XElement.Load(bonesFile).Elements("Bone").Select(e => e.Value)];
         LevelDesc ld = Utils.DeserializeFromPath<LevelDesc>(ldPath);
         LevelTypes lt = ltPath is null ? new() { Levels = [] } : Utils.DeserializeFromPath<LevelTypes>(ltPath);
         LevelSetTypes lst = lstPath is null ? new() { Playlists = [] } : Utils.DeserializeFromPath<LevelSetTypes>(lstPath);

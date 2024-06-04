@@ -75,7 +75,7 @@ public static class ImGuiExt
     {
         int current = Enum.TryParse(type, currentName, out object? result) ? (int)result : 0;
         string[] allNames = includeNone
-            ? Enum.GetNames(type).Prepend("None").ToArray()
+            ? ["None", .. Enum.GetNames(type)]
             : Enum.GetNames(type);
         ImGui.Combo(label, ref current, allNames, allNames.Length);
         return Enum.GetName(type, current) ?? "";
