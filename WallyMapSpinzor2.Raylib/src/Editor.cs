@@ -24,7 +24,7 @@ public class Editor(PathPreferences pathPrefs)
 
     public IDrawable? MapData { get; set; }
     PathPreferences PathPrefs { get; } = pathPrefs;
-    public string[] BoneNames { get; set; } = null!;
+    public string[]? BoneNames { get; set; }
 
     public RaylibCanvas? Canvas { get; set; }
     private Camera2D _cam = new();
@@ -65,7 +65,7 @@ public class Editor(PathPreferences pathPrefs)
         CommandHistory.Clear();
         if (Canvas is not null)
         {
-            Canvas.BoneNames = BoneNames;
+            Canvas.BoneNames = BoneNames!;
             Canvas.ClearTextureCache();
         }
 
@@ -171,7 +171,7 @@ public class Editor(PathPreferences pathPrefs)
         Rl.ClearBackground(Raylib_cs.Color.Black);
         if (PathPrefs.BrawlhallaPath is not null)
         {
-            Canvas ??= new(PathPrefs.BrawlhallaPath, BoneNames);
+            Canvas ??= new(PathPrefs.BrawlhallaPath, BoneNames!);
             Canvas.CameraMatrix = Rl.GetCameraMatrix2D(_cam);
 
             MapData?.DrawOn(Canvas, Transform.IDENTITY, _config, new RenderContext(), _state);
