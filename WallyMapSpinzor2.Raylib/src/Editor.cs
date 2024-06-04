@@ -45,10 +45,15 @@ public class Editor(PathPreferences pathPrefs)
 
     public MousePickingFramebuffer PickingFramebuffer { get; set; } = new();
 
-    public void LoadMap(string ldPath, string? ltPath, string? lstPath, string btPath)
+    public void LoadMap(string ldPath, string? ltPath, string? lstPath, string? btPath)
     {
-        using (FileStream bonesFile = new(btPath, FileMode.Open, FileAccess.Read))
+        if (btPath is null && BoneNames is null)
+            throw new Exception("Trying to load a map without a BoneTypes.xml file, and without a bone name list already loaded");
+        if (btPath is not null)
+        {
+            using FileStream bonesFile = new(btPath, FileMode.Open, FileAccess.Read);
             BoneNames = [.. XElement.Load(bonesFile).Elements("Bone").Select(e => e.Value)];
+        }
         LevelDesc ld = Utils.DeserializeFromPath<LevelDesc>(ldPath);
         LevelTypes lt = ltPath is null ? new() { Levels = [] } : Utils.DeserializeFromPath<LevelTypes>(ltPath);
         LevelSetTypes lst = lstPath is null ? new() { Playlists = [] } : Utils.DeserializeFromPath<LevelSetTypes>(lstPath);
@@ -233,7 +238,7 @@ public class Editor(PathPreferences pathPrefs)
             {
                 Canvas?.ClearTextureCache();
             }
-            if (ImGui.MenuItem("Reload Map", "Ctrl+R") && PathPrefs.LevelDescPath is not null && PathPrefs.BoneTypesPath is not null)
+            if (ImGui.MenuItem("Reload Map", "Ctrl+R") && PathPrefs.LevelDescPath is not null && (BoneNames is not null || PathPrefs.BoneTypesPath is not null))
             {
                 LoadMap(PathPrefs.LevelDescPath, PathPrefs.LevelTypePath, PathPrefs.LevelSetTypesPath, PathPrefs.BoneTypesPath);
             }

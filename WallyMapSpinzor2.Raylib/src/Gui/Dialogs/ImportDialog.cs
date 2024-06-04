@@ -269,7 +269,7 @@ public class ImportDialog(Editor editor, PathPreferences prefs) : IDialog
         ImGui.Text(savedLstPath ?? "None");
 
         ImGui.Separator();
-        if (savedLdPath is not null && savedBtPath is not null && ImGui.Button("Import"))
+        if (savedLdPath is not null && (editor.BoneNames is not null || savedBtPath is not null) && ImGui.Button("Import"))
         {
             _loadingStatus = "loading...";
             try
