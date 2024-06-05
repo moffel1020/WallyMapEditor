@@ -28,12 +28,12 @@ public class RenderConfigWindow
         Utils.SerializeToPath(config, path);
     }
 
-    public void Show(RenderConfig config, PathPreferences prefs)
+    public void Show(RenderConfig config, RenderConfigDefault configDefault, PathPreferences prefs)
     {
         ImGui.Begin("Render Config", ref _open);
 
         ImGui.SeparatorText("Loading##config");
-        if (ImGui.Button("Load config from file"))
+        if (ImGui.Button("Load config from file##config"))
         {
             //TODO: give a reasonable default folder (a Config folder inside the appdata?)
             Task.Run(() =>
@@ -54,7 +54,7 @@ public class RenderConfigWindow
             });
         }
 
-        if (ImGui.Button("Save config to file"))
+        if (ImGui.Button("Save config to file##config"))
         {
             //TODO: give a reasonable default folder (a Config folder inside the appdata?)
             Task.Run(() =>
@@ -73,6 +73,23 @@ public class RenderConfigWindow
                     }
                 }
             });
+        }
+
+        ImGui.Separator();
+
+        if (ImGui.Button("Reset to custom default##config"))
+        {
+            config.Deserialize(configDefault.SerializeToXElement());
+        }
+
+        if (ImGui.Button("Reset to base default##config"))
+        {
+            config.Deserialize(RenderConfig.Default.SerializeToXElement());
+        }
+
+        if (ImGui.Button("Set as custom default##config"))
+        {
+            configDefault.Deserialize(config.SerializeToXElement());
         }
 
         ImGui.SeparatorText("General##config");

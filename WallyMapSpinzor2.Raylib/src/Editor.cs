@@ -13,7 +13,7 @@ using ImGuiNET;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public class Editor(PathPreferences pathPrefs)
+public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault)
 {
     public const float ZOOM_INCREMENT = 0.15f;
     public const float MIN_ZOOM = 0.01f;
@@ -24,6 +24,7 @@ public class Editor(PathPreferences pathPrefs)
 
     public IDrawable? MapData { get; set; }
     PathPreferences PathPrefs { get; } = pathPrefs;
+    RenderConfigDefault ConfigDefault { get; } = configDefault;
     public string[]? BoneNames { get; set; }
 
     public RaylibCanvas? Canvas { get; set; }
@@ -115,6 +116,8 @@ public class Editor(PathPreferences pathPrefs)
 
     public void Run()
     {
+        _config.Deserialize(ConfigDefault.SerializeToXElement());
+
         if (PathPrefs.LevelDescPath is not null && PathPrefs.BoneTypesPath is not null)
         {
             LoadMap(PathPrefs.LevelDescPath, PathPrefs.LevelTypePath, PathPrefs.LevelSetTypesPath, PathPrefs.BoneTypesPath);
@@ -153,6 +156,7 @@ public class Editor(PathPreferences pathPrefs)
         }
 
         PathPrefs.Save();
+        ConfigDefault.Save();
         Rl.CloseWindow();
     }
 
@@ -190,17 +194,22 @@ public class Editor(PathPreferences pathPrefs)
         ImGui.DockSpaceOverViewport();
         ShowMainMenuBar();
 
-        if (ViewportWindow.Open) ViewportWindow.Show();
-        if (RenderConfigWindow.Open) RenderConfigWindow.Show(_config, PathPrefs);
-        if (MapOverviewWindow.Open && MapData is Level l) MapOverviewWindow.Show(l, CommandHistory, ref _selectedObject);
+        if (ViewportWindow.Open)
+            ViewportWindow.Show();
+        if (RenderConfigWindow.Open)
+            RenderConfigWindow.Show(_config, ConfigDefault, PathPrefs);
+        if (MapOverviewWindow.Open && MapData is Level l)
+            MapOverviewWindow.Show(l, CommandHistory, ref _selectedObject);
 
         if (_selectedObject is not null)
             PropertiesWindow.Open = true;
-        if (PropertiesWindow.Open && _selectedObject is not null) PropertiesWindow.Show(_selectedObject, CommandHistory);
+        if (PropertiesWindow.Open && _selectedObject is not null)
+            PropertiesWindow.Show(_selectedObject, CommandHistory);
         if (!PropertiesWindow.Open)
             _selectedObject = null;
 
-        if (HistoryPanel.Open) HistoryPanel.Show(CommandHistory);
+        if (HistoryPanel.Open)
+            HistoryPanel.Show(CommandHistory);
 
         DialogWindows.RemoveAll(dialog => dialog.Closed);
         foreach (IDialog d in DialogWindows)

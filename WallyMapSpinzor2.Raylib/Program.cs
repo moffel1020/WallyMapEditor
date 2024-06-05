@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using WallyMapSpinzor2.Raylib;
 
 PathPreferences prefs = PathPreferences.Load();
+RenderConfigDefault config = RenderConfigDefault.Load();
 
 Dictionary<string, string> cmdArgs = [];
 foreach (string arg in args)
@@ -24,5 +25,5 @@ if (cmdArgs.TryGetValue("--brawlAir", out string? brawlAir))
 if (cmdArgs.TryGetValue("--swzKey", out string? swzKey))
     prefs.DecryptionKey = swzKey;
 
-Editor editor = new(prefs);
+Editor editor = new(prefs, config);
 editor.Run();
