@@ -93,9 +93,8 @@ public class ImportDialog(Editor editor, PathPreferences prefs) : IDialog
         }
         ImGui.Text($"Path: {prefs.BrawlhallaPath}");
 
-        string swzKey = prefs.DecryptionKey ?? "";
-        ImGui.InputText("Decryption key", ref swzKey, MAX_KEY_LENGTH, ImGuiInputTextFlags.CharsDecimal);
-        if (swzKey.Length > 0 && _decryptedLt is null && ImGuiExt.WithDisabledButton(_decrypting, "Decrypt"))
+        prefs.DecryptionKey = ImGuiExt.InputText("Decryption key", prefs.DecryptionKey ?? "", MAX_KEY_LENGTH, ImGuiInputTextFlags.CharsDecimal);
+        if (prefs.DecryptionKey.Length > 0 && _decryptedLt is null && ImGuiExt.WithDisabledButton(_decrypting, "Decrypt"))
         {
             _decrypting = true;
             Task.Run(() =>
@@ -104,7 +103,6 @@ public class ImportDialog(Editor editor, PathPreferences prefs) : IDialog
                 try
                 {
                     DecryptSwzFiles(prefs.BrawlhallaPath!);
-                    prefs.DecryptionKey = swzKey;
                     _loadingStatus = null;
                     _loadingError = null;
                 }
