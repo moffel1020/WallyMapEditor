@@ -71,7 +71,11 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         }
 
         Level l = new(ld, lt, lst);
-        l.Type ??= DefaultLevelType;
+        if (l.Type is null)
+        {
+            l.Type = DefaultLevelType;
+            l.Type.LevelName = ld.LevelName;
+        }
         MapData = l;
         // it's fine if there are no playlists here, they will be selected when exporting
 
