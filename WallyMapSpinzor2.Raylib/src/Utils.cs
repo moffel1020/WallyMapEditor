@@ -105,7 +105,7 @@ public static class Utils
         return element.DeserializeTo<T>();
     }
 
-    public static void SerializeToPath<T>(T serializable, string toPath)
+    public static void SerializeToPath<T>(T serializable, string toPath, bool minify = false)
         where T : ISerializable
     {
         XElement e = serializable.SerializeToXElement();
@@ -113,15 +113,15 @@ public static class Utils
         using XmlWriter xmlw = XmlWriter.Create(toFile, new()
         {
             OmitXmlDeclaration = true, //no xml header
-            IndentChars = "    ",
-            Indent = true, //indent with four spaces
-            NewLineChars = "\n", //use UNIX line endings
+            IndentChars = minify ? "" : "    ",
+            Indent = !minify, //indent with four spaces
+            NewLineChars = minify ? "" : "\n", //use UNIX line endings
             Encoding = new UTF8Encoding(false) //use UTF8 (no BOM) encoding
         });
         e.Save(xmlw);
     }
 
-    public static string? SerializeToString<T>(T serializable)
+    public static string? SerializeToString<T>(T serializable, bool minimify = false)
         where T : ISerializable
     {
         XElement e = serializable.SerializeToXElement();
@@ -129,9 +129,9 @@ public static class Utils
         using XmlWriter xmlw = XmlWriter.Create(sw, new()
         {
             OmitXmlDeclaration = true, //no xml header
-            IndentChars = "    ",
-            Indent = true, //indent with four spaces
-            NewLineChars = "\n", //use UNIX line endings
+            IndentChars = minimify ? "" : "    ",
+            Indent = !minimify, //indent with four spaces
+            NewLineChars = minimify ? "" : "\n", //use UNIX line endings
             Encoding = new UTF8Encoding(false) //use UTF8 (no BOM) encoding
         });
         e.Save(xmlw);

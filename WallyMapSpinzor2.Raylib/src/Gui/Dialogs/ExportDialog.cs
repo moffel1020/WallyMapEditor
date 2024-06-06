@@ -247,7 +247,7 @@ public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
         uint key = Utils.FindDecryptionKey(abcFile) ?? throw new InvalidDataException("Could not find decryption key");
         prefs.DecryptionKey = key.ToString();
         _exportStatus = "found!";
-        string? ldData = Utils.SerializeToString(l.Desc) ?? throw new SerializationException("Could not serialize leveldesc to string");
+        string? ldData = Utils.SerializeToString(l.Desc, true) ?? throw new SerializationException("Could not serialize leveldesc to string");
 
         string dynamicPath = Path.Combine(prefs.BrawlhallaPath!, "Dynamic.swz");
         string initPath = Path.Combine(prefs.BrawlhallaPath!, "Init.swz");
@@ -273,7 +273,7 @@ public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
             initFiles.Add(SwzUtils.GetFileName(content), content);
         LevelTypes lts = Utils.DeserializeFromString<LevelTypes>(initFiles["LevelTypes.xml"]);
         lts.AddOrUpdateLevelType(l.Type ?? throw new ArgumentNullException("l.Type"));
-        initFiles["LevelTypes.xml"] = Utils.SerializeToString(lts) ?? throw new SerializationException("Could not serialize leveltypes to string");
+        initFiles["LevelTypes.xml"] = Utils.SerializeToString(lts, true) ?? throw new SerializationException("Could not serialize leveltypes to string");
 
         _exportStatus = "creating new swz...";
         Utils.SerializeSwzFilesToPath(dynamicPath, dynamicFiles.Values, key);
