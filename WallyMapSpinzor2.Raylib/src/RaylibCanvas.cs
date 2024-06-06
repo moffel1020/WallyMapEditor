@@ -279,12 +279,13 @@ public partial class RaylibCanvas : ICanvas
 
     public void DrawAnim(Gfx gfx, string animName, int frame, Transform trans, DrawPriorityEnum priority, object? caller, int loopLimit = -1)
     {
-        ColorTransform colorTransform = new()
+        ColorTransform? colorTransform = gfx.Tint == 0 ? null : new()
         {
             RMult = (short)((gfx.Tint >> 16) & 0xFF),
             GMult = (short)((gfx.Tint >> 8) & 0xFF),
             BMult = (short)((gfx.Tint >> 0) & 0xFF),
         };
+        ColorTransform[] colorTransfroms = colorTransform is not null ? [colorTransform] : [];
         /*
         NOTE: the game goes over the list from the end until it finds a CustomArt that matches
         this only matters for CustomArt with RIGHT and for AsymmetrySwapFlags.
@@ -299,7 +300,7 @@ public partial class RaylibCanvas : ICanvas
             if (swf is null)
                 return;
             ushort spriteId = swf.SymbolClass[gfx.AnimClass + customArtSuffix];
-            DrawSwfSprite(gfx.AnimFile, spriteId, frame, gfx.AnimScale, [colorTransform], 1, trans, priority, caller, loopLimit);
+            DrawSwfSprite(gfx.AnimFile, spriteId, frame, gfx.AnimScale, colorTransfroms, 1, trans, priority, caller, loopLimit);
         }
         // anm animation
         else if (gfx.AnimFile.StartsWith("Animation_"))
@@ -325,7 +326,7 @@ public partial class RaylibCanvas : ICanvas
                 if (swf is null)
                     return;
                 ushort spriteId = swf.SymbolClass[spriteName];
-                DrawSwfSprite(swfPath, spriteId, bone.Frame - 1, gfx.AnimScale, [colorTransform], bone.Opacity, trans * boneTrans, priority, caller);
+                DrawSwfSprite(swfPath, spriteId, bone.Frame - 1, gfx.AnimScale, colorTransfroms, bone.Opacity, trans * boneTrans, priority, caller);
             }
         }
     }
@@ -354,17 +355,19 @@ public partial class RaylibCanvas : ICanvas
         SwfSpriteFrame spriteFrame = sprite.Frames[BrawlhallaMath.SafeMod(frame, sprite.Frames.Length)];
         foreach ((_, SwfSpriteFrameLayer layer) in spriteFrame.Layers)
         {
+            ColorTransform[] newColorTransform = layer.ColorTransform is not null ? [.. colorTransforms, layer.ColorTransform] : colorTransforms;
+            Transform newTrans = trans * Utils.SwfMatrixToTransform(layer.Matrix);
             // is a shape
             if (file.ShapeTags.TryGetValue(layer.CharacterId, out DefineShapeXTag? shape))
             {
                 ushort shapeId = shape.ShapeID;
-                DrawSwfShape(filePath, shapeId, animScale, [.. colorTransforms, layer.ColorTransform], opacity, trans * Utils.SwfMatrixToTransform(layer.Matrix), priority, caller);
+                DrawSwfShape(filePath, shapeId, animScale, newColorTransform, opacity, newTrans, priority, caller);
             }
             // is a sprite
             else if (file.SpriteTags.TryGetValue(layer.CharacterId, out DefineSpriteTag? childSprite))
             {
                 ushort childSpriteId = childSprite.SpriteID;
-                DrawSwfSprite(filePath, childSpriteId, frame + layer.FrameOffset, animScale, [.. colorTransforms, layer.ColorTransform], opacity, trans * Utils.SwfMatrixToTransform(layer.Matrix), priority, caller);
+                DrawSwfSprite(filePath, childSpriteId, frame + layer.FrameOffset, animScale, newColorTransform, opacity, newTrans, priority, caller);
             }
         }
     }
