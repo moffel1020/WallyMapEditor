@@ -66,10 +66,20 @@ public class MapOverviewWindow
         {
             if (ImGui.CollapsingHeader("Kill Bounds##overview"))
             {
-                _propChanged |= ImGuiExt.DragIntHistory("Top##killbounds", l.Type.TopKill!.Value, val => l.Type.TopKill = val, cmd, minValue: 1);
-                _propChanged |= ImGuiExt.DragIntHistory("Bottom##killbounds", l.Type.BottomKill!.Value, val => l.Type.BottomKill = val, cmd, minValue: 1);
-                _propChanged |= ImGuiExt.DragIntHistory("Left##killbounds", l.Type.LeftKill!.Value, val => l.Type.LeftKill = val, cmd, minValue: 1);
-                _propChanged |= ImGuiExt.DragIntHistory("Right##killbounds", l.Type.RightKill!.Value, val => l.Type.RightKill = val, cmd, minValue: 1);
+                _propChanged |= ImGuiExt.DragIntHistory("TopKill##killbounds", l.Type.TopKill!.Value, val => l.Type.TopKill = val, cmd, minValue: 1);
+                _propChanged |= ImGuiExt.DragIntHistory("BottomKill##killbounds", l.Type.BottomKill!.Value, val => l.Type.BottomKill = val, cmd, minValue: 1);
+                _propChanged |= ImGuiExt.DragIntHistory("LeftKill##killbounds", l.Type.LeftKill!.Value, val => l.Type.LeftKill = val, cmd, minValue: 1);
+                _propChanged |= ImGuiExt.DragIntHistory("RightKill##killbounds", l.Type.RightKill!.Value, val => l.Type.RightKill = val, cmd, minValue: 1);
+
+                _propChanged |= ImGuiExt.CheckboxHistory("SoftTopKill", l.Type.SoftTopKill ?? true, val => l.Type.SoftTopKill = val ? null : val, cmd);
+                ImGuiExt.WithDisabled(l.Type.LeftKill < 200, () =>
+                {
+                    _propChanged |= ImGuiExt.CheckboxHistory("HardLeftKill", l.Type.HardLeftKill ?? false, val => l.Type.HardLeftKill = val ? val : null, cmd);
+                });
+                ImGuiExt.WithDisabled(l.Type.RightKill < 200, () =>
+                {
+                    _propChanged |= ImGuiExt.CheckboxHistory("HardRightKill", l.Type.HardRightKill ?? false, val => l.Type.HardRightKill = val ? val : null, cmd);
+                });
             }
         }
 
