@@ -12,6 +12,7 @@ using WallyAnmSpinzor;
 using SwiffCheese.Wrappers;
 
 using SwfLib.Tags;
+using System.Collections.Generic;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -138,7 +139,7 @@ public partial class RaylibCanvas : ICanvas
         Texture2DWrapper texture = LoadTextureFromPath(path);
         DrawingQueue.Push((caller, () =>
         {
-            DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, texture.W, texture.H, trans);
+            DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, texture.W, texture.H, trans, [], 1);
         }
         ), (int)priority);
     }
@@ -150,17 +151,50 @@ public partial class RaylibCanvas : ICanvas
         h ??= texture.Texture.Height;
         DrawingQueue.Push((caller, () =>
         {
-            DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, w.Value, h.Value, trans);
+            DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, w.Value, h.Value, trans, [], 1);
         }
         ), (int)priority);
     }
 
-    private static void DrawTextureWithTransform(Texture2D texture, double x, double y, double w, double h, Transform trans, float tintR = 1, float tintG = 1, float tintB = 1, float tintA = 1)
+    private static readonly Dictionary<ColorTransform[], Shader> _shaderCache = [];
+
+    private static void DrawTextureWithTransform(Texture2D texture, double x, double y, double w, double h, Transform trans, ColorTransform[] colorTransforms, double opacity)
     {
+        Shader shader;
+        if (_shaderCache.TryGetValue(colorTransforms, out Shader value))
+        {
+            shader = value;
+        }
+        else
+        {
+            shader = Rl.LoadShaderFromMemory(
+            @"
+            #version 330
+
+            in vec3 vertexPosition;
+            in vec2 vertexTexCoord;
+            in vec4 vertexColor;
+
+            out vec2 fragTexCoord;
+            out vec4 fragColor;
+
+            uniform mat4 mvp;
+
+            void main()
+            {
+                fragTexCoord = vertexTexCoord;
+                fragColor = vertexColor;
+                gl_Position = mvp*vec4(vertexPosition, 1.0);
+            };"
+            , ColorTransform.CreateShader(colorTransforms));
+            _shaderCache[colorTransforms] = shader;
+        }
+
         Rl.BeginBlendMode(BlendMode.AlphaPremultiply);
         Rlgl.SetTexture(texture.Id);
+        Rl.BeginShaderMode(shader);
         Rlgl.Begin(DrawMode.Quads);
-        Rlgl.Color4f(tintR * tintA, tintG * tintA, tintB * tintA, tintA);
+        Rlgl.Color4f(1, 1, 1, (float)opacity);
         (double xMin, double yMin) = (x, y);
         (double xMax, double yMax) = (x + w, y + h);
         (double, double)[] texCoords = [(0, 0), (0, 1), (1, 1), (1, 0), (0, 0)];
@@ -178,6 +212,7 @@ public partial class RaylibCanvas : ICanvas
             Rlgl.TexCoord2f((float)texCoords[i + 1].Item1, (float)texCoords[i + 1].Item2);
             Rlgl.Vertex2f((float)points[i + 1].Item1, (float)points[i + 1].Item2);
         }
+        Rl.EndShaderMode();
         Rlgl.End();
         Rlgl.SetTexture(0);
         Rl.EndBlendMode();
@@ -263,6 +298,12 @@ public partial class RaylibCanvas : ICanvas
 
     public void DrawAnim(Gfx gfx, string animName, int frame, Transform trans, DrawPriorityEnum priority, object? caller, int loopLimit = -1)
     {
+        ColorTransform colorTransform = new()
+        {
+            RMult = (short)((gfx.Tint >> 16) & 0xFF),
+            GMult = (short)((gfx.Tint >> 8) & 0xFF),
+            BMult = (short)((gfx.Tint >> 0) & 0xFF),
+        };
         /*
         NOTE: the game goes over the list from the end until it finds a CustomArt that matches
         this only matters for CustomArt with RIGHT and for AsymmetrySwapFlags.
@@ -277,7 +318,7 @@ public partial class RaylibCanvas : ICanvas
             if (swf is null)
                 return;
             ushort spriteId = swf.SymbolClass[gfx.AnimClass + customArtSuffix];
-            DrawSwfSprite(gfx.AnimFile, spriteId, frame, gfx.AnimScale, gfx.Tint, 1, trans, priority, caller, loopLimit);
+            DrawSwfSprite(gfx.AnimFile, spriteId, frame, gfx.AnimScale, [colorTransform], 1, trans, priority, caller, loopLimit);
         }
         // anm animation
         else if (gfx.AnimFile.StartsWith("Animation_"))
@@ -303,28 +344,23 @@ public partial class RaylibCanvas : ICanvas
                 if (swf is null)
                     return;
                 ushort spriteId = swf.SymbolClass[spriteName];
-                DrawSwfSprite(swfPath, spriteId, bone.Frame - 1, gfx.AnimScale, gfx.Tint, bone.Opacity, trans * boneTrans, priority, caller);
+                DrawSwfSprite(swfPath, spriteId, bone.Frame - 1, gfx.AnimScale, [colorTransform], bone.Opacity, trans * boneTrans, priority, caller);
             }
         }
     }
 
-    public void DrawSwfShape(string filePath, ushort shapeId, double animScale, uint tint, double opacity, Transform trans, DrawPriorityEnum priority, object? caller)
+    public void DrawSwfShape(string filePath, ushort shapeId, double animScale, ColorTransform[] colorTransforms, double opacity, Transform trans, DrawPriorityEnum priority, object? caller)
     {
-        float tintR = tint == 0 ? 1 : ((byte)(tint >> 16) / 256f);
-        float tintG = tint == 0 ? 1 : ((byte)(tint >> 8) / 256f);
-        float tintB = tint == 0 ? 1 : ((byte)(tint >> 0) / 256f);
-        float tintA = (float)opacity;
-
         Texture2DWrapper? texture = LoadShapeFromSwf(filePath, shapeId, animScale);
         if (texture is null) return;
         DrawingQueue.Push((caller, () =>
         {
-            DrawTextureWithTransform(texture.Texture, 0, 0, texture.W, texture.H, trans * Transform.CreateTranslate(texture.XOff, texture.YOff), tintR: tintR, tintG: tintG, tintB: tintB, tintA: tintA);
+            DrawTextureWithTransform(texture.Texture, 0, 0, texture.W, texture.H, trans * Transform.CreateTranslate(texture.XOff, texture.YOff), colorTransforms, opacity);
         }
         ), (int)priority);
     }
 
-    public void DrawSwfSprite(string filePath, ushort spriteId, int frame, double animScale, uint tint, double opacity, Transform trans, DrawPriorityEnum priority, object? caller, int loopLimit = -1)
+    public void DrawSwfSprite(string filePath, ushort spriteId, int frame, double animScale, ColorTransform[] colorTransforms, double opacity, Transform trans, DrawPriorityEnum priority, object? caller, int loopLimit = -1)
     {
         SwfFileData? file = LoadSwf(filePath);
         if (file is null) return;
@@ -341,13 +377,13 @@ public partial class RaylibCanvas : ICanvas
             if (file.ShapeTags.TryGetValue(layer.CharacterId, out DefineShapeXTag? shape))
             {
                 ushort shapeId = shape.ShapeID;
-                DrawSwfShape(filePath, shapeId, animScale, tint, opacity, trans * Utils.SwfMatrixToTransform(layer.Matrix), priority, caller);
+                DrawSwfShape(filePath, shapeId, animScale, [.. colorTransforms, layer.ColorTransform], opacity, trans * Utils.SwfMatrixToTransform(layer.Matrix), priority, caller);
             }
             // is a sprite
             else if (file.SpriteTags.TryGetValue(layer.CharacterId, out DefineSpriteTag? childSprite))
             {
                 ushort childSpriteId = childSprite.SpriteID;
-                DrawSwfSprite(filePath, childSpriteId, frame + layer.FrameOffset, animScale, tint, opacity, trans * Utils.SwfMatrixToTransform(layer.Matrix), priority, caller);
+                DrawSwfSprite(filePath, childSpriteId, frame + layer.FrameOffset, animScale, [.. colorTransforms, layer.ColorTransform], opacity, trans * Utils.SwfMatrixToTransform(layer.Matrix), priority, caller);
             }
         }
     }

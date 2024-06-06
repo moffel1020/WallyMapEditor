@@ -7,7 +7,7 @@ public class SwfSpriteFrameLayer
 {
     public int FrameOffset { get; set; }
     public SwfMatrix Matrix { get; set; }
-    public ColorTransformRGBA? ColorTransform { get; set; }
+    public ColorTransform ColorTransform { get; set; } = new();
     public ushort CharacterId { get; set; }
 
     public void ModifyBy(PlaceObjectBaseTag placeObject)
@@ -19,7 +19,7 @@ public class SwfSpriteFrameLayer
             if (placeObject2.HasMatrix)
                 Matrix = placeObject.Matrix;
             if (placeObject2.HasColorTransform)
-                ColorTransform = placeObject2.ColorTransform;
+                ColorTransform = new(placeObject2.ColorTransform);
         }
         else if (placeObject is PlaceObject3Tag placeObject3)
         {
@@ -28,7 +28,7 @@ public class SwfSpriteFrameLayer
             if (placeObject3.HasMatrix)
                 Matrix = placeObject.Matrix;
             if (placeObject3.HasColorTransform)
-                ColorTransform = placeObject3.ColorTransform;
+                ColorTransform = placeObject3.ColorTransform is not null ? new(placeObject3.ColorTransform.Value) : new();
         }
     }
 
