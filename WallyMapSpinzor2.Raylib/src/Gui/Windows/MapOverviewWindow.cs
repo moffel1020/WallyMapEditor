@@ -48,11 +48,15 @@ public class MapOverviewWindow
                 _propChanged = true;
             }
 
+            ImGui.Text($"LevelID: {l.Type.LevelID}");
+
             // these are unused in modern brawlhalla, so no reason to edit them
             ImGui.Text($"AssetName: {l.Type.AssetName}");
             ImGui.Text($"FileName: {l.Type.FileName}");
 
-            l.Type.DisplayName = ImGuiExt.InputText("DisplayName", l.Type.DisplayName);
+            _propChanged |= ImGuiExt.InputTextHistory("DisplayName", l.Type.DisplayName, val => l.Type.DisplayName = val, cmd);
+            _propChanged |= ImGuiExt.CheckboxHistory("DevOnly", l.Type.DevOnly, val => l.Type.DevOnly = val, cmd);
+            _propChanged |= ImGuiExt.CheckboxHistory("TestLevel", l.Type.TestLevel, val => l.Type.TestLevel = val, cmd);
         }
 
         _propChanged |= ImGuiExt.DragFloatHistory("default SlowMult##overview", l.Desc.SlowMult, val => l.Desc.SlowMult = val, cmd, speed: 0.05);

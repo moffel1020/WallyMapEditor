@@ -302,4 +302,15 @@ public static class ImGuiExt
         }
         return false;
     }
+
+    public static bool InputTextHistory(string label, string value, Action<string> changeCommand, CommandHistory cmd, uint maxLength = 512, ImGuiInputTextFlags flags = ImGuiInputTextFlags.None)
+    {
+        string newValue = InputText(label, value, maxLength, flags);
+        if (value != newValue)
+        {
+            cmd.Add(new PropChangeCommand<string>(changeCommand, value, newValue));
+            return true;
+        }
+        return false;
+    }
 }
