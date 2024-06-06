@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 
@@ -44,6 +43,13 @@ public static class ImGuiExt
     {
         string v = value;
         ImGui.InputText(label, ref v, maxLength, flags);
+        return v;
+    }
+
+    public static string InputTextWithCallback(string label, string value, ImGuiInputTextCallback callback, uint maxLength = 512, ImGuiInputTextFlags flags = ImGuiInputTextFlags.None)
+    {
+        string v = value;
+        ImGui.InputText(label, ref v, maxLength, flags, callback);
         return v;
     }
 

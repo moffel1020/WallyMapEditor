@@ -12,6 +12,18 @@ public class MapOverviewWindow
 
     private bool _propChanged = false;
 
+    // type ImGuiInputTextCallback
+    private unsafe static int LevelNameFilter(ImGuiInputTextCallbackData* data)
+    {
+        return (char)data->EventChar switch
+        {
+            >= 'a' and <= 'z' => 0,
+            >= 'A' and <= 'Z' => 0,
+            >= '0' and <= '9' => 0,
+            _ => 1,
+        };
+    }
+
     public void Show(Level l, CommandHistory cmd, ref object? selected)
     {
         ImGui.Begin("Map Overview", ref _open);
@@ -24,7 +36,19 @@ public class MapOverviewWindow
 
         if (l.Type is not null)
         {
-            ImGui.Text($"LevelName: {l.Type.LevelName}");
+            ImGui.TextWrapped("Warning: when exporting, the LevelName is used as the name of a new map. If another map exists with that LevelName, it will be overwritten.");
+            string newLevelName;
+            unsafe
+            {
+                newLevelName = ImGuiExt.InputTextWithCallback("LevelName", l.Type.LevelName, LevelNameFilter, flags: ImGuiInputTextFlags.CallbackCharFilter);
+            }
+            if (newLevelName != l.Type.LevelName)
+            {
+                cmd.Add(new PropChangeCommand<string>(val => l.Type.LevelName = l.Desc.LevelName = val, l.Type.LevelName, newLevelName));
+                _propChanged = true;
+            }
+
+            // these are unused in modern brawlhalla, so no reason to edit them
             ImGui.Text($"AssetName: {l.Type.AssetName}");
             ImGui.Text($"FileName: {l.Type.FileName}");
 
