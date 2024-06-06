@@ -76,10 +76,13 @@ public class ColorTransform
             in vec4 fragColor;
 
             uniform sampler2D texture0;
+            uniform vec4 colDiffuse;
+
+            out vec4 finalColor;
 
             void main()
             {
-                vec4 texColor = texture2D(texture0, fragTexCoord);
+                vec4 texColor = texture(texture0, fragTexCoord);
             "
         );
         foreach (ColorTransform transform in transforms.Reverse())
@@ -88,7 +91,7 @@ public class ColorTransform
         }
         sb.Append(
             @"
-                gl_FragColor = texColor;
+                finalColor = texColor*colDiffuse;
             }"
         );
         return sb.ToString();
