@@ -49,11 +49,11 @@ public class MapOverviewWindow
             }
 
             ImGui.Text($"LevelID: {l.Type.LevelID}");
-
-            // these are unused in modern brawlhalla, so no reason to edit them
-            ImGui.Text($"AssetName: {l.Type.AssetName}");
-            ImGui.Text($"FileName: {l.Type.FileName}");
-
+            ImGui.Separator();
+            ImGui.TextWrapped("Note: these don't do anything");
+            _propChanged |= ImGuiExt.InputTextHistory("AssetName", l.Type.AssetName ?? "", val => l.Type.AssetName = val == "" ? null : val, cmd);
+            _propChanged |= ImGuiExt.InputTextHistory("FileName", l.Type.FileName ?? "", val => l.Type.FileName = val == "" ? null : val, cmd);
+            ImGui.Separator();
             _propChanged |= ImGuiExt.InputTextHistory("DisplayName", l.Type.DisplayName, val => l.Type.DisplayName = val, cmd);
             _propChanged |= ImGuiExt.CheckboxHistory("DevOnly", l.Type.DevOnly, val => l.Type.DevOnly = val, cmd);
             _propChanged |= ImGuiExt.CheckboxHistory("TestLevel", l.Type.TestLevel, val => l.Type.TestLevel = val, cmd);
