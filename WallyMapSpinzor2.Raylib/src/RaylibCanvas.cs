@@ -12,7 +12,6 @@ using WallyAnmSpinzor;
 using SwiffCheese.Wrappers;
 
 using SwfLib.Tags;
-using System.Collections.Generic;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -26,6 +25,7 @@ public partial class RaylibCanvas : ICanvas
     public SwfFileCache SwfFileCache { get; } = new();
     public SwfShapeCache SwfShapeCache { get; } = new();
     public SwfSpriteCache SwfSpriteCache { get; } = new();
+    public ShaderCache ShaderCache { get; } = new();
     public ConcurrentDictionary<string, AnmClass> AnmClasses { get; set; } = [];
     public Matrix4x4 CameraMatrix { get; set; } = Matrix4x4.Identity;
 
@@ -59,6 +59,7 @@ public partial class RaylibCanvas : ICanvas
         SwfShapeCache.Clear();
         SwfSpriteCache.Clear();
         SwfFileCache.Clear();
+        ShaderCache.Clear();
     }
 
     public void DrawCircle(double x, double y, double radius, Color color, Transform trans, DrawPriorityEnum priority, object? caller)
@@ -136,46 +137,35 @@ public partial class RaylibCanvas : ICanvas
 
     public void DrawTexture(string path, double x, double y, Transform trans, DrawPriorityEnum priority, object? caller)
     {
+        Shader defaultShader = LoadShader(null, null);
         Texture2DWrapper texture = LoadTextureFromPath(path);
         DrawingQueue.Push((caller, () =>
         {
-            DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, texture.W, texture.H, trans, [], 1);
+            DrawTextureWithTransform(texture.Texture, defaultShader, x + texture.XOff, y + texture.YOff, texture.W, texture.H, trans, 1);
         }
         ), (int)priority);
     }
 
     public void DrawTextureRect(string path, double x, double y, double? w, double? h, Transform trans, DrawPriorityEnum priority, object? caller)
     {
+        Shader defaultShader = LoadShader(null, null);
         Texture2DWrapper texture = LoadTextureFromPath(path);
         w ??= texture.Texture.Width;
         h ??= texture.Texture.Height;
         DrawingQueue.Push((caller, () =>
         {
-            DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, w.Value, h.Value, trans, [], 1);
+            DrawTextureWithTransform(texture.Texture, defaultShader, x + texture.XOff, y + texture.YOff, w.Value, h.Value, trans, 1);
         }
         ), (int)priority);
     }
 
-    private static readonly Dictionary<ColorTransform[], Shader> _shaderCache = [];
-
-    private static void DrawTextureWithTransform(Texture2D texture, double x, double y, double w, double h, Transform trans, ColorTransform[] colorTransforms, double opacity)
+    private static void DrawTextureWithTransform(Texture2D texture, Shader shader, double x, double y, double w, double h, Transform trans, double opacity)
     {
-        Shader shader;
-        if (_shaderCache.TryGetValue(colorTransforms, out Shader value))
-        {
-            shader = value;
-        }
-        else
-        {
-            shader = Rl.LoadShaderFromMemory(null, ColorTransform.CreateShader(colorTransforms));
-            _shaderCache[colorTransforms] = shader;
-        }
-
         Rl.BeginBlendMode(BlendMode.AlphaPremultiply);
         Rl.BeginShaderMode(shader);
         Rlgl.SetTexture(texture.Id);
         Rlgl.Begin(DrawMode.Quads);
-        Rlgl.Color4f(1, 1, 1, (float)opacity);
+        Rlgl.Color4f((float)opacity, (float)opacity, (float)opacity, (float)opacity);
         (double xMin, double yMin) = (x, y);
         (double xMax, double yMax) = (x + w, y + h);
         (double, double)[] texCoords = [(0, 0), (0, 1), (1, 1), (1, 0), (0, 0)];
@@ -237,6 +227,11 @@ public partial class RaylibCanvas : ICanvas
             return swf;
         SwfFileCache.LoadAsync(finalPath);
         return null;
+    }
+
+    public Shader LoadShader(string? vs, string? fs)
+    {
+        return ShaderCache.Load(vs, fs);
     }
 
     public Texture2DWrapper? LoadShapeFromSwf(string filePath, ushort shapeId, double animScale)
@@ -335,9 +330,10 @@ public partial class RaylibCanvas : ICanvas
     {
         Texture2DWrapper? texture = LoadShapeFromSwf(filePath, shapeId, animScale);
         if (texture is null) return;
+        Shader shader = LoadShader(null, ColorTransform.CreateShader(colorTransforms));
         DrawingQueue.Push((caller, () =>
         {
-            DrawTextureWithTransform(texture.Texture, 0, 0, texture.W, texture.H, trans * Transform.CreateTranslate(texture.XOff, texture.YOff), colorTransforms, opacity);
+            DrawTextureWithTransform(texture.Texture, shader, 0, 0, texture.W, texture.H, trans * Transform.CreateTranslate(texture.XOff, texture.YOff), opacity);
         }
         ), (int)priority);
     }
