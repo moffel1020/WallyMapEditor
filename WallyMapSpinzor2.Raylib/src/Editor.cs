@@ -211,7 +211,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         if (RenderConfigWindow.Open)
             RenderConfigWindow.Show(_config, ConfigDefault, PathPrefs);
         if (MapOverviewWindow.Open && MapData is Level l)
-            MapOverviewWindow.Show(l, CommandHistory, ref _selectedObject);
+            MapOverviewWindow.Show(l, CommandHistory, PathPrefs, Canvas, ref _selectedObject);
 
         if (_selectedObject is not null)
             PropertiesWindow.Open = true;

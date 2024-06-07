@@ -2,6 +2,11 @@ using System.Collections;
 using ImGuiNET;
 using Rl = Raylib_cs.Raylib;
 using Raylib_cs;
+using rlImGui_cs;
+using System.Numerics;
+using System.IO;
+using System.Threading.Tasks;
+using NativeFileDialogSharp;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -24,7 +29,7 @@ public class MapOverviewWindow
         };
     }
 
-    public void Show(Level l, CommandHistory cmd, ref object? selected)
+    public void Show(Level l, CommandHistory cmd, PathPreferences pathPrefs, RaylibCanvas? canvas, ref object? selected)
     {
         ImGui.Begin("Map Overview", ref _open);
 
@@ -57,6 +62,37 @@ public class MapOverviewWindow
             _propChanged |= ImGuiExt.InputTextHistory("DisplayName", l.Type.DisplayName, val => l.Type.DisplayName = val, cmd);
             _propChanged |= ImGuiExt.CheckboxHistory("DevOnly", l.Type.DevOnly, val => l.Type.DevOnly = val, cmd);
             _propChanged |= ImGuiExt.CheckboxHistory("TestLevel", l.Type.TestLevel, val => l.Type.TestLevel = val, cmd);
+            ImGui.Separator();
+            ImGui.Text("ThumbnailPNGFile: " + (l.Type.ThumbnailPNGFile ?? "None"));
+            if (pathPrefs.BrawlhallaPath is not null)
+            {
+                string thumbnailPath = Path.Combine(pathPrefs.BrawlhallaPath, "images/thumbnails/");
+                ImGui.SameLine();
+                if (ImGui.Button("Select"))
+                {
+                    Task.Run(() =>
+                    {
+                        DialogResult dialogResult = Dialog.FileOpen("png,jpg", thumbnailPath);
+                        if (dialogResult.IsOk)
+                        {
+                            string path = dialogResult.Path;
+                            string newThumnailPNGFile = Path.GetRelativePath(thumbnailPath, path);
+                            if (newThumnailPNGFile != l.Type.ThumbnailPNGFile)
+                            {
+                                cmd.Add(new PropChangeCommand<string?>(val => l.Type.ThumbnailPNGFile = val, l.Type.ThumbnailPNGFile, newThumnailPNGFile));
+                                _propChanged = true;
+                            }
+                        }
+                    });
+                }
+
+                if (canvas is not null)
+                {
+                    Texture2DWrapper texture = canvas.LoadTextureFromPath(Path.Combine(thumbnailPath, l.Type.ThumbnailPNGFile ?? "CorruptFile.png"));
+                    rlImGui.ImageSize(texture.Texture, new Vector2(60 * (float)(texture.Width / texture.Height), 60));
+                }
+            }
+            ImGui.Separator();
         }
 
         _propChanged |= ImGuiExt.DragFloatHistory("default SlowMult##overview", l.Desc.SlowMult, val => l.Desc.SlowMult = val, cmd, speed: 0.05);
