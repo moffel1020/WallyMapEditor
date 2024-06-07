@@ -251,11 +251,11 @@ public static class Utils
 
     public static void CreateBackupOfFile(string path)
     {
-        int suffix = 0;
+        int suffix = 1;
         string backupPath;
         do
         {
-            backupPath = ChangePathName(path, s => $"{s}_Backup{(suffix == 0 ? "" : suffix.ToString())}");
+            backupPath = ChangePathName(path, s => $"{s}_Backup{suffix}");
             suffix++;
         } while (File.Exists(backupPath));
         using FileStream read = new(path, FileMode.Open, FileAccess.Read);
