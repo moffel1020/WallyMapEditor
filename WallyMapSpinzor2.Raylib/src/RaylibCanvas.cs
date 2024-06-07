@@ -172,8 +172,8 @@ public partial class RaylibCanvas : ICanvas
         }
 
         Rl.BeginBlendMode(BlendMode.AlphaPremultiply);
-        Rlgl.SetTexture(texture.Id);
         Rl.BeginShaderMode(shader);
+        Rlgl.SetTexture(texture.Id);
         Rlgl.Begin(DrawMode.Quads);
         Rlgl.Color4f(1, 1, 1, (float)opacity);
         (double xMin, double yMin) = (x, y);
@@ -193,9 +193,9 @@ public partial class RaylibCanvas : ICanvas
             Rlgl.TexCoord2f((float)texCoords[i + 1].Item1, (float)texCoords[i + 1].Item2);
             Rlgl.Vertex2f((float)points[i + 1].Item1, (float)points[i + 1].Item2);
         }
-        Rl.EndShaderMode();
         Rlgl.End();
         Rlgl.SetTexture(0);
+        Rl.EndShaderMode();
         Rl.EndBlendMode();
     }
 
