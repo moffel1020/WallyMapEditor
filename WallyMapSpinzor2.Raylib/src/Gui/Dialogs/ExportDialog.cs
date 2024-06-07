@@ -4,10 +4,18 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+
 using ImGuiNET;
+
+using Raylib_cs;
+using Rl = Raylib_cs.Raylib;
+
 using NativeFileDialogSharp;
+
 using SwfLib.Tags.ActionsTags;
+
 using AbcDisassembler;
+
 using BrawlhallaSwz;
 
 namespace WallyMapSpinzor2.Raylib;
@@ -116,6 +124,8 @@ public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
                 }
                 catch (Exception e)
                 {
+                    Rl.TraceLog(TraceLogLevel.Error, e.Message);
+                    Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
                     _exportError = e.Message;
                     _exportStatus = null;
                 }
@@ -205,6 +215,8 @@ public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
                     }
                     catch (Exception e)
                     {
+                        Rl.TraceLog(TraceLogLevel.Error, e.Message);
+                        Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
                         _exportError = e.Message;
                         _exportStatus = null;
                     }

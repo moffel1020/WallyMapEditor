@@ -49,6 +49,7 @@ public class RenderConfigWindow
                     catch (Exception e)
                     {
                         Rl.TraceLog(TraceLogLevel.Error, $"Loading config failed with error: {e.Message}");
+                        Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
                     }
                 }
             });
@@ -70,6 +71,7 @@ public class RenderConfigWindow
                     catch (Exception e)
                     {
                         Rl.TraceLog(TraceLogLevel.Error, $"Saving config failed with error: {e.Message}");
+                        Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
                     }
                 }
             });

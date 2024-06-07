@@ -109,6 +109,7 @@ public class ImportDialog(Editor editor, PathPreferences prefs) : IDialog
                 catch (Exception e)
                 {
                     Rl.TraceLog(TraceLogLevel.Error, e.Message);
+                    Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
                     _loadingStatus = null;
                     _loadingError = $"Could not decrypt swz files. {e.Message}";
                 }
@@ -146,6 +147,7 @@ public class ImportDialog(Editor editor, PathPreferences prefs) : IDialog
                 catch (Exception e)
                 {
                     Rl.TraceLog(TraceLogLevel.Error, e.Message);
+                    Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
                     _loadingStatus = null;
                     _loadingError = $"Failed to load map file. {e.Message}";
                 }
@@ -195,6 +197,7 @@ public class ImportDialog(Editor editor, PathPreferences prefs) : IDialog
                 catch (Exception e)
                 {
                     Rl.TraceLog(TraceLogLevel.Error, e.Message);
+                    Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
                     _loadingStatus = null;
                     _loadingError = "Could not find decryption key. " + e.Message;
                 }
@@ -284,6 +287,7 @@ public class ImportDialog(Editor editor, PathPreferences prefs) : IDialog
             catch (Exception e)
             {
                 Rl.TraceLog(TraceLogLevel.Error, e.Message);
+                Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
                 _loadingStatus = null;
                 _loadingError = $"Could not load xml file. {e.Message}";
             }

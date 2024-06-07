@@ -120,6 +120,12 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
     public void Run()
     {
+#if DEBUG
+        Rl.SetTraceLogLevel(TraceLogLevel.All);
+#else
+        Rl.SetTraceLogLevel(TraceLogLevel.Warning);
+#endif
+
         _config.Deserialize(ConfigDefault.SerializeToXElement());
 
         if (PathPrefs.LevelDescPath is not null && PathPrefs.BoneTypesPath is not null)
