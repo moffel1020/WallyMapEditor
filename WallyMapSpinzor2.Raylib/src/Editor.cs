@@ -315,10 +315,16 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
                 Image image = GetWorldRect((float)l.Desc.CameraBounds.X, (float)l.Desc.CameraBounds.Y, (int)l.Desc.CameraBounds.W, (int)l.Desc.CameraBounds.H);
                 Task.Run(() =>
                 {
+                    string extension = "png";
                     Rl.ImageFlipVertical(ref image);
-                    DialogResult dialogResult = Dialog.FileSave("png");
+                    DialogResult dialogResult = Dialog.FileSave(extension);
                     if (dialogResult.IsOk)
-                        Rl.ExportImage(image, dialogResult.Path);
+                    {
+                        string path = dialogResult.Path;
+                        if (!Path.HasExtension(path) || Path.GetExtension(path) != extension) 
+                            path = Path.ChangeExtension(path, extension);
+                        Rl.ExportImage(image, path);
+                    }
                     Rl.UnloadImage(image);
                 });
             }
