@@ -96,6 +96,8 @@ public class RenderConfigWindow
 
         ImGui.SeparatorText("General##config");
         config.RenderSpeed = ImGuiExt.DragFloat("Render speed##config", config.RenderSpeed, speed: 0.1);
+        if (ImGui.Button("Reset time##config"))
+            config.Time = TimeSpan.FromSeconds(0);
 
         ImGui.SeparatorText("Bounds##config");
         config.ShowCameraBounds = ImGuiExt.Checkbox("Camera bounds##config", config.ShowCameraBounds);

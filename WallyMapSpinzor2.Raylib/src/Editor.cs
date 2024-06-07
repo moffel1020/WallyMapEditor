@@ -10,6 +10,7 @@ using Raylib_cs;
 using Rl = Raylib_cs.Raylib;
 using rlImGui_cs;
 using ImGuiNET;
+using NativeFileDialogSharp;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -305,6 +306,18 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             if (Rl.IsKeyPressed(KeyboardKey.Y)) CommandHistory.Redo();
             // if (Rl.IsKeyPressed(KeyboardKey.R)) LoadMap();
         }
+
+        if (Rl.IsKeyDown(KeyboardKey.P))
+        {
+            if (MapData is Level l && Canvas is not null)
+            {
+                Image image = GetWorldRect((float)l.Desc.CameraBounds.X, (float)l.Desc.CameraBounds.Y, (int)l.Desc.CameraBounds.W, (int)l.Desc.CameraBounds.H);
+                DialogResult dialogResult = Dialog.FileSave("png");
+                if (dialogResult.IsOk)
+                    Rl.ExportImage(image, dialogResult.Path);
+                Rl.UnloadImage(image);
+            }
+        }
     }
 
     public Vector2 ScreenToWorld(Vector2 screenPos) =>
@@ -326,6 +339,29 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         _cam.Offset = new(0);
         _cam.Target = new((float)bounds.X, (float)bounds.Y);
         _cam.Zoom = (float)scale;
+    }
+
+    public Image GetWorldRect(float x, float y, int w, int h)
+    {
+        if (Canvas is null)
+            throw new InvalidOperationException("Cannot get world rect when Canvas is not initialized");
+        RenderTexture2D renderTexture = Rl.LoadRenderTexture(w, h);
+        Camera2D camera = new(new(0, 0), new(x, y), 0, 1);
+        Rl.BeginDrawing();
+        Rl.ClearBackground(Raylib_cs.Color.Black);
+        Rlgl.SetLineWidth(Math.Max(LINE_WIDTH * camera.Zoom, 1));
+        Rl.BeginTextureMode(renderTexture);
+        Rl.BeginMode2D(camera);
+        Canvas.CameraMatrix = Rl.GetCameraMatrix2D(camera);
+        MapData?.DrawOn(Canvas, Transform.IDENTITY, _config, new RenderContext(), _state);
+        Canvas.FinalizeDraw();
+        Rl.EndMode2D();
+        Rl.EndTextureMode();
+        Rl.EndDrawing();
+        Image image = Rl.LoadImageFromTexture(renderTexture.Texture);
+        Rl.UnloadRenderTexture(renderTexture);
+        Rl.ImageFlipVertical(ref image);
+        return image;
     }
 
     ~Editor()
