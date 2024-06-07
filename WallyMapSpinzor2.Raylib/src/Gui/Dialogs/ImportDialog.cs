@@ -301,6 +301,7 @@ public class ImportDialog(Editor editor, PathPreferences prefs) : IDialog
         string initPath = Path.Combine(folder, "Init.swz");
         uint key = uint.Parse(prefs.DecryptionKey!);
 
+        levelDescFiles.Clear();
         foreach (string file in Utils.GetFilesInSwz(dynamicPath, key))
         {
             string name = SwzUtils.GetFileName(file);

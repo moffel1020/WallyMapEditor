@@ -169,10 +169,11 @@ public static class Utils
 
     public static void SerializeSwzFilesToPath(string swzPath, IEnumerable<string> swzFiles, uint key)
     {
-        using FileStream stream = new(swzPath, FileMode.OpenOrCreate, FileAccess.Write);
+        using FileStream stream = new(swzPath, FileMode.Truncate, FileAccess.Write);
         using SwzWriter writer = new(stream, key);
         foreach (string file in swzFiles)
             writer.WriteFile(file);
+        writer.Flush();
     }
 
     private static List<int> FindGetlexPositions(CPoolInfo cpool, string lexName, List<Instruction> code) => code
