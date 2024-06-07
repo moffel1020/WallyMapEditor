@@ -11,6 +11,7 @@ using Rl = Raylib_cs.Raylib;
 using rlImGui_cs;
 using ImGuiNET;
 using NativeFileDialogSharp;
+using System.Threading.Tasks;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -312,10 +313,14 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             if (MapData is Level l && Canvas is not null)
             {
                 Image image = GetWorldRect((float)l.Desc.CameraBounds.X, (float)l.Desc.CameraBounds.Y, (int)l.Desc.CameraBounds.W, (int)l.Desc.CameraBounds.H);
-                DialogResult dialogResult = Dialog.FileSave("png");
-                if (dialogResult.IsOk)
-                    Rl.ExportImage(image, dialogResult.Path);
-                Rl.UnloadImage(image);
+                Task.Run(() =>
+                {
+                    Rl.ImageFlipVertical(ref image);
+                    DialogResult dialogResult = Dialog.FileSave("png");
+                    if (dialogResult.IsOk)
+                        Rl.ExportImage(image, dialogResult.Path);
+                    Rl.UnloadImage(image);
+                });
             }
         }
     }
@@ -360,7 +365,6 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         Rl.EndDrawing();
         Image image = Rl.LoadImageFromTexture(renderTexture.Texture);
         Rl.UnloadRenderTexture(renderTexture);
-        Rl.ImageFlipVertical(ref image);
         return image;
     }
 
