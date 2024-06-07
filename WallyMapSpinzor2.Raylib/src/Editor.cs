@@ -308,7 +308,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             // if (Rl.IsKeyPressed(KeyboardKey.R)) LoadMap();
         }
 
-        if (Rl.IsKeyDown(KeyboardKey.P))
+        if (Rl.IsKeyPressed(KeyboardKey.P))
         {
             if (MapData is Level l && Canvas is not null)
             {
