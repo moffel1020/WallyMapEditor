@@ -1,3 +1,4 @@
+using System.IO;
 using Raylib_cs;
 using Rl = Raylib_cs.Raylib;
 
@@ -7,6 +8,7 @@ public class TextureCache : UploadCache<string, Image, Texture2DWrapper>
 {
     protected override Image LoadIntermediate(string path)
     {
+        path = Path.GetFullPath(path);
         return Utils.LoadRlImage(path);
     }
 

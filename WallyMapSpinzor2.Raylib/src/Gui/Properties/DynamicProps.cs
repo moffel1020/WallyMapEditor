@@ -4,7 +4,7 @@ namespace WallyMapSpinzor2.Raylib;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowDynamicProps<T>(AbstractDynamic<T> ad, CommandHistory cmd)
+    public static bool ShowDynamicProps<T>(AbstractDynamic<T> ad, CommandHistory cmd, RaylibCanvas? canvas, string? assetDir)
         where T : IDeserializable, ISerializable, IDrawable
     {
         bool propChanged = false;
@@ -18,7 +18,7 @@ public partial class PropertiesWindow
             {
                 if (ImGui.TreeNode($"{child.GetType().Name} {MapOverviewWindow.GetExtraObjectInfo(child)}###dynamicChild{child.GetHashCode()}"))
                 {
-                    propChanged |= ShowProperties(child, cmd);
+                    propChanged |= ShowProperties(child, cmd, canvas, assetDir);
                     ImGui.TreePop();
                 }
             }

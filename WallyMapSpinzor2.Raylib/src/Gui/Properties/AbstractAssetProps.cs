@@ -1,15 +1,48 @@
+using System.IO;
+using System.Numerics;
+using System.Threading.Tasks;
 using ImGuiNET;
+using rlImGui_cs;
+using NativeFileDialogSharp;
 
 namespace WallyMapSpinzor2.Raylib;
 
 partial class PropertiesWindow
 {
-    public static bool ShowAbstractAssetProps(AbstractAsset a, CommandHistory cmd)
+    public static bool ShowAbstractAssetProps(AbstractAsset a, CommandHistory cmd, RaylibCanvas? canvas, string? assetDir)
     {
         bool propChanged = false;
         if (a.AssetName is not null)
         {
             ImGui.Text("AssetName: " + a.AssetName);
+
+            if (assetDir is not null)
+            {
+                ImGui.SameLine();
+                if (ImGui.Button("Select"))
+                {
+                    Task.Run(() =>
+                    {
+                        DialogResult dialogResult = Dialog.FileOpen("png,jpg", assetDir);
+                        if (dialogResult.IsOk)
+                        {
+                            string path = dialogResult.Path;
+                            string newAssetName = Path.GetRelativePath(assetDir, path);
+                            if (newAssetName != a.AssetName)
+                            {
+                                cmd.Add(new PropChangeCommand<string>(val => a.AssetName = val, a.AssetName, newAssetName));
+                                propChanged = true;
+                            }
+                        }
+                    });
+                }
+
+                if (canvas is not null)
+                {
+                    Texture2DWrapper texture = canvas.LoadTextureFromPath(Path.Combine(assetDir, a.AssetName));
+                    rlImGui.ImageSize(texture.Texture, new Vector2(60 * (float)(texture.Width / texture.Height), 60));
+                }
+            }
             propChanged |= ImGuiExt.DragFloatHistory("X", a.X, val => a.X = val, cmd);
             propChanged |= ImGuiExt.DragFloatHistory("Y", a.Y, val => a.Y = val, cmd);
             ImGui.Separator();
