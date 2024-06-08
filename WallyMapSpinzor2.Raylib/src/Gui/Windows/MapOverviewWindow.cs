@@ -66,9 +66,9 @@ public class MapOverviewWindow
             ImGui.Text("ThumbnailPNGFile: " + (l.Type.ThumbnailPNGFile ?? "None"));
             if (pathPrefs.BrawlhallaPath is not null)
             {
-                string thumbnailPath = Path.Combine(pathPrefs.BrawlhallaPath, "images/thumbnails/");
+                string thumbnailPath = Path.Combine(pathPrefs.BrawlhallaPath, "images", "thumbnails");
                 ImGui.SameLine();
-                if (ImGui.Button("Select"))
+                if (ImGui.Button("Select##ThumbnailPNGFile"))
                 {
                     Task.Run(() =>
                     {

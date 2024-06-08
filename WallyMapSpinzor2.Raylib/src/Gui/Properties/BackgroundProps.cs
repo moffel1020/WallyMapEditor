@@ -12,14 +12,14 @@ public partial class PropertiesWindow
     public static bool ShowBackgroundProps(Background b, CommandHistory cmd, RaylibCanvas? canvas, string? assetDir)
     {
         // NFD doesn't like the .. in the path
-        string? backgroundDir = assetDir is not null ? Path.GetFullPath(Path.Combine(assetDir, "../Backgrounds/")) : null;
+        string? backgroundDir = assetDir is not null ? Path.GetFullPath(Path.Combine(assetDir, "..", "Backgrounds")) : null;
 
         bool propChanged = false;
         ImGui.Text("AssetName: " + (b.AssetName ?? "None"));
         if (backgroundDir is not null && canvas is not null)
         {
             ImGui.SameLine();
-            if (ImGui.Button("Select"))
+            if (ImGui.Button("Select##AssetName"))
             {
                 Task.Run(() =>
                 {
@@ -46,7 +46,7 @@ public partial class PropertiesWindow
         if (backgroundDir is not null && canvas is not null)
         {
             ImGui.SameLine();
-            if (ImGui.Button("Select"))
+            if (ImGui.Button("Select##AnimatedAssetName"))
             {
                 Task.Run(() =>
                 {
@@ -64,7 +64,7 @@ public partial class PropertiesWindow
                 });
             }
             ImGui.SameLine();
-            if (ImGuiExt.WithDisabledButton(b.AnimatedAssetName is null, "Remove"))
+            if (ImGuiExt.WithDisabledButton(b.AnimatedAssetName is null, "Remove##AnimatedAssetName"))
             {
                 if (b.AnimatedAssetName is not null)
                 {

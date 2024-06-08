@@ -19,7 +19,7 @@ partial class PropertiesWindow
             if (assetDir is not null)
             {
                 ImGui.SameLine();
-                if (ImGui.Button("Select"))
+                if (ImGui.Button("Select##AssetName"))
                 {
                     Task.Run(() =>
                     {
