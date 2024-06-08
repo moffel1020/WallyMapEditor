@@ -274,7 +274,6 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
     {
         ImGuiIOPtr io = ImGui.GetIO();
         bool wantCaptureKeyboard = io.WantCaptureKeyboard;
-        bool wantCaptureMouse = io.WantCaptureMouse;
         if (ViewportWindow.Hovered)
         {
             float wheel = Rl.GetMouseWheelMove();
@@ -285,14 +284,14 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
                 _cam.Zoom = Math.Clamp(_cam.Zoom + wheel * ZOOM_INCREMENT * _cam.Zoom, MIN_ZOOM, MAX_ZOOM);
             }
 
-            if (!wantCaptureMouse && Rl.IsMouseButtonReleased(MouseButton.Left))
+            if (Rl.IsMouseButtonReleased(MouseButton.Left))
             {
                 _selectedObject = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, MapData, _cam, _config, _state);
                 // TODO: we might want a way to associate objects with their parents. 
                 // for example when selecting a hard collision we probably want to get the parent dynamic collision if it exists, when selecting an asset we want the platform
             }
 
-            if (!wantCaptureMouse && Rl.IsMouseButtonDown(MouseButton.Right))
+            if (Rl.IsMouseButtonDown(MouseButton.Right))
             {
                 Vector2 delta = Rl.GetMouseDelta();
                 delta = Raymath.Vector2Scale(delta, -1.0f / _cam.Zoom);
