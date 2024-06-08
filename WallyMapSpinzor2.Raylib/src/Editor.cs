@@ -272,6 +272,9 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
     private void Update()
     {
+        ImGuiIOPtr io = ImGui.GetIO();
+        bool wantCaptureKeyboard = io.WantCaptureKeyboard;
+        bool wantCaptureMouse = io.WantCaptureMouse;
         if (ViewportWindow.Hovered)
         {
             float wheel = Rl.GetMouseWheelMove();
@@ -282,14 +285,14 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
                 _cam.Zoom = Math.Clamp(_cam.Zoom + wheel * ZOOM_INCREMENT * _cam.Zoom, MIN_ZOOM, MAX_ZOOM);
             }
 
-            if (Rl.IsMouseButtonReleased(MouseButton.Left))
+            if (!wantCaptureMouse && Rl.IsMouseButtonReleased(MouseButton.Left))
             {
                 _selectedObject = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, MapData, _cam, _config, _state);
                 // TODO: we might want a way to associate objects with their parents. 
                 // for example when selecting a hard collision we probably want to get the parent dynamic collision if it exists, when selecting an asset we want the platform
             }
 
-            if (Rl.IsMouseButtonDown(MouseButton.Right))
+            if (!wantCaptureMouse && Rl.IsMouseButtonDown(MouseButton.Right))
             {
                 Vector2 delta = Rl.GetMouseDelta();
                 delta = Raymath.Vector2Scale(delta, -1.0f / _cam.Zoom);
@@ -297,18 +300,18 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             }
 
             // R. no ctrl.
-            if (Rl.IsKeyPressed(KeyboardKey.R) && !Rl.IsKeyDown(KeyboardKey.LeftControl))
+            if (!wantCaptureKeyboard && Rl.IsKeyPressed(KeyboardKey.R) && !Rl.IsKeyDown(KeyboardKey.LeftControl))
                 ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
         }
 
-        if (Rl.IsKeyDown(KeyboardKey.LeftControl))
+        if (!wantCaptureKeyboard && Rl.IsKeyDown(KeyboardKey.LeftControl))
         {
             if (Rl.IsKeyPressed(KeyboardKey.Z)) CommandHistory.Undo();
             if (Rl.IsKeyPressed(KeyboardKey.Y)) CommandHistory.Redo();
             // if (Rl.IsKeyPressed(KeyboardKey.R)) LoadMap();
         }
 
-        if (Rl.IsKeyPressed(KeyboardKey.P))
+        if (!wantCaptureKeyboard && Rl.IsKeyPressed(KeyboardKey.P))
         {
             if (MapData is Level l && Canvas is not null)
             {
@@ -321,7 +324,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
                     if (dialogResult.IsOk)
                     {
                         string path = dialogResult.Path;
-                        if (!Path.HasExtension(path) || Path.GetExtension(path) != extension) 
+                        if (!Path.HasExtension(path) || Path.GetExtension(path) != extension)
                             path = Path.ChangeExtension(path, extension);
                         Rl.ExportImage(image, path);
                     }
