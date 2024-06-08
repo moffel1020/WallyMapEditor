@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 
@@ -314,10 +315,10 @@ public static class ImGuiExt
         return false;
     }
 
-    public static bool GenericStringComboHistory<T>(string label, T value, Action<T> changeCommand, Func<T, string> stringify, Func<string, T> parse, string[] options, CommandHistory cmd)
+    public static bool GenericStringComboHistory<T>(string label, T value, Action<T> changeCommand, Func<T, string> stringify, Func<string, T> parse, T[] options, CommandHistory cmd)
     {
         string valueString = stringify(value);
-        string newValueString = StringCombo(label, valueString, options);
+        string newValueString = StringCombo(label, valueString, [.. options.Select(stringify)]);
         T newValue = parse(newValueString);
         if (!Equals(value, newValue))
         {

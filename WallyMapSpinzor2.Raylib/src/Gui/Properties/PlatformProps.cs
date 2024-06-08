@@ -30,8 +30,7 @@ partial class PropertiesWindow
             {
                 "simple" or "animated" => s,
                 _ => null,
-            },
-            ["always", "simple", "animated"], cmd);
+            }, [null, "simple", "animated"], cmd);
         }
 
         ImGui.Separator();
