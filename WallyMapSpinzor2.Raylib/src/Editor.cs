@@ -218,7 +218,17 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         if (_selectedObject is not null)
             PropertiesWindow.Open = true;
         if (PropertiesWindow.Open && _selectedObject is not null)
-            PropertiesWindow.Show(_selectedObject, CommandHistory, new PropertiesWindowData(Loader, MapData as Level, PathPrefs));
+        {
+            PropertiesWindowData data = new()
+            {
+                Time = _config.Time,
+                Canvas = Canvas,
+                Loader = Loader,
+                Level = MapData as Level,
+                PathPrefs = PathPrefs,
+            };
+            PropertiesWindow.Show(_selectedObject, CommandHistory, data);
+        }
         if (!PropertiesWindow.Open)
             _selectedObject = null;
 

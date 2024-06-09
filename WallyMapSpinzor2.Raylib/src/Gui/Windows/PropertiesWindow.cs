@@ -36,7 +36,7 @@ public partial class PropertiesWindow
         TeamScoreboard ts => ShowTeamScoreboardProps(ts, cmd),
         Platform p => ShowPlatformProps(p, cmd, data),
         AnimatedBackground ab => ShowAnimatedBackgroundProps(ab, cmd, data),
-        Gfx gfx => ShowGfxProps(gfx, cmd),
+        Gfx gfx => ShowGfxProps(gfx, cmd, data),
         LevelAnim la => ShowLevelAnimProps(la, cmd),
         LevelAnimation la => ShowLevelAnimationProps(la, cmd),
 
