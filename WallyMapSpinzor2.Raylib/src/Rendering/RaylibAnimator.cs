@@ -101,35 +101,43 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         }
     }
 
-    public static readonly Dictionary<(Gfx, string, int), RenderTexture2D> AnimationTextureCache = [];
-    public static RenderTexture2D? EmptyTexture;
+    public static readonly Dictionary<(Gfx, string), RenderTexture2D> RenderTextureCache = [];
+    public static RenderTexture2D? Empty;
 
     public Texture2D? AnimToTexture(Gfx gfx, string animName, int frame)
     {
-        (double, double, double, double)? bounds = CalculateAnimBounds(gfx, animName, frame, Transform.IDENTITY, out int actualFrame);
+        (double, double, double, double)? bounds = CalculateAnimBounds(gfx, animName, frame, Transform.IDENTITY);
         if (bounds is null)
             return null;
         if (bounds == (0, 0, 0, 0))
         {
-            EmptyTexture ??= Rl.LoadRenderTexture(1, 1);
-            return EmptyTexture.Value.Texture;
+            Empty ??= Rl.LoadRenderTexture(1, 1);
+            return Empty.Value.Texture;
         }
-        if (AnimationTextureCache.TryGetValue((gfx, animName, actualFrame), out RenderTexture2D value))
-            return value.Texture;
         (double x, double y, double w, double h) = bounds.Value;
-        RenderTexture2D renderTexture = Rl.LoadRenderTexture((int)w, (int)h);
-        Rl.BeginTextureMode(renderTexture);
+        RenderTexture2D render;
+        // see if render texture was already created
+        if (!RenderTextureCache.TryGetValue((gfx, animName), out render))
+            RenderTextureCache[(gfx, animName)] = render = Rl.LoadRenderTexture((int)w, (int)h);
+        // increase render texture size if needed
+        if ((int)w > render.Texture.Width || (int)h > render.Texture.Height)
+        {
+            int newW = Math.Max((int)w, render.Texture.Width);
+            int newH = Math.Max((int)h, render.Texture.Height);
+            Rl.UnloadRenderTexture(render);
+            RenderTextureCache[(gfx, animName)] = render = Rl.LoadRenderTexture(newW, newH);
+        }
+        Rl.BeginTextureMode(render);
         Rl.ClearBackground(Raylib_cs.Color.Blank);
-        canvas.DrawAnim(gfx, animName, actualFrame, Transform.CreateTranslate(-x, -y), DrawPriorityEnum.BACKGROUND, null);
+        canvas.DrawAnim(gfx, animName, frame, Transform.CreateTranslate(-x, -y), DrawPriorityEnum.BACKGROUND, null);
         canvas.FinalizeDraw();
         Rl.EndTextureMode();
-        AnimationTextureCache[(gfx, animName, actualFrame)] = renderTexture;
-        return renderTexture.Texture;
+        return render.Texture;
     }
 
-    public (double x, double y, double w, double h)? CalculateAnimBounds(Gfx gfx, string animName, int frame, Transform trans, out int actualFrame)
+    public (double x, double y, double w, double h)? CalculateAnimBounds(Gfx gfx, string animName, int frame, Transform trans)
     {
-        (double, double)[]? points = CalculateAnimPoints(gfx, animName, frame, trans, out actualFrame);
+        (double, double)[]? points = CalculateAnimPoints(gfx, animName, frame, trans);
         if (points is null)
             return null;
         double xMin = double.MaxValue, xMax = double.MinValue, yMin = double.MaxValue, yMax = double.MinValue;
@@ -145,9 +153,8 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         return (xMin, yMin, xMax - xMin, yMax - yMin);
     }
 
-    private (double, double)[]? CalculateAnimPoints(Gfx gfx, string animName, int frame, Transform trans, out int actualFrame)
+    private (double, double)[]? CalculateAnimPoints(Gfx gfx, string animName, int frame, Transform trans)
     {
-        actualFrame = -1;
         /*
         NOTE: the game goes over the list from the end until it finds a CustomArt that matches
         this only matters for CustomArt with RIGHT and for AsymmetrySwapFlags.
@@ -162,7 +169,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
             if (swf is null)
                 return null;
             ushort spriteId = swf.SymbolClass[gfx.AnimClass + customArtSuffix];
-            return CalculateSwfSpritePoints(gfx.AnimFile, spriteId, frame, gfx.AnimScale, trans, out actualFrame);
+            return CalculateSwfSpritePoints(gfx.AnimFile, spriteId, frame, gfx.AnimScale, trans);
         }
         // anm animation
         else if (gfx.AnimFile.StartsWith("Animation_"))
@@ -172,8 +179,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
             List<(double, double)> result = [];
             // anm animation
             AnmAnimation animation = anmClass.Animations[animName];
-            actualFrame = BrawlhallaMath.SafeMod(frame, animation.Frames.Count);
-            AnmFrame anmFrame = animation.Frames[actualFrame];
+            AnmFrame anmFrame = animation.Frames[BrawlhallaMath.SafeMod(frame, animation.Frames.Count)];
             foreach (AnmBone bone in anmFrame.Bones)
             {
                 Transform boneTrans = new(bone.ScaleX, bone.RotateSkew1, bone.RotateSkew0, bone.ScaleY, bone.X, bone.Y);
@@ -186,7 +192,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
                 if (swf is null)
                     continue;
                 ushort spriteId = swf.SymbolClass[spriteName];
-                result.AddRange(CalculateSwfSpritePoints(swfPath, spriteId, bone.Frame - 1, gfx.AnimScale, trans * boneTrans, out _) ?? []);
+                result.AddRange(CalculateSwfSpritePoints(swfPath, spriteId, bone.Frame - 1, gfx.AnimScale, trans * boneTrans) ?? []);
             }
             return [.. result];
         }
@@ -202,17 +208,15 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         return [shapeTrans * (0, 0), shapeTrans * (0, texture.H), shapeTrans * (texture.W, texture.H), shapeTrans * (texture.W, 0)];
     }
 
-    private (double, double)[]? CalculateSwfSpritePoints(string filePath, ushort spriteId, int frame, double animScale, Transform trans, out int actualFrame)
+    private (double, double)[]? CalculateSwfSpritePoints(string filePath, ushort spriteId, int frame, double animScale, Transform trans)
     {
-        actualFrame = -1;
         SwfFileData? file = loader.LoadSwf(filePath);
         if (file is null)
             return null;
         SwfSprite? sprite = loader.LoadSpriteFromSwf(filePath, spriteId);
         if (sprite is null)
             return null;
-        actualFrame = BrawlhallaMath.SafeMod(frame, sprite.Frames.Length);
-        SwfSpriteFrame spriteFrame = sprite.Frames[actualFrame];
+        SwfSpriteFrame spriteFrame = sprite.Frames[BrawlhallaMath.SafeMod(frame, sprite.Frames.Length)];
         List<(double, double)> result = [];
         foreach ((_, SwfSpriteFrameLayer layer) in spriteFrame.Layers)
         {
@@ -226,7 +230,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
             else if (file.SpriteTags.TryGetValue(layer.CharacterId, out DefineSpriteTag? childSprite))
             {
                 ushort childSpriteId = childSprite.SpriteID;
-                result.AddRange(CalculateSwfSpritePoints(filePath, childSpriteId, frame + layer.FrameOffset, animScale, trans * Utils.SwfMatrixToTransform(layer.Matrix), out _) ?? []);
+                result.AddRange(CalculateSwfSpritePoints(filePath, childSpriteId, frame + layer.FrameOffset, animScale, trans * Utils.SwfMatrixToTransform(layer.Matrix)) ?? []);
             }
         }
         return [.. result];
