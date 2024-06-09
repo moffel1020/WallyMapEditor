@@ -52,9 +52,9 @@ partial class PropertiesWindow
                     ImGui.PopTextWrapPos();
                 }
 
-                if (data.Canvas is not null)
+                if (data.Loader is not null)
                 {
-                    Texture2DWrapper texture = data.Canvas.LoadTextureFromPath(Path.Combine(assetDir, a.AssetName));
+                    Texture2DWrapper texture = data.Loader.LoadTextureFromPath(Path.Combine(assetDir, a.AssetName));
                     rlImGui.ImageSize(texture.Texture, new Vector2(60 * (float)(texture.Width / texture.Height), 60));
                 }
             }

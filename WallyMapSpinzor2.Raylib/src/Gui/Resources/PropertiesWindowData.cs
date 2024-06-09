@@ -1,6 +1,6 @@
 namespace WallyMapSpinzor2.Raylib;
 
-public record PropertiesWindowData(RaylibCanvas? Canvas, Level? Level, PathPreferences PathPrefs)
+public record PropertiesWindowData(AssetLoader? Loader, Level? Level, PathPreferences PathPrefs)
 {
 
 }

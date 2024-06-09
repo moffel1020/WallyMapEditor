@@ -31,7 +31,7 @@ public class MapOverviewWindow
         _ => 1,
     };
 
-    public void Show(Level l, CommandHistory cmd, PathPreferences pathPrefs, RaylibCanvas? canvas, ref object? selected)
+    public void Show(Level l, CommandHistory cmd, PathPreferences pathPrefs, AssetLoader? loader, ref object? selected)
     {
         ImGui.Begin("Map Overview", ref _open);
 
@@ -102,11 +102,11 @@ public class MapOverviewWindow
                     ImGui.PushTextWrapPos();
                     ImGui.Text("[Error]: " + _thumbnailSelectError);
                     ImGui.PopTextWrapPos();
-                } 
+                }
 
-                if (canvas is not null)
+                if (loader is not null)
                 {
-                    Texture2DWrapper texture = canvas.LoadTextureFromPath(Path.Combine(thumbnailPath, l.Type.ThumbnailPNGFile ?? "CorruptFile.png"));
+                    Texture2DWrapper texture = loader.LoadTextureFromPath(Path.Combine(thumbnailPath, l.Type.ThumbnailPNGFile ?? "CorruptFile.png"));
                     rlImGui.ImageSize(texture.Texture, new Vector2(60 * (float)(texture.Width / texture.Height), 60));
                 }
             }

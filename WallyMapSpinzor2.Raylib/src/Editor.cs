@@ -30,6 +30,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
     public string[]? BoneNames { get; set; }
 
     public RaylibCanvas? Canvas { get; set; }
+    public AssetLoader? Loader { get; set; }
     private Camera2D _cam = new();
     public TimeSpan Time { get; set; } = TimeSpan.FromSeconds(0);
 
@@ -66,10 +67,10 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
         _selectedObject = null;
         CommandHistory.Clear();
-        if (Canvas is not null)
+        if (Loader is not null)
         {
-            Canvas.BoneNames = BoneNames!;
-            Canvas.ClearTextureCache();
+            Loader.BoneNames = BoneNames!;
+            Loader.ClearCache();
         }
 
         Level l = new(ld, lt, lst);
@@ -90,10 +91,10 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         BoneNames = boneNames;
         _selectedObject = null;
         CommandHistory.Clear();
-        if (Canvas is not null)
+        if (Loader is not null)
         {
-            Canvas.BoneNames = boneNames;
-            Canvas.ClearTextureCache();
+            Loader.BoneNames = boneNames;
+            Loader.ClearCache();
         }
 
         MapData = l;
@@ -187,7 +188,8 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         Rl.ClearBackground(Raylib_cs.Color.Black);
         if (PathPrefs.BrawlhallaPath is not null)
         {
-            Canvas ??= new(PathPrefs.BrawlhallaPath, BoneNames!);
+            Loader ??= new(PathPrefs.BrawlhallaPath, BoneNames!);
+            Canvas ??= new(Loader);
             Canvas.CameraMatrix = Rl.GetCameraMatrix2D(_cam);
 
             MapData?.DrawOn(Canvas, Transform.IDENTITY, _config, new RenderContext(), _state);
@@ -211,12 +213,12 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         if (RenderConfigWindow.Open)
             RenderConfigWindow.Show(_config, ConfigDefault, PathPrefs);
         if (MapOverviewWindow.Open && MapData is Level l)
-            MapOverviewWindow.Show(l, CommandHistory, PathPrefs, Canvas, ref _selectedObject);
+            MapOverviewWindow.Show(l, CommandHistory, PathPrefs, Loader, ref _selectedObject);
 
         if (_selectedObject is not null)
             PropertiesWindow.Open = true;
         if (PropertiesWindow.Open && _selectedObject is not null)
-            PropertiesWindow.Show(_selectedObject, CommandHistory, new PropertiesWindowData(Canvas, MapData as Level, PathPrefs));
+            PropertiesWindow.Show(_selectedObject, CommandHistory, new PropertiesWindowData(Loader, MapData as Level, PathPrefs));
         if (!PropertiesWindow.Open)
             _selectedObject = null;
 
