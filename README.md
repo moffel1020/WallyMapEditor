@@ -24,15 +24,15 @@ The program allows overriding any relevant brawlhalla file with a custom one, bu
 
 ## Submodules
 
-- WallyMapSpinzor2 - C# Serialization library for maps + rendering API (can be implemented in any rendering library - see the old WallyMapSpinzor2.MonoGame repo).
+- WallyMapSpinzor2 - C# serialization library for Brawlhalla .xml maps + rendering API (can be implemented in any rendering library - see the old WallyMapSpinzor2.MonoGame repo).
 
-- WallyAnmSpinzor - C# Serialization library for Brawlhalla .anm files.
+- WallyAnmSpinzor - C# library for parsing Brawlhalla .anm files.
 
-- BrawlhallaSwz - C# Library for encrypting and decrypting Brawlhalla .swz files.
+- BrawlhallaSwz - C# library for encrypting and decrypting Brawlhalla .swz files.
 
-- SwiffCheese - C# Library for exporting flash vector graphics.
+- SwiffCheese - C# library for exporting flash vector graphics.
 
-- AbcDisassembler - C# Library for parsing actionscript bytecode. Used to find the swz decryption key.
+- AbcDisassembler - C# library for parsing actionscript bytecode. Used to find the swz decryption key.
 
 ## Package Dependencies
 
