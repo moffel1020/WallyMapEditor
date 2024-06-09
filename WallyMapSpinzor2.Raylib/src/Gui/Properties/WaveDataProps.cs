@@ -102,34 +102,21 @@ public partial class PropertiesWindow
             }
             propChanged |= ImGuiExt.EnumComboHistory("Path##enum", g.Path, val => g.Path = val, cmd);
         }
-
-
-
-        string behaviorString = GetBehaviorString(g.Behavior);
-        string newBehaviorString = ImGuiExt.StringCombo("Behavior", behaviorString, [.. Enum.GetValues<BehaviorEnum>().Select(GetBehaviorString)]);
-        BehaviorEnum newBehavior = ParseBehaviorString(newBehaviorString);
-        if (g.Behavior != newBehavior)
-        {
-            cmd.Add(new PropChangeCommand<BehaviorEnum>(val => g.Behavior = val, g.Behavior, newBehavior));
-            propChanged = true;
-        }
-
+        propChanged |= ImGuiExt.GenericStringComboHistory("Behavior", g.Behavior, val => g.Behavior = val, BehaviorToString, ParseBehaviorString, Enum.GetValues<BehaviorEnum>(), cmd);
         bool realIsShared = MapUtils.IsSharedDir(g.Dir) || g.Shared;
         ImGuiExt.WithDisabled(MapUtils.IsSharedDir(g.Dir), () =>
         {
             propChanged |= ImGuiExt.CheckboxHistory("Shared", realIsShared, val => g.Shared = val, cmd);
         });
-
         bool realIsSharedPath = MapUtils.IsSharedPath(g.Path) || g.SharedPath;
         ImGuiExt.WithDisabled(MapUtils.IsSharedPath(g.Path), () =>
         {
             propChanged |= ImGuiExt.CheckboxHistory("SharedPath", realIsSharedPath, val => g.SharedPath = val, cmd);
         });
-
         return propChanged;
     }
 
-    public static string GetBehaviorString(BehaviorEnum behavior) => behavior switch
+    public static string BehaviorToString(BehaviorEnum behavior) => behavior switch
     {
         BehaviorEnum.FAST => "yellow",
         BehaviorEnum.TANKY => "red",

@@ -245,7 +245,7 @@ public class MapOverviewWindow
         WaveData w => $"({w.ID})",
         CustomPath cp => $"({cp.Points.Length} points)",
         Point p => $"({p.X}, {p.Y})",
-        Group g => $"({g.GetCount(2)}/{g.GetCount(3)}/{g.GetCount(4)} {PropertiesWindow.GetBehaviorString(g.Behavior)})",
+        Group g => $"({g.GetCount(2)}/{g.GetCount(3)}/{g.GetCount(4)} {PropertiesWindow.BehaviorToString(g.Behavior)})",
 
         DynamicCollision dc => $"({dc.PlatID})",
         DynamicItemSpawn di => $"({di.PlatID})",
