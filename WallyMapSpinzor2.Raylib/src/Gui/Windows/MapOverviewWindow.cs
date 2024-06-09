@@ -235,7 +235,7 @@ public class MapOverviewWindow
         AbstractItemSpawn i => $"({i.X}, {i.Y}, {i.W}, {i.H})",
         AbstractCollision c => $"({c.X1}, {c.Y1}, {c.X2}, {c.Y2})",
         AbstractVolume v => $"(team {v.Team} - {v.X}, {v.Y}, {v.W}, {v.H})",
-        NavNode n => $"({PropertiesWindow.GetNavTypeString(n.Type)}{n.NavID})",
+        NavNode n => $"({PropertiesWindow.NavTypeToString(n.Type)}{n.NavID})",
 
         LevelSound ls => $"({ls.SoundEventName})",
 
