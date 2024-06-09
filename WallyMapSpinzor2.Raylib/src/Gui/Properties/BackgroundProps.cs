@@ -31,7 +31,7 @@ public partial class PropertiesWindow
                     if (dialogResult.IsOk)
                     {
                         string path = dialogResult.Path;
-                        string newAssetName = Path.GetRelativePath(backgroundDir, path);
+                        string newAssetName = Path.GetRelativePath(backgroundDir, path).Replace("\\", "/");
                         if (newAssetName != b.AssetName)
                         {
                             cmd.Add(new PropChangeCommand<string>(val => b.AssetName = val, b.AssetName, newAssetName));
@@ -59,7 +59,7 @@ public partial class PropertiesWindow
                     if (dialogResult.IsOk)
                     {
                         string path = dialogResult.Path;
-                        string newAnimatedAssetName = Path.GetRelativePath(backgroundDir, path);
+                        string newAnimatedAssetName = Path.GetRelativePath(backgroundDir, path).Replace("\\", "/");
                         if (newAnimatedAssetName != b.AnimatedAssetName)
                         {
                             cmd.Add(new PropChangeCommand<string?>(val => b.AnimatedAssetName = val, b.AnimatedAssetName, newAnimatedAssetName));

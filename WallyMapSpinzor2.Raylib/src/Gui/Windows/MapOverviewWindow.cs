@@ -79,7 +79,7 @@ public class MapOverviewWindow
                         if (dialogResult.IsOk)
                         {
                             string path = dialogResult.Path;
-                            string newThumnailPNGFile = Path.GetRelativePath(thumbnailPath, path);
+                            string newThumnailPNGFile = Path.GetRelativePath(thumbnailPath, path).Replace("\\", "/");
                             if (newThumnailPNGFile != l.Type.ThumbnailPNGFile)
                             {
                                 cmd.Add(new PropChangeCommand<string?>(val => l.Type.ThumbnailPNGFile = val, l.Type.ThumbnailPNGFile, newThumnailPNGFile));
