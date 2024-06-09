@@ -10,7 +10,7 @@ namespace WallyMapSpinzor2.Raylib;
 public partial class PropertiesWindow
 {
     private static string? _warningText;
-    // private static string? _errorText;
+    private static string? _backgroundErrorText;
 
     public static bool ShowBackgroundProps(Background b, CommandHistory cmd, PropertiesWindowData data)
     {
@@ -20,6 +20,9 @@ public partial class PropertiesWindow
 
         bool propChanged = false;
         ImGui.Text("AssetName: " + b.AssetName);
+
+        if (data.PathPrefs.BrawlhallaPath is null) return false;
+
         if (backgroundDir is not null)
         {
             ImGui.SameLine();
@@ -32,10 +35,15 @@ public partial class PropertiesWindow
                     {
                         string path = dialogResult.Path;
                         string newAssetName = Path.GetRelativePath(backgroundDir, path).Replace("\\", "/");
-                        if (newAssetName != b.AssetName)
+                        if (!Utils.IsInDirectory(data.PathPrefs.BrawlhallaPath, path))
+                        {
+                            _backgroundErrorText = "Asset has to be inside the brawlhalla directory";
+                        }
+                        else if (newAssetName != b.AssetName)
                         {
                             cmd.Add(new PropChangeCommand<string>(val => b.AssetName = val, b.AssetName, newAssetName));
                             propChanged = true;
+                            _backgroundErrorText = null;
                         }
                     }
                 });
@@ -60,7 +68,11 @@ public partial class PropertiesWindow
                     {
                         string path = dialogResult.Path;
                         string newAnimatedAssetName = Path.GetRelativePath(backgroundDir, path).Replace("\\", "/");
-                        if (newAnimatedAssetName != b.AnimatedAssetName)
+                        if (!Utils.IsInDirectory(data.PathPrefs.BrawlhallaPath, path))
+                        {
+                            _backgroundErrorText = "Asset has to be inside the brawlhalla directory";
+                        }
+                        else if (newAnimatedAssetName != b.AnimatedAssetName)
                         {
                             cmd.Add(new PropChangeCommand<string?>(val => b.AnimatedAssetName = val, b.AnimatedAssetName, newAnimatedAssetName));
                             propChanged = true;
@@ -105,7 +117,7 @@ public partial class PropertiesWindow
 
         ImGui.PushTextWrapPos();
         if (_warningText is not null) ImGui.Text($"[Warning]: {_warningText}");
-        // if (_errorText is not null) ImGui.Text($"[Error]: {_errorText}");
+        if (_backgroundErrorText is not null) ImGui.Text($"[Error]: {_backgroundErrorText}");
         ImGui.PopTextWrapPos();
 
         return propChanged;

@@ -39,6 +39,18 @@ public static class Utils
     public static Transform MatrixToTransform(Matrix4x4 m) => new(m.M11, m.M21, m.M12, m.M22, m.M41, m.M42);
     public static Transform SwfMatrixToTransform(SwfMatrix m) => new(m.ScaleX, m.RotateSkew1, m.RotateSkew0, m.ScaleY, m.TranslateX / 20.0, m.TranslateY / 20.0);
 
+    public static bool IsInDirectory(string dirPath, string filePath)
+    {
+        string? dir = Path.GetDirectoryName(filePath);
+        while (dir is not null)
+        {
+            if (dir == dirPath)
+                return true;
+            dir = Path.GetDirectoryName(dir);
+        }
+        return false;
+    }
+
     public static Raylib_cs.Color ToRlColor(Color c) => new(c.R, c.G, c.B, c.A);
 
     public static Raylib_cs.Image ImageSharpImageToRl(Image image)

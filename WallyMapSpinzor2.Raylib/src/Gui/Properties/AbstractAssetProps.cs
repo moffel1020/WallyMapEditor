@@ -9,6 +9,8 @@ namespace WallyMapSpinzor2.Raylib;
 
 partial class PropertiesWindow
 {
+    private static string? _assetErrorText;
+
     public static bool ShowAbstractAssetProps(AbstractAsset a, CommandHistory cmd, PropertiesWindowData data)
     {
         bool propChanged = false;
@@ -28,14 +30,26 @@ partial class PropertiesWindow
                         if (dialogResult.IsOk)
                         {
                             string path = dialogResult.Path;
-                            string newAssetName = Path.GetRelativePath(assetDir, path);
-                            if (newAssetName != a.AssetName)
+                            string newAssetName = Path.GetRelativePath(assetDir, path).Replace("\\", "/");
+                            if (!Utils.IsInDirectory(data.PathPrefs.BrawlhallaPath, path))
+                            {
+                                _assetErrorText = "Asset has to be inside brawlhalla directory";
+                            }
+                            else if (newAssetName != a.AssetName)
                             {
                                 cmd.Add(new PropChangeCommand<string>(val => a.AssetName = val, a.AssetName, newAssetName));
                                 propChanged = true;
+                                _assetErrorText = null;
                             }
                         }
                     });
+                }
+
+                if (_assetErrorText is not null)
+                {
+                    ImGui.PushTextWrapPos();
+                    ImGui.Text("[Error]: " + _assetErrorText);
+                    ImGui.PopTextWrapPos();
                 }
 
                 if (data.Canvas is not null)

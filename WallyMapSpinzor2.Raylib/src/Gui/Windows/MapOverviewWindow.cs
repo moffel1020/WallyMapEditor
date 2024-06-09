@@ -20,17 +20,16 @@ public class MapOverviewWindow
 
     private bool _propChanged = false;
 
+    private string? _thumbnailSelectError;
+
     // type ImGuiInputTextCallback
-    private unsafe static int LevelNameFilter(ImGuiInputTextCallbackData* data)
+    private unsafe static int LevelNameFilter(ImGuiInputTextCallbackData* data) => (char)data->EventChar switch
     {
-        return (char)data->EventChar switch
-        {
-            >= 'a' and <= 'z' => 0,
-            >= 'A' and <= 'Z' => 0,
-            >= '0' and <= '9' => 0,
-            _ => 1,
-        };
-    }
+        >= 'a' and <= 'z' => 0,
+        >= 'A' and <= 'Z' => 0,
+        >= '0' and <= '9' => 0,
+        _ => 1,
+    };
 
     public void Show(Level l, CommandHistory cmd, PathPreferences pathPrefs, RaylibCanvas? canvas, ref object? selected)
     {
@@ -80,14 +79,25 @@ public class MapOverviewWindow
                         {
                             string path = dialogResult.Path;
                             string newThumnailPNGFile = Path.GetRelativePath(thumbnailPath, path).Replace("\\", "/");
-                            if (newThumnailPNGFile != l.Type.ThumbnailPNGFile)
+                            if (!Utils.IsInDirectory(pathPrefs.BrawlhallaPath, path))
+                            {
+                                _thumbnailSelectError = "Thumbnail file has to be inside the brawlhalla directory";
+                            }
+                            else if (newThumnailPNGFile != l.Type.ThumbnailPNGFile)
                             {
                                 cmd.Add(new PropChangeCommand<string?>(val => l.Type.ThumbnailPNGFile = val, l.Type.ThumbnailPNGFile, newThumnailPNGFile));
                                 _propChanged = true;
+                                _thumbnailSelectError = null;
                             }
                         }
                     });
                 }
+                if (_thumbnailSelectError is not null)
+                {
+                    ImGui.PushTextWrapPos();
+                    ImGui.Text("[Error]: " + _thumbnailSelectError);
+                    ImGui.PopTextWrapPos();
+                } 
 
                 if (canvas is not null)
                 {
