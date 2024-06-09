@@ -7,7 +7,7 @@ public partial class PropertiesWindow
     public static bool ShowBackgroundProps(Background b, CommandHistory cmd)
     {
         bool propChanged = false;
-        ImGui.Text("AssetName: " + (b.AssetName ?? "None"));
+        ImGui.Text("AssetName: " + b.AssetName);
         ImGui.Text("AnimatedAssetName: " + (b.AnimatedAssetName ?? "None"));
         ImGui.Text("W: " + b.W);
         ImGui.Text("H: " + b.H);
