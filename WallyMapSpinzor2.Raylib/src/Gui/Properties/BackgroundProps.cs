@@ -9,14 +9,15 @@ namespace WallyMapSpinzor2.Raylib;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowBackgroundProps(Background b, CommandHistory cmd, RaylibCanvas? canvas, string? assetDir)
+    public static bool ShowBackgroundProps(Background b, CommandHistory cmd, PropertiesWindowData data)
     {
-        // NFD doesn't like the .. in the path
-        string? backgroundDir = assetDir is not null ? Path.GetFullPath(Path.Combine(assetDir, "..", "Backgrounds")) : null;
+        string? backgroundDir = data.PathPrefs.BrawlhallaPath is not null
+            ? Path.Combine(data.PathPrefs.BrawlhallaPath, "mapArt", "Backgrounds")
+            : null;
 
         bool propChanged = false;
         ImGui.Text("AssetName: " + (b.AssetName ?? "None"));
-        if (backgroundDir is not null && canvas is not null)
+        if (backgroundDir is not null)
         {
             ImGui.SameLine();
             if (ImGui.Button("Select##AssetName"))
@@ -36,14 +37,14 @@ public partial class PropertiesWindow
                     }
                 });
             }
-            if (b.AssetName is not null)
+            if (data.Canvas is not null && b.AssetName is not null)
             {
-                Texture2DWrapper texture = canvas.LoadTextureFromPath(Path.Combine(backgroundDir, b.AssetName));
+                Texture2DWrapper texture = data.Canvas.LoadTextureFromPath(Path.Combine(backgroundDir, b.AssetName));
                 rlImGui.ImageSize(texture.Texture, new Vector2(200 * (float)(texture.Width / texture.Height), 200));
             }
         }
         ImGui.Text("AnimatedAssetName: " + (b.AnimatedAssetName ?? "None"));
-        if (backgroundDir is not null && canvas is not null)
+        if (backgroundDir is not null)
         {
             ImGui.SameLine();
             if (ImGui.Button("Select##AnimatedAssetName"))
@@ -72,9 +73,9 @@ public partial class PropertiesWindow
                     propChanged = true;
                 }
             }
-            if (b.AnimatedAssetName is not null)
+            if (data.Canvas is not null && b.AnimatedAssetName is not null)
             {
-                Texture2DWrapper texture = canvas.LoadTextureFromPath(Path.Combine(backgroundDir, b.AnimatedAssetName));
+                Texture2DWrapper texture = data.Canvas.LoadTextureFromPath(Path.Combine(backgroundDir, b.AnimatedAssetName));
                 rlImGui.ImageSize(texture.Texture, new Vector2(200 * (float)(texture.Width / texture.Height), 200));
             }
         }

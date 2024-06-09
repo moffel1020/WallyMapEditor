@@ -4,7 +4,7 @@ namespace WallyMapSpinzor2.Raylib;
 
 partial class PropertiesWindow
 {
-    public static bool ShowPlatformProps(Platform p, CommandHistory cmd, RaylibCanvas? canvas, string? assetDir)
+    public static bool ShowPlatformProps(Platform p, CommandHistory cmd, PropertiesWindowData data)
     {
         bool propChanged = false;
 
@@ -17,7 +17,7 @@ partial class PropertiesWindow
         }
 
         ImGui.Separator();
-        propChanged |= ShowAbstractAssetProps(p, cmd, canvas, assetDir);
+        propChanged |= ShowAbstractAssetProps(p, cmd, data);
         if (p.AssetName is not null)
         {
             propChanged |= ImGuiExt.GenericStringComboHistory("PlatformAssetSwap", p.PlatformAssetSwap, val => p.PlatformAssetSwap = val,
@@ -43,7 +43,7 @@ partial class PropertiesWindow
             {
                 if (ImGui.TreeNode($"{child.GetType().Name}##{child.GetHashCode()}"))
                 {
-                    propChanged |= ShowProperties(child, cmd, canvas, assetDir);
+                    propChanged |= ShowProperties(child, cmd, data);
                     ImGui.TreePop();
                 }
             }

@@ -216,10 +216,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         if (_selectedObject is not null)
             PropertiesWindow.Open = true;
         if (PropertiesWindow.Open && _selectedObject is not null)
-        {
-            string? assetDir = Canvas is not null && MapData is Level level && PathPrefs.BrawlhallaPath is not null ? Path.Combine(PathPrefs.BrawlhallaPath, "mapArt", level.Desc.AssetDir) : null;
-            PropertiesWindow.Show(_selectedObject, CommandHistory, Canvas, assetDir);
-        }
+            PropertiesWindow.Show(_selectedObject, CommandHistory, new PropertiesWindowData(Canvas, MapData as Level, PathPrefs));
         if (!PropertiesWindow.Open)
             _selectedObject = null;
 

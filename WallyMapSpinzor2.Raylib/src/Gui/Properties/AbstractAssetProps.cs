@@ -9,15 +9,16 @@ namespace WallyMapSpinzor2.Raylib;
 
 partial class PropertiesWindow
 {
-    public static bool ShowAbstractAssetProps(AbstractAsset a, CommandHistory cmd, RaylibCanvas? canvas, string? assetDir)
+    public static bool ShowAbstractAssetProps(AbstractAsset a, CommandHistory cmd, PropertiesWindowData data)
     {
         bool propChanged = false;
         if (a.AssetName is not null)
         {
             ImGui.Text("AssetName: " + a.AssetName);
 
-            if (assetDir is not null)
+            if (data.Level is not null && data.PathPrefs.BrawlhallaPath is not null)
             {
+                string assetDir = Path.Combine(data.PathPrefs.BrawlhallaPath, "mapArt", data.Level.Desc.AssetDir);
                 ImGui.SameLine();
                 if (ImGui.Button("Select##AssetName"))
                 {
@@ -37,9 +38,9 @@ partial class PropertiesWindow
                     });
                 }
 
-                if (canvas is not null)
+                if (data.Canvas is not null)
                 {
-                    Texture2DWrapper texture = canvas.LoadTextureFromPath(Path.Combine(assetDir, a.AssetName));
+                    Texture2DWrapper texture = data.Canvas.LoadTextureFromPath(Path.Combine(assetDir, a.AssetName));
                     rlImGui.ImageSize(texture.Texture, new Vector2(60 * (float)(texture.Width / texture.Height), 60));
                 }
             }

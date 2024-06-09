@@ -6,7 +6,7 @@ namespace WallyMapSpinzor2.Raylib;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowWaveDataProps(WaveData w, CommandHistory cmd, RaylibCanvas? canvas, string? assetDir)
+    public static bool ShowWaveDataProps(WaveData w, CommandHistory cmd, PropertiesWindowData data)
     {
         bool propChanged = false;
         ImGui.Text("ID: " + w.ID);
@@ -21,7 +21,7 @@ public partial class PropertiesWindow
             {
                 if (ImGui.TreeNode($"CustomPath {MapOverviewWindow.GetExtraObjectInfo(cp)}###customPaths{cp.GetHashCode()}"))
                 {
-                    propChanged |= ShowProperties(cp, cmd, canvas, assetDir);
+                    propChanged |= ShowProperties(cp, cmd, data);
                     ImGui.TreePop();
                 }
             }
@@ -32,7 +32,7 @@ public partial class PropertiesWindow
             {
                 if (ImGui.TreeNode($"Group {MapOverviewWindow.GetExtraObjectInfo(g)}###groups{g.GetHashCode()}"))
                 {
-                    propChanged |= ShowProperties(g, cmd, canvas, assetDir);
+                    propChanged |= ShowProperties(g, cmd, data);
                     ImGui.TreePop();
                 }
             }
@@ -40,7 +40,7 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
-    public static bool ShowCustomPathProps(CustomPath cp, CommandHistory cmd, RaylibCanvas? canvas, string? assetDir)
+    public static bool ShowCustomPathProps(CustomPath cp, CommandHistory cmd, PropertiesWindowData data)
     {
         bool propChanged = false;
         if (ImGui.CollapsingHeader($"Points##props{cp.GetHashCode()}"))
@@ -49,7 +49,7 @@ public partial class PropertiesWindow
             {
                 if (ImGui.TreeNode($"Point {MapOverviewWindow.GetExtraObjectInfo(p)}###points{p.GetHashCode()}"))
                 {
-                    propChanged |= ShowProperties(p, cmd, canvas, assetDir);
+                    propChanged |= ShowProperties(p, cmd, data);
                     ImGui.TreePop();
                 }
             }
