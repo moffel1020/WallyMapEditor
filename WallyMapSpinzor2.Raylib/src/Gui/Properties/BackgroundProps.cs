@@ -9,6 +9,9 @@ namespace WallyMapSpinzor2.Raylib;
 
 public partial class PropertiesWindow
 {
+    private static string? _warningText;
+    // private static string? _errorText;
+
     public static bool ShowBackgroundProps(Background b, CommandHistory cmd, PropertiesWindowData data)
     {
         string? backgroundDir = data.PathPrefs.BrawlhallaPath is not null
@@ -41,6 +44,7 @@ public partial class PropertiesWindow
             {
                 Texture2DWrapper texture = data.Canvas.LoadTextureFromPath(Path.Combine(backgroundDir, b.AssetName));
                 rlImGui.ImageSize(texture.Texture, new Vector2(200 * (float)(texture.Width / texture.Height), 200));
+                (b.W, b.H) = (texture.Texture.Width, texture.Texture.Height);
             }
         }
         ImGui.Text("AnimatedAssetName: " + (b.AnimatedAssetName ?? "None"));
@@ -77,6 +81,10 @@ public partial class PropertiesWindow
             {
                 Texture2DWrapper texture = data.Canvas.LoadTextureFromPath(Path.Combine(backgroundDir, b.AnimatedAssetName));
                 rlImGui.ImageSize(texture.Texture, new Vector2(200 * (float)(texture.Width / texture.Height), 200));
+                if (texture.W != b.W || texture.H != b.H)
+                    _warningText = "AnimatedAssetName image is not the same size as the AssetName image. This can lead to the image displaying incorrectly";
+                else
+                    _warningText = null;
             }
         }
         ImGui.Text("W: " + b.W);
@@ -94,6 +102,12 @@ public partial class PropertiesWindow
                 ImGui.BulletText(theme);
             }
         }
+
+        ImGui.PushTextWrapPos();
+        if (_warningText is not null) ImGui.Text($"[Warning]: {_warningText}");
+        // if (_errorText is not null) ImGui.Text($"[Error]: {_errorText}");
+        ImGui.PopTextWrapPos();
+
         return propChanged;
     }
 }
