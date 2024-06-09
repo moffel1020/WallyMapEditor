@@ -16,7 +16,7 @@ public partial class PropertiesWindow
             : null;
 
         bool propChanged = false;
-        ImGui.Text("AssetName: " + (b.AssetName ?? "None"));
+        ImGui.Text("AssetName: " + b.AssetName);
         if (backgroundDir is not null)
         {
             ImGui.SameLine();
@@ -31,13 +31,13 @@ public partial class PropertiesWindow
                         string newAssetName = Path.GetRelativePath(backgroundDir, path);
                         if (newAssetName != b.AssetName)
                         {
-                            cmd.Add(new PropChangeCommand<string?>(val => b.AssetName = val, b.AssetName, newAssetName));
+                            cmd.Add(new PropChangeCommand<string>(val => b.AssetName = val, b.AssetName, newAssetName));
                             propChanged = true;
                         }
                     }
                 });
             }
-            if (data.Canvas is not null && b.AssetName is not null)
+            if (data.Canvas is not null)
             {
                 Texture2DWrapper texture = data.Canvas.LoadTextureFromPath(Path.Combine(backgroundDir, b.AssetName));
                 rlImGui.ImageSize(texture.Texture, new Vector2(200 * (float)(texture.Width / texture.Height), 200));
