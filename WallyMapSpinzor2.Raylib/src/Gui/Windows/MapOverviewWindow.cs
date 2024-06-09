@@ -43,12 +43,16 @@ public class MapOverviewWindow
 
         if (l.Type is not null)
         {
-            ImGui.TextWrapped("Warning: when exporting, the LevelName is used as the name of a new map. If another map exists with that LevelName, it will be overwritten.");
             string newLevelName;
             unsafe
             {
                 newLevelName = ImGuiExt.InputTextWithCallback("LevelName", l.Type.LevelName, LevelNameFilter, flags: ImGuiInputTextFlags.CallbackCharFilter);
             }
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.SetTooltip("Warning: when exporting, the LevelName is used as the name of a new map.\nIf another map exists with that LevelName, it will be overwritten.");
+            }
+
             if (newLevelName != l.Type.LevelName)
             {
                 cmd.Add(new PropChangeCommand<string>(val => l.Type.LevelName = l.Desc.LevelName = val, l.Type.LevelName, newLevelName));
@@ -57,9 +61,10 @@ public class MapOverviewWindow
 
             ImGui.Text($"LevelID: {l.Type.LevelID}");
             ImGui.Separator();
-            ImGui.TextWrapped("Note: these don't do anything");
             _propChanged |= ImGuiExt.InputTextHistory("AssetName", l.Type.AssetName ?? "", val => l.Type.AssetName = val == "" ? null : val, cmd);
+            if (ImGui.IsItemHovered()) ImGui.SetTooltip("Note: this doesn't do anything in game");
             _propChanged |= ImGuiExt.InputTextHistory("FileName", l.Type.FileName ?? "", val => l.Type.FileName = val == "" ? null : val, cmd);
+            if (ImGui.IsItemHovered()) ImGui.SetTooltip("Note: this doesn't do anything in game");
             ImGui.Separator();
             _propChanged |= ImGuiExt.InputTextHistory("DisplayName", l.Type.DisplayName, val => l.Type.DisplayName = val, cmd);
             _propChanged |= ImGuiExt.CheckboxHistory("DevOnly", l.Type.DevOnly, val => l.Type.DevOnly = val, cmd);
