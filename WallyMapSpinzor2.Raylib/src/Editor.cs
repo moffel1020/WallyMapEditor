@@ -236,6 +236,15 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
         if (HistoryPanel.Open)
             HistoryPanel.Show(CommandHistory);
+        
+        if (Rl.IsKeyPressed(KeyboardKey.Space) || Rl.IsMouseButtonPressed(MouseButton.Middle))
+        {
+            ImGui.OpenPopup(AddObjectPopup.NAME);
+            AddObjectPopup.NewPos = ScreenToWorld(Rl.GetMousePosition());
+        }
+
+        if (MapData is Level level)
+            AddObjectPopup.Update(level, CommandHistory);
 
         DialogWindows.RemoveAll(dialog => dialog.Closed);
         foreach (IDialog d in DialogWindows)
