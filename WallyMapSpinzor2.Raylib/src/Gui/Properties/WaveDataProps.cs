@@ -6,7 +6,7 @@ namespace WallyMapSpinzor2.Raylib;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowWaveDataProps(WaveData w, CommandHistory cmd)
+    public static bool ShowWaveDataProps(WaveData w, CommandHistory cmd, PropertiesWindowData data)
     {
         bool propChanged = false;
         ImGui.Text("ID: " + w.ID);
@@ -21,7 +21,7 @@ public partial class PropertiesWindow
             {
                 if (ImGui.TreeNode($"CustomPath {MapOverviewWindow.GetExtraObjectInfo(cp)}###customPaths{cp.GetHashCode()}"))
                 {
-                    propChanged |= ShowProperties(cp, cmd);
+                    propChanged |= ShowProperties(cp, cmd, data);
                     ImGui.TreePop();
                 }
             }
@@ -32,7 +32,7 @@ public partial class PropertiesWindow
             {
                 if (ImGui.TreeNode($"Group {MapOverviewWindow.GetExtraObjectInfo(g)}###groups{g.GetHashCode()}"))
                 {
-                    propChanged |= ShowProperties(g, cmd);
+                    propChanged |= ShowProperties(g, cmd, data);
                     ImGui.TreePop();
                 }
             }
@@ -40,7 +40,7 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
-    public static bool ShowCustomPathProps(CustomPath cp, CommandHistory cmd)
+    public static bool ShowCustomPathProps(CustomPath cp, CommandHistory cmd, PropertiesWindowData data)
     {
         bool propChanged = false;
         if (ImGui.CollapsingHeader($"Points##props{cp.GetHashCode()}"))
@@ -49,7 +49,7 @@ public partial class PropertiesWindow
             {
                 if (ImGui.TreeNode($"Point {MapOverviewWindow.GetExtraObjectInfo(p)}###points{p.GetHashCode()}"))
                 {
-                    propChanged |= ShowProperties(p, cmd);
+                    propChanged |= ShowProperties(p, cmd, data);
                     ImGui.TreePop();
                 }
             }
@@ -102,34 +102,21 @@ public partial class PropertiesWindow
             }
             propChanged |= ImGuiExt.EnumComboHistory("Path##enum", g.Path, val => g.Path = val, cmd);
         }
-
-
-
-        string behaviorString = GetBehaviorString(g.Behavior);
-        string newBehaviorString = ImGuiExt.StringCombo("Behavior", behaviorString, [.. Enum.GetValues<BehaviorEnum>().Select(GetBehaviorString)]);
-        BehaviorEnum newBehavior = ParseBehaviorString(newBehaviorString);
-        if (g.Behavior != newBehavior)
-        {
-            cmd.Add(new PropChangeCommand<BehaviorEnum>(val => g.Behavior = val, g.Behavior, newBehavior));
-            propChanged = true;
-        }
-
+        propChanged |= ImGuiExt.GenericStringComboHistory("Behavior", g.Behavior, val => g.Behavior = val, BehaviorToString, ParseBehaviorString, Enum.GetValues<BehaviorEnum>(), cmd);
         bool realIsShared = MapUtils.IsSharedDir(g.Dir) || g.Shared;
         ImGuiExt.WithDisabled(MapUtils.IsSharedDir(g.Dir), () =>
         {
             propChanged |= ImGuiExt.CheckboxHistory("Shared", realIsShared, val => g.Shared = val, cmd);
         });
-
         bool realIsSharedPath = MapUtils.IsSharedPath(g.Path) || g.SharedPath;
         ImGuiExt.WithDisabled(MapUtils.IsSharedPath(g.Path), () =>
         {
             propChanged |= ImGuiExt.CheckboxHistory("SharedPath", realIsSharedPath, val => g.SharedPath = val, cmd);
         });
-
         return propChanged;
     }
 
-    public static string GetBehaviorString(BehaviorEnum behavior) => behavior switch
+    public static string BehaviorToString(BehaviorEnum behavior) => behavior switch
     {
         BehaviorEnum.FAST => "yellow",
         BehaviorEnum.TANKY => "red",

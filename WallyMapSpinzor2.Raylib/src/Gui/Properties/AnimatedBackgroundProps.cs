@@ -4,11 +4,11 @@ namespace WallyMapSpinzor2.Raylib;
 
 partial class PropertiesWindow
 {
-    public static bool ShowAnimatedBackgroundProps(AnimatedBackground ab, CommandHistory cmd)
+    public static bool ShowAnimatedBackgroundProps(AnimatedBackground ab, CommandHistory cmd, PropertiesWindowData data)
     {
         bool propChanged = false;
         if (ImGui.CollapsingHeader("Gfx"))
-            propChanged |= ShowProperties(ab.Gfx, cmd);
+            propChanged |= ShowProperties(ab.Gfx, cmd, data);
         propChanged |= ImGuiExt.CheckboxHistory("Midground", ab.Midground, val => ab.Midground = val, cmd);
         propChanged |= ImGuiExt.DragFloatHistory("PositionX", ab.Position_X, val => ab.Position_X = val, cmd);
         propChanged |= ImGuiExt.DragFloatHistory("PositionY", ab.Position_Y, val => ab.Position_Y = val, cmd);

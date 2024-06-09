@@ -4,32 +4,46 @@ namespace WallyMapSpinzor2.Raylib;
 
 partial class PropertiesWindow
 {
-    public static bool ShowPlatformProps(Platform a, CommandHistory cmd)
+    public static bool ShowPlatformProps(Platform p, CommandHistory cmd, PropertiesWindowData data)
     {
         bool propChanged = false;
 
-        string name = a.InstanceName;
+        string name = p.InstanceName;
         ImGui.InputText("InstanceName", ref name, 64);
-        if (name != a.InstanceName)
+        if (name != p.InstanceName)
         {
-            cmd.Add(new PropChangeCommand<string>(val => a.InstanceName = val, a.InstanceName, name));
+            cmd.Add(new PropChangeCommand<string>(val => p.InstanceName = val, p.InstanceName, name));
             propChanged = true;
         }
 
         ImGui.Separator();
-        propChanged |= ShowAbstractAssetProps(a, cmd);
+        propChanged |= ShowAbstractAssetProps(p, cmd, data);
+        if (p.AssetName is not null)
+        {
+            propChanged |= ImGuiExt.GenericStringComboHistory("PlatformAssetSwap", p.PlatformAssetSwap, val => p.PlatformAssetSwap = val,
+            s => s switch
+            {
+                "simple" or "animated" => s,
+                _ => "always",
+            },
+            s => s switch
+            {
+                "simple" or "animated" => s,
+                _ => null,
+            }, [null, "simple", "animated"], cmd);
+        }
 
         ImGui.Separator();
-        ImGui.Text($"Blue: {a.Blue?.ToString() ?? "No"}");
-        ImGui.Text($"Red: {a.Red?.ToString() ?? "No"}");
+        ImGui.Text($"Blue: {p.Blue?.ToString() ?? "No"}");
+        ImGui.Text($"Red: {p.Red?.ToString() ?? "No"}");
 
-        if (a.AssetName is null && ImGui.CollapsingHeader("Children"))
+        if (p.AssetName is null && ImGui.CollapsingHeader("Children"))
         {
-            foreach (AbstractAsset child in a.AssetChildren!)
+            foreach (AbstractAsset child in p.AssetChildren!)
             {
                 if (ImGui.TreeNode($"{child.GetType().Name}##{child.GetHashCode()}"))
                 {
-                    propChanged |= ShowProperties(child, cmd);
+                    propChanged |= ShowProperties(child, cmd, data);
                     ImGui.TreePop();
                 }
             }

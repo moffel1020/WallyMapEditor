@@ -1,7 +1,15 @@
 using System.Collections;
-using ImGuiNET;
+using System.Numerics;
+using System.IO;
+using System.Threading.Tasks;
+
 using Rl = Raylib_cs.Raylib;
 using Raylib_cs;
+
+using ImGuiNET;
+using rlImGui_cs;
+
+using NativeFileDialogSharp;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -12,19 +20,18 @@ public class MapOverviewWindow
 
     private bool _propChanged = false;
 
-    // type ImGuiInputTextCallback
-    private unsafe static int LevelNameFilter(ImGuiInputTextCallbackData* data)
-    {
-        return (char)data->EventChar switch
-        {
-            >= 'a' and <= 'z' => 0,
-            >= 'A' and <= 'Z' => 0,
-            >= '0' and <= '9' => 0,
-            _ => 1,
-        };
-    }
+    private string? _thumbnailSelectError;
 
-    public void Show(Level l, CommandHistory cmd, ref object? selected)
+    // type ImGuiInputTextCallback
+    private unsafe static int LevelNameFilter(ImGuiInputTextCallbackData* data) => (char)data->EventChar switch
+    {
+        >= 'a' and <= 'z' => 0,
+        >= 'A' and <= 'Z' => 0,
+        >= '0' and <= '9' => 0,
+        _ => 1,
+    };
+
+    public void Show(Level l, CommandHistory cmd, PathPreferences pathPrefs, RaylibCanvas? canvas, ref object? selected)
     {
         ImGui.Begin("Map Overview", ref _open);
 
@@ -57,6 +64,48 @@ public class MapOverviewWindow
             _propChanged |= ImGuiExt.InputTextHistory("DisplayName", l.Type.DisplayName, val => l.Type.DisplayName = val, cmd);
             _propChanged |= ImGuiExt.CheckboxHistory("DevOnly", l.Type.DevOnly, val => l.Type.DevOnly = val, cmd);
             _propChanged |= ImGuiExt.CheckboxHistory("TestLevel", l.Type.TestLevel, val => l.Type.TestLevel = val, cmd);
+            ImGui.Separator();
+            ImGui.Text("ThumbnailPNGFile: " + (l.Type.ThumbnailPNGFile ?? "None"));
+            if (pathPrefs.BrawlhallaPath is not null)
+            {
+                string thumbnailPath = Path.Combine(pathPrefs.BrawlhallaPath, "images", "thumbnails");
+                ImGui.SameLine();
+                if (ImGui.Button("Select##ThumbnailPNGFile"))
+                {
+                    Task.Run(() =>
+                    {
+                        DialogResult dialogResult = Dialog.FileOpen("png,jpg", thumbnailPath);
+                        if (dialogResult.IsOk)
+                        {
+                            string path = dialogResult.Path;
+                            string newThumnailPNGFile = Path.GetRelativePath(thumbnailPath, path).Replace("\\", "/");
+                            if (!Utils.IsInDirectory(pathPrefs.BrawlhallaPath, path))
+                            {
+                                _thumbnailSelectError = "Thumbnail file has to be inside the brawlhalla directory";
+                            }
+                            else if (newThumnailPNGFile != l.Type.ThumbnailPNGFile)
+                            {
+                                cmd.Add(new PropChangeCommand<string?>(val => l.Type.ThumbnailPNGFile = val, l.Type.ThumbnailPNGFile, newThumnailPNGFile));
+                                _propChanged = true;
+                                _thumbnailSelectError = null;
+                            }
+                        }
+                    });
+                }
+                if (_thumbnailSelectError is not null)
+                {
+                    ImGui.PushTextWrapPos();
+                    ImGui.Text("[Error]: " + _thumbnailSelectError);
+                    ImGui.PopTextWrapPos();
+                } 
+
+                if (canvas is not null)
+                {
+                    Texture2DWrapper texture = canvas.LoadTextureFromPath(Path.Combine(thumbnailPath, l.Type.ThumbnailPNGFile ?? "CorruptFile.png"));
+                    rlImGui.ImageSize(texture.Texture, new Vector2(60 * (float)(texture.Width / texture.Height), 60));
+                }
+            }
+            ImGui.Separator();
         }
 
         _propChanged |= ImGuiExt.DragFloatHistory("default SlowMult##overview", l.Desc.SlowMult, val => l.Desc.SlowMult = val, cmd, speed: 0.05);
@@ -199,14 +248,14 @@ public class MapOverviewWindow
         AbstractItemSpawn i => $"({i.X}, {i.Y}, {i.W}, {i.H})",
         AbstractCollision c => $"({c.X1}, {c.Y1}, {c.X2}, {c.Y2})",
         AbstractVolume v => $"(team {v.Team} - {v.X}, {v.Y}, {v.W}, {v.H})",
-        NavNode n => $"({PropertiesWindow.GetNavTypeString(n.Type)}{n.NavID})",
+        NavNode n => $"({PropertiesWindow.NavTypeToString(n.Type)}{n.NavID})",
 
         LevelSound ls => $"({ls.SoundEventName})",
 
         WaveData w => $"({w.ID})",
         CustomPath cp => $"({cp.Points.Length} points)",
         Point p => $"({p.X}, {p.Y})",
-        Group g => $"({g.GetCount(2)}/{g.GetCount(3)}/{g.GetCount(4)} {PropertiesWindow.GetBehaviorString(g.Behavior)})",
+        Group g => $"({g.GetCount(2)}/{g.GetCount(3)}/{g.GetCount(4)} {PropertiesWindow.BehaviorToString(g.Behavior)})",
 
         DynamicCollision dc => $"({dc.PlatID})",
         DynamicItemSpawn di => $"({di.PlatID})",

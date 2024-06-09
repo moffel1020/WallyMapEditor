@@ -4,7 +4,7 @@ namespace WallyMapSpinzor2.Raylib;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowMovingPlatformProps(MovingPlatform mp, CommandHistory cmd)
+    public static bool ShowMovingPlatformProps(MovingPlatform mp, CommandHistory cmd, PropertiesWindowData data)
     {
         bool propChanged = false;
         ImGui.Text("PlatID: " + mp.PlatID);
@@ -19,7 +19,7 @@ public partial class PropertiesWindow
             {
                 if (ImGui.TreeNode($"{child.GetType().Name} {MapOverviewWindow.GetExtraObjectInfo(child)}##{child.GetHashCode()}"))
                 {
-                    propChanged |= ShowProperties(child, cmd);
+                    propChanged |= ShowProperties(child, cmd, data);
                     ImGui.TreePop();
                 }
             }

@@ -18,16 +18,17 @@ public partial class PropertiesWindow
         propChanged |= ImGuiExt.DragFloatHistory($"Y1##props{ac.GetHashCode()}", ac.Y1, val => ac.Y1 = val, cmd);
         propChanged |= ImGuiExt.DragFloatHistory($"X2##props{ac.GetHashCode()}", ac.X2, val => ac.X2 = val, cmd);
         propChanged |= ImGuiExt.DragFloatHistory($"Y2##props{ac.GetHashCode()}", ac.Y2, val => ac.Y2 = val, cmd);
-
-        string teamString = ac.Team == 0 ? "None" : ac.Team.ToString();
-        string newTeamString = ImGuiExt.StringCombo($"Team##props{ac.GetHashCode()}", teamString, ["None", "1", "2", "3", "4", "5"]);
-        int newTeam = newTeamString == "None" ? 0 : int.Parse(newTeamString);
-        if (ac.Team != newTeam)
+        propChanged |= ImGuiExt.GenericStringComboHistory($"Team##props{ac.GetHashCode()}", ac.Team, val => ac.Team = val,
+        t => t switch
         {
-            cmd.Add(new PropChangeCommand<int>(val => ac.Team = val, ac.Team, newTeam));
-            propChanged = true;
-        }
-
+            0 => "None",
+            _ => t.ToString(),
+        },
+        t => t switch
+        {
+            "None" => 0,
+            _ => int.Parse(t),
+        }, [0, 1, 2, 3, 4, 5], cmd);
         propChanged |= ImGuiExt.NullableEnumComboHistory($"Flag##{ac.GetHashCode()}", ac.Flag, val => ac.Flag = val, cmd);
         propChanged |= ImGuiExt.NullableEnumComboHistory($"ColorFlag##{ac.GetHashCode()}", ac.ColorFlag, val => ac.ColorFlag = val, cmd);
 
