@@ -67,10 +67,10 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
         _selectedObject = null;
         CommandHistory.Clear();
-        if (Loader is not null)
+        if (Canvas is not null)
         {
-            Loader.BoneNames = BoneNames!;
-            Loader.ClearCache();
+            Canvas.Loader.BoneNames = BoneNames!;
+            Canvas.ClearTextureCache();
         }
 
         Level l = new(ld, lt, lst);
@@ -91,10 +91,10 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         BoneNames = boneNames;
         _selectedObject = null;
         CommandHistory.Clear();
-        if (Loader is not null)
+        if (Canvas is not null)
         {
-            Loader.BoneNames = boneNames;
-            Loader.ClearCache();
+            Canvas.Loader.BoneNames = boneNames;
+            Canvas.ClearTextureCache();
         }
 
         MapData = l;

@@ -101,8 +101,18 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         }
     }
 
-    public static readonly Dictionary<(Gfx, string), RenderRect> RenderTextureCache = [];
-    private static RenderTexture2D? Empty;
+    private readonly Dictionary<(Gfx, string), RenderRect> RenderRectCache = [];
+    private RenderTexture2D? Empty;
+
+    public void ClearCache()
+    {
+        foreach ((_, RenderRect rect) in RenderRectCache)
+            rect.Dispose();
+        RenderRectCache.Clear();
+        if (Empty is not null)
+            Rl.UnloadRenderTexture(Empty.Value);
+        Empty = null;
+    }
 
     public Texture2D? AnimToTexture(Gfx gfx, string animName, int frame, bool withDebug = false)
     {
@@ -116,11 +126,11 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         }
         (double x, double y, double w, double h) = bounds.Value;
         // see if render texture was already created
-        if (!RenderTextureCache.TryGetValue((gfx, animName), out RenderRect rect))
+        if (!RenderRectCache.TryGetValue((gfx, animName), out RenderRect rect))
             rect = new(x, y, w, h);
         else
             rect.UpdateWith(x, y, w, h);
-        RenderTextureCache[(gfx, animName)] = rect;
+        RenderRectCache[(gfx, animName)] = rect;
         Rl.BeginTextureMode(rect.RenderTexture);
         Rl.ClearBackground(Raylib_cs.Color.Blank);
         canvas.DrawAnim(gfx, animName, frame, Transform.CreateTranslate(-rect.Rect.XMin, -rect.Rect.YMin), DrawPriorityEnum.BACKGROUND, null);

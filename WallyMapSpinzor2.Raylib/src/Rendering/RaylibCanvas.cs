@@ -22,6 +22,7 @@ public partial class RaylibCanvas : ICanvas
     public void ClearTextureCache()
     {
         Loader.ClearCache();
+        Animator.ClearCache();
     }
 
     public void DrawCircle(double x, double y, double radius, Color color, Transform trans, DrawPriorityEnum priority, object? caller)
