@@ -76,7 +76,7 @@ public static class AddObjectPopup
         where T : AbstractItemSpawn, new()
     {
         T spawn = new(){ X = NewPos.X, Y = NewPos.Y };
-        (spawn.W, spawn.H) = (spawn.DefaultW, spawn.DefaultH);
+        (spawn.W, spawn.H) = (100, 100);
         cmd.Add(new PropChangeCommand<AbstractItemSpawn[]>(val => l.Desc.ItemSpawns = val, l.Desc.ItemSpawns, [.. l.Desc.ItemSpawns, spawn]));
         cmd.SetAllowMerge(false);
     }
