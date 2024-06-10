@@ -163,7 +163,9 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
         while (!Rl.WindowShouldClose())
         {
-            _config.Time += TimeSpan.FromSeconds(_config.RenderSpeed * Rl.GetFrameTime());
+            float delta = Rl.GetFrameTime();
+            _config.Time += TimeSpan.FromSeconds(_config.RenderSpeed * delta);
+            Time += TimeSpan.FromSeconds(delta);
             Draw();
             Update();
         }
@@ -221,7 +223,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         {
             PropertiesWindowData data = new()
             {
-                Time = _config.Time,
+                Time = Time,
                 Canvas = Canvas,
                 Loader = Loader,
                 Level = MapData as Level,
