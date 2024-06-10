@@ -360,17 +360,15 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             throw new InvalidOperationException("Cannot get world rect when Canvas is not initialized");
         RenderTexture2D renderTexture = Rl.LoadRenderTexture(w, h);
         Camera2D camera = new(new(0, 0), new(x, y), 0, 1);
-        Rl.BeginDrawing();
-        Rl.ClearBackground(Raylib_cs.Color.Black);
         Rlgl.SetLineWidth(Math.Max(LINE_WIDTH * camera.Zoom, 1));
         Rl.BeginTextureMode(renderTexture);
+        Rl.ClearBackground(Raylib_cs.Color.Blank);
         Rl.BeginMode2D(camera);
         Canvas.CameraMatrix = Rl.GetCameraMatrix2D(camera);
         MapData?.DrawOn(Canvas, Transform.IDENTITY, _config, new RenderContext(), _state);
         Canvas.FinalizeDraw();
         Rl.EndMode2D();
         Rl.EndTextureMode();
-        Rl.EndDrawing();
         Image image = Rl.LoadImageFromTexture(renderTexture.Texture);
         Rl.UnloadRenderTexture(renderTexture);
         return image;
