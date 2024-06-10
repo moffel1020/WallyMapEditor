@@ -101,10 +101,10 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         }
     }
 
-    public static readonly Dictionary<(Gfx, string), RenderTexture2D> RenderTextureCache = [];
-    public static RenderTexture2D? Empty;
+    public static readonly Dictionary<(Gfx, string), RenderRect> RenderTextureCache = [];
+    private static RenderTexture2D? Empty;
 
-    public Texture2D? AnimToTexture(Gfx gfx, string animName, int frame)
+    public Texture2D? AnimToTexture(Gfx gfx, string animName, int frame, bool withDebug = false)
     {
         (double, double, double, double)? bounds = CalculateAnimBounds(gfx, animName, frame, Transform.IDENTITY);
         if (bounds is null)
@@ -115,24 +115,23 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
             return Empty.Value.Texture;
         }
         (double x, double y, double w, double h) = bounds.Value;
-        RenderTexture2D render;
         // see if render texture was already created
-        if (!RenderTextureCache.TryGetValue((gfx, animName), out render))
-            RenderTextureCache[(gfx, animName)] = render = Rl.LoadRenderTexture((int)w, (int)h);
-        // increase render texture size if needed
-        if ((int)w > render.Texture.Width || (int)h > render.Texture.Height)
-        {
-            int newW = Math.Max((int)w, render.Texture.Width);
-            int newH = Math.Max((int)h, render.Texture.Height);
-            Rl.UnloadRenderTexture(render);
-            RenderTextureCache[(gfx, animName)] = render = Rl.LoadRenderTexture(newW, newH);
-        }
-        Rl.BeginTextureMode(render);
+        if (!RenderTextureCache.TryGetValue((gfx, animName), out RenderRect rect))
+            rect = new(x, y, w, h);
+        else
+            rect.UpdateWith(x, y, w, h);
+        RenderTextureCache[(gfx, animName)] = rect;
+        Rl.BeginTextureMode(rect.RenderTexture);
         Rl.ClearBackground(Raylib_cs.Color.Blank);
-        canvas.DrawAnim(gfx, animName, frame, Transform.CreateTranslate(-x, -y), DrawPriorityEnum.BACKGROUND, null);
+        canvas.DrawAnim(gfx, animName, frame, Transform.CreateTranslate(-rect.Rect.XMin, -rect.Rect.YMin), DrawPriorityEnum.BACKGROUND, null);
+        if (withDebug)
+        {
+            canvas.DrawRect(rect.Rect.XMin, rect.Rect.YMin, rect.Rect.Width, rect.Rect.Height, false, Color.FromHex(0x568917FF), Transform.CreateTranslate(-rect.Rect.XMin, -rect.Rect.YMin), DrawPriorityEnum.MIDGROUND, null);
+            canvas.DrawRect(x, y, w, h, false, Color.FromHex(0x1758FFFF), Transform.CreateTranslate(-rect.Rect.XMin, -rect.Rect.YMin), DrawPriorityEnum.FOREGROUND, null);
+        }
         canvas.FinalizeDraw();
         Rl.EndTextureMode();
-        return render.Texture;
+        return rect.RenderTexture.Texture;
     }
 
     public (double x, double y, double w, double h)? CalculateAnimBounds(Gfx gfx, string animName, int frame, Transform trans)
@@ -155,11 +154,6 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
 
     private (double, double)[]? CalculateAnimPoints(Gfx gfx, string animName, int frame, Transform trans)
     {
-        /*
-        NOTE: the game goes over the list from the end until it finds a CustomArt that matches
-        this only matters for CustomArt with RIGHT and for AsymmetrySwapFlags.
-        we don't need that yet so just take last.
-        */
         CustomArt? customArt = gfx.CustomArts.Length == 0 ? null : gfx.CustomArts[^1];
         string customArtSuffix = customArt is not null ? $"_{customArt.Name}" : "";
         // swf animation

@@ -339,10 +339,14 @@ public static class ImGuiExt
             return;
         }
         Texture2D texture = texture_.Value;
-        float ratio = texture.Id == 0 ? 1 : (float)texture.Width / texture.Height;
-        Vector2 size = new(60 * ratio, 60);
+        float ratio = (float)texture.Width / texture.Height;
+        Vector2 size = new(90 * ratio, 90);
+        ImGui.Spacing();
+        ImGui.Indent();
         // neg height because render texture is flipped vertically
         ImageRect(texture, size.X, size.Y, new Rectangle(0, 0, texture.Width, -texture.Height));
+        ImGui.Unindent();
+        ImGui.Spacing();
     }
 
     // for some reason, rlImGui exposes the width and height in ImageRect as int, despite the underlying values being float
