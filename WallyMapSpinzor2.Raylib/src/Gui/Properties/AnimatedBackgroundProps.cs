@@ -30,7 +30,13 @@ partial class PropertiesWindow
         ImGui.Text("AnimFile: " + g.AnimFile);
         ImGui.Text("AnimClass: " + g.AnimClass);
         if (data.Canvas is not null)
+        {
+            ImGui.Spacing();
+            ImGui.Indent();
             ImGuiExt.Animation(data.Canvas, g, "Ready", LevelDesc.GET_ANIM_FRAME(data.Time));
+            ImGui.Unindent();
+            ImGui.Spacing();
+        }
         // changing AnimScale requires remaking the texture
         // we're not gonna do that, so don't let users just edit it
         ImGui.Text("AnimScale: " + g.AnimScale);
