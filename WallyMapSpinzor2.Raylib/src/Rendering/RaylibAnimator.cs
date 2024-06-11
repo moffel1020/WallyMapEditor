@@ -101,7 +101,52 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         }
     }
 
-    private readonly Dictionary<(Gfx, string), RenderRect> RenderRectCache = [];
+    private sealed class GfxHasher : IEqualityComparer<(Gfx, string)>
+    {
+        public bool Equals((Gfx, string) x, (Gfx, string) y)
+        {
+            (Gfx xg, string xa) = x;
+            (Gfx yg, string ya) = y;
+            if (xa != ya)
+                return false;
+            if (xg.AnimClass != yg.AnimClass)
+                return false;
+            if (xg.AnimFile != yg.AnimFile)
+                return false;
+            if (xg.AnimScale != yg.AnimScale)
+                return false;
+            if (xg.CustomArts.Length != yg.CustomArts.Length)
+                return false;
+            for (int i = 0; i < xg.CustomArts.Length; ++i)
+            {
+                CustomArt xca = xg.CustomArts[i];
+                CustomArt yca = yg.CustomArts[i];
+                if (xca.Right != yca.Right)
+                    return false;
+                if (xca.Type != yca.Type)
+                    return false;
+                if (xca.FileName != yca.FileName)
+                    return false;
+                if (xca.Name != yca.Name)
+                    return false;
+            }
+            return true;
+        }
+
+        public int GetHashCode((Gfx, string) obj)
+        {
+            (Gfx gfx, string anim) = obj;
+            int hash = (anim, gfx.AnimClass, gfx.AnimFile, gfx.AnimScale).GetHashCode();
+            foreach (CustomArt ca in gfx.CustomArts)
+            {
+                int caHash = (ca.Right, ca.Type, ca.FileName, ca.Name).GetHashCode();
+                hash = HashCode.Combine(hash, caHash);
+            }
+            return hash;
+        }
+    }
+
+    private readonly Dictionary<(Gfx, string), RenderRect> RenderRectCache = new(new GfxHasher());
     private RenderTexture2D? Empty;
 
     public void ClearCache()
