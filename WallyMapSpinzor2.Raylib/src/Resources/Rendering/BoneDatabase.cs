@@ -533,33 +533,33 @@ public static class BoneDatabase
         Register1("a_SwooshSpAttackAirDown", 1);
     }
 
-    public static Dictionary<string, uint> UnknownDict1 { get; } = [];
-    public static Dictionary<string, (int, bool)> TypeDict { get; } = [];
+    public static Dictionary<string, uint> ArtTypeDict { get; } = [];
+    public static Dictionary<string, (int, bool)> BoneTypeDict { get; } = [];
     public static Dictionary<string, string> ForearmVariantDict { get; } = [];
     public static Dictionary<string, string> KatarVariantDict { get; } = [];
     public static Dictionary<string, string> AsymSwapDict { get; } = [];
 
-    public static void Register1(string name, uint thing)
+    public static void Register1(string name, uint artType)
     {
-        UnknownDict1[name] = thing;
+        ArtTypeDict[name] = artType;
     }
 
-    public static void Register2(string name, uint thing, int type, bool dir, bool hasRVar = false)
+    public static void Register2(string name, uint artType, int boneType, bool dir, bool hasRVar = false)
     {
-        TypeDict[name] = (type, dir);
+        BoneTypeDict[name] = (boneType, dir);
         if (hasRVar)
         {
-            TypeDict[name + "R"] = (type, dir);
-            if (type == 2)
+            BoneTypeDict[name + "R"] = (boneType, dir);
+            if (boneType == 2)
                 ForearmVariantDict[name] = name + "R";
-            else if (type == 12)
+            else if (boneType == 12)
                 KatarVariantDict[name] = name + "R";
-            Register1(name + "R", thing);
+            Register1(name + "R", artType);
         }
         if (name.EndsWith("Right"))
             AsymSwapDict[name] = name[..^"Right".Length];
         else if (name.EndsWith("Left"))
             AsymSwapDict[name] = name[..^"Left".Length];
-        Register1(name, thing);
+        Register1(name, artType);
     }
 }

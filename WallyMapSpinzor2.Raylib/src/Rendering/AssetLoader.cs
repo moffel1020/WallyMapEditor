@@ -23,7 +23,6 @@ public class AssetLoader
         LoadAnm("MapArtAnims");
         LoadAnm("ATLA_MapArtAnims");
         LoadAnm("GameModes");
-        LoadAnm("Boots");
     }
 
     private void LoadAnm(string name)

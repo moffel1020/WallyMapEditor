@@ -163,8 +163,8 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
             AnmFrame anmFrame = animation.Frames[BrawlhallaMath.SafeMod(frame, animation.Frames.Length)];
 
             List<BoneInstance> bones = GetBoneInstances(anmFrame.Bones, gfx);
-            SetAsymBonesVisibility(bones, trans.ScaleX * trans.ScaleY < 0);
-            
+            SetAsymBonesVisibility(bones, gfx, trans.ScaleX * trans.ScaleY < 0);
+
             List<BoneData> result = [];
             foreach (BoneInstance instance in bones)
             {
@@ -202,7 +202,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         {
             string boneName = loader.BoneNames[bone.Id - 1]; // bone id is 1 indexed
             (int, bool)? boneType;
-            if (BoneDatabase.TypeDict.TryGetValue(boneName, out var boneType_))
+            if (BoneDatabase.BoneTypeDict.TryGetValue(boneName, out var boneType_))
                 boneType = boneType_;
             else
                 boneType = null;
@@ -222,9 +222,13 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
                 else
                     mirrored = false;
             }
-            string finalBoneName = boneName;
 
-            if (BoneDatabase.AsymSwapDict.TryGetValue(boneName, out string? otherBoneName))
+            string finalBoneName = boneName;
+            if (gfx.BoneOverrides.TryGetValue(boneName, out string? overridenBoneName))
+            {
+                finalBoneName = overridenBoneName;
+            }
+            else if (BoneDatabase.AsymSwapDict.TryGetValue(boneName, out string? otherBoneName))
             {
                 if (boneType is null || gfx.AsymmetrySwapFlags.All(f => (int)f != boneType.Value.Item1))
                 {
@@ -234,9 +238,6 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
 
             bool right = boneType is not null && boneType.Value.Item1 == 1 && (otherHand ? !mirrored : mirrored);
             bool isOtherHand = false;
-
-            // not impled yet - bone override (see CustomeType)
-
             if (boneType is not null && boneType.Value.Item1 == 1)
             {
                 isOtherHand = otherHand && handBoneName == finalBoneName;
@@ -282,25 +283,24 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         return instances;
     }
 
-    private static void SetAsymBonesVisibility(IReadOnlyList<BoneInstance> bones, bool spriteMirrored)
+    private static void SetAsymBonesVisibility(IReadOnlyList<BoneInstance> bones, Gfx gfx, bool spriteMirrored)
     {
-        // those are set through costumeTypes.csv
-        bool useRightTorso = false;
-        bool useRightJaw = false;
-        bool useRightEyes = false;
-        bool useRightMouth = false;
-        bool useRightHair = false;
-        bool useRightGauntletForearm = false;
-        bool useRightGauntletForearmRight = false;
-        int rightKatarsUses = 0; // 2 if using
-        int rightForearmUses = 0; // 2 if using
-        int trueLeftRightHandsUses = 0; // 4 if using
+        bool useRightTorso = gfx.UseRightTorso;
+        bool useRightJaw = gfx.UseRightJaw;
+        bool useRightEyes = gfx.UseRightEyes;
+        bool useRightMouth = gfx.UseRightMouth;
+        bool useRightHair = gfx.UseRightHair;
+        bool useRightGauntlet1 = gfx.UseRightGauntlet;
+        bool useRightGauntlet2 = gfx.UseRightGauntlet;
+        int rightKatarUses = gfx.UseRightKatar ? 2 : 0;
+        int rightForearmUses = gfx.UseRightForearm ? 2 : 0;
+        int trueLeftRightHandsUses = gfx.UseTrueLeftRightHands ? 4 : 0;
         for (int i = 0; i < bones.Count; ++i)
         {
             BoneInstance instance = bones[i];
             bool mirrored = false;
             bool hand = false;
-            if (BoneDatabase.TypeDict.TryGetValue(instance.OgBoneName, out (int, bool) value))
+            if (BoneDatabase.BoneTypeDict.TryGetValue(instance.OgBoneName, out (int, bool) value))
             {
                 (int type, bool dir) = value;
                 if (type == 1 || type == 8 || type == 9 || type == 13 || type == 14 || type == 16 || type == 17)
@@ -350,20 +350,20 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
                 doVisibilitySwap();
                 useRightHair = false;
             }
-            else if (useRightGauntletForearm && instance.OgBoneName == "a_WeaponFistsForearm")
+            else if (useRightGauntlet1 && instance.OgBoneName == "a_WeaponFistsForearm")
             {
                 doVisibilitySwap();
-                useRightGauntletForearm = false;
+                useRightGauntlet1 = false;
             }
-            else if (useRightGauntletForearmRight && instance.OgBoneName == "a_WeaponFistsForearmRight")
+            else if (useRightGauntlet2 && instance.OgBoneName == "a_WeaponFistsForearmRight")
             {
                 doVisibilitySwap();
-                useRightGauntletForearmRight = false;
+                useRightGauntlet2 = false;
             }
-            else if (rightKatarsUses > 0 && BoneDatabase.KatarVariantDict.ContainsKey(instance.OgBoneName))
+            else if (rightKatarUses > 0 && BoneDatabase.KatarVariantDict.ContainsKey(instance.OgBoneName))
             {
                 doVisibilitySwap();
-                rightKatarsUses--;
+                rightKatarUses--;
             }
             else if (rightForearmUses > 0 && BoneDatabase.ForearmVariantDict.ContainsKey(instance.OgBoneName))
             {
@@ -381,13 +381,13 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
     private CustomArt? FindCustomArt(string ogBoneName, string boneName, CustomArt[] customArts, bool right, out bool needSwfLoad)
     {
         needSwfLoad = false;
-        uint thing = BoneDatabase.UnknownDict1.GetValueOrDefault(ogBoneName, 0u);
+        uint artType = BoneDatabase.ArtTypeDict.GetValueOrDefault(ogBoneName, 0u);
         for (int i = customArts.Length - 1; i >= 0; --i)
         {
             CustomArt ca = customArts[i];
             if (!(ca.Right && !right))
             {
-                if (!(thing != 0 && ca.Type != 0 && ca.Type != thing))
+                if (!(artType != 0 && ca.Type != 0 && ca.Type != artType))
                 {
                     // check that new sprite would exist
                     SwfFileData? swf = loader.LoadSwf(ca.FileName);
