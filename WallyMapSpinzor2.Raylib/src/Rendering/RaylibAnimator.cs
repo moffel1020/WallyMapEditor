@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Raylib_cs;
 using Rl = Raylib_cs.Raylib;
 using SwfLib.Tags;
 using SwiffCheese.Wrappers;
 using WallyAnmSpinzor;
-
 using BoneData = System.ValueTuple<WallyMapSpinzor2.Raylib.Texture2DWrapper, WallyMapSpinzor2.Transform, uint, double>;
 
 namespace WallyMapSpinzor2.Raylib;
@@ -138,23 +138,17 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         Empty = null;
     }
 
+
     #region building
     private BoneData[] BuildAnim(Gfx gfx, string animName, int frame, Transform trans, int loopLimit = -1)
     {
-        /*
-        NOTE: the game goes over the list from the end until it finds a CustomArt that matches
-        this only matters for CustomArt with RIGHT and for AsymmetrySwapFlags.
-        we don't need that yet so just take last.
-        */
-        CustomArt? customArt = gfx.CustomArts.Length == 0 ? null : gfx.CustomArts[^1];
-        string customArtSuffix = customArt is not null ? $"_{customArt.Name}" : "";
         // swf animation
         if (gfx.AnimFile.StartsWith("SFX_"))
         {
             SwfFileData? swf = loader.LoadSwf(gfx.AnimFile);
             if (swf is null)
                 return [];
-            ushort spriteId = swf.SymbolClass[gfx.AnimClass + customArtSuffix];
+            ushort spriteId = swf.SymbolClass[gfx.AnimClass];
             return BuildSwfSprite(gfx.AnimFile, spriteId, frame, gfx.AnimScale, gfx.Tint, 1, trans, loopLimit);
         }
         // anm animation
@@ -168,23 +162,242 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
                 return [];
             List<BoneData> result = [];
             AnmFrame anmFrame = animation.Frames[BrawlhallaMath.SafeMod(frame, animation.Frames.Count)];
+
+            List<BoneInstance> bones = [];
+
+            bool idk2 = false;
+            string smth = "";
             foreach (AnmBone bone in anmFrame.Bones)
             {
-                Transform boneTrans = new(bone.ScaleX, bone.RotateSkew1, bone.RotateSkew0, bone.ScaleY, bone.X, bone.Y);
-                string swfPath = Path.Combine("bones", $"Bones{anmClass.FileName["Animation".Length..]}");
-                string spriteName = loader.BoneNames[bone.Id - 1] + customArtSuffix; // bone id is 1 indexed
-                // wtf
-                if (spriteName == "flash.display::MovieClip")
+                string boneName = loader.BoneNames[bone.Id - 1]; // bone id is 1 indexed
+                (int, bool)? boneType;
+                if (BoneDatabase.TypeDict.TryGetValue(boneName, out var boneType_))
+                    boneType = boneType_;
+                else
+                    boneType = null;
+                bool mirrored;
+                if (boneType is null)
+                {
+                    mirrored = false;
+                }
+                else
+                {
+                    (int type, bool dir) = boneType.Value;
+                    if (type == 1 || type == 8 || type == 9 || type == 13 || type == 14 || type == 15 || type == 16 || type == 17)
+                    {
+                        double det = bone.ScaleX * bone.ScaleY - bone.RotateSkew0 * bone.RotateSkew1;
+                        mirrored = (det < 0) != dir;
+                    }
+                    else
+                        mirrored = false;
+                }
+                string finalBoneName = boneName;
+
+                if (BoneDatabase.AsymSwapDict.TryGetValue(boneName, out string? otherBoneName))
+                {
+                    if (boneType is null || gfx.AsymmetrySwapFlags.All(f => (int)f != boneType.Value.Item1))
+                    {
+                        finalBoneName = otherBoneName;
+                    }
+                }
+
+                bool right = boneType is not null && boneType.Value.Item1 == 1 && (idk2 ? !mirrored : mirrored);
+                bool anotherflag = false;
+
+                // not impled yet - bone override (see CustomeType)
+
+                if (boneType is not null && boneType.Value.Item1 == 1)
+                {
+                    anotherflag = idk2 && smth == finalBoneName;
+                    smth = anotherflag ? "" : finalBoneName;
+                    idk2 = !idk2;
+                }
+                else
+                {
+                    idk2 = false;
+                    smth = "";
+                }
+                CustomArt? customArt = FindCustomArt(boneName, finalBoneName, gfx.CustomArts, right, out bool needSwfLoad);
+                if (needSwfLoad)
                     continue;
-                SwfFileData? swf = loader.LoadSwf(swfPath);
+                string customArtSuffix = customArt is not null ? $"_{customArt.Name}" : "";
+                // wtf
+                if (finalBoneName == "flash.display::MovieClip")
+                    continue;
+                bool visible = boneType switch
+                {
+                    null => true,
+                    _ => boneType.Value.Item1 switch
+                    {
+                        8 when finalBoneName == "a_Torso1R" => false,
+                        1 when anotherflag => false,
+                        10 when finalBoneName == "a_WeaponFistsForearmR" => false,
+                        10 when finalBoneName == "a_WeaponFistsForearmRightR" => false,
+                        2 when BoneDatabase.ForearmVariantDict.ContainsValue(finalBoneName) => false,
+                        12 when BoneDatabase.KatarVariantDict.ContainsValue(finalBoneName) => false,
+                        _ => true,
+                    }
+                };
+                string swfPath = customArt?.FileName ?? Path.Combine("bones", $"Bones{anmClass.FileName["Animation".Length..]}");
+                bones.Add(new()
+                {
+                    FilePath = swfPath,
+                    SpriteName = finalBoneName + customArtSuffix,
+                    OgBoneName = boneName,
+                    Bone = bone,
+                    Visible = visible,
+                });
+            }
+            SetAsymBonesVisibility(bones, trans.ScaleX * trans.ScaleY < 0);
+
+            foreach (BoneInstance instance in bones)
+            {
+                if (!instance.Visible)
+                    continue;
+                SwfFileData? swf = loader.LoadSwf(instance.FilePath);
                 if (swf is null)
                     continue;
-                ushort spriteId = swf.SymbolClass[spriteName];
-                result.AddRange(BuildSwfSprite(swfPath, spriteId, bone.Frame - 1, gfx.AnimScale, gfx.Tint, bone.Opacity, trans * boneTrans));
+                if (!swf.SymbolClass.TryGetValue(instance.SpriteName, out ushort spriteId))
+                    continue;
+                AnmBone bone = instance.Bone;
+                Transform boneTrans = new(bone.ScaleX, bone.RotateSkew1, bone.RotateSkew0, bone.ScaleY, bone.X, bone.Y);
+                result.AddRange(BuildSwfSprite(instance.FilePath, spriteId, bone.Frame - 1, gfx.AnimScale, gfx.Tint, bone.Opacity, trans * boneTrans));
             }
+
             return [.. result];
         }
         return [];
+    }
+
+    private sealed class BoneInstance
+    {
+        public required string FilePath { get; init; }
+        public required string OgBoneName { get; init; }
+        public required string SpriteName { get; init; }
+        public required AnmBone Bone { get; init; }
+        public required bool Visible { get; set; }
+    }
+
+    private static void SetAsymBonesVisibility(IReadOnlyList<BoneInstance> bones, bool spriteMirrored)
+    {
+        // those are set through costumeTypes.csv
+        bool useRightTorso = false;
+        bool useRightJaw = false;
+        bool useRightEyes = false;
+        bool useRightMouth = false;
+        bool useRightHair = false;
+        bool useRightGauntletForearm = false;
+        bool useRightGauntletForearmRight = false;
+        int rightKatarsUses = 0; // 2 if using
+        int rightForearmUses = 0; // 2 if using
+        int trueLeftRightHandsUses = 0; // 4 if using
+        for (int i = 0; i < bones.Count; ++i)
+        {
+            BoneInstance instance = bones[i];
+            bool mirrored = false;
+            bool hand = false;
+            if (BoneDatabase.TypeDict.TryGetValue(instance.OgBoneName, out (int, bool) value))
+            {
+                (int type, bool dir) = value;
+                if (type == 1 || type == 8 || type == 9 || type == 13 || type == 14 || type == 16 || type == 17)
+                {
+                    double det = instance.Bone.ScaleX * instance.Bone.ScaleY - instance.Bone.RotateSkew0 * instance.Bone.RotateSkew1;
+                    mirrored = (det < 0) != dir;
+                }
+                hand = type == 1;
+            }
+
+            Action doVisibilitySwap = () =>
+            {
+                if (i < bones.Count - 1)
+                {
+                    bones[i].Visible = mirrored == spriteMirrored;
+                    bones[i + 1].Visible = mirrored != spriteMirrored;
+                }
+            };
+
+            if (useRightTorso && instance.OgBoneName == "a_Torso1")
+            {
+                doVisibilitySwap();
+                useRightTorso = false;
+            }
+            else if (useRightJaw && instance.OgBoneName == "a_Jaw")
+            {
+                doVisibilitySwap();
+                useRightJaw = false;
+            }
+            else if (useRightEyes && instance.OgBoneName.StartsWith("a_Eyes"))
+            {
+                doVisibilitySwap();
+                useRightEyes = false;
+            }
+            else if (useRightMouth && instance.OgBoneName.StartsWith("a_Mouth"))
+            {
+                doVisibilitySwap();
+                useRightMouth = false;
+            }
+            else if (useRightHair && instance.OgBoneName.StartsWith("a_Hair"))
+            {
+                doVisibilitySwap();
+                useRightHair = false;
+            }
+            else if (useRightHair && instance.OgBoneName.StartsWith("a_Hair"))
+            {
+                doVisibilitySwap();
+                useRightHair = false;
+            }
+            else if (useRightGauntletForearm && instance.OgBoneName == "a_WeaponFistsForearm")
+            {
+                doVisibilitySwap();
+                useRightGauntletForearm = false;
+            }
+            else if (useRightGauntletForearmRight && instance.OgBoneName == "a_WeaponFistsForearmRight")
+            {
+                doVisibilitySwap();
+                useRightGauntletForearmRight = false;
+            }
+            else if (rightKatarsUses > 0 && BoneDatabase.KatarVariantDict.ContainsKey(instance.OgBoneName))
+            {
+                doVisibilitySwap();
+                rightKatarsUses--;
+            }
+            else if (rightForearmUses > 0 && BoneDatabase.ForearmVariantDict.ContainsKey(instance.OgBoneName))
+            {
+                doVisibilitySwap();
+                rightForearmUses--;
+            }
+            else if (trueLeftRightHandsUses > 0 && hand)
+            {
+                bones[i].Visible = (i % 2 == 0) ? !spriteMirrored : spriteMirrored;
+                trueLeftRightHandsUses--;
+            }
+        }
+    }
+
+    private CustomArt? FindCustomArt(string ogBoneName, string boneName, CustomArt[] customArts, bool right, out bool needSwfLoad)
+    {
+        needSwfLoad = false;
+        uint thing = BoneDatabase.UnknownDict1.GetValueOrDefault(ogBoneName, 0u);
+        for (int i = customArts.Length - 1; i >= 0; --i)
+        {
+            CustomArt ca = customArts[i];
+            if (!(ca.Right && !right))
+            {
+                if (!(thing != 0 && ca.Type != 0 && ca.Type != thing))
+                {
+                    // check that new sprite would exist
+                    SwfFileData? swf = loader.LoadSwf(ca.FileName);
+                    if (swf is null)
+                    {
+                        needSwfLoad = true;
+                        return null;
+                    }
+                    if (swf.SymbolClass.ContainsKey($"{boneName}_{ca.Name}"))
+                        return ca;
+                }
+            }
+        }
+        return null;
     }
 
     private BoneData[] BuildSwfSprite(string filePath, ushort spriteId, int frame, double animScale, uint tint, double opacity, Transform trans, int loopLimit = -1)

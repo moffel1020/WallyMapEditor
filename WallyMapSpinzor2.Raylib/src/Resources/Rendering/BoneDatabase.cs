@@ -6,6 +6,104 @@ public static class BoneDatabase
 {
     static BoneDatabase()
     {
+        Register1("a_WeaponCrateReady", 3);
+        Register1("a_WeaponCratePickUp", 3);
+        Register1("a_WeaponCrateImpact", 3);
+        Register1("a_WeaponCrateForm", 3);
+        Register1("a_WeaponCrateFall", 3);
+        Register1("a_WeaponCrateDelivery", 3);
+        Register1("a_WeaponCrateAirPickUp", 3);
+        Register1("a_WeaponCrate", 3);
+        Register1("a_AxePickupFX", 3);
+        Register1("a_PistolPickupFX", 3);
+        Register1("a_SwordPickupFX", 3);
+        Register1("a_LancePickupFX", 3);
+        Register1("a_OrbPickupFX", 3);
+        Register1("a_HammerPickupFX", 3);
+        Register1("a_SpearPickupFX", 3);
+        Register1("a_KatarPickupFX", 3);
+        Register1("a_SpearPickupFXBack", 3);
+        Register1("a_BowPickupFX", 3);
+        Register1("a_FistsPickupFX", 3);
+        Register1("a_KatarPickupFXRear", 3);
+        Register1("a_ScythePickupFX", 3);
+        Register1("a_CannonPickupFX", 3);
+        Register1("a_GreatswordPickupFX", 3);
+        Register1("a_WeaponCrateJumpLand01", 3);
+        Register1("a_WeaponCrateJumpLand02", 3);
+        Register1("a_WeaponCrateJumpLand03", 3);
+        Register1("a_WeaponCrateJumpLand04", 3);
+        Register1("a_WeaponCrateJumpLand05", 3);
+        Register1("a_WeaponCrateJumpLand06", 3);
+        Register1("a_WeaponCrateJumpLand07", 3);
+        Register1("a_WeaponCrateJumpLand08", 3);
+        Register1("a_WeaponCrateJumpLand09", 3);
+        Register1("a_WeaponCrateJumpLand10", 3);
+        Register1("a_WeaponCrateJumpLand11", 3);
+        Register1("a_WeaponCrateJumpLand12", 3);
+        Register1("a_WeaponCrateJumpLand13", 3);
+        Register1("a_WeaponCrateJumpLand14", 3);
+        Register1("a_WeaponCrateJumpLand15", 3);
+        Register1("a_WeaponCrateJumpLand16", 3);
+        Register1("a_WeaponCrateJumpLand17", 3);
+        Register1("a_WeaponCrateJumpLand18", 3);
+        Register1("a_WeaponCrateJumpLand19", 3);
+        Register1("a_WeaponCrateJumpLand20", 3);
+        Register1("a_WeaponCrateJumpLand21", 3);
+        Register1("a_WeaponCrateJumpLand22", 3);
+        Register1("a_WeaponCrateJumpLand23", 3);
+        Register1("a_WeaponCrateJumpLand24", 3);
+        Register1("a_WeaponCrateJumpLand25", 3);
+        Register1("a_WeaponCrateJumpLand26", 3);
+        Register1("a_WeaponCrateJumpLand27", 3);
+        Register1("a_WeaponCrateJumpLand28", 3);
+        Register1("a_WeaponCrateJumpLand29", 3);
+        Register1("a_WeaponCrateJumpLand30", 3);
+        Register1("a_WeaponCrateJumpLand31", 3);
+        Register1("a_WeaponCrateJumpLand32", 3);
+        Register1("a_WeaponCrateJumpLand33", 3);
+        Register1("a_WeaponCrateJumpLand34", 3);
+        Register1("a_WeaponCrateJumpLand35", 3);
+        Register1("a_WeaponCrateJumpLand51", 3);
+        Register1("a_WeaponCrateJumpLand52", 3);
+        Register1("a_WeaponCrateJumpLand53", 3);
+        Register1("a_WeaponCrateJumpLand54", 3);
+        Register1("a_WeaponCrateJumpLand55", 3);
+        Register1("a_WeaponCrateJumpLand56", 3);
+        Register1("a_WeaponCrateJumpLand57", 3);
+        Register1("a_WeaponCrateJumpLand58", 3);
+        Register1("a_WeaponCrateJumpLand59", 3);
+        Register1("a_WeaponCrateJumpLand60", 3);
+        Register1("a_WeaponCrateReady01", 3);
+        Register1("a_WeaponCrateReady02", 3);
+        Register1("a_WeaponCrateReady03", 3);
+        Register1("a_WeaponCrateReady04", 3);
+        Register1("a_WeaponCrateReady05", 3);
+        Register1("a_WeaponCrateReady06", 3);
+        Register1("a_WeaponCrateReady07", 3);
+        Register1("a_WeaponCrateReady08", 3);
+        Register1("a_WeaponCrateReady09", 3);
+        Register1("a_WeaponCrateReady10", 3);
+        Register1("a_WeaponCrateReady11", 3);
+        Register1("a_WeaponCrateReady12", 3);
+        Register1("a_WeaponCrateReady13", 3);
+        Register1("a_WeaponCrateReady14", 3);
+        Register1("a_WeaponCrateReady15", 3);
+        Register1("a_WeaponCrateReady16", 3);
+        Register1("a_WeaponCrateReady17", 3);
+        Register1("a_WeaponCrateReady18", 3);
+        Register1("a_WeaponCrateReady19", 3);
+        Register1("a_WeaponCrateReady20", 3);
+        Register1("a_WeaponCrateReady21", 3);
+        Register1("a_WeaponCrateReady22", 3);
+        Register1("a_WeaponCrateReady23", 3);
+        Register1("a_WeaponCrateReady24", 3);
+        Register1("a_WeaponCrateForm01", 3);
+        Register1("a_WeaponCrateForm02", 3);
+        Register1("a_WeaponCrateForm03", 3);
+        Register1("a_WeaponCrateForm04", 3);
+        Register1("a_Helmet", 2);
+        Register1("a_HelmetBack", 2);
         Register2("a_Torso1", 2, 8, false);
         Register1("a_Torso1R", 2);
         Register2("a_Torso1Back", 2, 8, false);
@@ -437,9 +535,9 @@ public static class BoneDatabase
 
     public static Dictionary<string, uint> UnknownDict1 { get; } = [];
     public static Dictionary<string, (int, bool)> TypeDict { get; } = [];
-    public static Dictionary<string, string> UnknownDict2 { get; } = [];
-    public static Dictionary<string, string> UnknownDict3 { get; } = [];
-    public static Dictionary<string, string> UnknownDict4 { get; } = [];
+    public static Dictionary<string, string> ForearmVariantDict { get; } = [];
+    public static Dictionary<string, string> KatarVariantDict { get; } = [];
+    public static Dictionary<string, string> AsymSwapDict { get; } = [];
 
     public static void Register1(string name, uint thing)
     {
@@ -453,15 +551,15 @@ public static class BoneDatabase
         {
             TypeDict[name + "R"] = (type, dir);
             if (type == 2)
-                UnknownDict2[name] = name + "R";
+                ForearmVariantDict[name] = name + "R";
             else if (type == 12)
-                UnknownDict3[name] = name + "R";
+                KatarVariantDict[name] = name + "R";
             Register1(name + "R", thing);
         }
         if (name.EndsWith("Right"))
-            UnknownDict4[name] = name[..^"Right".Length];
+            AsymSwapDict[name] = name[..^"Right".Length];
         else if (name.EndsWith("Left"))
-            UnknownDict4[name] = name[..^"Left".Length];
+            AsymSwapDict[name] = name[..^"Left".Length];
         Register1(name, thing);
     }
 }
