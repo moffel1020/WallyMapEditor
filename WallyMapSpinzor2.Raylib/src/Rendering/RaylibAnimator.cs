@@ -59,18 +59,57 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
                 if (xca.Name != yca.Name)
                     return false;
             }
+            uint xgflags = 0;
+            foreach (Gfx.AsymmetrySwapFlagEnum flag in xg.AsymmetrySwapFlags)
+                xgflags |= 1u << (int)flag;
+            uint ygflags = 0;
+            foreach (Gfx.AsymmetrySwapFlagEnum flag in yg.AsymmetrySwapFlags)
+                ygflags |= 1u << (int)flag;
+            if (xgflags != ygflags)
+                return false;
+            if (xg.UseRightTorso != yg.UseRightTorso)
+                return false;
+            if (xg.UseRightJaw != yg.UseRightJaw)
+                return false;
+            if (xg.UseRightEyes != yg.UseRightEyes)
+                return false;
+            if (xg.UseRightMouth != yg.UseRightMouth)
+                return false;
+            if (xg.UseRightHair != yg.UseRightHair)
+                return false;
+            if (xg.UseRightForearm != yg.UseRightForearm)
+                return false;
+            if (xg.UseTrueLeftRightHands != yg.UseTrueLeftRightHands)
+                return false;
+            if (xg.UseRightGauntlet != yg.UseRightGauntlet)
+                return false;
+            if (xg.UseRightKatar != yg.UseRightKatar)
+                return false;
+            if (xg.BoneOverrides.Count != yg.BoneOverrides.Count)
+                return false;
+            foreach ((string k, string v) in xg.BoneOverrides)
+                if (!yg.BoneOverrides.TryGetValue(k, out string? v_) || v != v_)
+                    return false;
+            foreach ((string k, string v) in yg.BoneOverrides)
+                if (!xg.BoneOverrides.TryGetValue(k, out string? v_) || v != v_)
+                    return false;
+            // TODO: compare ColorSwap
             return true;
         }
 
         public int GetHashCode((Gfx, string) obj)
         {
             (Gfx gfx, string anim) = obj;
-            int hash = (anim, gfx.AnimClass, gfx.AnimFile, gfx.AnimScale).GetHashCode();
+            uint flags = 0;
+            foreach (Gfx.AsymmetrySwapFlagEnum flag in gfx.AsymmetrySwapFlags)
+                flags |= 1u << (int)flag;
+            int hash = (anim, gfx.AnimClass, gfx.AnimFile, gfx.AnimScale, flags).GetHashCode();
             foreach (CustomArt ca in gfx.CustomArts)
-            {
-                int caHash = (ca.Right, ca.Type, ca.FileName, ca.Name).GetHashCode();
-                hash = HashCode.Combine(hash, caHash);
-            }
+                hash = HashCode.Combine(hash, (ca.Right, ca.Type, ca.FileName, ca.Name));
+            // use sorted dictionary for consistent pair order (is there a better way to do this?)
+            foreach ((string k, string v) in new SortedDictionary<string, string>(gfx.BoneOverrides))
+                hash = HashCode.Combine(hash, (k, v));
+            // TODO: hash ColorSwap
             return hash;
         }
     }
