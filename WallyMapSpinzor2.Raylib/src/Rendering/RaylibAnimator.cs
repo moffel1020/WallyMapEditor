@@ -307,14 +307,14 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
                 hand = type == 1;
             }
 
-            Action doVisibilitySwap = () =>
+            void doVisibilitySwap()
             {
                 if (i < bones.Count - 1)
                 {
                     bones[i].Visible = mirrored == spriteMirrored;
                     bones[i + 1].Visible = mirrored != spriteMirrored;
                 }
-            };
+            }
 
             if (useRightTorso && instance.OgBoneName == "a_Torso1")
             {
