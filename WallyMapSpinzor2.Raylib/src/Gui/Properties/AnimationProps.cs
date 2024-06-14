@@ -40,17 +40,55 @@ public partial class PropertiesWindow
 
         if (ImGui.CollapsingHeader("KeyFrames"))
         {
-            propChanged |= ShowManyKeyFrameProps(anim.KeyFrames, cmd);
+            propChanged |=
+            ImGuiExt.EditArrayHistory("", anim.KeyFrames, val => anim.KeyFrames = val,
+            // create
+            () => CreateKeyFrame(anim),
+            // edit
+            (int index) =>
+            {
+                if (index != 0) ImGui.Spacing();
+                propChanged |= ShowAnimationKeyFrameProps(anim, index, cmd);
+            },
+            cmd, allowMove: false);
         }
 
         return propChanged;
     }
 
-    public static int LastKeyFrameNum(AbstractKeyFrame[] keyFrames) => keyFrames[^1] switch
-    {
-        KeyFrame kf => kf.FrameNum,
-        Phase p => p.StartFrame + LastKeyFrameNum(p.KeyFrames),
-        _ => throw new InvalidOperationException("Could not find the last keyframenum. type of abstract keyframe type is not implemented")
-    };
+    public static int LastKeyFrameNum(AbstractKeyFrame[] keyFrames) => keyFrames.Length == 0
+        ? 0
+        : keyFrames[^1] switch
+        {
+            KeyFrame kf => kf.FrameNum,
+            Phase p => p.StartFrame + LastKeyFrameNum(p.KeyFrames),
+            _ => throw new InvalidOperationException("Could not find the last keyframenum. type of abstract keyframe type is not implemented")
+        };
 
+    private static Maybe<AbstractKeyFrame> CreateKeyFrame(Animation anim)
+    {
+        Maybe<AbstractKeyFrame> result = new();
+        if (ImGui.BeginMenu("Add new"))
+        {
+            if (ImGui.MenuItem("KeyFrame"))
+            {
+                result = new KeyFrame()
+                {
+                    FrameNum = LastKeyFrameNum(anim.KeyFrames) + 1,
+                };
+                ImGui.CloseCurrentPopup();
+            }
+            if (ImGui.MenuItem("Phase"))
+            {
+                result = new Phase()
+                {
+                    StartFrame = LastKeyFrameNum(anim.KeyFrames) + 1,
+                    KeyFrames = [],
+                };
+                ImGui.CloseCurrentPopup();
+            }
+            ImGui.EndMenu();
+        }
+        return result;
+    }
 }

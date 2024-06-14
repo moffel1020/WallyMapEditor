@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
@@ -355,5 +357,53 @@ public static class ImGuiExt
         float uv1Y = uv0Y + sourceRect.Height / image.Height;
         Vector2 uv1 = new(uv1X, uv1Y);
         ImGui.Image(new IntPtr(image.Id), new Vector2(destWidth, destHeight), uv0, uv1);
+    }
+    
+    public static bool EditArrayHistory<T>(string label, T[] values, Action<T[]> changeCommand, Func<Maybe<T>> create, Action<int> edit, CommandHistory cmd, bool allowMove = true)
+    {
+        List<PropChangeCommand<T[]>> commands = [];
+        ImGui.BeginListBox(label);
+        bool changed = false;
+        for (int i = 0; i < values.Length; ++i)
+        {
+            T value = values[i];
+            edit(i);
+            if (ImGui.Button($"Remove##{value!.GetHashCode()}"))
+            {
+                T[] result = Utils.RemoveAt(values, i);
+                commands.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
+                changed = true;
+            }
+            if (allowMove)
+            {
+                ImGui.SameLine();
+                if (WithDisabledButton(i == 0, $"Move up##{value!.GetHashCode()}"))
+                {
+                    T[] result = Utils.MoveUp(values, i);
+                    commands.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
+                    changed = true;
+                }
+                ImGui.SameLine();
+                if (WithDisabledButton(i == values.Length - 1, $"Move down##{value!.GetHashCode()}"))
+                {
+                    T[] result = Utils.MoveDown(values, i);
+                    commands.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
+                    changed = true;
+                }
+            }
+        }
+        ImGui.EndListBox();
+        Maybe<T> maybeNewValue = create();
+        if (maybeNewValue.TryGetValue(out T? newValue))
+        {
+            T[] result = [.. values, newValue];
+            commands.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
+            changed = true;
+        }
+
+        foreach (PropChangeCommand<T[]> command in commands)
+            cmd.Add(command);
+
+        return changed;
     }
 }

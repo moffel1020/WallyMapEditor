@@ -58,6 +58,34 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
+    public static bool ShowAnimationKeyFrameProps(Animation anim, int index, CommandHistory cmd)
+    {
+        bool propChanged = false;
+        AbstractKeyFrame key = anim.KeyFrames[index];
+        if (key is KeyFrame keyFrame && ImGui.TreeNode($"KeyFrame {MapOverviewWindow.GetExtraObjectInfo(key)}###akf{key.GetHashCode()}"))
+        {
+            int minFrameNum = 0;
+            int maxFrameNum = int.MaxValue;
+            if (index - 1 >= 0) minFrameNum = LastKeyFrameNum(anim.KeyFrames[index - 1]) + 1;
+            if (index + 1 < anim.KeyFrames.Length) maxFrameNum = FirstKeyFrameNum(anim.KeyFrames[index + 1]) - 1;
+
+            propChanged |= ShowKeyFrameProps(keyFrame, cmd, minFrameNum, maxFrameNum);
+            ImGui.TreePop();
+        }
+        else if (key is Phase phase && ImGui.TreeNode($"Phase {MapOverviewWindow.GetExtraObjectInfo(key)}###akf{key.GetHashCode()}"))
+        {
+            int minStartFrame = 0;
+            int maxFrameNum = int.MaxValue;
+            if (index - 1 >= 0) minStartFrame = LastKeyFrameNum(anim.KeyFrames[index - 1]) + 1;
+            if (index + 1 < anim.KeyFrames.Length) maxFrameNum = FirstKeyFrameNum(anim.KeyFrames[index + 1]) - 1;
+
+            propChanged |= ShowPhaseProps(phase, cmd, minStartFrame, maxFrameNum);
+            ImGui.TreePop();
+        }
+
+        return propChanged;
+    }
+
     public static int LastKeyFrameNum(AbstractKeyFrame akf) => akf switch
     {
         KeyFrame kf => kf.FrameNum,
