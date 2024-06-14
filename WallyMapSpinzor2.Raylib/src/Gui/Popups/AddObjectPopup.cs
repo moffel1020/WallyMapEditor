@@ -68,10 +68,12 @@ public static class AddObjectPopup
                 if (ImGui.MenuItem("With AssetName"))
                 {
                     p = PropertiesWindow.DefaultPlatformWithAssetName;
+                    (p.X, p.Y) = (NewPos.X, NewPos.Y);
                 }
                 if (ImGui.MenuItem("Without AssetName"))
                 {
                     p = PropertiesWindow.DefaultPlatformWithoutAssetName;
+                    (p.X, p.Y) = (NewPos.X, NewPos.Y);
                 }
 
                 if (p is not null)
