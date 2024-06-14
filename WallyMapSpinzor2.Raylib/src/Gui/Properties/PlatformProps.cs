@@ -60,27 +60,16 @@ partial class PropertiesWindow
     private static Maybe<AbstractAsset> CreateNew()
     {
         Maybe<AbstractAsset> result = new();
-
         if (ImGui.BeginMenu("Add new child"))
         {
             if (ImGui.MenuItem("Asset"))
-            {
                 result = DefaultAsset;
-                ImGui.CloseCurrentPopup();
-            }
             if (ImGui.MenuItem("Platform with AssetName"))
-            {
                 result = DefaultPlatformWithAssetName;
-                ImGui.CloseCurrentPopup();
-            }
             if (ImGui.MenuItem("Platform without AssetName"))
-            {
                 result = DefaultPlatformWithoutAssetName;
-                ImGui.CloseCurrentPopup();
-            }
             ImGui.EndMenu();
         }
-
         return result;
     }
 

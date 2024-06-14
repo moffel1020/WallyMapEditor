@@ -72,15 +72,9 @@ public partial class PropertiesWindow
         if (ImGui.BeginMenu("Add new keyframe"))
         {
             if (ImGui.MenuItem("KeyFrame"))
-            {
                 result = DefaultKeyFrame(anim);
-                ImGui.CloseCurrentPopup();
-            }
             if (ImGui.MenuItem("Phase"))
-            {
                 result = DefaultPhase(anim);
-                ImGui.CloseCurrentPopup();
-            }
             ImGui.EndMenu();
         }
         return result;
