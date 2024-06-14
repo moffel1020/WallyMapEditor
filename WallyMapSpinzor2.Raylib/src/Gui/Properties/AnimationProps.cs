@@ -51,7 +51,7 @@ public partial class PropertiesWindow
                     ImGui.Separator();
                 propChanged |= ShowAnimationKeyFrameProps(anim, index, cmd);
             },
-            cmd, allowMove: false);
+            cmd, allowRemove: anim.KeyFrames.Length > 2, allowMove: false);
         }
 
         return propChanged;

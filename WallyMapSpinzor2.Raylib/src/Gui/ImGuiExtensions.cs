@@ -357,8 +357,8 @@ public static class ImGuiExt
         Vector2 uv1 = new(uv1X, uv1Y);
         ImGui.Image(new IntPtr(image.Id), new Vector2(destWidth, destHeight), uv0, uv1);
     }
-    
-    public static bool EditArrayHistory<T>(string label, T[] values, Action<T[]> changeCommand, Func<Maybe<T>> create, Action<int> edit, CommandHistory cmd, bool allowMove = true)
+
+    public static bool EditArrayHistory<T>(string label, T[] values, Action<T[]> changeCommand, Func<Maybe<T>> create, Action<int> edit, CommandHistory cmd, bool allowRemove = true, bool allowMove = true)
     {
         List<PropChangeCommand<T[]>> commands = [];
         unsafe { ImGui.PushStyleColor(ImGuiCol.ChildBg, *ImGui.GetStyleColorVec4(ImGuiCol.FrameBg)); }
@@ -368,15 +368,18 @@ public static class ImGuiExt
         {
             T value = values[i];
             edit(i);
-            if (ImGui.Button($"Remove##{value!.GetHashCode()}"))
+            if (allowRemove)
             {
-                T[] result = Utils.RemoveAt(values, i);
-                commands.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
-                changed = true;
+                if (ImGui.Button($"Remove##{value!.GetHashCode()}"))
+                {
+                    T[] result = Utils.RemoveAt(values, i);
+                    commands.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
+                    changed = true;
+                }
             }
             if (allowMove)
             {
-                ImGui.SameLine();
+                if (allowRemove) ImGui.SameLine();
                 if (WithDisabledButton(i == 0, $"Move up##{value!.GetHashCode()}"))
                 {
                     T[] result = Utils.MoveUp(values, i);
