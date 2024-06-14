@@ -16,45 +16,48 @@ public static class AddObjectPopup
             ImGui.Text("Add new object");
             if (ImGui.BeginMenu("Collision"))
             {
-                if (ImGui.MenuItem("Soft Collision"))
+                if (ImGui.BeginMenu("Normal Collision"))
                 {
-                    AddCollision<SoftCollision>(l, cmd);
-                    ImGui.CloseCurrentPopup();
+                    AddCollisionMenuItem<HardCollision>(nameof(HardCollision), l, cmd);
+                    AddCollisionMenuItem<SoftCollision>(nameof(SoftCollision), l, cmd);
+                    AddCollisionMenuItem<NoSlideCollision>(nameof(NoSlideCollision), l, cmd);
+                    ImGui.EndMenu();
                 }
-                if (ImGui.MenuItem("Hard Collision"))
+                if (ImGui.BeginMenu("Bouncy Collision"))
                 {
-                    AddCollision<HardCollision>(l, cmd);
-                    ImGui.CloseCurrentPopup();
+                    AddCollisionMenuItem<BouncyHardCollision>(nameof(BouncyHardCollision), l, cmd);
+                    AddCollisionMenuItem<BouncySoftCollision>(nameof(BouncySoftCollision), l, cmd);
+                    AddCollisionMenuItem<BouncyNoSlideCollision>(nameof(BouncyNoSlideCollision), l, cmd);
+                    ImGui.EndMenu();
+                }
+                if (ImGui.BeginMenu("Special Collision"))
+                {
+                    AddCollisionMenuItem<StickyCollision>(nameof(StickyCollision), l, cmd);
+                    AddCollisionMenuItem<ItemIgnoreCollision>(nameof(ItemIgnoreCollision), l, cmd);
+                    AddCollisionMenuItem<TriggerCollision>(nameof(TriggerCollision), l, cmd);
+                    ImGui.EndMenu();
+                }
+                if (ImGui.BeginMenu("Gamemode collision"))
+                {
+                    AddCollisionMenuItem<GameModeHardCollision>(nameof(GameModeHardCollision), l, cmd);
+                    AddCollisionMenuItem<PressurePlateCollision>(nameof(PressurePlateCollision), l, cmd);
+                    AddCollisionMenuItem<SoftPressurePlateCollision>(nameof(SoftPressurePlateCollision), l, cmd);
+                    AddCollisionMenuItem<LavaCollision>(nameof(LavaCollision), l, cmd);
+                    ImGui.EndMenu();
                 }
                 ImGui.EndMenu();
             }
             if (ImGui.BeginMenu("ItemSpawn"))
             {
-                if (ImGui.MenuItem("ItemSpawn"))
-                {
-                    AddItemSpawn<ItemSpawn>(l, cmd);
-                    ImGui.CloseCurrentPopup();
-                }
-                if (ImGui.MenuItem("ItemInitSpawn"))
-                {
-                    AddItemSpawn<ItemInitSpawn>(l, cmd);
-                    ImGui.CloseCurrentPopup();
-                }
-                if (ImGui.MenuItem("TeamItemInitSpawn"))
-                {
-                    AddItemSpawn<TeamItemInitSpawn>(l, cmd);
-                    ImGui.CloseCurrentPopup();
-                }
-                if (ImGui.MenuItem("ItemSet"))
-                {
-                    AddItemSpawn<ItemSet>(l, cmd);
-                    ImGui.CloseCurrentPopup();
-                }
+                AddItemSpawnMenuItem<ItemSpawn>(nameof(ItemSpawn), l, cmd);
+                AddItemSpawnMenuItem<ItemInitSpawn>(nameof(ItemInitSpawn), l, cmd);
+                AddItemSpawnMenuItem<TeamItemInitSpawn>(nameof(TeamItemInitSpawn), l, cmd);
+                AddItemSpawnMenuItem<ItemSet>(nameof(ItemSet), l, cmd);
                 ImGui.EndMenu();
             }
             if (ImGui.MenuItem("Respawn"))
             {
-                Respawn res = new(){X = NewPos.X, Y = NewPos.Y};
+                Respawn res = new() { X = NewPos.X, Y = NewPos.Y };
                 cmd.Add(new PropChangeCommand<Respawn[]>(val => l.Desc.Respawns = val, l.Desc.Respawns, [.. l.Desc.Respawns, res]));
                 cmd.SetAllowMerge(false);
                 ImGui.CloseCurrentPopup();
@@ -82,18 +85,52 @@ public static class AddObjectPopup
         }
     }
 
+    private static void AddCollisionMenuItem<T>(string title, Level l, CommandHistory cmd)
+        where T : AbstractCollision, new()
+    {
+        if (ImGui.MenuItem(title))
+        {
+            AddCollision<T>(l, cmd);
+            ImGui.CloseCurrentPopup();
+        }
+    }
+
     private static void AddCollision<T>(Level l, CommandHistory cmd)
         where T : AbstractCollision, new()
     {
-        T col = new(){ X1 = NewPos.X, X2 = NewPos.X + 100, Y1 = NewPos.Y, Y2 = NewPos.Y };
+        T col = new() { X1 = NewPos.X, X2 = NewPos.X + 100, Y1 = NewPos.Y, Y2 = NewPos.Y };
+        if (col is AbstractPressurePlateCollision pcol)
+        {
+            pcol.AssetName = "a__AnimationPressurePlate";
+            pcol.FireOffsetX = [];
+            pcol.FireOffsetY = [];
+            pcol.TrapPowers = [];
+            pcol.AnimOffsetX = (col.X1 + col.X2) / 2;
+            pcol.AnimOffsetY = (col.Y1 + col.Y2) / 2;
+            pcol.Cooldown = 3000;
+        }
+        if (col is LavaCollision lcol)
+        {
+            lcol.LavaPower = "LavaBurn";
+        }
         cmd.Add(new PropChangeCommand<AbstractCollision[]>(val => l.Desc.Collisions = val, l.Desc.Collisions, [.. l.Desc.Collisions, col]));
         cmd.SetAllowMerge(false);
+    }
+
+    private static void AddItemSpawnMenuItem<T>(string title, Level l, CommandHistory cmd)
+        where T : AbstractItemSpawn, new()
+    {
+        if (ImGui.MenuItem(title))
+        {
+            AddItemSpawn<T>(l, cmd);
+            ImGui.CloseCurrentPopup();
+        }
     }
 
     private static void AddItemSpawn<T>(Level l, CommandHistory cmd)
         where T : AbstractItemSpawn, new()
     {
-        T spawn = new(){ X = NewPos.X, Y = NewPos.Y };
+        T spawn = new() { X = NewPos.X, Y = NewPos.Y };
         (spawn.W, spawn.H) = (100, 100);
         cmd.Add(new PropChangeCommand<AbstractItemSpawn[]>(val => l.Desc.ItemSpawns = val, l.Desc.ItemSpawns, [.. l.Desc.ItemSpawns, spawn]));
         cmd.SetAllowMerge(false);
