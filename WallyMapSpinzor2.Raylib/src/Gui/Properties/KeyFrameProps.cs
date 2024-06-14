@@ -26,38 +26,6 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
-    public static bool ShowManyKeyFrameProps(AbstractKeyFrame[] frames, CommandHistory cmd)
-    {
-        bool propChanged = false;
-
-        for (int i = 0; i < frames.Length; i++)
-        {
-            AbstractKeyFrame kf = frames[i];
-            if (kf is KeyFrame keyFrame && ImGui.TreeNode($"KeyFrame {MapOverviewWindow.GetExtraObjectInfo(kf)}###akf{kf.GetHashCode()}"))
-            {
-                int minFrameNum = 0;
-                int maxFrameNum = int.MaxValue;
-                if (i - 1 >= 0) minFrameNum = LastKeyFrameNum(frames[i - 1]) + 1;
-                if (i + 1 < frames.Length) maxFrameNum = FirstKeyFrameNum(frames[i + 1]) - 1;
-
-                propChanged |= ShowKeyFrameProps(keyFrame, cmd, minFrameNum, maxFrameNum);
-                ImGui.TreePop();
-            }
-            else if (kf is Phase phase && ImGui.TreeNode($"Phase {MapOverviewWindow.GetExtraObjectInfo(kf)}###akf{kf.GetHashCode()}"))
-            {
-                int minStartFrame = 0;
-                int maxFrameNum = int.MaxValue;
-                if (i - 1 >= 0) minStartFrame = LastKeyFrameNum(frames[i - 1]) + 1;
-                if (i + 1 < frames.Length) maxFrameNum = FirstKeyFrameNum(frames[i + 1]) - 1;
-
-                propChanged |= ShowPhaseProps(phase, cmd, minStartFrame, maxFrameNum);
-                ImGui.TreePop();
-            }
-        }
-
-        return propChanged;
-    }
-
     public static bool ShowOneOfManyKeyFrameProps(AbstractKeyFrame[] frames, int index, CommandHistory cmd)
     {
         bool propChanged = false;
