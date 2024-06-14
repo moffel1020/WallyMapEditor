@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using ImGuiNET;
 
 namespace WallyMapSpinzor2.Raylib;
@@ -51,7 +52,7 @@ public partial class PropertiesWindow
                     ImGui.Separator();
                 propChanged |= ShowAnimationKeyFrameProps(anim, index, cmd);
             },
-            cmd, allowRemove: anim.KeyFrames.Length > 2, allowMove: false);
+            cmd, allowRemove: KeyFrameCount(anim.KeyFrames) > 2, allowMove: false);
         }
 
         return propChanged;
@@ -63,8 +64,15 @@ public partial class PropertiesWindow
         {
             KeyFrame kf => kf.FrameNum,
             Phase p => p.StartFrame + LastKeyFrameNum(p.KeyFrames),
-            _ => throw new InvalidOperationException("Could not find the last keyframenum. type of abstract keyframe type is not implemented")
+            _ => throw new ArgumentException($"Unknown keyframe type {keyFrames[^1].GetType().Name}")
         };
+
+    public static int KeyFrameCount(AbstractKeyFrame[] keyFrames) => keyFrames.Select(key => key switch
+    {
+        KeyFrame kf => 1,
+        Phase p => KeyFrameCount(p.KeyFrames),
+        _ => throw new ArgumentException($"Unknown keyframe type {key.GetType().Name}")
+    }).Sum();
 
     private static Maybe<AbstractKeyFrame> CreateKeyFrame(Animation anim)
     {

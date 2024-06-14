@@ -90,14 +90,14 @@ public partial class PropertiesWindow
     {
         KeyFrame kf => kf.FrameNum,
         Phase p => p.StartFrame + LastKeyFrameNum(p.KeyFrames),
-        _ => throw new InvalidOperationException("Could not find the last keyframenum. type of abstract keyframe type is not implemented")
+        _ => throw new ArgumentException($"Unknown keyframe type {akf.GetType().Name}")
     };
 
     public static int FirstKeyFrameNum(AbstractKeyFrame akf) => akf switch
     {
         KeyFrame kf => kf.FrameNum,
         Phase p => p.StartFrame,
-        _ => throw new InvalidOperationException("Could not find the first keyframenum. type of abstract keyframe type is not implemented")
+        _ => throw new ArgumentException($"Unknown keyframe type {akf.GetType().Name}")
     };
 
     public static KeyFrame DefaultKeyFrame(Animation anim) => new()
