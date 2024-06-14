@@ -13,7 +13,7 @@ public static class AddObjectPopup
     {
         if (ImGui.BeginPopup(NAME))
         {
-            ImGui.Text("Add new object");
+            ImGui.SeparatorText("Add new object");
             if (ImGui.BeginMenu("Collision"))
             {
                 if (ImGui.BeginMenu("Normal Collision"))

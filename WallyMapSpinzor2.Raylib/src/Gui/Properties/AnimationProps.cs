@@ -69,13 +69,16 @@ public partial class PropertiesWindow
     private static Maybe<AbstractKeyFrame> CreateKeyFrame(Animation anim)
     {
         Maybe<AbstractKeyFrame> result = new();
-        if (ImGui.BeginMenu("Add new keyframe"))
+        if (ImGui.Button("Add new keyframe"))
+            ImGui.OpenPopup("AddKeyframe");
+
+        if (ImGui.BeginPopup("AddKeyframe"))
         {
             if (ImGui.MenuItem("KeyFrame"))
                 result = DefaultKeyFrame(anim);
             if (ImGui.MenuItem("Phase"))
                 result = DefaultPhase(anim);
-            ImGui.EndMenu();
+            ImGui.EndPopup();
         }
         return result;
     }
