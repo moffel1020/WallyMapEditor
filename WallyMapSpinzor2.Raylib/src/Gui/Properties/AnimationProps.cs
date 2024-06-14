@@ -47,7 +47,8 @@ public partial class PropertiesWindow
             // edit
             (int index) =>
             {
-                if (index != 0) ImGui.Spacing();
+                if (index != 0)
+                    ImGui.Separator();
                 propChanged |= ShowAnimationKeyFrameProps(anim, index, cmd);
             },
             cmd, allowMove: false);

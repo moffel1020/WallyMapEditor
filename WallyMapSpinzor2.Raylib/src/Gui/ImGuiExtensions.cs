@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
@@ -363,7 +362,7 @@ public static class ImGuiExt
     {
         List<PropChangeCommand<T[]>> commands = [];
         unsafe { ImGui.PushStyleColor(ImGuiCol.ChildBg, *ImGui.GetStyleColorVec4(ImGuiCol.FrameBg)); }
-        ImGui.BeginChild(label, new Vector2(0, ImGui.GetTextLineHeightWithSpacing() * 8), ImGuiChildFlags.ResizeY | ImGuiChildFlags.Border);
+        ImGui.BeginChild(label, new Vector2(0, ImGui.GetTextLineHeightWithSpacing() * 8), ImGuiChildFlags.ResizeX | ImGuiChildFlags.ResizeY | ImGuiChildFlags.Border);
         bool changed = false;
         for (int i = 0; i < values.Length; ++i)
         {

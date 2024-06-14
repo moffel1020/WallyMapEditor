@@ -43,6 +43,8 @@ partial class PropertiesWindow
             CreateNew,
             (int index) =>
             {
+                if (index != 0)
+                    ImGui.Separator();
                 AbstractAsset child = p.AssetChildren![index];
                 if (ImGui.TreeNode($"{child.GetType().Name}##{child.GetHashCode()}"))
                 {
