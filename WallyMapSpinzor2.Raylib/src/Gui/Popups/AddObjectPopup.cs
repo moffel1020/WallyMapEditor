@@ -64,21 +64,38 @@ public static class AddObjectPopup
             }
             if (ImGui.MenuItem("Platform"))
             {
-                Platform p = new()
+                Platform? p = null;
+                if (ImGui.MenuItem("With AssetName"))
                 {
-                    InstanceName = "Custom_Platform",
-                    AssetName = "../Battlehill/SK_Small_Plat.png",
-                    X = NewPos.X,
-                    Y = NewPos.Y,
-                    W = 750,
-                    H = 175,
-                    ScaleX = 1,
-                    ScaleY = 1,
-                };
+                    p = new()
+                    {
+                        InstanceName = "Custom_Platform",
+                        AssetName = "../Battlehill/SK_Small_Plat.png",
+                        X = NewPos.X,
+                        Y = NewPos.Y,
+                        W = 750,
+                        H = 175,
+                    };
+                }
+                if (ImGui.MenuItem("Without AssetName"))
+                {
+                    p = new()
+                    {
+                        InstanceName = "Custom_Platform",
+                        AssetChildren = [],
+                        X = NewPos.X,
+                        Y = NewPos.Y,
+                        ScaleX = 1,
+                        ScaleY = 1,
+                    };
+                }
 
-                cmd.Add(new PropChangeCommand<AbstractAsset[]>(val => l.Desc.Assets = val, l.Desc.Assets, [.. l.Desc.Assets, p]));
-                cmd.SetAllowMerge(false);
-                ImGui.CloseCurrentPopup();
+                if (p is not null)
+                {
+                    cmd.Add(new PropChangeCommand<AbstractAsset[]>(val => l.Desc.Assets = val, l.Desc.Assets, [.. l.Desc.Assets, p]));
+                    cmd.SetAllowMerge(false);
+                    ImGui.CloseCurrentPopup();
+                }
             }
 
             ImGui.EndPopup();
