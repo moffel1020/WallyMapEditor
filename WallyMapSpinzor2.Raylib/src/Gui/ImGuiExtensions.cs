@@ -368,18 +368,15 @@ public static class ImGuiExt
         {
             T value = values[i];
             edit(i);
-            if (allowRemove)
+            if (WithDisabledButton(!allowRemove, $"Remove##{value!.GetHashCode()}"))
             {
-                if (ImGui.Button($"Remove##{value!.GetHashCode()}"))
-                {
-                    T[] result = Utils.RemoveAt(values, i);
-                    commands.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
-                    changed = true;
-                }
+                T[] result = Utils.RemoveAt(values, i);
+                commands.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
+                changed = true;
             }
             if (allowMove)
             {
-                if (allowRemove) ImGui.SameLine();
+                ImGui.SameLine();
                 if (WithDisabledButton(i == 0, $"Move up##{value!.GetHashCode()}"))
                 {
                     T[] result = Utils.MoveUp(values, i);
