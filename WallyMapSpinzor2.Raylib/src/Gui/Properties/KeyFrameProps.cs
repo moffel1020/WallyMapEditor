@@ -58,16 +58,16 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
-    public static bool ShowAnimationKeyFrameProps(Animation anim, int index, CommandHistory cmd)
+    public static bool ShowOneOfManyKeyFrameProps(AbstractKeyFrame[] frames, int index, CommandHistory cmd)
     {
         bool propChanged = false;
-        AbstractKeyFrame key = anim.KeyFrames[index];
+        AbstractKeyFrame key = frames[index];
         if (key is KeyFrame keyFrame && ImGui.TreeNode($"KeyFrame {MapOverviewWindow.GetExtraObjectInfo(key)}###akf{key.GetHashCode()}"))
         {
             int minFrameNum = 0;
             int maxFrameNum = int.MaxValue;
-            if (index - 1 >= 0) minFrameNum = LastKeyFrameNum(anim.KeyFrames[index - 1]) + 1;
-            if (index + 1 < anim.KeyFrames.Length) maxFrameNum = FirstKeyFrameNum(anim.KeyFrames[index + 1]) - 1;
+            if (index - 1 >= 0) minFrameNum = LastKeyFrameNum(frames[index - 1]) + 1;
+            if (index + 1 < frames.Length) maxFrameNum = FirstKeyFrameNum(frames[index + 1]) - 1;
 
             propChanged |= ShowKeyFrameProps(keyFrame, cmd, minFrameNum, maxFrameNum);
             ImGui.TreePop();
@@ -76,8 +76,8 @@ public partial class PropertiesWindow
         {
             int minStartFrame = 0;
             int maxFrameNum = int.MaxValue;
-            if (index - 1 >= 0) minStartFrame = LastKeyFrameNum(anim.KeyFrames[index - 1]) + 1;
-            if (index + 1 < anim.KeyFrames.Length) maxFrameNum = FirstKeyFrameNum(anim.KeyFrames[index + 1]) - 1;
+            if (index - 1 >= 0) minStartFrame = LastKeyFrameNum(frames[index - 1]) + 1;
+            if (index + 1 < frames.Length) maxFrameNum = FirstKeyFrameNum(frames[index + 1]) - 1;
 
             propChanged |= ShowPhaseProps(phase, cmd, minStartFrame, maxFrameNum);
             ImGui.TreePop();
@@ -100,8 +100,8 @@ public partial class PropertiesWindow
         _ => throw new ArgumentException($"Unknown keyframe type {akf.GetType().Name}")
     };
 
-    public static KeyFrame DefaultKeyFrame(Animation anim) => new()
+    public static KeyFrame DefaultKeyFrame(int lastKeyFrameNum) => new()
     {
-        FrameNum = LastKeyFrameNum(anim.KeyFrames) + 1,
+        FrameNum = lastKeyFrameNum + 1,
     };
 }

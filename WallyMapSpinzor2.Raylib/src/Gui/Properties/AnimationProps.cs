@@ -44,13 +44,13 @@ public partial class PropertiesWindow
             propChanged |=
             ImGuiExt.EditArrayHistory("", anim.KeyFrames, val => anim.KeyFrames = val,
             // create
-            () => CreateKeyFrame(anim),
+            () => CreateKeyFrame(LastKeyFrameNum(anim.KeyFrames)),
             // edit
             (int index) =>
             {
                 if (index != 0)
                     ImGui.Separator();
-                propChanged |= ShowAnimationKeyFrameProps(anim, index, cmd);
+                propChanged |= ShowOneOfManyKeyFrameProps(anim.KeyFrames, index, cmd);
             },
             cmd, allowRemove: KeyFrameCount(anim.KeyFrames) > 2, allowMove: false);
         }
@@ -74,7 +74,7 @@ public partial class PropertiesWindow
         _ => throw new ArgumentException($"Unknown keyframe type {key.GetType().Name}")
     }).Sum();
 
-    private static Maybe<AbstractKeyFrame> CreateKeyFrame(Animation anim)
+    public static Maybe<AbstractKeyFrame> CreateKeyFrame(int lastKeyFrameNum)
     {
         Maybe<AbstractKeyFrame> result = new();
         if (ImGui.Button("Add new keyframe"))
@@ -83,9 +83,9 @@ public partial class PropertiesWindow
         if (ImGui.BeginPopup("AddKeyframe"))
         {
             if (ImGui.MenuItem("KeyFrame"))
-                result = DefaultKeyFrame(anim);
+                result = DefaultKeyFrame(lastKeyFrameNum);
             if (ImGui.MenuItem("Phase"))
-                result = DefaultPhase(anim);
+                result = DefaultPhase(lastKeyFrameNum);
             ImGui.EndPopup();
         }
         return result;
