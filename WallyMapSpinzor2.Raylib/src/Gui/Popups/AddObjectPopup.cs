@@ -62,7 +62,7 @@ public static class AddObjectPopup
                 cmd.SetAllowMerge(false);
                 ImGui.CloseCurrentPopup();
             }
-            if (ImGui.MenuItem("Platform"))
+            if (ImGui.BeginMenu("Platform"))
             {
                 Platform? p = null;
                 if (ImGui.MenuItem("With AssetName"))
@@ -96,6 +96,7 @@ public static class AddObjectPopup
                     cmd.SetAllowMerge(false);
                     ImGui.CloseCurrentPopup();
                 }
+                ImGui.EndMenu();
             }
 
             ImGui.EndPopup();
