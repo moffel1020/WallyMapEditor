@@ -63,40 +63,17 @@ partial class PropertiesWindow
         {
             if (ImGui.MenuItem("Asset"))
             {
-                result = new Asset()
-                {
-                    AssetName = "../Battlehill/SK_Small_Plat.png",
-                    X = 0,
-                    Y = 0,
-                    W = 750,
-                    H = 175,
-                };
+                result = DefaultAsset;
                 ImGui.CloseCurrentPopup();
             }
             if (ImGui.MenuItem("Platform with AssetName"))
             {
-                result = new Platform()
-                {
-                    InstanceName = "Custom_Platform",
-                    AssetName = "../Battlehill/SK_Small_Plat.png",
-                    X = 0,
-                    Y = 0,
-                    W = 750,
-                    H = 175,
-                };
+                result = DefaultPlatformWithAssetName;
                 ImGui.CloseCurrentPopup();
             }
             if (ImGui.MenuItem("Platform without AssetName"))
             {
-                result = new Platform()
-                {
-                    InstanceName = "Custom_Platform",
-                    AssetChildren = [],
-                    X = 0,
-                    Y = 0,
-                    ScaleX = 1,
-                    ScaleY = 1,
-                };
+                result = DefaultPlatformWithoutAssetName;
                 ImGui.CloseCurrentPopup();
             }
             ImGui.EndMenu();
@@ -104,4 +81,24 @@ partial class PropertiesWindow
 
         return result;
     }
+
+    public static Platform DefaultPlatformWithAssetName => new()
+    {
+        InstanceName = "Custom_Platform",
+        AssetName = "../Battlehill/SK_Small_Plat.png",
+        X = 0,
+        Y = 0,
+        W = 750,
+        H = 175,
+    };
+
+    public static Platform DefaultPlatformWithoutAssetName => new()
+    {
+        InstanceName = "Custom_Platform",
+        AssetChildren = [],
+        X = 0,
+        Y = 0,
+        ScaleX = 1,
+        ScaleY = 1,
+    };
 }

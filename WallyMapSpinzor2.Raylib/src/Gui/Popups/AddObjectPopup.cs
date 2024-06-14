@@ -57,7 +57,7 @@ public static class AddObjectPopup
             }
             if (ImGui.MenuItem("Respawn"))
             {
-                Respawn res = new() { X = NewPos.X, Y = NewPos.Y };
+                Respawn res = PropertiesWindow.DefaultRespawn(NewPos);
                 cmd.Add(new PropChangeCommand<Respawn[]>(val => l.Desc.Respawns = val, l.Desc.Respawns, [.. l.Desc.Respawns, res]));
                 cmd.SetAllowMerge(false);
                 ImGui.CloseCurrentPopup();
@@ -67,27 +67,11 @@ public static class AddObjectPopup
                 Platform? p = null;
                 if (ImGui.MenuItem("With AssetName"))
                 {
-                    p = new()
-                    {
-                        InstanceName = "Custom_Platform",
-                        AssetName = "../Battlehill/SK_Small_Plat.png",
-                        X = NewPos.X,
-                        Y = NewPos.Y,
-                        W = 750,
-                        H = 175,
-                    };
+                    p = PropertiesWindow.DefaultPlatformWithAssetName;
                 }
                 if (ImGui.MenuItem("Without AssetName"))
                 {
-                    p = new()
-                    {
-                        InstanceName = "Custom_Platform",
-                        AssetChildren = [],
-                        X = NewPos.X,
-                        Y = NewPos.Y,
-                        ScaleX = 1,
-                        ScaleY = 1,
-                    };
+                    p = PropertiesWindow.DefaultPlatformWithoutAssetName;
                 }
 
                 if (p is not null)
@@ -116,21 +100,7 @@ public static class AddObjectPopup
     private static void AddCollision<T>(Level l, CommandHistory cmd)
         where T : AbstractCollision, new()
     {
-        T col = new() { X1 = NewPos.X, X2 = NewPos.X + 100, Y1 = NewPos.Y, Y2 = NewPos.Y };
-        if (col is AbstractPressurePlateCollision pcol)
-        {
-            pcol.AssetName = "a__AnimationPressurePlate";
-            pcol.FireOffsetX = [];
-            pcol.FireOffsetY = [];
-            pcol.TrapPowers = [];
-            pcol.AnimOffsetX = (col.X1 + col.X2) / 2;
-            pcol.AnimOffsetY = (col.Y1 + col.Y2) / 2;
-            pcol.Cooldown = 3000;
-        }
-        if (col is LavaCollision lcol)
-        {
-            lcol.LavaPower = "LavaBurn";
-        }
+        T col = PropertiesWindow.DefaultCollision<T>(NewPos);
         cmd.Add(new PropChangeCommand<AbstractCollision[]>(val => l.Desc.Collisions = val, l.Desc.Collisions, [.. l.Desc.Collisions, col]));
         cmd.SetAllowMerge(false);
     }
@@ -148,8 +118,7 @@ public static class AddObjectPopup
     private static void AddItemSpawn<T>(Level l, CommandHistory cmd)
         where T : AbstractItemSpawn, new()
     {
-        T spawn = new() { X = NewPos.X, Y = NewPos.Y };
-        (spawn.W, spawn.H) = (100, 100);
+        T spawn = PropertiesWindow.DefaultItemSpawn<T>(NewPos);
         cmd.Add(new PropChangeCommand<AbstractItemSpawn[]>(val => l.Desc.ItemSpawns = val, l.Desc.ItemSpawns, [.. l.Desc.ItemSpawns, spawn]));
         cmd.SetAllowMerge(false);
     }

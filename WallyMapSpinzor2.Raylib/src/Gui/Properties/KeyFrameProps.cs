@@ -99,4 +99,9 @@ public partial class PropertiesWindow
         Phase p => p.StartFrame,
         _ => throw new InvalidOperationException("Could not find the first keyframenum. type of abstract keyframe type is not implemented")
     };
+
+    public static KeyFrame DefaultKeyFrame(Animation anim) => new()
+    {
+        FrameNum = LastKeyFrameNum(anim.KeyFrames) + 1,
+    };
 }

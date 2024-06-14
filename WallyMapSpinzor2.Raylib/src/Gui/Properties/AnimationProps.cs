@@ -72,19 +72,12 @@ public partial class PropertiesWindow
         {
             if (ImGui.MenuItem("KeyFrame"))
             {
-                result = new KeyFrame()
-                {
-                    FrameNum = LastKeyFrameNum(anim.KeyFrames) + 1,
-                };
+                result = DefaultKeyFrame(anim);
                 ImGui.CloseCurrentPopup();
             }
             if (ImGui.MenuItem("Phase"))
             {
-                result = new Phase()
-                {
-                    StartFrame = LastKeyFrameNum(anim.KeyFrames) + 1,
-                    KeyFrames = [],
-                };
+                result = DefaultPhase(anim);
                 ImGui.CloseCurrentPopup();
             }
             ImGui.EndMenu();

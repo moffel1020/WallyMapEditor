@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace WallyMapSpinzor2.Raylib;
 
 public partial class PropertiesWindow
@@ -20,4 +22,6 @@ public partial class PropertiesWindow
 
         return propChanged;
     }
+
+    public static Respawn DefaultRespawn(Vector2 pos) => new() { X = pos.X, Y = pos.Y };
 }

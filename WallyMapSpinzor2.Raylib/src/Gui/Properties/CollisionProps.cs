@@ -1,3 +1,4 @@
+using System.Numerics;
 using ImGuiNET;
 
 namespace WallyMapSpinzor2.Raylib;
@@ -92,5 +93,25 @@ public partial class PropertiesWindow
         ImGui.Text("LavaPower: " + lc.LavaPower); //TODO: allow modifying
 
         return propChanged;
+    }
+
+    public static C DefaultCollision<C>(Vector2 pos) where C : AbstractCollision, new()
+    {
+        C col = new() { X1 = pos.X, X2 = pos.X + 100, Y1 = pos.Y, Y2 = pos.Y };
+        if (col is AbstractPressurePlateCollision pcol)
+        {
+            pcol.AssetName = "a__AnimationPressurePlate";
+            pcol.FireOffsetX = [];
+            pcol.FireOffsetY = [];
+            pcol.TrapPowers = [];
+            pcol.AnimOffsetX = (col.X1 + col.X2) / 2;
+            pcol.AnimOffsetY = (col.Y1 + col.Y2) / 2;
+            pcol.Cooldown = 3000;
+        }
+        if (col is LavaCollision lcol)
+        {
+            lcol.LavaPower = "LavaBurn";
+        }
+        return col;
     }
 }

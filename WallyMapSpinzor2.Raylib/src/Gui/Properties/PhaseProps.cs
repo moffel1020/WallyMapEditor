@@ -9,4 +9,10 @@ public partial class PropertiesWindow
         propChanged |= ShowManyKeyFrameProps(phase.KeyFrames, cmd);
         return propChanged;
     }
+
+    public static Phase DefaultPhase(Animation anim) => new()
+    {
+        StartFrame = LastKeyFrameNum(anim.KeyFrames) + 1,
+        KeyFrames = [],
+    };
 }
