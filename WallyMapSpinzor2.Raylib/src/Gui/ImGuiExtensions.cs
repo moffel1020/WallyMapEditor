@@ -362,7 +362,8 @@ public static class ImGuiExt
     public static bool EditArrayHistory<T>(string label, T[] values, Action<T[]> changeCommand, Func<Maybe<T>> create, Action<int> edit, CommandHistory cmd, bool allowMove = true)
     {
         List<PropChangeCommand<T[]>> commands = [];
-        ImGui.BeginListBox(label);
+        unsafe { ImGui.PushStyleColor(ImGuiCol.ChildBg, *ImGui.GetStyleColorVec4(ImGuiCol.FrameBg)); }
+        ImGui.BeginChild(label, new Vector2(0, ImGui.GetTextLineHeightWithSpacing() * 8), ImGuiChildFlags.ResizeY | ImGuiChildFlags.Border);
         bool changed = false;
         for (int i = 0; i < values.Length; ++i)
         {
@@ -392,7 +393,8 @@ public static class ImGuiExt
                 }
             }
         }
-        ImGui.EndListBox();
+        ImGui.EndChild();
+        ImGui.PopStyleColor();
         Maybe<T> maybeNewValue = create();
         if (maybeNewValue.TryGetValue(out T? newValue))
         {
