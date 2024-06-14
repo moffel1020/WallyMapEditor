@@ -39,16 +39,69 @@ partial class PropertiesWindow
 
         if (p.AssetName is null && ImGui.CollapsingHeader("Children"))
         {
-            foreach (AbstractAsset child in p.AssetChildren!)
+            propChanged |= ImGuiExt.EditArrayHistory("", p.AssetChildren!, val => p.AssetChildren = val,
+            CreateNew,
+            (int index) =>
             {
+                AbstractAsset child = p.AssetChildren![index];
                 if (ImGui.TreeNode($"{child.GetType().Name}##{child.GetHashCode()}"))
                 {
                     propChanged |= ShowProperties(child, cmd, data);
                     ImGui.TreePop();
                 }
-            }
+            }, cmd);
         }
 
         return propChanged;
+    }
+
+    private static Maybe<AbstractAsset> CreateNew()
+    {
+        Maybe<AbstractAsset> result = new();
+
+        if (ImGui.BeginMenu("Add new child"))
+        {
+            if (ImGui.MenuItem("Asset"))
+            {
+                result = new Asset()
+                {
+                    AssetName = "../Battlehill/SK_Small_Plat.png",
+                    X = 0,
+                    Y = 0,
+                    W = 750,
+                    H = 175,
+                };
+                ImGui.CloseCurrentPopup();
+            }
+            if (ImGui.MenuItem("Platform with AssetName"))
+            {
+                result = new Platform()
+                {
+                    InstanceName = "Custom_Platform",
+                    AssetName = "../Battlehill/SK_Small_Plat.png",
+                    X = 0,
+                    Y = 0,
+                    W = 750,
+                    H = 175,
+                };
+                ImGui.CloseCurrentPopup();
+            }
+            if (ImGui.MenuItem("Platform without AssetName"))
+            {
+                result = new Platform()
+                {
+                    InstanceName = "Custom_Platform",
+                    AssetChildren = [],
+                    X = 0,
+                    Y = 0,
+                    ScaleX = 1,
+                    ScaleY = 1,
+                };
+                ImGui.CloseCurrentPopup();
+            }
+            ImGui.EndMenu();
+        }
+
+        return result;
     }
 }

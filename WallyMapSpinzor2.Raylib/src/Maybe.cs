@@ -6,8 +6,8 @@ namespace WallyMapSpinzor2.Raylib;
 // simple optional type
 public readonly struct Maybe<T>
 {
-    private readonly bool _hasValue;
-    private readonly T _value;
+    private readonly bool _hasValue = false;
+    private readonly T _value = default!;
 
     public bool HasValue => _hasValue;
     public T Value => _hasValue ? _value : throw new InvalidOperationException("Attempt to get value of none type");
