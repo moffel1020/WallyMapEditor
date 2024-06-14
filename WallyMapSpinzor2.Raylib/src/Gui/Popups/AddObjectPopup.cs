@@ -59,6 +59,24 @@ public static class AddObjectPopup
                 cmd.SetAllowMerge(false);
                 ImGui.CloseCurrentPopup();
             }
+            if (ImGui.MenuItem("Platform"))
+            {
+                Platform p = new()
+                {
+                    InstanceName = "Custom_Platform",
+                    AssetName = "../Battlehill/SK_Small_Plat.png",
+                    X = NewPos.X,
+                    Y = NewPos.Y,
+                    W = 750,
+                    H = 175,
+                    ScaleX = 1,
+                    ScaleY = 1,
+                };
+
+                cmd.Add(new PropChangeCommand<AbstractAsset[]>(val => l.Desc.Assets = val, l.Desc.Assets, [.. l.Desc.Assets, p]));
+                cmd.SetAllowMerge(false);
+                ImGui.CloseCurrentPopup();
+            }
 
             ImGui.EndPopup();
         }
