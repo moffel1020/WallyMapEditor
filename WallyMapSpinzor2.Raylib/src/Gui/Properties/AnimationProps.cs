@@ -52,7 +52,7 @@ public partial class PropertiesWindow
                     ImGui.Separator();
                 propChanged |= ShowOneOfManyKeyFrameProps(anim.KeyFrames, index, cmd);
             },
-            cmd, allowRemove: KeyFrameCount(anim.KeyFrames) > 2, allowMove: false);
+            cmd, allowRemove: anim.KeyFrames.Length > 1, allowMove: false);
         }
 
         return propChanged;
@@ -66,13 +66,6 @@ public partial class PropertiesWindow
             Phase p => p.StartFrame + LastKeyFrameNum(p.KeyFrames),
             _ => throw new ArgumentException($"Unknown keyframe type {keyFrames[^1].GetType().Name}")
         };
-
-    public static int KeyFrameCount(AbstractKeyFrame[] keyFrames) => keyFrames.Select(key => key switch
-    {
-        KeyFrame kf => 1,
-        Phase p => KeyFrameCount(p.KeyFrames),
-        _ => throw new ArgumentException($"Unknown keyframe type {key.GetType().Name}")
-    }).Sum();
 
     public static Maybe<AbstractKeyFrame> CreateKeyFrame(int lastKeyFrameNum)
     {
