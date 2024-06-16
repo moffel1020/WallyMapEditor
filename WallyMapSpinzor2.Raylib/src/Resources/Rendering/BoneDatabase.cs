@@ -480,7 +480,7 @@ public static class BoneDatabase
         Register1("a_BotForearmFront", 5);
         Register1("a_BotHead", 5);
         Register1("a_BotTail", 5);
-        Register1("a_BotTorso", 5);
+        Register2("a_BotTorso", 5, 8, false, true);
         Register1("a_CapeIdle00", 2);
         Register1("a_CapeIdle01", 2);
         Register1("a_CapeIdle02", 2);
