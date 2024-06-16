@@ -36,7 +36,7 @@ public partial class PropertiesWindow
         TeamScoreboard ts => ShowTeamScoreboardProps(ts, cmd),
         Platform p => ShowPlatformProps(p, cmd, data),
         AnimatedBackground ab => ShowAnimatedBackgroundProps(ab, cmd, data),
-        Gfx gfx => ShowGfxProps(gfx, cmd),
+        Gfx gfx => ShowGfxProps(gfx, cmd, data),
         LevelAnim la => ShowLevelAnimProps(la, cmd),
         LevelAnimation la => ShowLevelAnimationProps(la, cmd),
 
@@ -45,7 +45,7 @@ public partial class PropertiesWindow
         CameraBounds cb => ShowCameraBoundsProps(cb, cmd),
         SpawnBotBounds sb => ShowSpawnBotBoundsProps(sb, cmd),
 
-        AbstractCollision ac => ShowCollisionProps(ac, cmd),
+        AbstractCollision ac => ShowCollisionProps(ac, cmd, data),
         AbstractItemSpawn i => ShowItemSpawnProps(i, cmd),
         AbstractAsset a => ShowAbstractAssetProps(a, cmd, data),
         AbstractVolume v => ShowAbstractVolumeProps(v, cmd),

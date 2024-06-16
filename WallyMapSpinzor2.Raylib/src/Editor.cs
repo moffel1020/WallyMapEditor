@@ -30,6 +30,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
     public string[]? BoneNames { get; set; }
 
     public RaylibCanvas? Canvas { get; set; }
+    public AssetLoader? Loader { get; set; }
     private Camera2D _cam = new();
     public TimeSpan Time { get; set; } = TimeSpan.FromSeconds(0);
 
@@ -68,7 +69,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         CommandHistory.Clear();
         if (Canvas is not null)
         {
-            Canvas.BoneNames = BoneNames!;
+            Canvas.Loader.BoneNames = BoneNames!;
             Canvas.ClearTextureCache();
         }
 
@@ -92,7 +93,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         CommandHistory.Clear();
         if (Canvas is not null)
         {
-            Canvas.BoneNames = boneNames;
+            Canvas.Loader.BoneNames = boneNames;
             Canvas.ClearTextureCache();
         }
 
@@ -162,7 +163,9 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
         while (!Rl.WindowShouldClose())
         {
-            _config.Time += TimeSpan.FromSeconds(_config.RenderSpeed * Rl.GetFrameTime());
+            float delta = Rl.GetFrameTime();
+            _config.Time += TimeSpan.FromSeconds(_config.RenderSpeed * delta);
+            Time += TimeSpan.FromSeconds(delta);
             Draw();
             Update();
         }
@@ -187,7 +190,8 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         Rl.ClearBackground(Raylib_cs.Color.Black);
         if (PathPrefs.BrawlhallaPath is not null)
         {
-            Canvas ??= new(PathPrefs.BrawlhallaPath, BoneNames!);
+            Loader ??= new(PathPrefs.BrawlhallaPath, BoneNames!);
+            Canvas ??= new(Loader);
             Canvas.CameraMatrix = Rl.GetCameraMatrix2D(_cam);
 
             MapData?.DrawOn(Canvas, Transform.IDENTITY, _config, new RenderContext(), _state);
@@ -211,12 +215,22 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         if (RenderConfigWindow.Open)
             RenderConfigWindow.Show(_config, ConfigDefault, PathPrefs);
         if (MapOverviewWindow.Open && MapData is Level l)
-            MapOverviewWindow.Show(l, CommandHistory, PathPrefs, Canvas, ref _selectedObject);
+            MapOverviewWindow.Show(l, CommandHistory, PathPrefs, Loader, ref _selectedObject);
 
         if (_selectedObject is not null)
             PropertiesWindow.Open = true;
         if (PropertiesWindow.Open && _selectedObject is not null)
-            PropertiesWindow.Show(_selectedObject, CommandHistory, new PropertiesWindowData(Canvas, MapData as Level, PathPrefs));
+        {
+            PropertiesWindowData data = new()
+            {
+                Time = Time,
+                Canvas = Canvas,
+                Loader = Loader,
+                Level = MapData as Level,
+                PathPrefs = PathPrefs,
+            };
+            PropertiesWindow.Show(_selectedObject, CommandHistory, data);
+        }
         if (!PropertiesWindow.Open)
             _selectedObject = null;
 

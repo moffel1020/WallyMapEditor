@@ -4,9 +4,9 @@ namespace WallyMapSpinzor2.Raylib;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowCollisionProps(AbstractCollision ac, CommandHistory cmd) => ac switch
+    public static bool ShowCollisionProps(AbstractCollision ac, CommandHistory cmd, PropertiesWindowData data) => ac switch
     {
-        AbstractPressurePlateCollision pc => ShowAbstractPressurePlateCollisionProps(pc, cmd),
+        AbstractPressurePlateCollision pc => ShowAbstractPressurePlateCollisionProps(pc, cmd, data),
         LavaCollision lc => ShowLavaCollisionProps(lc, cmd),
         _ => ShowAbstractCollisionProps(ac, cmd)
     };
@@ -59,12 +59,16 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
-    public static bool ShowAbstractPressurePlateCollisionProps(AbstractPressurePlateCollision pc, CommandHistory cmd)
+    public static bool ShowAbstractPressurePlateCollisionProps(AbstractPressurePlateCollision pc, CommandHistory cmd, PropertiesWindowData data)
     {
         bool propChanged = false;
         propChanged |= ShowAbstractCollisionProps(pc, cmd);
         ImGui.SeparatorText($"Pressure plate props##props{pc.GetHashCode()}");
-        ImGui.Text("AssetName: " + pc.AssetName); //TODO: allow modifying
+        ImGui.Text("AssetName: " + pc.AssetName);
+        if (data.Canvas is not null)
+        {
+            ImGuiExt.Animation(data.Canvas, pc.Gfx, "Ready", 0);
+        }
         propChanged |= ImGuiExt.DragFloatHistory($"AnimOffseyX##props{pc.GetHashCode()}", pc.AnimOffsetX, val => pc.AnimOffsetX = val, cmd);
         propChanged |= ImGuiExt.DragFloatHistory($"AnimOffsetY##props{pc.GetHashCode()}", pc.AnimOffsetY, val => pc.AnimOffsetY = val, cmd);
         propChanged |= ImGuiExt.DragFloatHistory($"AnimRotation##props{pc.GetHashCode()}", pc.AnimRotation, val => pc.AnimRotation = BrawlhallaMath.SafeMod(val, 360.0), cmd);

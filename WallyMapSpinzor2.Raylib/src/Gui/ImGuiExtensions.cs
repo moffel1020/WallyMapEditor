@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
+using Raylib_cs;
+using rlImGui_cs;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -326,5 +328,32 @@ public static class ImGuiExt
             return true;
         }
         return false;
+    }
+
+    public static void Animation(RaylibCanvas canvas, Gfx gfx, string animName, int frame)
+    {
+        Texture2D? texture_ = canvas.Animator.AnimToTexture(gfx, animName, frame);
+        if (texture_ is null)
+        {
+            ImGui.Text("Loading...");
+            return;
+        }
+        Texture2D texture = texture_.Value;
+        float ratio = (float)texture.Width / texture.Height;
+        // neg height because render texture is flipped vertically
+        ImageRect(texture, 90 * ratio, 90, new Rectangle(0, 0, texture.Width, -texture.Height));
+    }
+
+    // for some reason, rlImGui exposes the width and height in ImageRect as int, despite the underlying values being float
+    // this is a reimplementation without the issue (and is also modified to be simpler)
+    public static void ImageRect(Texture2D image, float destWidth, float destHeight, Rectangle sourceRect)
+    {
+        float uv0X = Math.Sign(sourceRect.Width) * sourceRect.X / image.Width;
+        float uv0Y = Math.Sign(sourceRect.Height) * sourceRect.Y / image.Height;
+        Vector2 uv0 = new(uv0X, uv0Y);
+        float uv1X = uv0X + sourceRect.Width / image.Width;
+        float uv1Y = uv0Y + sourceRect.Height / image.Height;
+        Vector2 uv1 = new(uv1X, uv1Y);
+        ImGui.Image(new IntPtr(image.Id), new Vector2(destWidth, destHeight), uv0, uv1);
     }
 }

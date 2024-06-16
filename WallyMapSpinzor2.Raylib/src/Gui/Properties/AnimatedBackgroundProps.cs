@@ -22,13 +22,21 @@ partial class PropertiesWindow
         return propChanged;
     }
 
-    // unused variable warning
+    // unused variable warning (cmd is unused)
 #pragma warning disable IDE0060
-    public static bool ShowGfxProps(Gfx g, CommandHistory cmd)
+    public static bool ShowGfxProps(Gfx g, CommandHistory cmd, PropertiesWindowData data)
     {
         bool propChanged = false;
         ImGui.Text("AnimFile: " + g.AnimFile);
         ImGui.Text("AnimClass: " + g.AnimClass);
+        if (data.Canvas is not null)
+        {
+            ImGui.Spacing();
+            ImGui.Indent();
+            ImGuiExt.Animation(data.Canvas, g, "Ready", LevelDesc.GET_ANIM_FRAME(data.Time));
+            ImGui.Unindent();
+            ImGui.Spacing();
+        }
         // changing AnimScale requires remaking the texture
         // we're not gonna do that, so don't let users just edit it
         ImGui.Text("AnimScale: " + g.AnimScale);
