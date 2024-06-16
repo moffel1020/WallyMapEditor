@@ -50,9 +50,16 @@ public class AssetLoader
         return Texture2DWrapper.Default; // placeholder white texture until the image is read from disk
     }
 
+    private static string GetRealSwfPath(string filename)
+    {
+        if (filename.StartsWith("Animation_"))
+            return Path.Combine("bones", "Bones_" + filename["Animation_".Length..]);
+        return filename;
+    }
+
     public SwfFileData? LoadSwf(string filePath)
     {
-        string finalPath = Path.Combine(brawlPath, filePath);
+        string finalPath = Path.Combine(brawlPath, GetRealSwfPath(filePath));
         SwfFileCache.Cache.TryGetValue(finalPath, out SwfFileData? swf);
         if (swf is not null)
             return swf;
