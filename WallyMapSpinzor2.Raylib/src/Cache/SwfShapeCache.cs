@@ -22,8 +22,9 @@ public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCach
 
     protected override ShapeData LoadIntermediate(TextureInfo textureInfo)
     {
-        double animScale = textureInfo.AnimScale * ANIM_SCALE_MULTIPLIER;
-        DefineShapeXTag shape = textureInfo.Swf.ShapeTags[textureInfo.ShapeId];
+        (SwfFileData swf, ushort shapeId, double animScale) = textureInfo;
+        animScale *= ANIM_SCALE_MULTIPLIER;
+        DefineShapeXTag shape = swf.ShapeTags[shapeId];
         SwfShape compiledShape = new(shape);
         // logic follows game
         double x = shape.ShapeBounds.XMin * 1.0 / SWF_UNIT_DIVISOR;
@@ -43,9 +44,10 @@ public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCach
 
     protected override Texture2DWrapper IntermediateToValue(ShapeData shapeData)
     {
-        Texture2D texture = Rl.LoadTextureFromImage(shapeData.Img);
+        (Raylib_cs.Image img, int offsetX, int offsetY) = shapeData;
+        Texture2D texture = Rl.LoadTextureFromImage(img);
         Rl.SetTextureFilter(texture, TextureFilter.Bilinear);
-        return new(texture, shapeData.OffsetX, shapeData.OffsetY);
+        return new(texture, offsetX, offsetY);
     }
 
     protected override void UnloadIntermediate(ShapeData shapeData)
