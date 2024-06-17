@@ -11,7 +11,7 @@ using Raylib_cs;
 using Rl = Raylib_cs.Raylib;
 
 using TxtId = System.ValueTuple<WallyMapSpinzor2.Raylib.SwfFileData, ushort, double>;
-using ImgData = System.ValueTuple<Raylib_cs.Image, int, int, double>;
+using ImgData = System.ValueTuple<Raylib_cs.Image, int, int>;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -39,21 +39,20 @@ public class SwfShapeCache : UploadCache<TxtId, ImgData, Texture2DWrapper>
         ImageSharpShapeExporter exporter = new(image, new Size(SWF_UNIT_DIVISOR * -offsetX, SWF_UNIT_DIVISOR * -offsetY), SWF_UNIT_DIVISOR);
         compiledShape.Export(exporter);
         Raylib_cs.Image img = Utils.ImageSharpImageToRl(image);
-        // brawlhalla uses the un-multiplied AnimScale for the actual scaling
-        return (img, offsetX, offsetY, animScale / ANIM_SCALE_MULTIPLIER);
+        return (img, offsetX, offsetY);
     }
 
     protected override Texture2DWrapper IntermediateToValue(ImgData intermediate)
     {
-        (Raylib_cs.Image img, int offsetX, int offsetY, double animScale) = intermediate;
+        (Raylib_cs.Image img, int offsetX, int offsetY) = intermediate;
         Texture2D texture = Rl.LoadTextureFromImage(img);
         Rl.SetTextureFilter(texture, TextureFilter.Bilinear);
-        return new(texture, offsetX, offsetY, animScale);
+        return new(texture, offsetX, offsetY);
     }
 
     protected override void UnloadIntermediate(ImgData intermediate)
     {
-        (Raylib_cs.Image img, _, _, _) = intermediate;
+        (Raylib_cs.Image img, _, _) = intermediate;
         Rl.UnloadImage(img);
     }
 

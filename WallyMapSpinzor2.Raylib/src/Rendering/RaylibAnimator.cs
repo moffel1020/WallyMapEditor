@@ -181,6 +181,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
     #region building
     private BoneData[] BuildAnim(Gfx gfx, string animName, int frame, Transform trans, int loopLimit = -1)
     {
+        trans *= Transform.CreateScale(gfx.AnimScale, gfx.AnimScale);
         // swf animation
         if (gfx.AnimFile.StartsWith("SFX_"))
         {
