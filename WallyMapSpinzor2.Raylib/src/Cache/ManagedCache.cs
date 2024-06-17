@@ -17,7 +17,7 @@ public abstract class ManagedCache<K, V> where K : notnull
         Cache[k] = v;
     }
 
-    public void LoadAsync(K k)
+    public void LoadInThread(K k)
     {
         lock (_loading)
         {

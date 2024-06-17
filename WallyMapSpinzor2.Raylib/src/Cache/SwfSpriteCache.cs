@@ -12,5 +12,5 @@ public class SwfSpriteCache : ManagedCache<SprId, SwfSprite?>
     }
 
     public void Load(SwfFileData data, ushort spriteId) => Load((data, spriteId));
-    public void LoadAsync(SwfFileData data, ushort spriteId) => LoadAsync((data, spriteId));
+    public void LoadAsync(SwfFileData data, ushort spriteId) => LoadInThread((data, spriteId));
 }

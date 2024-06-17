@@ -58,8 +58,8 @@ public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCach
         texture.Dispose();
     }
 
-    public void LoadAsync(SwfFileData swf, ushort shapeId, double animScale)
+    public void LoadInThread(SwfFileData swf, ushort shapeId, double animScale)
     {
-        LoadAsync(new(swf, shapeId, animScale));
+        LoadInThread(new(swf, shapeId, animScale));
     }
 }

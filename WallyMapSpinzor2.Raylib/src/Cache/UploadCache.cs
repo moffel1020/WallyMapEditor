@@ -23,7 +23,7 @@ public abstract class UploadCache<K, I, V> where K : notnull
         Cache[k] = v;
     }
 
-    public void LoadAsync(K k)
+    public void LoadInThread(K k)
     {
         if (_queueSet.Contains(k)) return;
         _queueSet.Add(k);

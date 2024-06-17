@@ -46,7 +46,7 @@ public class AssetLoader
         TextureCache.Cache.TryGetValue(finalPath, out Texture2DWrapper? texture);
         if (texture is not null) return texture;
 
-        TextureCache.LoadAsync(finalPath);
+        TextureCache.LoadInThread(finalPath);
         return Texture2DWrapper.Default; // placeholder white texture until the image is read from disk
     }
 
@@ -63,7 +63,7 @@ public class AssetLoader
         SwfFileCache.Cache.TryGetValue(finalPath, out SwfFileData? swf);
         if (swf is not null)
             return swf;
-        SwfFileCache.LoadAsync(finalPath);
+        SwfFileCache.LoadInThread(finalPath);
         return null;
     }
 
@@ -72,10 +72,10 @@ public class AssetLoader
         SwfFileData? swf = LoadSwf(filePath);
         if (swf is null)
             return null;
-        SwfShapeCache.Cache.TryGetValue((swf, shapeId, animScale), out Texture2DWrapper? texture);
+        SwfShapeCache.Cache.TryGetValue(new(swf, shapeId, animScale), out Texture2DWrapper? texture);
         if (texture is not null)
             return texture;
-        SwfShapeCache.LoadAsync(swf, shapeId, animScale);
+        SwfShapeCache.LoadInThread(swf, shapeId, animScale);
         return null;
     }
 
