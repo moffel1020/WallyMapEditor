@@ -10,21 +10,20 @@ using SwiffCheese.Wrappers;
 using Raylib_cs;
 using Rl = Raylib_cs.Raylib;
 
-using TxtId = System.ValueTuple<WallyMapSpinzor2.Raylib.SwfFileData, ushort, double>;
-using ImgData = System.ValueTuple<Raylib_cs.Image, int, int>;
-
 namespace WallyMapSpinzor2.Raylib;
 
-public class SwfShapeCache : UploadCache<TxtId, ImgData, Texture2DWrapper>
+public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCache.ShapeData, Texture2DWrapper>
 {
     private const int SWF_UNIT_DIVISOR = 20;
     private const double ANIM_SCALE_MULTIPLIER = 1.2;
 
-    protected override ImgData LoadIntermediate(TxtId data)
+    public readonly record struct TextureInfo(SwfFileData Swf, ushort ShapeId, double AnimScale);
+    public readonly record struct ShapeData(Raylib_cs.Image Img, int OffsetX, int OffsetY);
+
+    protected override ShapeData LoadIntermediate(TextureInfo textureInfo)
     {
-        (SwfFileData swf, ushort shapeId, double animScale) = data;
-        animScale *= ANIM_SCALE_MULTIPLIER;
-        DefineShapeXTag shape = swf.ShapeTags[shapeId];
+        double animScale = textureInfo.AnimScale * ANIM_SCALE_MULTIPLIER;
+        DefineShapeXTag shape = textureInfo.Swf.ShapeTags[textureInfo.ShapeId];
         SwfShape compiledShape = new(shape);
         // logic follows game
         double x = shape.ShapeBounds.XMin * 1.0 / SWF_UNIT_DIVISOR;
@@ -39,21 +38,19 @@ public class SwfShapeCache : UploadCache<TxtId, ImgData, Texture2DWrapper>
         ImageSharpShapeExporter exporter = new(image, new Size(SWF_UNIT_DIVISOR * -offsetX, SWF_UNIT_DIVISOR * -offsetY), SWF_UNIT_DIVISOR);
         compiledShape.Export(exporter);
         Raylib_cs.Image img = Utils.ImageSharpImageToRl(image);
-        return (img, offsetX, offsetY);
+        return new ShapeData(img, offsetX, offsetY);
     }
 
-    protected override Texture2DWrapper IntermediateToValue(ImgData intermediate)
+    protected override Texture2DWrapper IntermediateToValue(ShapeData shapeData)
     {
-        (Raylib_cs.Image img, int offsetX, int offsetY) = intermediate;
-        Texture2D texture = Rl.LoadTextureFromImage(img);
+        Texture2D texture = Rl.LoadTextureFromImage(shapeData.Img);
         Rl.SetTextureFilter(texture, TextureFilter.Bilinear);
-        return new(texture, offsetX, offsetY);
+        return new(texture, shapeData.OffsetX, shapeData.OffsetY);
     }
 
-    protected override void UnloadIntermediate(ImgData intermediate)
+    protected override void UnloadIntermediate(ShapeData shapeData)
     {
-        (Raylib_cs.Image img, _, _) = intermediate;
-        Rl.UnloadImage(img);
+        Rl.UnloadImage(shapeData.Img);
     }
 
     protected override void UnloadValue(Texture2DWrapper texture)
@@ -63,6 +60,6 @@ public class SwfShapeCache : UploadCache<TxtId, ImgData, Texture2DWrapper>
 
     public void LoadAsync(SwfFileData swf, ushort shapeId, double animScale)
     {
-        LoadAsync((swf, shapeId, animScale));
+        LoadAsync(new(swf, shapeId, animScale));
     }
 }
