@@ -1,16 +1,16 @@
-using SprId = System.ValueTuple<WallyMapSpinzor2.Raylib.SwfFileData, ushort>;
-
 namespace WallyMapSpinzor2.Raylib;
 
-public class SwfSpriteCache : ManagedCache<SprId, SwfSprite?>
+public class SwfSpriteCache : ManagedCache<SwfSpriteCache.SpriteInfo, SwfSprite?>
 {
-    protected override SwfSprite LoadInternal(SprId sprId)
+    public readonly record struct SpriteInfo(SwfFileData Swf, ushort SpriteId);
+
+    protected override SwfSprite LoadInternal(SpriteInfo spriteInfo)
     {
-        (SwfFileData data, ushort spriteId) = sprId;
-        SwfSprite sprite = SwfSprite.CompileFrom(data.SpriteTags[spriteId]);
+        (SwfFileData swf, ushort spriteId) = spriteInfo;
+        SwfSprite sprite = SwfSprite.CompileFrom(swf.SpriteTags[spriteId]);
         return sprite;
     }
 
-    public void Load(SwfFileData data, ushort spriteId) => Load((data, spriteId));
-    public void LoadAsync(SwfFileData data, ushort spriteId) => LoadInThread((data, spriteId));
+    public void Load(SwfFileData swf, ushort spriteId) => Load(new(swf, spriteId));
+    public void LoadInThread(SwfFileData swf, ushort spriteId) => LoadInThread(new(swf, spriteId));
 }

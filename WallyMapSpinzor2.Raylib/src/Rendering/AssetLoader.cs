@@ -84,10 +84,10 @@ public class AssetLoader
         SwfFileData? swf = LoadSwf(filePath);
         if (swf is null)
             return null;
-        SwfSpriteCache.Cache.TryGetValue((swf, spriteId), out SwfSprite? sprite);
+        SwfSpriteCache.Cache.TryGetValue(new(swf, spriteId), out SwfSprite? sprite);
         if (sprite is not null)
             return sprite;
-        SwfSpriteCache.LoadAsync(swf, spriteId);
+        SwfSpriteCache.LoadInThread(swf, spriteId);
         return null;
     }
 
