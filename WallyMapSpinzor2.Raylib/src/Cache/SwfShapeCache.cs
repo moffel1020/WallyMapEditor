@@ -1,7 +1,6 @@
 using System;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using IMS = SixLabors.ImageSharp;
 
 using SwiffCheese.Exporting;
 using SwiffCheese.Shapes;
@@ -36,7 +35,7 @@ public class SwfShapeCache : UploadCache<TxtId, ImgData, Texture2DWrapper>
         int offsetY = (int)Math.Floor(y);
         int imageW = (int)Math.Floor(w + (x - offsetX) + animScale) + 2;
         int imageH = (int)Math.Floor(h + (y - offsetY) + animScale) + 2;
-        using Image<Rgba32> image = new(imageW, imageH, new Rgba32(0, 0, 0, 0));
+        using Image<Rgba32> image = new(imageW, imageH, new Rgba32(255, 255, 255, 0));
         ImageSharpShapeExporter exporter = new(image, new Size(SWF_UNIT_DIVISOR * -offsetX, SWF_UNIT_DIVISOR * -offsetY), SWF_UNIT_DIVISOR);
         compiledShape.Export(exporter);
         Raylib_cs.Image img = Utils.ImageSharpImageToRl(image);
@@ -48,6 +47,7 @@ public class SwfShapeCache : UploadCache<TxtId, ImgData, Texture2DWrapper>
     {
         (Raylib_cs.Image img, int offsetX, int offsetY, double animScale) = intermediate;
         Texture2D texture = Rl.LoadTextureFromImage(img);
+        Rl.SetTextureFilter(texture, TextureFilter.Bilinear);
         return new(texture, offsetX, offsetY, animScale);
     }
 
