@@ -1,4 +1,6 @@
 using System;
+using System.Numerics;
+
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
@@ -33,10 +35,11 @@ public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCach
         double h = shape.ShapeBounds.Height() * animScale / SWF_UNIT_DIVISOR;
         int offsetX = (int)Math.Floor(x);
         int offsetY = (int)Math.Floor(y);
+        Vector2 offset = new(-offsetX, -offsetY);
         int imageW = (int)Math.Floor(w + (x - offsetX) + animScale) + 2;
         int imageH = (int)Math.Floor(h + (y - offsetY) + animScale) + 2;
         using Image<Rgba32> image = new(imageW, imageH, new Rgba32(255, 255, 255, 0));
-        ImageSharpShapeExporter exporter = new(image, new Size(SWF_UNIT_DIVISOR * -offsetX, SWF_UNIT_DIVISOR * -offsetY), SWF_UNIT_DIVISOR);
+        ImageSharpShapeExporter exporter = new(image, offset, SWF_UNIT_DIVISOR);
         compiledShape.Export(exporter);
         Raylib_cs.Image img = Utils.ImageSharpImageToRl(image);
         return new ShapeData(img, offsetX, offsetY);

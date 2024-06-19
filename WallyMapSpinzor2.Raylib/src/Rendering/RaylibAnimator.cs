@@ -458,7 +458,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         foreach ((_, SwfSpriteFrameLayer layer) in spriteFrame.Layers)
         {
             // is a shape
-            if (file.ShapeTags.TryGetValue(layer.CharacterId, out DefineShapeXTag? shape))
+            if (file.ShapeTags.TryGetValue(layer.CharacterId, out DefineShapeXTag shape))
             {
                 ushort shapeId = shape.ShapeID;
                 result.AddRange(BuildSwfShape(filePath, shapeId, animScale, tint, opacity, trans * Utils.SwfMatrixToTransform(layer.Matrix)));
