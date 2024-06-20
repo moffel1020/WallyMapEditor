@@ -240,7 +240,7 @@ public class MapOverviewWindow
 
     public static string GetExtraObjectInfo(object o) => o switch
     {
-        Background b => $"({b.AssetName ?? b.AnimatedAssetName})",
+        Background b => $"({b.AssetName})",
         Platform p => $"({p.InstanceName})",
         AnimatedBackground ab => $"({ab.Gfx.AnimClass})",
         Gfx g => $"({g.AnimClass})",
