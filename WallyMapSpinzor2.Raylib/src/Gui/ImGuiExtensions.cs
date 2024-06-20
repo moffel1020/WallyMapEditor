@@ -359,6 +359,7 @@ public static class ImGuiExt
     }
 
     public static bool EditArrayHistory<T>(string label, T[] values, Action<T[]> changeCommand, Func<Maybe<T>> create, Action<int> edit, CommandHistory cmd, bool allowRemove = true, bool allowMove = true)
+        where T : notnull
     {
         List<PropChangeCommand<T[]>> commands = [];
         unsafe { ImGui.PushStyleColor(ImGuiCol.ChildBg, *ImGui.GetStyleColorVec4(ImGuiCol.FrameBg)); }
@@ -368,7 +369,7 @@ public static class ImGuiExt
         {
             T value = values[i];
             edit(i);
-            if (WithDisabledButton(!allowRemove, $"Remove##{value!.GetHashCode()}"))
+            if (WithDisabledButton(!allowRemove, $"Remove##{value.GetHashCode()}"))
             {
                 T[] result = Utils.RemoveAt(values, i);
                 commands.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
@@ -377,14 +378,14 @@ public static class ImGuiExt
             if (allowMove)
             {
                 ImGui.SameLine();
-                if (WithDisabledButton(i == 0, $"Move up##{value!.GetHashCode()}"))
+                if (WithDisabledButton(i == 0, $"Move up##{value.GetHashCode()}"))
                 {
                     T[] result = Utils.MoveUp(values, i);
                     commands.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
                     changed = true;
                 }
                 ImGui.SameLine();
-                if (WithDisabledButton(i == values.Length - 1, $"Move down##{value!.GetHashCode()}"))
+                if (WithDisabledButton(i == values.Length - 1, $"Move down##{value.GetHashCode()}"))
                 {
                     T[] result = Utils.MoveDown(values, i);
                     commands.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
