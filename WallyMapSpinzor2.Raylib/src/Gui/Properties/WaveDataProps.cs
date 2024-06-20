@@ -17,25 +17,31 @@ public partial class PropertiesWindow
         propChanged |= ImGuiExt.DragNullableIntHistory("LoopIdx", w.LoopIdx == 0 ? null : w.LoopIdx, 1, val => w.LoopIdx = val ?? 0, cmd, minValue: 1, maxValue: w.Groups.Length - 1);
         if (ImGui.CollapsingHeader($"CustomPaths##props{w.GetHashCode()}"))
         {
-            foreach (CustomPath cp in w.CustomPaths)
+            propChanged |= ImGuiExt.EditArrayHistory("", w.CustomPaths, val => w.CustomPaths = val,
+            CreateNewCustomPath,
+            (int index) =>
             {
+                CustomPath cp = w.CustomPaths[index];
                 if (ImGui.TreeNode($"CustomPath {MapOverviewWindow.GetExtraObjectInfo(cp)}###customPaths{cp.GetHashCode()}"))
                 {
                     propChanged |= ShowProperties(cp, cmd, data);
                     ImGui.TreePop();
                 }
-            }
+            }, cmd);
         }
         if (ImGui.CollapsingHeader($"Groups##props{w.GetHashCode()}"))
         {
-            foreach (Group g in w.Groups)
+            propChanged |= ImGuiExt.EditArrayHistory("", w.Groups, val => w.Groups = val,
+            CreateNewGroup,
+            (int index) =>
             {
+                Group g = w.Groups[index];
                 if (ImGui.TreeNode($"Group {MapOverviewWindow.GetExtraObjectInfo(g)}###groups{g.GetHashCode()}"))
                 {
                     propChanged |= ShowProperties(g, cmd, data);
                     ImGui.TreePop();
                 }
-            }
+            }, cmd);
         }
         return propChanged;
     }
@@ -45,14 +51,17 @@ public partial class PropertiesWindow
         bool propChanged = false;
         if (ImGui.CollapsingHeader($"Points##props{cp.GetHashCode()}"))
         {
-            foreach (Point p in cp.Points)
+            propChanged |= ImGuiExt.EditArrayHistory("", cp.Points, val => cp.Points = val,
+            CreateNewPoint,
+            (int index) =>
             {
+                Point p = cp.Points[index];
                 if (ImGui.TreeNode($"Point {MapOverviewWindow.GetExtraObjectInfo(p)}###points{p.GetHashCode()}"))
                 {
                     propChanged |= ShowProperties(p, cmd, data);
                     ImGui.TreePop();
                 }
-            }
+            }, cmd);
         }
         return propChanged;
     }
@@ -130,5 +139,46 @@ public partial class PropertiesWindow
         "red" => BehaviorEnum.TANKY,
         "random" => BehaviorEnum.ANY,
         _ => BehaviorEnum._,
+    };
+
+    private static Maybe<Point> CreateNewPoint()
+    {
+        Maybe<Point> result = new();
+        if (ImGui.Button("Add new point##custompath"))
+        {
+            result = DefaultPoint;
+        }
+        return result;
+    }
+    public static Point DefaultPoint => new() { X = 0, Y = 0 };
+
+    private static Maybe<CustomPath> CreateNewCustomPath()
+    {
+        Maybe<CustomPath> result = new();
+        if (ImGui.Button("Add new custom path##wave"))
+        {
+            result = DefaultCustomPath;
+        }
+        return result;
+    }
+    public static CustomPath DefaultCustomPath => new() { Points = [] };
+
+    private static Maybe<Group> CreateNewGroup()
+    {
+        Maybe<Group> result = new();
+        if (ImGui.Button("Add new group##wave"))
+        {
+            result = DefaultGroup;
+        }
+        return result;
+    }
+    public static Group DefaultGroup => new()
+    {
+        Count = 1,
+        Delay = 0,
+        Stagger = 500,
+        Dir = DirEnum.ANY,
+        Path = PathEnum.ANY,
+        Behavior = BehaviorEnum._
     };
 }
