@@ -110,9 +110,10 @@ public class MousePickingFramebuffer : IDisposable
         {
             (object? obj, Action drawAction) = canvas.DrawingQueue.PopMin();
             if (obj is not null) _drawables.Add(obj);
+            float id = obj is not null ? _drawables.Count : 0;
             // setting shader attribs per vertex in raylib is annoying, so we do it in a hacky way with shader uniforms
             // raylib doesnt expose the integer type for framebuffer drawing so float will do 
-            Rl.SetShaderValue(Shader, Rl.GetShaderLocation(Shader, "id"), (float)_drawables.Count, ShaderUniformDataType.Float);
+            Rl.SetShaderValue(Shader, Rl.GetShaderLocation(Shader, "id"), id, ShaderUniformDataType.Float);
             drawAction();
             Rlgl.DrawRenderBatchActive(); // force drawcall so uniform value gets drawn
         }
