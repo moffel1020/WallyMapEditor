@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace WallyMapSpinzor2.Raylib;
 
 // simple optional type
-public readonly struct Maybe<T> : IEquatable<T>, IEquatable<Maybe<T>>
+public readonly struct Maybe<T> : IEquatable<Maybe<T>>
 {
     private readonly bool _hasValue = false;
     private readonly T _value = default!;
@@ -21,8 +21,6 @@ public readonly struct Maybe<T> : IEquatable<T>, IEquatable<Maybe<T>>
         _value = value;
     }
 
-
-    [MemberNotNullWhen(true, nameof(_value))]
     public bool HasValue => _hasValue;
 
     public T Value => _hasValue ? _value : throw new InvalidOperationException("Attempt to get value of none type");
@@ -70,13 +68,6 @@ public readonly struct Maybe<T> : IEquatable<T>, IEquatable<Maybe<T>>
             ifNone();
     }
 
-    public bool Equals(T? other)
-    {
-        if (!_hasValue)
-            return false;
-        return _value!.Equals(other);
-    }
-
     public bool Equals(Maybe<T> other)
     {
         if (!_hasValue && !other._hasValue)
@@ -90,17 +81,21 @@ public readonly struct Maybe<T> : IEquatable<T>, IEquatable<Maybe<T>>
     {
         return
             (obj is Maybe<T> maybe && Equals(maybe)) ||
-            (obj is T t && Equals(t));
+            (_hasValue && Equals(_value, obj));
     }
 
     public static bool operator ==(Maybe<T> left, Maybe<T> right) => left.Equals(right);
     public static bool operator !=(Maybe<T> left, Maybe<T> right) => !(left == right);
-    public static bool operator ==(Maybe<T> left, T right) => left.Equals(right);
-    public static bool operator !=(Maybe<T> left, T right) => !(left == right);
 
     public override int GetHashCode() => HashCode.Combine(_value, _hasValue);
 
     public static Maybe<T> Some(T value) => new(value);
     public static Maybe<T> None => new();
     public static implicit operator Maybe<T>(T value) => new(value);
+}
+
+public static class Maybe
+{
+    public static Maybe<T> Some<T>(T value) => Maybe<T>.Some(value);
+    public static Maybe<T> None<T>() => Maybe<T>.None;
 }
