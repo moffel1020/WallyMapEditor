@@ -120,14 +120,15 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
             uint flags = 0;
             foreach (Gfx.AsymmetrySwapFlagEnum flag in gfx.AsymmetrySwapFlags)
                 flags |= 1u << (int)flag;
-            int hash = (anim, gfx.AnimClass, gfx.AnimFile, gfx.AnimScale, flags).GetHashCode();
+            HashCode code = new();
+            code.Add((anim, gfx.AnimClass, gfx.AnimFile, gfx.AnimScale, flags));
             foreach (CustomArt ca in gfx.CustomArts)
-                hash = HashCode.Combine(hash, (ca.Right, ca.Type, ca.FileName, ca.Name));
+                code.Add((ca.Right, ca.Type, ca.FileName, ca.Name));
             // use sorted dictionary for consistent pair order (is there a better way to do this?)
             foreach ((string k, string v) in new SortedDictionary<string, string>(gfx.BoneOverrides))
-                hash = HashCode.Combine(hash, (k, v));
+                code.Add((k, v));
             // TODO: hash ColorSwap
-            return hash;
+            return code.ToHashCode();
         }
     }
 
