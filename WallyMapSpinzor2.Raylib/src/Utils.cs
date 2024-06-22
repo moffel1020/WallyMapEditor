@@ -25,6 +25,22 @@ namespace WallyMapSpinzor2.Raylib;
 
 public static class Utils
 {
+    public static readonly XmlWriterSettings StandardSaveSettings = new()
+    {
+        OmitXmlDeclaration = true, // no xml header
+        IndentChars = "    ",
+        Indent = true, // indent with four spaces
+        NewLineChars = "\n", // use UNIX line endings
+        Encoding = new UTF8Encoding(false) // use UTF8 (no BOM) encoding
+    };
+
+    public static readonly XmlWriterSettings MinifiedSaveSettings = new()
+    {
+        OmitXmlDeclaration = true, //no xml header
+        NewLineChars = "", // do not newline
+        Encoding = new UTF8Encoding(false) // use UTF8 (no BOM) encoding
+    };
+
     //m11, m12, m13, m14
     //m21, m22, m23, m24
     //m31, m32, m33, m34
@@ -35,7 +51,6 @@ public static class Utils
         0, 0, 1, 0,
         (float)t.TranslateX, (float)t.TranslateY, 0, 1
     );
-
     public static Transform MatrixToTransform(Matrix4x4 m) => new(m.M11, m.M21, m.M12, m.M22, m.M41, m.M42);
     public static Transform SwfMatrixToTransform(SwfMatrix m) => new(m.ScaleX, m.RotateSkew1, m.RotateSkew0, m.ScaleY, m.TranslateX / 20.0, m.TranslateY / 20.0);
 
@@ -122,30 +137,16 @@ public static class Utils
     {
         XElement e = serializable.SerializeToXElement();
         using FileStream toFile = new(toPath, FileMode.Create, FileAccess.Write);
-        using XmlWriter xmlw = XmlWriter.Create(toFile, new()
-        {
-            OmitXmlDeclaration = true, //no xml header
-            IndentChars = minify ? "" : "    ",
-            Indent = !minify, //indent with four spaces
-            NewLineChars = minify ? "" : "\n", //use UNIX line endings
-            Encoding = new UTF8Encoding(false) //use UTF8 (no BOM) encoding
-        });
+        using XmlWriter xmlw = XmlWriter.Create(toFile, minify ? StandardSaveSettings : MinifiedSaveSettings);
         e.Save(xmlw);
     }
 
-    public static string SerializeToString<T>(T serializable, bool minimify = false)
+    public static string SerializeToString<T>(T serializable, bool minify = false)
         where T : ISerializable
     {
         XElement e = serializable.SerializeToXElement();
         using StringWriter sw = new();
-        using XmlWriter xmlw = XmlWriter.Create(sw, new()
-        {
-            OmitXmlDeclaration = true, //no xml header
-            IndentChars = minimify ? "" : "    ",
-            Indent = !minimify, //indent with four spaces
-            NewLineChars = minimify ? "" : "\n", //use UNIX line endings
-            Encoding = new UTF8Encoding(false) //use UTF8 (no BOM) encoding
-        });
+        using XmlWriter xmlw = XmlWriter.Create(sw, minify ? StandardSaveSettings : MinifiedSaveSettings);
         e.Save(xmlw);
         xmlw.Flush();
         return sw.ToString();
