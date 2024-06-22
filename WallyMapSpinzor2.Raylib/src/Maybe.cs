@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace WallyMapSpinzor2.Raylib;
 
 // simple optional type
-public readonly struct Maybe<T> : IEquatable<Maybe<T>>
+public readonly struct Maybe<T>
 {
     private readonly bool _hasValue = false;
     private readonly T _value = default!;
@@ -67,27 +67,6 @@ public readonly struct Maybe<T> : IEquatable<Maybe<T>>
         if (!_hasValue)
             ifNone();
     }
-
-    public bool Equals(Maybe<T> other)
-    {
-        if (!_hasValue && !other._hasValue)
-            return true;
-        if (_hasValue && other._hasValue)
-            return _value!.Equals(other._value);
-        return false;
-    }
-
-    public override bool Equals(object? obj)
-    {
-        return
-            (obj is Maybe<T> maybe && Equals(maybe)) ||
-            (_hasValue && Equals(_value, obj));
-    }
-
-    public static bool operator ==(Maybe<T> left, Maybe<T> right) => left.Equals(right);
-    public static bool operator !=(Maybe<T> left, Maybe<T> right) => !(left == right);
-
-    public override int GetHashCode() => HashCode.Combine(_value, _hasValue);
 
     public static Maybe<T> Some(T value) => new(value);
     public static Maybe<T> None => new();
