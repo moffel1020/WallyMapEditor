@@ -133,7 +133,7 @@ public static class Utils
         e.Save(xmlw);
     }
 
-    public static string? SerializeToString<T>(T serializable, bool minimify = false)
+    public static string SerializeToString<T>(T serializable, bool minimify = false)
         where T : ISerializable
     {
         XElement e = serializable.SerializeToXElement();
