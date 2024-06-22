@@ -41,7 +41,7 @@ public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCach
         using Image<Rgba32> image = new(imageW, imageH, new Rgba32(255, 255, 255, 0));
         ImageSharpShapeExporter exporter = new(image, offset, SWF_UNIT_DIVISOR);
         compiledShape.Export(exporter);
-        Raylib_cs.Image img = Utils.ImageSharpImageToRl(image);
+        Raylib_cs.Image img = Utils.ImgSharpImageToRlImage(image);
         return new ShapeData(img, offsetX, offsetY);
     }
 

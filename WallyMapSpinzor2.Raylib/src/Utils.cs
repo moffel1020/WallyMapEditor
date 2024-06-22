@@ -45,13 +45,13 @@ public static class Utils
     //m21, m22, m23, m24
     //m31, m32, m33, m34
     //m41, m42, m43, m44
-    public static Matrix4x4 TransformToMatrix(Transform t) => new(
+    public static Matrix4x4 TransformToMatrix4x4(Transform t) => new(
         (float)t.ScaleX, (float)t.SkewY, 0, 0,
         (float)t.SkewX, (float)t.ScaleY, 0, 0,
         0, 0, 1, 0,
         (float)t.TranslateX, (float)t.TranslateY, 0, 1
     );
-    public static Transform MatrixToTransform(Matrix4x4 m) => new(m.M11, m.M21, m.M12, m.M22, m.M41, m.M42);
+    public static Transform Matrix4x4ToTransform(Matrix4x4 m) => new(m.M11, m.M21, m.M12, m.M22, m.M41, m.M42);
     public static Transform SwfMatrixToTransform(SwfMatrix m) => new(m.ScaleX, m.RotateSkew1, m.RotateSkew0, m.ScaleY, m.TranslateX / 20.0, m.TranslateY / 20.0);
 
     public static bool IsInDirectory(string dirPath, string filePath)
@@ -66,9 +66,9 @@ public static class Utils
         return false;
     }
 
-    public static Raylib_cs.Color ToRlColor(Color c) => new(c.R, c.G, c.B, c.A);
+    public static Raylib_cs.Color WmsColorToRlColor(Color c) => new(c.R, c.G, c.B, c.A);
 
-    public static Raylib_cs.Image ImageSharpImageToRl(Image image)
+    public static Raylib_cs.Image ImgSharpImageToRlImage(Image image)
     {
         using MemoryStream ms = new();
         image.SaveAsQoi(ms);
@@ -83,7 +83,7 @@ public static class Utils
         if (path.EndsWith(".jpg"))
         {
             using Image image = Image.Load(path);
-            return ImageSharpImageToRl(image);
+            return ImgSharpImageToRlImage(image);
         }
 
         Raylib_cs.Image img = Rl.LoadImage(path);
@@ -103,11 +103,6 @@ public static class Utils
         }
         return area > 0;
     }
-
-    public static IEnumerable<ushort> GetShapeIds(this DefineSpriteTag tag) =>
-        tag.Tags
-            .OfType<PlaceObjectBaseTag>()
-            .Select(place => place.CharacterID);
 
     public static T DeserializeFromPath<T>(string fromPath)
         where T : IDeserializable, new()

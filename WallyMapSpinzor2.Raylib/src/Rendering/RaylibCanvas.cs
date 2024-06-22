@@ -32,7 +32,7 @@ public partial class RaylibCanvas : ICanvas
 
         DrawingQueue.Push((caller, () =>
         {
-            Rl.DrawCircle((int)x, (int)y, (float)radius, Utils.ToRlColor(color));
+            Rl.DrawCircle((int)x, (int)y, (float)radius, Utils.WmsColorToRlColor(color));
         }
         ), (int)priority);
     }
@@ -44,7 +44,7 @@ public partial class RaylibCanvas : ICanvas
 
         DrawingQueue.Push((caller, () =>
         {
-            Rl.DrawLine((int)x1, (int)y1, (int)x2, (int)y2, Utils.ToRlColor(color));
+            Rl.DrawLine((int)x1, (int)y1, (int)x2, (int)y2, Utils.WmsColorToRlColor(color));
         }
         ), (int)priority);
     }
@@ -53,8 +53,8 @@ public partial class RaylibCanvas : ICanvas
     {
         if (!Matrix4x4.Invert(CameraMatrix, out Matrix4x4 invertedMat))
             throw new ArgumentException("Camera transform is not invertible");
-        Transform cam = Utils.MatrixToTransform(CameraMatrix);
-        Transform inv = Utils.MatrixToTransform(invertedMat);
+        Transform cam = Utils.Matrix4x4ToTransform(CameraMatrix);
+        Transform inv = Utils.Matrix4x4ToTransform(invertedMat);
 
         (x1, y1) = cam * trans * (x1, y1);
         (x2, y2) = cam * trans * (x2, y2);
