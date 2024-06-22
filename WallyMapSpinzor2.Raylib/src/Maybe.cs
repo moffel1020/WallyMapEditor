@@ -36,16 +36,29 @@ public readonly struct Maybe<T>
     public T ValueOr(T t) => _hasValue ? _value : t;
     public T ValueOr(Func<T> func) => _hasValue ? _value : func();
 
-    public Maybe<U> Map<U>(Func<T, U> operation) => _hasValue
-        ? Maybe<U>.Some(operation(_value))
-        : Maybe<U>.None;
-
-    public Maybe<U> Bind<U>(Func<T, Maybe<U>> operation) => _hasValue
+    public Maybe<U> Map<U>(Func<T, U> operation) =>
+    _hasValue
         ? operation(_value)
         : Maybe<U>.None;
 
-    public Maybe<U> Cast<U>() => _hasValue
-        ? Maybe<U>.Some((U)(object)_value!)
+    public Maybe<U> Bind<U>(Func<T, Maybe<U>> operation) =>
+    _hasValue
+        ? operation(_value)
+        : Maybe<U>.None;
+
+    public Maybe<R> Combine<U, R>(Maybe<U> other, Func<T, U, R> operation) =>
+    _hasValue && other._hasValue
+        ? operation(_value, other._value)
+        : Maybe<R>.None;
+
+    public Maybe<R> CombineBind<U, R>(Maybe<U> other, Func<T, U, Maybe<R>> operation) =>
+    _hasValue && other._hasValue
+        ? operation(_value, other._value)
+        : Maybe<R>.None;
+
+    public Maybe<U> Cast<U>() =>
+    _hasValue
+        ? (U)(object)_value!
         : Maybe<U>.None;
 
     public void Do(Action<T> ifSome, Action ifNone)
