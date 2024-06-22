@@ -1,4 +1,4 @@
-using System.Collections;
+using System;
 using System.Numerics;
 using System.IO;
 using System.Threading.Tasks;
@@ -169,7 +169,7 @@ public class MapOverviewWindow
 
         if (ImGui.CollapsingHeader("Images##overview"))
         {
-            ShowSelectableList(l.Desc.Backgrounds, ref selected);
+            ShowSelectableList(l.Desc.Backgrounds, ref selected, val => l.Desc.Backgrounds = val, cmd);
         }
 
         ImGui.Separator();
@@ -181,58 +181,71 @@ public class MapOverviewWindow
             {
                 selected = ts;
             }
-            ShowSelectableList(l.Desc.Assets, ref selected);
-            ShowSelectableList(l.Desc.LevelAnims, ref selected);
-            ShowSelectableList(l.Desc.AnimatedBackgrounds, ref selected);
-            ShowSelectableList(l.Desc.LevelAnimations, ref selected);
+            ShowSelectableList(l.Desc.Assets, ref selected, val => l.Desc.Assets = val, cmd);
+            ShowSelectableList(l.Desc.LevelAnims, ref selected, val => l.Desc.LevelAnims = val, cmd);
+            ShowSelectableList(l.Desc.AnimatedBackgrounds, ref selected, val => l.Desc.AnimatedBackgrounds = val, cmd);
+            ShowSelectableList(l.Desc.LevelAnimations, ref selected, val => l.Desc.LevelAnimations = val, cmd);
         }
 
         if (ImGui.CollapsingHeader("Collisions##overview"))
         {
-            ShowSelectableList(l.Desc.Collisions, ref selected);
-            ShowSelectableList(l.Desc.DynamicCollisions, ref selected);
+            ShowSelectableList(l.Desc.Collisions, ref selected, val => l.Desc.Collisions = val, cmd);
+            ShowSelectableList(l.Desc.DynamicCollisions, ref selected, val => l.Desc.DynamicCollisions = val, cmd);
         }
 
         if (ImGui.CollapsingHeader("Respawns##overview"))
         {
-            ShowSelectableList(l.Desc.Respawns, ref selected);
-            ShowSelectableList(l.Desc.DynamicRespawns, ref selected);
+            ShowSelectableList(l.Desc.Respawns, ref selected, val => l.Desc.Respawns = val, cmd);
+            ShowSelectableList(l.Desc.DynamicRespawns, ref selected, val => l.Desc.DynamicRespawns = val, cmd);
         }
 
         if (ImGui.CollapsingHeader("Item Spawns##overview"))
         {
-            ShowSelectableList(l.Desc.ItemSpawns, ref selected);
-            ShowSelectableList(l.Desc.DynamicItemSpawns, ref selected);
+            ShowSelectableList(l.Desc.ItemSpawns, ref selected, val => l.Desc.ItemSpawns = val, cmd);
+            ShowSelectableList(l.Desc.DynamicItemSpawns, ref selected, val => l.Desc.DynamicItemSpawns = val, cmd);
         }
 
         if (ImGui.CollapsingHeader("Volumes##overview"))
         {
-            ShowSelectableList(l.Desc.Volumes, ref selected);
+            ShowSelectableList(l.Desc.Volumes, ref selected, val => l.Desc.Volumes = val, cmd);
         }
 
-        if (ImGui.CollapsingHeader("Nav Nodes##overview"))
+        if (ImGui.CollapsingHeader("NavNodes##overview"))
         {
-            ShowSelectableList(l.Desc.NavNodes, ref selected);
-            ShowSelectableList(l.Desc.DynamicNavNodes, ref selected);
+            ShowSelectableList(l.Desc.NavNodes, ref selected, val => l.Desc.NavNodes = val, cmd);
+            ShowSelectableList(l.Desc.DynamicNavNodes, ref selected, val => l.Desc.DynamicNavNodes = val, cmd);
         }
 
         if (ImGui.CollapsingHeader("Sounds##overview"))
         {
-            ShowSelectableList(l.Desc.LevelSounds, ref selected);
+            ShowSelectableList(l.Desc.LevelSounds, ref selected, val => l.Desc.LevelSounds = val, cmd);
         }
 
         if (ImGui.CollapsingHeader("Horde##overview"))
         {
-            ShowSelectableList(l.Desc.WaveDatas, ref selected);
+            ShowSelectableList(l.Desc.WaveDatas, ref selected, val => l.Desc.WaveDatas = val, cmd);
         }
 
         ImGui.End();
     }
 
-    private static void ShowSelectableList(IEnumerable list, ref object? selected)
+    private void ShowSelectableList<T>(T[] values, ref object? selected, Action<T[]> changeCommand, CommandHistory cmd)
+        where T : notnull
     {
-        foreach (object o in list)
+        for (int i = 0; i < values.Length; i++)
         {
+            object? o = values[i];
+            if (ImGui.Button($"x##{o.GetHashCode()}"))
+            {
+                if (selected == o) selected = null;
+
+                T[] result = Utils.RemoveAt(values, i);
+                cmd.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
+                cmd.SetAllowMerge(false);
+                _propChanged |= true;
+            }
+            ImGui.SameLine();
+
             if (ImGui.Selectable($"{o.GetType().Name} {GetExtraObjectInfo(o)}##selectable{o.GetHashCode()}", selected == o))
                 selected = o;
         }

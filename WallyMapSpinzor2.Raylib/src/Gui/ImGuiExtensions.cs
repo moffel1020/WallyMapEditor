@@ -361,7 +361,7 @@ public static class ImGuiExt
     public static bool EditArrayHistory<T>(string label, T[] values, Action<T[]> changeCommand, Func<Maybe<T>> create, Action<int> edit, CommandHistory cmd, bool allowRemove = true, bool allowMove = true)
         where T : notnull
     {
-        List<PropChangeCommand<T[]>> commands = [];
+        List<(PropChangeCommand<T[]>, bool)> commands = [];
         unsafe { ImGui.PushStyleColor(ImGuiCol.ChildBg, *ImGui.GetStyleColorVec4(ImGuiCol.FrameBg)); }
         ImGui.BeginChild(label, new Vector2(0, ImGui.GetTextLineHeightWithSpacing() * 8), ImGuiChildFlags.ResizeY | ImGuiChildFlags.Border);
         bool changed = false;
@@ -372,7 +372,7 @@ public static class ImGuiExt
             if (WithDisabledButton(!allowRemove, $"Remove##{value.GetHashCode()}"))
             {
                 T[] result = Utils.RemoveAt(values, i);
-                commands.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
+                commands.Add((new PropChangeCommand<T[]>(changeCommand, values, result), false));
                 changed = true;
             }
             if (allowMove)
@@ -381,14 +381,14 @@ public static class ImGuiExt
                 if (WithDisabledButton(i == 0, $"Move up##{value.GetHashCode()}"))
                 {
                     T[] result = Utils.MoveUp(values, i);
-                    commands.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
+                    commands.Add((new PropChangeCommand<T[]>(changeCommand, values, result), false));
                     changed = true;
                 }
                 ImGui.SameLine();
                 if (WithDisabledButton(i == values.Length - 1, $"Move down##{value.GetHashCode()}"))
                 {
                     T[] result = Utils.MoveDown(values, i);
-                    commands.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
+                    commands.Add((new PropChangeCommand<T[]>(changeCommand, values, result), false));
                     changed = true;
                 }
             }
@@ -399,12 +399,15 @@ public static class ImGuiExt
         if (maybeNewValue.TryGetValue(out T? newValue))
         {
             T[] result = [.. values, newValue];
-            commands.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
+            commands.Add((new PropChangeCommand<T[]>(changeCommand, values, result), false));
             changed = true;
         }
 
-        foreach (PropChangeCommand<T[]> command in commands)
+        foreach ((PropChangeCommand<T[]> command, bool mergeable) in commands)
+        {
             cmd.Add(command);
+            cmd.SetAllowMerge(mergeable);
+        }
 
         return changed;
     }
