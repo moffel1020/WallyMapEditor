@@ -32,7 +32,7 @@ public partial class RaylibCanvas : ICanvas
 
         DrawingQueue.Push((caller, () =>
         {
-            Rl.DrawCircle((int)x, (int)y, (float)radius, Utils.WmsColorToRlColor(color));
+            Rl.DrawCircleV(new((float)x, (float)y), (float)radius, Utils.WmsColorToRlColor(color));
         }
         ), (int)priority);
     }
@@ -44,7 +44,7 @@ public partial class RaylibCanvas : ICanvas
 
         DrawingQueue.Push((caller, () =>
         {
-            Rl.DrawLine((int)x1, (int)y1, (int)x2, (int)y2, Utils.WmsColorToRlColor(color));
+            Rl.DrawLineV(new((float)x1, (float)y1), new((float)x2, (float)y2), Utils.WmsColorToRlColor(color));
         }
         ), (int)priority);
     }
