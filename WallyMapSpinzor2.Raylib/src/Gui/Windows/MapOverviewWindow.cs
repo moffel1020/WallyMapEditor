@@ -174,7 +174,27 @@ public class MapOverviewWindow
 
         ImGui.Separator();
 
-        if (ImGui.CollapsingHeader("Assets##overview"))
+        void addButton<T>(string id, T[] values, Func<Maybe<T>> menu, Action<T[]> change)
+        {
+            if (ImGui.Button($"+##{id}"))
+                ImGui.OpenPopup($"AddObject_{id}");
+
+            if (ImGui.BeginPopup($"AddObject_{id}"))
+            {
+                Maybe<T> result = menu();
+                if (result.TryGetValue(out T? val))
+                {
+                    cmd.Add(new PropChangeCommand<T[]>(change, values, [.. values, val]));
+                    cmd.SetAllowMerge(false);
+                    _propChanged = true;
+                    selection.Object = val;
+                    ImGui.CloseCurrentPopup();
+                }
+                ImGui.EndPopup();
+            }
+        }
+
+        ImGuiExt.HeaderWithWidget("Assets##overview", () =>
         {
             TeamScoreboard? ts = l.Desc.TeamScoreboard;
             if (ts is not null && ImGui.Selectable($"{ts.GetType().Name} {GetExtraObjectInfo(ts)}##selectable{ts.GetHashCode()}", selection.Object == ts))
@@ -185,25 +205,29 @@ public class MapOverviewWindow
             ShowSelectableList(l.Desc.LevelAnims, selection, val => l.Desc.LevelAnims = val, cmd);
             ShowSelectableList(l.Desc.AnimatedBackgrounds, selection, val => l.Desc.AnimatedBackgrounds = val, cmd);
             ShowSelectableList(l.Desc.LevelAnimations, selection, val => l.Desc.LevelAnimations = val, cmd);
-        }
+        },
+        () => addButton("asset", l.Desc.Assets, () => AddObjectPopup.AddAssetMenu(new(0, 0)), val => l.Desc.Assets = val));
 
-        if (ImGui.CollapsingHeader("Collisions##overview"))
+        ImGuiExt.HeaderWithWidget("Collisions##overview", () =>
         {
             ShowSelectableList(l.Desc.Collisions, selection, val => l.Desc.Collisions = val, cmd);
             ShowSelectableList(l.Desc.DynamicCollisions, selection, val => l.Desc.DynamicCollisions = val, cmd);
-        }
+        },
+        () => addButton("collision", l.Desc.Collisions, () => AddObjectPopup.AddCollisionMenu(new(0, 0)), val => l.Desc.Collisions = val));
 
-        if (ImGui.CollapsingHeader("Respawns##overview"))
+        ImGuiExt.HeaderWithWidget("Respawns##overview", () =>
         {
             ShowSelectableList(l.Desc.Respawns, selection, val => l.Desc.Respawns = val, cmd);
             ShowSelectableList(l.Desc.DynamicRespawns, selection, val => l.Desc.DynamicRespawns = val, cmd);
-        }
+        },
+        () => addButton("respawn", l.Desc.Respawns, () => PropertiesWindow.DefaultRespawn(new(0, 0)), val => l.Desc.Respawns = val));
 
-        if (ImGui.CollapsingHeader("Item Spawns##overview"))
+        ImGuiExt.HeaderWithWidget("Item Spawns##overview", () =>
         {
             ShowSelectableList(l.Desc.ItemSpawns, selection, val => l.Desc.ItemSpawns = val, cmd);
             ShowSelectableList(l.Desc.DynamicItemSpawns, selection, val => l.Desc.DynamicItemSpawns = val, cmd);
-        }
+        },
+        () => addButton("itemspawn", l.Desc.ItemSpawns, () => AddObjectPopup.AddItemSpawnMenu(new(0, 0)), val => l.Desc.ItemSpawns = val));
 
         if (ImGui.CollapsingHeader("Volumes##overview"))
         {

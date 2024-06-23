@@ -4,7 +4,6 @@ using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using Raylib_cs;
-using rlImGui_cs;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -410,5 +409,21 @@ public static class ImGuiExt
         }
 
         return changed;
+    }
+
+    public static void HeaderWithWidget(string label, Action headerAction, Action widget, int rightOffset = 15)
+    {
+        ImGui.SetNextItemAllowOverlap();
+        if (ImGui.CollapsingHeader(label))
+        {
+            ImGui.SameLine(ImGui.GetContentRegionMax().X - rightOffset);
+            widget();
+            headerAction();
+        }
+        else
+        {
+            ImGui.SameLine(ImGui.GetContentRegionMax().X - rightOffset);
+            widget();
+        }
     }
 }
