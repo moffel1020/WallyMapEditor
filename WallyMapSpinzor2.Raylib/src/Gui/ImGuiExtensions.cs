@@ -357,7 +357,7 @@ public static class ImGuiExt
         ImGui.Image(new IntPtr(image.Id), new Vector2(destWidth, destHeight), uv0, uv1);
     }
 
-    public static bool EditArrayHistory<T>(string label, T[] values, Action<T[]> changeCommand, Func<Maybe<T>> create, Action<int> edit, CommandHistory cmd, bool allowRemove = true, bool allowMove = true)
+    public static bool EditArrayHistory<T>(string label, T[] values, Action<T[]> changeCommand, Func<Maybe<T>> create, Func<int, bool> edit, CommandHistory cmd, bool allowRemove = true, bool allowMove = true)
         where T : notnull
     {
         List<(PropChangeCommand<T[]>, bool)> commands = [];
@@ -367,7 +367,7 @@ public static class ImGuiExt
         for (int i = 0; i < values.Length; ++i)
         {
             T value = values[i];
-            edit(i);
+            changed |= edit(i);
             if (WithDisabledButton(!allowRemove, $"Remove##{value.GetHashCode()}"))
             {
                 T[] result = Utils.RemoveAt(values, i);

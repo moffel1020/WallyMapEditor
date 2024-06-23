@@ -18,12 +18,14 @@ public partial class PropertiesWindow
             CreateDynamicChild<T>,
             (int index) =>
             {
+                bool changed = false;
                 T child = ad.Children[index];
                 if (ImGui.TreeNode($"{child.GetType().Name} {MapOverviewWindow.GetExtraObjectInfo(child)}###dynamicChild{child.GetHashCode()}"))
                 {
-                    propChanged |= ShowProperties(child, cmd, data);
+                    changed |= ShowProperties(child, cmd, data);
                     ImGui.TreePop();
                 }
+                return changed;
             }, cmd);
         }
 

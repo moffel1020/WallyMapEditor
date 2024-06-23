@@ -47,11 +47,13 @@ partial class PropertiesWindow
                 if (index != 0)
                     ImGui.Separator();
                 AbstractAsset child = p.AssetChildren![index];
+                bool changed = false;
                 if (ImGui.TreeNode($"{child.GetType().Name}##{child.GetHashCode()}"))
                 {
-                    propChanged |= ShowProperties(child, cmd, data);
+                    changed |= ShowProperties(child, cmd, data);
                     ImGui.TreePop();
                 }
+                return changed;
             }, cmd);
         }
 

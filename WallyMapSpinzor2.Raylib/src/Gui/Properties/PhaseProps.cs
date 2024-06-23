@@ -6,16 +6,13 @@ public partial class PropertiesWindow
     {
         bool propChanged = false;
         propChanged |= ImGuiExt.DragIntHistory("StartFrame", phase.StartFrame, val => phase.StartFrame = val, cmd, minValue: minStartFrame, maxValue: maxFrameNum);
-        propChanged |=
-            ImGuiExt.EditArrayHistory("", phase.KeyFrames, val => phase.KeyFrames = val,
+        propChanged |= ImGuiExt.EditArrayHistory("", phase.KeyFrames, val => phase.KeyFrames = val,
             // create
             () => CreateKeyFrame(LastKeyFrameNum(phase.KeyFrames)),
             // edit
-            (int index) =>
-            {
-                propChanged |= ShowOneOfManyKeyFrameProps(phase.KeyFrames, index, cmd);
-            },
+            (int index) => ShowOneOfManyKeyFrameProps(phase.KeyFrames, index, cmd),
             cmd, allowMove: false);
+
         return propChanged;
     }
 

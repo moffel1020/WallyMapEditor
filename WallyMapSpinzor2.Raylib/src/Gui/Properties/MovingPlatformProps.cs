@@ -19,12 +19,14 @@ public partial class PropertiesWindow
             CreateNewMovingPlatformChild,
             (int index) =>
             {
+                bool changed = false;
                 AbstractAsset child = mp.Assets[index];
                 if (ImGui.TreeNode($"{child.GetType().Name} {MapOverviewWindow.GetExtraObjectInfo(child)}##{child.GetHashCode()}"))
                 {
-                    propChanged |= ShowProperties(child, cmd, data);
+                    changed |= ShowProperties(child, cmd, data);
                     ImGui.TreePop();
                 }
+                return changed;
             }, cmd);
         }
         return propChanged;

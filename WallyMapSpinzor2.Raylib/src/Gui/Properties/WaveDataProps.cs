@@ -21,12 +21,14 @@ public partial class PropertiesWindow
             CreateNewCustomPath,
             (int index) =>
             {
+                bool changed = false;
                 CustomPath cp = w.CustomPaths[index];
                 if (ImGui.TreeNode($"CustomPath {MapOverviewWindow.GetExtraObjectInfo(cp)}###customPaths{cp.GetHashCode()}"))
                 {
-                    propChanged |= ShowProperties(cp, cmd, data);
+                    changed |= ShowProperties(cp, cmd, data);
                     ImGui.TreePop();
                 }
+                return changed;
             }, cmd);
         }
         if (ImGui.CollapsingHeader($"Groups##props{w.GetHashCode()}"))
@@ -35,12 +37,14 @@ public partial class PropertiesWindow
             CreateNewGroup,
             (int index) =>
             {
+                bool changed = false;
                 Group g = w.Groups[index];
                 if (ImGui.TreeNode($"Group {MapOverviewWindow.GetExtraObjectInfo(g)}###groups{g.GetHashCode()}"))
                 {
-                    propChanged |= ShowProperties(g, cmd, data);
+                    changed |= ShowProperties(g, cmd, data);
                     ImGui.TreePop();
                 }
+                return changed;
             }, cmd);
         }
         return propChanged;
@@ -55,12 +59,14 @@ public partial class PropertiesWindow
             CreateNewPoint,
             (int index) =>
             {
+                bool changed = false;
                 Point p = cp.Points[index];
                 if (ImGui.TreeNode($"Point {MapOverviewWindow.GetExtraObjectInfo(p)}###points{p.GetHashCode()}"))
                 {
-                    propChanged |= ShowProperties(p, cmd, data);
+                    changed |= ShowProperties(p, cmd, data);
                     ImGui.TreePop();
                 }
+                return changed;
             }, cmd);
         }
         return propChanged;

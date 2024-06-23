@@ -50,7 +50,7 @@ public partial class PropertiesWindow
             {
                 if (index != 0)
                     ImGui.Separator();
-                propChanged |= ShowOneOfManyKeyFrameProps(anim.KeyFrames, index, cmd);
+                return ShowOneOfManyKeyFrameProps(anim.KeyFrames, index, cmd);
             },
             cmd, allowRemove: anim.KeyFrames.Length > 1, allowMove: false);
         }
