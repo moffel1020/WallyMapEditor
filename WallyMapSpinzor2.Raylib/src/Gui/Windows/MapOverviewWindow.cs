@@ -169,7 +169,7 @@ public class MapOverviewWindow
 
         if (ImGui.CollapsingHeader("Images##overview"))
         {
-            ShowSelectableList(l.Desc.Backgrounds, selection, val => l.Desc.Backgrounds = val, cmd);
+            ShowSelectableList(l.Desc.Backgrounds, selection, val => l.Desc.Backgrounds = val, cmd, false);
         }
 
         ImGui.Separator();
@@ -229,22 +229,25 @@ public class MapOverviewWindow
         ImGui.End();
     }
 
-    private void ShowSelectableList<T>(T[] values, SelectionContext selection, Action<T[]> changeCommand, CommandHistory cmd)
+    private void ShowSelectableList<T>(T[] values, SelectionContext selection, Action<T[]> changeCommand, CommandHistory cmd, bool removable = true)
         where T : notnull
     {
         for (int i = 0; i < values.Length; i++)
         {
             object? o = values[i];
-            if (ImGui.Button($"x##{o.GetHashCode()}"))
+            if (removable)
             {
-                if (selection.Object == o) selection.Object = null;
+                if (ImGui.Button($"x##{o.GetHashCode()}"))
+                {
+                    if (selection.Object == o) selection.Object = null;
 
-                T[] result = Utils.RemoveAt(values, i);
-                cmd.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
-                cmd.SetAllowMerge(false);
-                _propChanged |= true;
+                    T[] result = Utils.RemoveAt(values, i);
+                    cmd.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
+                    cmd.SetAllowMerge(false);
+                    _propChanged |= true;
+                }
+                ImGui.SameLine();
             }
-            ImGui.SameLine();
 
             if (ImGui.Selectable($"{o.GetType().Name} {GetExtraObjectInfo(o)}##selectable{o.GetHashCode()}", selection.Object == o))
                 selection.Object = o;
