@@ -9,7 +9,7 @@ public static class AddObjectPopup
 
     public static Vector2 NewPos { get; set; }
 
-    public static void Update(Level l, CommandHistory cmd)
+    public static void Update(Level l, CommandHistory cmd, SelectionContext selection)
     {
         if (ImGui.BeginPopup(NAME))
         {
@@ -21,6 +21,7 @@ public static class AddObjectPopup
                 {
                     cmd.Add(new PropChangeCommand<AbstractCollision[]>(val => l.Desc.Collisions = val, l.Desc.Collisions, [.. l.Desc.Collisions, ac]));
                     cmd.SetAllowMerge(false);
+                    selection.Object = ac;
                 }
 
                 ImGui.EndMenu();
@@ -32,6 +33,7 @@ public static class AddObjectPopup
                 {
                     cmd.Add(new PropChangeCommand<AbstractItemSpawn[]>(val => l.Desc.ItemSpawns = val, l.Desc.ItemSpawns, [.. l.Desc.ItemSpawns, item]));
                     cmd.SetAllowMerge(false);
+                    selection.Object = item;
                 }
 
                 ImGui.EndMenu();
@@ -41,6 +43,7 @@ public static class AddObjectPopup
                 Respawn res = PropertiesWindow.DefaultRespawn(NewPos);
                 cmd.Add(new PropChangeCommand<Respawn[]>(val => l.Desc.Respawns = val, l.Desc.Respawns, [.. l.Desc.Respawns, res]));
                 cmd.SetAllowMerge(false);
+                selection.Object = res;
                 ImGui.CloseCurrentPopup();
             }
             if (ImGui.BeginMenu("Platform"))
@@ -50,6 +53,7 @@ public static class AddObjectPopup
                 {
                     cmd.Add(new PropChangeCommand<AbstractAsset[]>(val => l.Desc.Assets = val, l.Desc.Assets, [.. l.Desc.Assets, asset]));
                     cmd.SetAllowMerge(false);
+                    selection.Object = asset;
                 }
                 ImGui.EndMenu();
             }

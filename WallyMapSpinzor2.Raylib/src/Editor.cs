@@ -244,7 +244,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         }
 
         if (MapData is Level level)
-            AddObjectPopup.Update(level, CommandHistory);
+            AddObjectPopup.Update(level, CommandHistory, Selection);
 
         DialogWindows.RemoveAll(dialog => dialog.Closed);
         foreach (IDialog d in DialogWindows)
