@@ -49,35 +49,7 @@ public partial class PropertiesWindow
 
         if (ImGui.BeginPopup("AddChild##dynamic"))
         {
-            if (ImGui.BeginMenu("Normal Collision"))
-            {
-                if (ImGui.MenuItem(nameof(HardCollision))) result = DefaultCollision<HardCollision>(new(0, 0));
-                if (ImGui.MenuItem(nameof(SoftCollision))) result = DefaultCollision<SoftCollision>(new(0, 0));
-                if (ImGui.MenuItem(nameof(NoSlideCollision))) result = DefaultCollision<NoSlideCollision>(new(0, 0));
-                ImGui.EndMenu();
-            }
-            if (ImGui.BeginMenu("Bouncy Collision"))
-            {
-                if (ImGui.MenuItem(nameof(BouncyHardCollision))) result = DefaultCollision<BouncyHardCollision>(new(0, 0));
-                if (ImGui.MenuItem(nameof(BouncySoftCollision))) result = DefaultCollision<BouncySoftCollision>(new(0, 0));
-                if (ImGui.MenuItem(nameof(BouncyNoSlideCollision))) result = DefaultCollision<BouncyNoSlideCollision>(new(0, 0));
-                ImGui.EndMenu();
-            }
-            if (ImGui.BeginMenu("Special Collision"))
-            {
-                if (ImGui.MenuItem(nameof(StickyCollision))) result = DefaultCollision<StickyCollision>(new(0, 0));
-                if (ImGui.MenuItem(nameof(ItemIgnoreCollision))) result = DefaultCollision<ItemIgnoreCollision>(new(0, 0));
-                if (ImGui.MenuItem(nameof(TriggerCollision))) result = DefaultCollision<TriggerCollision>(new(0, 0));
-                ImGui.EndMenu();
-            }
-            if (ImGui.BeginMenu("Gamemode collision"))
-            {
-                if (ImGui.MenuItem(nameof(GameModeHardCollision))) result = DefaultCollision<GameModeHardCollision>(new(0, 0));
-                if (ImGui.MenuItem(nameof(PressurePlateCollision))) result = DefaultCollision<PressurePlateCollision>(new(0, 0));
-                if (ImGui.MenuItem(nameof(SoftPressurePlateCollision))) result = DefaultCollision<SoftPressurePlateCollision>(new(0, 0));
-                if (ImGui.MenuItem(nameof(LavaCollision))) result = DefaultCollision<LavaCollision>(new(0, 0));
-                ImGui.EndMenu();
-            }
+            result = AddObjectPopup.AddCollisionMenu(new(0, 0));
             ImGui.EndPopup();
         }
         return result;
@@ -91,10 +63,7 @@ public partial class PropertiesWindow
 
         if (ImGui.BeginPopup("AddChild##dynamic"))
         {
-            if (ImGui.MenuItem(nameof(ItemSpawn))) result = DefaultItemSpawn<ItemSpawn>(new(0, 0));
-            if (ImGui.MenuItem(nameof(ItemInitSpawn))) result = DefaultItemSpawn<ItemInitSpawn>(new(0, 0));
-            if (ImGui.MenuItem(nameof(TeamItemInitSpawn))) result = DefaultItemSpawn<TeamItemInitSpawn>(new(0, 0));
-            if (ImGui.MenuItem(nameof(ItemSet))) result = DefaultItemSpawn<ItemSet>(new(0, 0));
+            result = AddObjectPopup.AddItemSpawnMenu(new(0, 0));
             ImGui.EndPopup();
         }
         return result;

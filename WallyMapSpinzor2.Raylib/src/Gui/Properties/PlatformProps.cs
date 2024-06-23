@@ -1,3 +1,4 @@
+using System.Numerics;
 using ImGuiNET;
 
 namespace WallyMapSpinzor2.Raylib;
@@ -65,33 +66,28 @@ partial class PropertiesWindow
 
         if (ImGui.BeginPopup("AddChild##platform"))
         {
-            if (ImGui.MenuItem("Asset"))
-                result = DefaultAsset;
-            if (ImGui.MenuItem("Platform with AssetName"))
-                result = DefaultPlatformWithAssetName;
-            if (ImGui.MenuItem("Platform without AssetName"))
-                result = DefaultPlatformWithoutAssetName;
+            result = AddObjectPopup.AddAssetMenu(new(0, 0), true);
             ImGui.EndPopup();
         }
         return result;
     }
 
-    public static Platform DefaultPlatformWithAssetName => new()
+    public static Platform DefaultPlatformWithAssetName(Vector2 pos) => new()
     {
         InstanceName = "Custom_Platform",
         AssetName = "../Battlehill/SK_Small_Plat.png",
-        X = 0,
-        Y = 0,
+        X = pos.X,
+        Y = pos.Y,
         W = 750,
         H = 175,
     };
 
-    public static Platform DefaultPlatformWithoutAssetName => new()
+    public static Platform DefaultPlatformWithoutAssetName(Vector2 pos) => new()
     {
         InstanceName = "Custom_Platform",
         AssetChildren = [],
-        X = 0,
-        Y = 0,
+        X = pos.X,
+        Y = pos.Y,
         ScaleX = 1,
         ScaleY = 1,
     };

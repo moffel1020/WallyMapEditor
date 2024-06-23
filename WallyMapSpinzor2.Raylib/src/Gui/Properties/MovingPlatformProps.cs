@@ -38,10 +38,7 @@ public partial class PropertiesWindow
 
         if (ImGui.BeginPopup("AddChild##moving_platform"))
         {
-            if (ImGui.MenuItem("Platform with AssetName"))
-                result = DefaultPlatformWithAssetName;
-            if (ImGui.MenuItem("Platform without AssetName"))
-                result = DefaultPlatformWithoutAssetName;
+            result = AddObjectPopup.AddAssetMenu(new(0, 0));
             ImGui.EndPopup();
         }
         return result;

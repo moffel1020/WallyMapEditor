@@ -491,7 +491,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         return [new()
         {
             Texture = texture,
-            Transform =  trans * Transform.CreateTranslate(texture.XOff, texture.YOff),
+            Transform = trans * Transform.CreateTranslate(texture.XOff, texture.YOff),
             Tint = tint,
             Opacity = opacity,
         }];
