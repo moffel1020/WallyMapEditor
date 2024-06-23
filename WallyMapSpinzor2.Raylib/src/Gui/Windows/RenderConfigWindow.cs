@@ -150,8 +150,18 @@ public class RenderConfigWindow
             ImGui.Separator();
             config.ShowRingRopes = ImGuiExt.Checkbox("Show brawldown ropes##config", config.ShowRingRopes);
             ImGui.Separator();
-            config.ShowBombsketballTargets = ImGuiExt.Checkbox("Show bombsketball targets##config", config.ShowBombsketballTargets);
-            config.UseBombsketballDigitSize = ImGuiExt.Checkbox("Bombsketball digit size fix##config", config.UseBombsketballDigitSize);
+            if (ImGui.TreeNode("Bombsketball##config"))
+            {
+                config.ShowBombsketballTargets = ImGuiExt.Checkbox("Show bombsketball targets##config", config.ShowBombsketballTargets);
+                config.UseBombsketballDigitSize = ImGuiExt.Checkbox("Bombsketball digit size fix##config", config.UseBombsketballDigitSize);
+                ImGui.Separator();
+                double[] frames = [7500 / 16.0, 3000 / 10.0, 7500 / 16.0];
+                for (int i = 0; i < 3; ++i)
+                {
+                    config.ShowBombsketballBombTimers[i] = ImGuiExt.Checkbox($"Show timer {i + 1}##config", config.ShowBombsketballBombTimers[i]);
+                    config.BombsketballBombTimerFrames[i] = ImGuiExt.DragFloat($"Timer {i + 1} frames##config", config.BombsketballBombTimerFrames[i], minValue: 0, maxValue: frames[i] - 1 / 16.0);
+                }
+            }
             ImGui.Separator();
             if (ImGui.TreeNode("Horde##config"))
             {

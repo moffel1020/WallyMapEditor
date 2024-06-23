@@ -125,6 +125,11 @@ public partial class RaylibCanvas : ICanvas
         Animator.DrawAnim(gfx, animName, frame, trans, priority, caller, loopLimit);
     }
 
+    public int? GetAnimationFrameCount(Gfx gfx, string animName)
+    {
+        return Animator.GetAnimationFrameCount(gfx, animName);
+    }
+
     public static void DrawTextureWithTransform(Texture2D texture, double x, double y, double w, double h, Transform trans, float tintR = 1, float tintG = 1, float tintB = 1, float tintA = 1)
     {
         Rl.BeginBlendMode(BlendMode.AlphaPremultiply);

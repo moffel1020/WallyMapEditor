@@ -47,6 +47,30 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         }
     }
 
+    public int? GetAnimationFrameCount(Gfx gfx, string animName)
+    {
+        if (gfx.AnimFile.StartsWith("SFX_"))
+        {
+            SwfFileData? swf = loader.LoadSwf(gfx.AnimFile);
+            if (swf is null)
+                return null;
+            ushort spriteId = swf.SymbolClass[gfx.AnimClass];
+            SwfSprite? sprite = loader.LoadSpriteFromSwf(gfx.AnimFile, spriteId);
+            if (sprite is null)
+                return null;
+            return sprite.Frames.Length;
+        }
+        // anm animation
+        else if (gfx.AnimFile.StartsWith("Animation_"))
+        {
+            if (!loader.AnmClasses.TryGetValue($"{gfx.AnimFile}/{gfx.AnimClass}", out AnmClass? anmClass))
+                return null;
+            AnmAnimation animation = anmClass.Animations[animName];
+            return animation.Frames.Length;
+        }
+        return null;
+    }
+
     private sealed class GfxHasher : IEqualityComparer<(Gfx, string)>
     {
         public bool Equals((Gfx, string) x, (Gfx, string) y)
