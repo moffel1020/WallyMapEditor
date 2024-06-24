@@ -201,10 +201,10 @@ public class MapOverviewWindow
             {
                 selection.Object = ts;
             }
-            ShowSelectableList(l.Desc.Assets, selection, val => l.Desc.Assets = val, cmd);
-            ShowSelectableList(l.Desc.LevelAnims, selection, val => l.Desc.LevelAnims = val, cmd);
-            ShowSelectableList(l.Desc.AnimatedBackgrounds, selection, val => l.Desc.AnimatedBackgrounds = val, cmd);
-            ShowSelectableList(l.Desc.LevelAnimations, selection, val => l.Desc.LevelAnimations = val, cmd);
+            ShowSelectableList(l.Desc.Assets, selection, val => l.Desc.Assets = val, cmd, movable: true);
+            ShowSelectableList(l.Desc.LevelAnims, selection, val => l.Desc.LevelAnims = val, cmd, movable: true);
+            ShowSelectableList(l.Desc.AnimatedBackgrounds, selection, val => l.Desc.AnimatedBackgrounds = val, cmd, movable: true);
+            ShowSelectableList(l.Desc.LevelAnimations, selection, val => l.Desc.LevelAnimations = val, cmd, movable: true);
         },
         () => addButton("asset", l.Desc.Assets, () => AddObjectPopup.AddAssetMenu(new(0, 0)), val => l.Desc.Assets = val));
 
@@ -253,7 +253,7 @@ public class MapOverviewWindow
         ImGui.End();
     }
 
-    private void ShowSelectableList<T>(T[] values, SelectionContext selection, Action<T[]> changeCommand, CommandHistory cmd, bool removable = true)
+    private void ShowSelectableList<T>(T[] values, SelectionContext selection, Action<T[]> changeCommand, CommandHistory cmd, bool removable = true, bool movable = false)
         where T : notnull
     {
         for (int i = 0; i < values.Length; i++)
@@ -266,6 +266,27 @@ public class MapOverviewWindow
                     if (selection.Object == o) selection.Object = null;
 
                     T[] result = Utils.RemoveAt(values, i);
+                    cmd.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
+                    cmd.SetAllowMerge(false);
+                    _propChanged |= true;
+                }
+                ImGui.SameLine();
+            }
+
+            if (movable)
+            {
+                // couldn't get unicode char to work
+                if (ImGui.Button($"^##{o.GetHashCode()}"))
+                {
+                    T[] result = Utils.MoveUp(values, i);
+                    cmd.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
+                    cmd.SetAllowMerge(false);
+                    _propChanged |= true;
+                }
+                ImGui.SameLine();
+                if (ImGui.Button($"v##{o.GetHashCode()}"))
+                {
+                    T[] result = Utils.MoveDown(values, i);
                     cmd.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
                     cmd.SetAllowMerge(false);
                     _propChanged |= true;
