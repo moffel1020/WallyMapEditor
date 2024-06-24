@@ -79,4 +79,13 @@ partial class PropertiesWindow
         }
         return propChanged;
     }
+
+    public static Asset DefaultAsset(Vector2 pos) => new()
+    {
+        AssetName = "../Battlehill/SK_Small_Plat.png",
+        X = pos.X,
+        Y = pos.Y,
+        W = 750,
+        H = 175,
+    };
 }

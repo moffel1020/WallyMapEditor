@@ -1,3 +1,4 @@
+using System.Numerics;
 using ImGuiNET;
 
 namespace WallyMapSpinzor2.Raylib;
@@ -39,16 +40,57 @@ partial class PropertiesWindow
 
         if (p.AssetName is null && ImGui.CollapsingHeader("Children"))
         {
-            foreach (AbstractAsset child in p.AssetChildren!)
+            propChanged |= ImGuiExt.EditArrayHistory("", p.AssetChildren!, val => p.AssetChildren = val,
+            CreateNewPlatformChild,
+            (int index) =>
             {
+                if (index != 0)
+                    ImGui.Separator();
+                AbstractAsset child = p.AssetChildren![index];
+                bool changed = false;
                 if (ImGui.TreeNode($"{child.GetType().Name}##{child.GetHashCode()}"))
                 {
-                    propChanged |= ShowProperties(child, cmd, data);
+                    changed |= ShowProperties(child, cmd, data);
                     ImGui.TreePop();
                 }
-            }
+                return changed;
+            }, cmd);
         }
 
         return propChanged;
     }
+
+    private static Maybe<AbstractAsset> CreateNewPlatformChild()
+    {
+        Maybe<AbstractAsset> result = new();
+        if (ImGui.Button("Add new child"))
+            ImGui.OpenPopup("AddChild##platform");
+
+        if (ImGui.BeginPopup("AddChild##platform"))
+        {
+            result = AddObjectPopup.AddAssetMenu(new(0, 0), true);
+            ImGui.EndPopup();
+        }
+        return result;
+    }
+
+    public static Platform DefaultPlatformWithAssetName(Vector2 pos) => new()
+    {
+        InstanceName = "Custom_Platform",
+        AssetName = "../Battlehill/SK_Small_Plat.png",
+        X = pos.X,
+        Y = pos.Y,
+        W = 750,
+        H = 175,
+    };
+
+    public static Platform DefaultPlatformWithoutAssetName(Vector2 pos) => new()
+    {
+        InstanceName = "Custom_Platform",
+        AssetChildren = [],
+        X = pos.X,
+        Y = pos.Y,
+        ScaleX = 1,
+        ScaleY = 1,
+    };
 }

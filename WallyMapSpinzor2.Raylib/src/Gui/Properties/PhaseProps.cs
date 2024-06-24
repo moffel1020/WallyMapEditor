@@ -6,7 +6,19 @@ public partial class PropertiesWindow
     {
         bool propChanged = false;
         propChanged |= ImGuiExt.DragIntHistory("StartFrame", phase.StartFrame, val => phase.StartFrame = val, cmd, minValue: minStartFrame, maxValue: maxFrameNum);
-        propChanged |= ShowManyKeyFrameProps(phase.KeyFrames, cmd);
+        propChanged |= ImGuiExt.EditArrayHistory("", phase.KeyFrames, val => phase.KeyFrames = val,
+            // create
+            () => CreateKeyFrame(LastKeyFrameNum(phase.KeyFrames)),
+            // edit
+            (int index) => ShowOneOfManyKeyFrameProps(phase.KeyFrames, index, cmd),
+            cmd, allowMove: false);
+
         return propChanged;
     }
+
+    public static Phase DefaultPhase(int lastKeyFrameNum) => new()
+    {
+        StartFrame = lastKeyFrameNum + 1,
+        KeyFrames = [],
+    };
 }

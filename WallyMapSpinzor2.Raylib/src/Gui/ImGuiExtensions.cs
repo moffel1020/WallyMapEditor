@@ -1,9 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using Raylib_cs;
-using rlImGui_cs;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -355,5 +355,75 @@ public static class ImGuiExt
         float uv1Y = uv0Y + sourceRect.Height / image.Height;
         Vector2 uv1 = new(uv1X, uv1Y);
         ImGui.Image(new IntPtr(image.Id), new Vector2(destWidth, destHeight), uv0, uv1);
+    }
+
+    public static bool EditArrayHistory<T>(string label, T[] values, Action<T[]> changeCommand, Func<Maybe<T>> create, Func<int, bool> edit, CommandHistory cmd, bool allowRemove = true, bool allowMove = true)
+        where T : notnull
+    {
+        List<(PropChangeCommand<T[]>, bool)> commands = [];
+        unsafe { ImGui.PushStyleColor(ImGuiCol.ChildBg, *ImGui.GetStyleColorVec4(ImGuiCol.FrameBg)); }
+        ImGui.BeginChild(label, new Vector2(0, ImGui.GetTextLineHeightWithSpacing() * 8), ImGuiChildFlags.ResizeY | ImGuiChildFlags.Border);
+        bool changed = false;
+        for (int i = 0; i < values.Length; ++i)
+        {
+            T value = values[i];
+            changed |= edit(i);
+            if (WithDisabledButton(!allowRemove, $"Remove##{value.GetHashCode()}"))
+            {
+                T[] result = Utils.RemoveAt(values, i);
+                commands.Add((new PropChangeCommand<T[]>(changeCommand, values, result), false));
+                changed = true;
+            }
+            if (allowMove)
+            {
+                ImGui.SameLine();
+                if (WithDisabledButton(i == 0, $"Move up##{value.GetHashCode()}"))
+                {
+                    T[] result = Utils.MoveUp(values, i);
+                    commands.Add((new PropChangeCommand<T[]>(changeCommand, values, result), false));
+                    changed = true;
+                }
+                ImGui.SameLine();
+                if (WithDisabledButton(i == values.Length - 1, $"Move down##{value.GetHashCode()}"))
+                {
+                    T[] result = Utils.MoveDown(values, i);
+                    commands.Add((new PropChangeCommand<T[]>(changeCommand, values, result), false));
+                    changed = true;
+                }
+            }
+        }
+        ImGui.EndChild();
+        ImGui.PopStyleColor();
+        Maybe<T> maybeNewValue = create();
+        if (maybeNewValue.TryGetValue(out T? newValue))
+        {
+            T[] result = [.. values, newValue];
+            commands.Add((new PropChangeCommand<T[]>(changeCommand, values, result), false));
+            changed = true;
+        }
+
+        foreach ((PropChangeCommand<T[]> command, bool mergeable) in commands)
+        {
+            cmd.Add(command);
+            cmd.SetAllowMerge(mergeable);
+        }
+
+        return changed;
+    }
+
+    public static void HeaderWithWidget(string label, Action headerAction, Action widget, int rightOffset = 15)
+    {
+        ImGui.SetNextItemAllowOverlap();
+        if (ImGui.CollapsingHeader(label))
+        {
+            ImGui.SameLine(ImGui.GetContentRegionMax().X - rightOffset);
+            widget();
+            headerAction();
+        }
+        else
+        {
+            ImGui.SameLine(ImGui.GetContentRegionMax().X - rightOffset);
+            widget();
+        }
     }
 }

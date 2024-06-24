@@ -1,4 +1,4 @@
-using System.Collections;
+using System;
 using System.Numerics;
 using System.IO;
 using System.Threading.Tasks;
@@ -31,7 +31,7 @@ public class MapOverviewWindow
         _ => 1,
     };
 
-    public void Show(Level l, CommandHistory cmd, PathPreferences pathPrefs, AssetLoader? loader, ref object? selected)
+    public void Show(Level l, CommandHistory cmd, PathPreferences pathPrefs, AssetLoader? loader, SelectionContext selection)
     {
         ImGui.Begin("Map Overview", ref _open);
 
@@ -169,78 +169,118 @@ public class MapOverviewWindow
 
         if (ImGui.CollapsingHeader("Images##overview"))
         {
-            ShowSelectableList(l.Desc.Backgrounds, ref selected);
+            ShowSelectableList(l.Desc.Backgrounds, selection, val => l.Desc.Backgrounds = val, cmd, false);
         }
 
         ImGui.Separator();
 
-        if (ImGui.CollapsingHeader("Assets##overview"))
+        void addButton<T>(string id, T[] values, Func<Maybe<T>> menu, Action<T[]> change)
+        {
+            if (ImGui.Button($"+##{id}"))
+                ImGui.OpenPopup($"AddObject_{id}");
+
+            if (ImGui.BeginPopup($"AddObject_{id}"))
+            {
+                Maybe<T> result = menu();
+                if (result.TryGetValue(out T? val))
+                {
+                    cmd.Add(new PropChangeCommand<T[]>(change, values, [.. values, val]));
+                    cmd.SetAllowMerge(false);
+                    _propChanged = true;
+                    selection.Object = val;
+                    ImGui.CloseCurrentPopup();
+                }
+                ImGui.EndPopup();
+            }
+        }
+
+        ImGuiExt.HeaderWithWidget("Assets##overview", () =>
         {
             TeamScoreboard? ts = l.Desc.TeamScoreboard;
-            if (ts is not null && ImGui.Selectable($"{ts.GetType().Name} {GetExtraObjectInfo(ts)}##selectable{ts.GetHashCode()}", selected == ts))
+            if (ts is not null && ImGui.Selectable($"{ts.GetType().Name} {GetExtraObjectInfo(ts)}##selectable{ts.GetHashCode()}", selection.Object == ts))
             {
-                selected = ts;
+                selection.Object = ts;
             }
-            ShowSelectableList(l.Desc.Assets, ref selected);
-            ShowSelectableList(l.Desc.LevelAnims, ref selected);
-            ShowSelectableList(l.Desc.AnimatedBackgrounds, ref selected);
-            ShowSelectableList(l.Desc.LevelAnimations, ref selected);
-        }
+            ShowSelectableList(l.Desc.Assets, selection, val => l.Desc.Assets = val, cmd);
+            ShowSelectableList(l.Desc.LevelAnims, selection, val => l.Desc.LevelAnims = val, cmd);
+            ShowSelectableList(l.Desc.AnimatedBackgrounds, selection, val => l.Desc.AnimatedBackgrounds = val, cmd);
+            ShowSelectableList(l.Desc.LevelAnimations, selection, val => l.Desc.LevelAnimations = val, cmd);
+        },
+        () => addButton("asset", l.Desc.Assets, () => AddObjectPopup.AddAssetMenu(new(0, 0)), val => l.Desc.Assets = val));
 
-        if (ImGui.CollapsingHeader("Collisions##overview"))
+        ImGuiExt.HeaderWithWidget("Collisions##overview", () =>
         {
-            ShowSelectableList(l.Desc.Collisions, ref selected);
-            ShowSelectableList(l.Desc.DynamicCollisions, ref selected);
-        }
+            ShowSelectableList(l.Desc.Collisions, selection, val => l.Desc.Collisions = val, cmd);
+            ShowSelectableList(l.Desc.DynamicCollisions, selection, val => l.Desc.DynamicCollisions = val, cmd);
+        },
+        () => addButton("collision", l.Desc.Collisions, () => AddObjectPopup.AddCollisionMenu(new(0, 0)), val => l.Desc.Collisions = val));
 
-        if (ImGui.CollapsingHeader("Respawns##overview"))
+        ImGuiExt.HeaderWithWidget("Respawns##overview", () =>
         {
-            ShowSelectableList(l.Desc.Respawns, ref selected);
-            ShowSelectableList(l.Desc.DynamicRespawns, ref selected);
-        }
+            ShowSelectableList(l.Desc.Respawns, selection, val => l.Desc.Respawns = val, cmd);
+            ShowSelectableList(l.Desc.DynamicRespawns, selection, val => l.Desc.DynamicRespawns = val, cmd);
+        },
+        () => addButton("respawn", l.Desc.Respawns, () => PropertiesWindow.DefaultRespawn(new(0, 0)), val => l.Desc.Respawns = val));
 
-        if (ImGui.CollapsingHeader("Item Spawns##overview"))
+        ImGuiExt.HeaderWithWidget("Item Spawns##overview", () =>
         {
-            ShowSelectableList(l.Desc.ItemSpawns, ref selected);
-            ShowSelectableList(l.Desc.DynamicItemSpawns, ref selected);
-        }
+            ShowSelectableList(l.Desc.ItemSpawns, selection, val => l.Desc.ItemSpawns = val, cmd);
+            ShowSelectableList(l.Desc.DynamicItemSpawns, selection, val => l.Desc.DynamicItemSpawns = val, cmd);
+        },
+        () => addButton("itemspawn", l.Desc.ItemSpawns, () => AddObjectPopup.AddItemSpawnMenu(new(0, 0)), val => l.Desc.ItemSpawns = val));
 
         if (ImGui.CollapsingHeader("Volumes##overview"))
         {
-            ShowSelectableList(l.Desc.Volumes, ref selected);
+            ShowSelectableList(l.Desc.Volumes, selection, val => l.Desc.Volumes = val, cmd);
         }
 
-        if (ImGui.CollapsingHeader("Nav Nodes##overview"))
+        if (ImGui.CollapsingHeader("NavNodes##overview"))
         {
-            ShowSelectableList(l.Desc.NavNodes, ref selected);
-            ShowSelectableList(l.Desc.DynamicNavNodes, ref selected);
+            ShowSelectableList(l.Desc.NavNodes, selection, val => l.Desc.NavNodes = val, cmd);
+            ShowSelectableList(l.Desc.DynamicNavNodes, selection, val => l.Desc.DynamicNavNodes = val, cmd);
         }
 
         if (ImGui.CollapsingHeader("Sounds##overview"))
         {
-            ShowSelectableList(l.Desc.LevelSounds, ref selected);
+            ShowSelectableList(l.Desc.LevelSounds, selection, val => l.Desc.LevelSounds = val, cmd);
         }
 
         if (ImGui.CollapsingHeader("Horde##overview"))
         {
-            ShowSelectableList(l.Desc.WaveDatas, ref selected);
+            ShowSelectableList(l.Desc.WaveDatas, selection, val => l.Desc.WaveDatas = val, cmd);
         }
 
         ImGui.End();
     }
 
-    private static void ShowSelectableList(IEnumerable list, ref object? selected)
+    private void ShowSelectableList<T>(T[] values, SelectionContext selection, Action<T[]> changeCommand, CommandHistory cmd, bool removable = true)
+        where T : notnull
     {
-        foreach (object o in list)
+        for (int i = 0; i < values.Length; i++)
         {
-            if (ImGui.Selectable($"{o.GetType().Name} {GetExtraObjectInfo(o)}##selectable{o.GetHashCode()}", selected == o))
-                selected = o;
+            object? o = values[i];
+            if (removable)
+            {
+                if (ImGui.Button($"x##{o.GetHashCode()}"))
+                {
+                    if (selection.Object == o) selection.Object = null;
+
+                    T[] result = Utils.RemoveAt(values, i);
+                    cmd.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
+                    cmd.SetAllowMerge(false);
+                    _propChanged |= true;
+                }
+                ImGui.SameLine();
+            }
+
+            if (ImGui.Selectable($"{o.GetType().Name} {GetExtraObjectInfo(o)}##selectable{o.GetHashCode()}", selection.Object == o))
+                selection.Object = o;
         }
     }
 
     public static string GetExtraObjectInfo(object o) => o switch
     {
-        Background b => $"({b.AssetName ?? b.AnimatedAssetName})",
+        Background b => $"({b.AssetName})",
         Platform p => $"({p.InstanceName})",
         AnimatedBackground ab => $"({ab.Gfx.AnimClass})",
         Gfx g => $"({g.AnimClass})",
@@ -253,7 +293,7 @@ public class MapOverviewWindow
         AbstractItemSpawn i => $"({i.X}, {i.Y}, {i.W}, {i.H})",
         AbstractCollision c => $"({c.X1}, {c.Y1}, {c.X2}, {c.Y2})",
         AbstractVolume v => $"(team {v.Team} - {v.X}, {v.Y}, {v.W}, {v.H})",
-        NavNode n => $"({PropertiesWindow.NavTypeToString(n.Type)}{n.NavID})",
+        NavNode n => $"({NavNode.NavIDToString(n.NavID, n.Type)})",
 
         LevelSound ls => $"({ls.SoundEventName})",
 

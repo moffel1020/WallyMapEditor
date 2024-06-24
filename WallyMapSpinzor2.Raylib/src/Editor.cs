@@ -42,7 +42,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
     public List<IDialog> DialogWindows { get; set; } = [];
 
     public CommandHistory CommandHistory { get; set; } = new();
-    private object? _selectedObject = null;
+    public SelectionContext Selection { get; set; } = new();
 
     private readonly RenderConfig _config = RenderConfig.Default;
     private readonly RenderState _state = new();
@@ -65,7 +65,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         // scuffed xml parse error handling
         if (ld.CameraBounds is null) throw new System.Xml.XmlException("LevelDesc xml did not contain essential elements");
 
-        _selectedObject = null;
+        Selection.Object = null;
         CommandHistory.Clear();
         if (Canvas is not null)
         {
@@ -89,7 +89,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
     public void LoadMap(Level l, string[] boneNames)
     {
         BoneNames = boneNames;
-        _selectedObject = null;
+        Selection.Object = null;
         CommandHistory.Clear();
         if (Canvas is not null)
         {
@@ -215,11 +215,11 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         if (RenderConfigWindow.Open)
             RenderConfigWindow.Show(_config, ConfigDefault, PathPrefs);
         if (MapOverviewWindow.Open && MapData is Level l)
-            MapOverviewWindow.Show(l, CommandHistory, PathPrefs, Loader, ref _selectedObject);
+            MapOverviewWindow.Show(l, CommandHistory, PathPrefs, Loader, Selection);
 
-        if (_selectedObject is not null)
+        if (Selection.Object is not null)
             PropertiesWindow.Open = true;
-        if (PropertiesWindow.Open && _selectedObject is not null)
+        if (PropertiesWindow.Open && Selection.Object is not null)
         {
             PropertiesWindowData data = new()
             {
@@ -229,13 +229,22 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
                 Level = MapData as Level,
                 PathPrefs = PathPrefs,
             };
-            PropertiesWindow.Show(_selectedObject, CommandHistory, data);
+            PropertiesWindow.Show(Selection.Object, CommandHistory, data);
         }
         if (!PropertiesWindow.Open)
-            _selectedObject = null;
+            Selection.Object = null;
 
         if (HistoryPanel.Open)
             HistoryPanel.Show(CommandHistory);
+
+        if (ViewportWindow.Hovered && (Rl.IsKeyPressed(KeyboardKey.Space) || Rl.IsMouseButtonPressed(MouseButton.Middle)))
+        {
+            ImGui.OpenPopup(AddObjectPopup.NAME);
+            AddObjectPopup.NewPos = ScreenToWorld(Rl.GetMousePosition());
+        }
+
+        if (MapData is Level level)
+            AddObjectPopup.Update(level, CommandHistory, Selection);
 
         DialogWindows.RemoveAll(dialog => dialog.Closed);
         foreach (IDialog d in DialogWindows)
@@ -300,7 +309,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
             if (Rl.IsMouseButtonReleased(MouseButton.Left))
             {
-                _selectedObject = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, MapData, _cam, _config, _state);
+                Selection.Object = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, MapData, _cam, _config, _state);
                 // TODO: we might want a way to associate objects with their parents. 
                 // for example when selecting a hard collision we probably want to get the parent dynamic collision if it exists, when selecting an asset we want the platform
             }

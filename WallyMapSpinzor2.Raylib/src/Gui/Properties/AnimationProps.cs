@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using ImGuiNET;
 
 namespace WallyMapSpinzor2.Raylib;
@@ -40,17 +41,46 @@ public partial class PropertiesWindow
 
         if (ImGui.CollapsingHeader("KeyFrames"))
         {
-            propChanged |= ShowManyKeyFrameProps(anim.KeyFrames, cmd);
+            propChanged |=
+            ImGuiExt.EditArrayHistory("", anim.KeyFrames, val => anim.KeyFrames = val,
+            // create
+            () => CreateKeyFrame(LastKeyFrameNum(anim.KeyFrames)),
+            // edit
+            (int index) =>
+            {
+                if (index != 0)
+                    ImGui.Separator();
+                return ShowOneOfManyKeyFrameProps(anim.KeyFrames, index, cmd);
+            },
+            cmd, allowRemove: anim.KeyFrames.Length > 1, allowMove: false);
         }
 
         return propChanged;
     }
 
-    public static int LastKeyFrameNum(AbstractKeyFrame[] keyFrames) => keyFrames[^1] switch
-    {
-        KeyFrame kf => kf.FrameNum,
-        Phase p => p.StartFrame + LastKeyFrameNum(p.KeyFrames),
-        _ => throw new InvalidOperationException("Could not find the last keyframenum. type of abstract keyframe type is not implemented")
-    };
+    public static int LastKeyFrameNum(AbstractKeyFrame[] keyFrames) => keyFrames.Length == 0
+        ? 0
+        : keyFrames[^1] switch
+        {
+            KeyFrame kf => kf.FrameNum,
+            Phase p => p.StartFrame + LastKeyFrameNum(p.KeyFrames),
+            _ => throw new ArgumentException($"Unknown keyframe type {keyFrames[^1].GetType().Name}")
+        };
 
+    public static Maybe<AbstractKeyFrame> CreateKeyFrame(int lastKeyFrameNum)
+    {
+        Maybe<AbstractKeyFrame> result = new();
+        if (ImGui.Button("Add new keyframe"))
+            ImGui.OpenPopup("AddKeyframe");
+
+        if (ImGui.BeginPopup("AddKeyframe"))
+        {
+            if (ImGui.MenuItem("KeyFrame"))
+                result = DefaultKeyFrame(lastKeyFrameNum);
+            if (ImGui.MenuItem("Phase"))
+                result = DefaultPhase(lastKeyFrameNum);
+            ImGui.EndPopup();
+        }
+        return result;
+    }
 }

@@ -271,4 +271,34 @@ public static class Utils
         using FileStream write = new(backupPath, FileMode.CreateNew, FileAccess.Write);
         read.CopyTo(write);
     }
+
+    public static T[] RemoveAt<T>(T[] array, int index)
+    {
+        T[] result = new T[array.Length - 1];
+        for ((int i, int j) = (0, 0); i < array.Length; ++i)
+        {
+            if (i != index)
+            {
+                result[j] = array[i];
+                ++j;
+            }
+        }
+        return result;
+    }
+
+    public static T[] MoveUp<T>(T[] array, int index)
+    {
+        T[] result = [.. array];
+        if (index > 0)
+            (result[index], result[index - 1]) = (result[index - 1], result[index]);
+        return result;
+    }
+
+    public static T[] MoveDown<T>(T[] array, int index)
+    {
+        T[] result = [.. array];
+        if (index < array.Length - 1)
+            (result[index], result[index + 1]) = (result[index + 1], result[index]);
+        return result;
+    }
 }

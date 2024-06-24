@@ -15,15 +15,34 @@ public partial class PropertiesWindow
         ImGui.Separator();
         if (mp.AssetName is null && ImGui.CollapsingHeader("Children"))
         {
-            foreach (AbstractAsset child in mp.Assets)
+            propChanged |= ImGuiExt.EditArrayHistory("", mp.Assets, val => mp.Assets = val,
+            CreateNewMovingPlatformChild,
+            (int index) =>
             {
+                bool changed = false;
+                AbstractAsset child = mp.Assets[index];
                 if (ImGui.TreeNode($"{child.GetType().Name} {MapOverviewWindow.GetExtraObjectInfo(child)}##{child.GetHashCode()}"))
                 {
-                    propChanged |= ShowProperties(child, cmd, data);
+                    changed |= ShowProperties(child, cmd, data);
                     ImGui.TreePop();
                 }
-            }
+                return changed;
+            }, cmd);
         }
         return propChanged;
+    }
+
+    private static Maybe<AbstractAsset> CreateNewMovingPlatformChild()
+    {
+        Maybe<AbstractAsset> result = new();
+        if (ImGui.Button("Add new child"))
+            ImGui.OpenPopup("AddChild##moving_platform");
+
+        if (ImGui.BeginPopup("AddChild##moving_platform"))
+        {
+            result = AddObjectPopup.AddAssetMenu(new(0, 0));
+            ImGui.EndPopup();
+        }
+        return result;
     }
 }

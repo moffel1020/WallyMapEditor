@@ -14,16 +14,70 @@ public partial class PropertiesWindow
 
         if (ImGui.CollapsingHeader("Children"))
         {
-            foreach (T child in ad.Children)
+            propChanged |= ImGuiExt.EditArrayHistory("", ad.Children, val => ad.Children = val,
+            CreateDynamicChild<T>,
+            (int index) =>
             {
+                bool changed = false;
+                T child = ad.Children[index];
                 if (ImGui.TreeNode($"{child.GetType().Name} {MapOverviewWindow.GetExtraObjectInfo(child)}###dynamicChild{child.GetHashCode()}"))
                 {
-                    propChanged |= ShowProperties(child, cmd, data);
+                    changed |= ShowProperties(child, cmd, data);
                     ImGui.TreePop();
                 }
-            }
+                return changed;
+            }, cmd);
         }
 
         return propChanged;
+    }
+
+    private static Maybe<T> CreateDynamicChild<T>()
+    {
+        if (typeof(T) == typeof(AbstractCollision))
+            return CreateCollisionChild().Cast<T>();
+        if (typeof(T) == typeof(AbstractItemSpawn))
+            return CreateItemSpawnChild().Cast<T>();
+        if (typeof(T) == typeof(Respawn))
+            return CreateRespawnChild().Cast<T>();
+        return Maybe<T>.None;
+    }
+
+    private static Maybe<AbstractCollision> CreateCollisionChild()
+    {
+        Maybe<AbstractCollision> result = new();
+        if (ImGui.Button("Add new child"))
+            ImGui.OpenPopup("AddChild##dynamic");
+
+        if (ImGui.BeginPopup("AddChild##dynamic"))
+        {
+            result = AddObjectPopup.AddCollisionMenu(new(0, 0));
+            ImGui.EndPopup();
+        }
+        return result;
+    }
+
+    private static Maybe<AbstractItemSpawn> CreateItemSpawnChild()
+    {
+        Maybe<AbstractItemSpawn> result = new();
+        if (ImGui.Button("Add new child"))
+            ImGui.OpenPopup("AddChild##dynamic");
+
+        if (ImGui.BeginPopup("AddChild##dynamic"))
+        {
+            result = AddObjectPopup.AddItemSpawnMenu(new(0, 0));
+            ImGui.EndPopup();
+        }
+        return result;
+    }
+
+    private static Maybe<Respawn> CreateRespawnChild()
+    {
+        Maybe<Respawn> result = new();
+        if (ImGui.Button("Add new respawn"))
+        {
+            result = DefaultRespawn(new(0, 0));
+        }
+        return result;
     }
 }
