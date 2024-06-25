@@ -30,8 +30,7 @@ public partial class PropertiesWindow
     // TODO: hardcollision should be edited as a shape rather than an individual collision, if they are not a shape they wont work properly ingame
     private static bool ShowProperties(object o, CommandHistory cmd, PropertiesWindowData data) => o switch
     {
-        Respawn r => ShowRespawnProps(r, cmd),
-
+        Respawn r => ShowRespawnProps(r, cmd, data),
         Background b => ShowBackgroundProps(b, cmd, data),
         TeamScoreboard ts => ShowTeamScoreboardProps(ts, cmd),
         Platform p => ShowPlatformProps(p, cmd, data),
@@ -46,10 +45,10 @@ public partial class PropertiesWindow
         SpawnBotBounds sb => ShowSpawnBotBoundsProps(sb, cmd),
 
         AbstractCollision ac => ShowCollisionProps(ac, cmd, data),
-        AbstractItemSpawn i => ShowItemSpawnProps(i, cmd),
+        AbstractItemSpawn i => ShowItemSpawnProps(i, cmd, data),
         AbstractAsset a => ShowAbstractAssetProps(a, cmd, data),
         AbstractVolume v => ShowAbstractVolumeProps(v, cmd),
-        NavNode n => ShowNavNodeProps(n, cmd),
+        NavNode n => ShowNavNodeProps(n, cmd, data),
 
         LevelSound ls => ShowLevelSoundProps(ls, cmd),
 

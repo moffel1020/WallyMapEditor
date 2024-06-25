@@ -6,8 +6,15 @@ namespace WallyMapSpinzor2.Raylib;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowNavNodeProps(NavNode n, CommandHistory cmd)
+    public static bool ShowNavNodeProps(NavNode n, CommandHistory cmd, PropertiesWindowData data)
     {
+        if (n.Parent is not null)
+        {
+            ImGui.Text("Parent DynamicNavNode: ");
+            ImGui.SameLine();
+            if (ImGui.Button($"PlatID {n.Parent.PlatID}")) data.Selection.Object = n.Parent;
+            ImGui.Separator();
+        }
         bool propChanged = false;
         ImGui.Text("NavID: " + n.NavID);
         propChanged |= ImGuiExt.GenericStringComboHistory("NavType", n.Type, val => n.Type = val,

@@ -27,7 +27,7 @@ public partial class PropertiesWindow
                     ImGui.TreePop();
                 }
 
-                if (ImGui.Button("Select")) data.Selection.Object = child;
+                if (ImGui.Button($"Select##mpchild{index}")) data.Selection.Object = child;
                 ImGui.SameLine();
 
                 return changed;

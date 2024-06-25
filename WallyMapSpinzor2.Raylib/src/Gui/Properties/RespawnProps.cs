@@ -1,11 +1,20 @@
 using System.Numerics;
+using ImGuiNET;
 
 namespace WallyMapSpinzor2.Raylib;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowRespawnProps(Respawn r, CommandHistory cmd)
+    public static bool ShowRespawnProps(Respawn r, CommandHistory cmd, PropertiesWindowData data)
     {
+        if (r.Parent is not null)
+        {
+            ImGui.Text($"Parent DynamicRespawn: ");
+            ImGui.SameLine();
+            if (ImGui.Button($"PlatID {r.Parent.PlatID}")) data.Selection.Object = r.Parent;
+            ImGui.Separator();
+        }
+
         bool propChanged = false;
         propChanged |= ImGuiExt.DragFloatHistory("X", r.X, val => r.X = val, cmd);
         propChanged |= ImGuiExt.DragFloatHistory("Y", r.Y, val => r.Y = val, cmd);

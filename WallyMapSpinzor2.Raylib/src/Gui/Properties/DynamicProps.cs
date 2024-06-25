@@ -26,7 +26,7 @@ public partial class PropertiesWindow
                     ImGui.TreePop();
                 }
 
-                if (ImGui.Button($"Select##{child.GetHashCode()}")) data.Selection.Object = child;
+                if (ImGui.Button($"Select##dyncol{child.GetHashCode()}")) data.Selection.Object = child;
                 ImGui.SameLine();
 
                 return changed;

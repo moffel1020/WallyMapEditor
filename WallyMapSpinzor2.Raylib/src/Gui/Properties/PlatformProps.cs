@@ -53,6 +53,10 @@ partial class PropertiesWindow
                     changed |= ShowProperties(child, cmd, data);
                     ImGui.TreePop();
                 }
+
+                if (ImGui.Button($"Select##platchild{child.GetHashCode()}")) data.Selection.Object = child;
+                ImGui.SameLine();
+
                 return changed;
             }, cmd);
         }
