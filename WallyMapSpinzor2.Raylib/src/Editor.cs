@@ -47,6 +47,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
     private readonly RenderConfig _config = RenderConfig.Default;
     private readonly RenderState _state = new();
+    private RenderContext _context = new();
 
     public MousePickingFramebuffer PickingFramebuffer { get; set; } = new();
 
@@ -130,11 +131,12 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             Canvas ??= new(Loader);
             Canvas.CameraMatrix = Rl.GetCameraMatrix2D(_cam);
 
-            MapData?.DrawOn(Canvas, Transform.IDENTITY, _config, new RenderContext(), _state);
+            _context = new();
+            MapData?.DrawOn(Canvas, Transform.IDENTITY, _config, _context, _state);
             Canvas.FinalizeDraw();
         }
 
-        OverlayManager.Draw(new() { Cam = _cam, Viewport = ViewportWindow, MousePos = Rl.GetMousePosition() });
+        OverlayManager.Draw(new() { Cam = _cam, Viewport = ViewportWindow, Context = _context});
 
         Rl.EndMode2D();
         Rl.EndTextureMode();
@@ -234,7 +236,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
     private void Update()
     {
         bool wasUsing = OverlayManager.IsUsing; // hack for not selecting picking new object when using overlay
-        OverlayManager.Update(Selection, new() { Viewport = ViewportWindow, Cam = _cam, MousePos = Rl.GetMousePosition() }, CommandHistory);
+        OverlayManager.Update(Selection, new() { Viewport = ViewportWindow, Cam = _cam, Context = _context}, CommandHistory);
 
         ImGuiIOPtr io = ImGui.GetIO();
         bool wantCaptureKeyboard = io.WantCaptureKeyboard;

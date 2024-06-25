@@ -29,7 +29,7 @@ public class DragCircle(double x, double y)
 
     public void Update(OverlayData data, bool allowDragging)
     {
-        Vector2 worldPos = data.Viewport.ScreenToWorld(data.MousePos, data.Cam);
+        Vector2 worldPos = data.Viewport.ScreenToWorld(Rl.GetMousePosition(), data.Cam);
         Hovered = data.Viewport.Hovered && Rl.CheckCollisionPointCircle(worldPos, Coords, RADIUS);
 
         if (!allowDragging) Dragging = false;
