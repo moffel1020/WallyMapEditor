@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using ImGuiNET;
 
 namespace WallyMapSpinzor2.Raylib;
@@ -67,7 +66,7 @@ public partial class PropertiesWindow
             _ => throw new ArgumentException($"Unknown keyframe type {keyFrames[^1].GetType().Name}")
         };
 
-    public static Maybe<AbstractKeyFrame> CreateKeyFrame(int lastKeyFrameNum)
+    public static Maybe<AbstractKeyFrame> CreateKeyFrame(int lastKeyFrameNum, Phase? parent = null)
     {
         Maybe<AbstractKeyFrame> result = new();
         if (ImGui.Button("Add new keyframe"))
@@ -79,6 +78,10 @@ public partial class PropertiesWindow
                 result = DefaultKeyFrame(lastKeyFrameNum);
             if (ImGui.MenuItem("Phase"))
                 result = DefaultPhase(lastKeyFrameNum);
+            
+            if (parent is not null) 
+                result.DoIfSome(k => k.Parent = parent);
+
             ImGui.EndPopup();
         }
         return result;

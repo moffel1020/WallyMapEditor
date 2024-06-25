@@ -41,7 +41,7 @@ partial class PropertiesWindow
         if (p.AssetName is null && ImGui.CollapsingHeader("Children"))
         {
             propChanged |= ImGuiExt.EditArrayHistory("", p.AssetChildren!, val => p.AssetChildren = val,
-            CreateNewPlatformChild,
+            () => CreateNewPlatformChild(p),
             (int index) =>
             {
                 if (index != 0)
@@ -60,7 +60,7 @@ partial class PropertiesWindow
         return propChanged;
     }
 
-    private static Maybe<AbstractAsset> CreateNewPlatformChild()
+    private static Maybe<AbstractAsset> CreateNewPlatformChild(Platform parent)
     {
         Maybe<AbstractAsset> result = new();
         if (ImGui.Button("Add new child"))
@@ -69,6 +69,7 @@ partial class PropertiesWindow
         if (ImGui.BeginPopup("AddChild##platform"))
         {
             result = AddObjectPopup.AddAssetMenu(new(0, 0), true);
+            result.DoIfSome(a => a.Parent = parent);
             ImGui.EndPopup();
         }
         return result;
