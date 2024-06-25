@@ -34,6 +34,9 @@ public class ViewportWindow
         ImGui.PopStyleVar();
     }
 
+    public Vector2 ScreenToWorld(Vector2 screenPos, Camera2D cam) =>
+        Rl.GetScreenToWorld2D(screenPos - Bounds.P1, cam);
+
     private void CreateFramebuffer(int width, int height)
     {
         if (Framebuffer.Id != 0) Rl.UnloadRenderTexture(Framebuffer);

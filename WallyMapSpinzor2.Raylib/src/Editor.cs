@@ -50,6 +50,8 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
     public MousePickingFramebuffer PickingFramebuffer { get; set; } = new();
 
+    public OverlayManager OverlayManager { get; set; } = new();
+
     public void Run()
     {
         Setup();
@@ -132,6 +134,8 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             Canvas.FinalizeDraw();
         }
 
+        OverlayManager.Draw(new() { Cam = _cam, Viewport = ViewportWindow, MousePos = Rl.GetMousePosition() });
+
         Rl.EndMode2D();
         Rl.EndTextureMode();
 
@@ -174,7 +178,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         if (ViewportWindow.Hovered && (Rl.IsKeyPressed(KeyboardKey.Space) || Rl.IsMouseButtonPressed(MouseButton.Middle)))
         {
             ImGui.OpenPopup(AddObjectPopup.NAME);
-            AddObjectPopup.NewPos = ScreenToWorld(Rl.GetMousePosition());
+            AddObjectPopup.NewPos = ViewportWindow.ScreenToWorld(Rl.GetMousePosition(), _cam);
         }
 
         if (MapData is Level level)
@@ -229,6 +233,9 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
     private void Update()
     {
+        bool wasUsing = OverlayManager.IsUsing; // hack for not selecting picking new object when using overlay
+        OverlayManager.Update(Selection, new() { Viewport = ViewportWindow, Cam = _cam, MousePos = Rl.GetMousePosition() }, CommandHistory);
+
         ImGuiIOPtr io = ImGui.GetIO();
         bool wantCaptureKeyboard = io.WantCaptureKeyboard;
         if (ViewportWindow.Hovered)
@@ -236,12 +243,12 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             float wheel = Rl.GetMouseWheelMove();
             if (wheel != 0)
             {
-                _cam.Target = ScreenToWorld(Rl.GetMousePosition());
+                _cam.Target = ViewportWindow.ScreenToWorld(Rl.GetMousePosition(), _cam);
                 _cam.Offset = Rl.GetMousePosition() - ViewportWindow.Bounds.P1;
                 _cam.Zoom = Math.Clamp(_cam.Zoom + wheel * ZOOM_INCREMENT * _cam.Zoom, MIN_ZOOM, MAX_ZOOM);
             }
 
-            if (Rl.IsMouseButtonReleased(MouseButton.Left))
+            if (!OverlayManager.IsUsing && !wasUsing && Rl.IsMouseButtonReleased(MouseButton.Left))
             {
                 Selection.Object = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, MapData, _cam, _config, _state);
                 // TODO: we might want a way to associate objects with their parents. 
@@ -264,6 +271,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         {
             if (Rl.IsKeyPressed(KeyboardKey.Z)) CommandHistory.Undo();
             if (Rl.IsKeyPressed(KeyboardKey.Y)) CommandHistory.Redo();
+            if (Rl.IsKeyPressed(KeyboardKey.D)) Selection.Object = null;
             // if (Rl.IsKeyPressed(KeyboardKey.R)) LoadMap();
         }
 
