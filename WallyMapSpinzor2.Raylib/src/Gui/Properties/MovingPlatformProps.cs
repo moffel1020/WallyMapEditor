@@ -26,6 +26,10 @@ public partial class PropertiesWindow
                     changed |= ShowProperties(child, cmd, data);
                     ImGui.TreePop();
                 }
+
+                if (ImGui.Button("Select")) data.Selection.Object = child;
+                ImGui.SameLine();
+
                 return changed;
             }, cmd);
         }

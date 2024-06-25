@@ -168,6 +168,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
                 Loader = Loader,
                 Level = MapData as Level,
                 PathPrefs = PathPrefs,
+                Selection = Selection,
             };
             PropertiesWindow.Show(Selection.Object, CommandHistory, data);
         }
