@@ -101,7 +101,7 @@ public partial class PropertiesWindow
         bool isNumericPath = ImGuiExt.Checkbox("Numeric path", MapUtils.IsSharedPath(g.Path));
         if (isNumericPath)
         {
-            if (isNumericPath && !MapUtils.IsSharedPath(g.Path))
+            if (!MapUtils.IsSharedPath(g.Path))
             {
                 cmd.Add(new PropChangeCommand<PathEnum>(val => g.Path = val, g.Path, 0));
                 propChanged = true;
@@ -110,7 +110,7 @@ public partial class PropertiesWindow
         }
         else
         {
-            if (!isNumericPath && MapUtils.IsSharedPath(g.Path))
+            if (MapUtils.IsSharedPath(g.Path))
             {
                 cmd.Add(new PropChangeCommand<PathEnum>(val => g.Path = val, g.Path, PathEnum.ANY));
                 propChanged = true;
