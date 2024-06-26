@@ -13,7 +13,6 @@ using SixLabors.ImageSharp;
 
 using SwfLib;
 using SwfLib.Tags;
-using SwfLib.Tags.DisplayListTags;
 using SwfLib.Tags.ActionsTags;
 using SwfLib.Data;
 

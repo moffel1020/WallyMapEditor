@@ -303,12 +303,10 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
             {
                 finalBoneName = overridenBoneName;
             }
-            else if (BoneDatabase.AsymSwapDict.TryGetValue(boneName, out string? otherBoneName))
+            else if (BoneDatabase.AsymSwapDict.TryGetValue(boneName, out string? otherBoneName) &&
+                Array.TrueForAll(gfx.AsymmetrySwapFlags, f => (int)f != boneType?.Item1))
             {
-                if (boneType is null || gfx.AsymmetrySwapFlags.All(f => (int)f != boneType.Value.Item1))
-                {
-                    finalBoneName = otherBoneName;
-                }
+                finalBoneName = otherBoneName;
             }
 
             bool right = boneType is not null && boneType.Value.Item1 == 1 && (otherHand ? !mirrored : mirrored);
@@ -420,11 +418,6 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
                 doVisibilitySwap();
                 useRightHair = false;
             }
-            else if (useRightHair && instance.OgBoneName.StartsWith("a_Hair"))
-            {
-                doVisibilitySwap();
-                useRightHair = false;
-            }
             else if (useRightGauntlet1 && instance.OgBoneName == "a_WeaponFistsForearm")
             {
                 doVisibilitySwap();
@@ -460,20 +453,17 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         for (int i = customArts.Length - 1; i >= 0; --i)
         {
             CustomArt ca = customArts[i];
-            if (!(ca.Right && !right))
+            if ((right || !ca.Right) && (artType == 0 || ca.Type == 0 || ca.Type == artType))
             {
-                if (!(artType != 0 && ca.Type != 0 && ca.Type != artType))
+                // check that new sprite would exist
+                SwfFileData? swf = loader.LoadSwf(ca.FileName);
+                if (swf is null)
                 {
-                    // check that new sprite would exist
-                    SwfFileData? swf = loader.LoadSwf(ca.FileName);
-                    if (swf is null)
-                    {
-                        needSwfLoad = true;
-                        return null;
-                    }
-                    if (swf.SymbolClass.ContainsKey($"{boneName}_{ca.Name}"))
-                        return ca;
+                    needSwfLoad = true;
+                    return null;
                 }
+                if (swf.SymbolClass.ContainsKey($"{boneName}_{ca.Name}"))
+                    return ca;
             }
         }
         return null;
