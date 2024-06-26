@@ -2,5 +2,5 @@ namespace WallyMapSpinzor2.Raylib;
 
 public class SelectionContext
 {
-    public object? Object;
+    public object? Object { get; set; }
 }
