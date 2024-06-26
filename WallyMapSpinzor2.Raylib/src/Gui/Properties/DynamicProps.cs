@@ -36,14 +36,14 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
-    private static Maybe<T> CreateDynamicChild<T>(AbstractDynamic<T> parent) 
+    private static Maybe<T> CreateDynamicChild<T>(AbstractDynamic<T> parent)
         where T : IDeserializable, ISerializable, IDrawable => parent switch
-    {
-        DynamicCollision col => CreateCollisionChild(col).Cast<T>(),
-        DynamicItemSpawn item => CreateItemSpawnChild(item).Cast<T>(),
-        DynamicRespawn res => CreateRespawnChild(res).Cast<T>(),
-        _ => Maybe<T>.None
-    };
+        {
+            DynamicCollision col => CreateCollisionChild(col).Cast<T>(),
+            DynamicItemSpawn item => CreateItemSpawnChild(item).Cast<T>(),
+            DynamicRespawn res => CreateRespawnChild(res).Cast<T>(),
+            _ => Maybe<T>.None
+        };
 
     private static Maybe<AbstractCollision> CreateCollisionChild(DynamicCollision parent)
     {

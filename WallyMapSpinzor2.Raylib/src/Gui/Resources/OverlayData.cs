@@ -7,4 +7,5 @@ public class OverlayData()
     public required ViewportWindow Viewport { get; init; }
     public required Camera2D Cam { get; init; }
     public required RenderContext Context { get; init; }
+    public required RenderConfig Config { get; init; }
 }

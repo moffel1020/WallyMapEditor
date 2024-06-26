@@ -78,8 +78,8 @@ public partial class PropertiesWindow
                 result = DefaultKeyFrame(lastKeyFrameNum);
             if (ImGui.MenuItem("Phase"))
                 result = DefaultPhase(lastKeyFrameNum);
-            
-            if (parent is not null) 
+
+            if (parent is not null)
                 result.DoIfSome(k => k.Parent = parent);
 
             ImGui.EndPopup();

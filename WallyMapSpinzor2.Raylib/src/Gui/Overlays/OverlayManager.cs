@@ -2,7 +2,7 @@ namespace WallyMapSpinzor2.Raylib;
 
 public class OverlayManager
 {
-    public IOverlay? ActiveOverlay { get; private set; }= null;
+    public IOverlay? ActiveOverlay { get; private set; } = null;
     private object? _currentObject = null;
     public bool IsUsing { get; private set; } = false;
 
@@ -10,7 +10,7 @@ public class OverlayManager
     {
         if (_currentObject != selection.Object)
         {
-            ActiveOverlay = GetOverlay(selection);
+            ActiveOverlay = CreateOverlay(selection);
             _currentObject = selection.Object;
         }
 
@@ -22,9 +22,10 @@ public class OverlayManager
 
     public void Draw(OverlayData data) => ActiveOverlay?.Draw(data);
 
-    private static IOverlay? GetOverlay(SelectionContext selection) => selection.Object switch
+    private static IOverlay? CreateOverlay(SelectionContext selection) => selection.Object switch
     {
         AbstractCollision ac => new CollisionOverlay(ac),
+        Respawn r => new RespawnOverlay(r),
         _ => null
     };
 }

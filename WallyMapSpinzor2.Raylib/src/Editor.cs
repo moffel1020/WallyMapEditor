@@ -136,7 +136,14 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             Canvas.FinalizeDraw();
         }
 
-        OverlayManager.Draw(new() { Cam = _cam, Viewport = ViewportWindow, Context = _context});
+        OverlayData data = new()
+        {
+            Viewport = ViewportWindow,
+            Cam = _cam,
+            Context = _context,
+            Config = _config,
+        };
+        OverlayManager.Draw(data);
 
         Rl.EndMode2D();
         Rl.EndTextureMode();
@@ -237,7 +244,14 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
     private void Update()
     {
         bool wasUsing = OverlayManager.IsUsing; // hack for not selecting picking new object when using overlay
-        OverlayManager.Update(Selection, new() { Viewport = ViewportWindow, Cam = _cam, Context = _context}, CommandHistory);
+        OverlayData data = new()
+        {
+            Viewport = ViewportWindow,
+            Cam = _cam,
+            Context = _context,
+            Config = _config,
+        };
+        OverlayManager.Update(Selection, data, CommandHistory);
 
         ImGuiIOPtr io = ImGui.GetIO();
         bool wantCaptureKeyboard = io.WantCaptureKeyboard;
