@@ -316,4 +316,20 @@ public static class Utils
             (result[index], result[index + 1]) = (result[index + 1], result[index]);
         return result;
     }
+
+    public static bool CheckCollisionPointRec(Vector2 point, Raylib_cs.Rectangle rec)
+    {
+        if (rec.Width < 0)
+        {
+            rec.X += rec.Width;
+            rec.Width = -rec.Width;
+        }
+        if (rec.Height < 0)
+        {
+            rec.Y += rec.Height;
+            rec.Height = -rec.Height;
+        }
+
+        return Rl.CheckCollisionPointRec(point, rec);
+    }
 }

@@ -18,8 +18,8 @@ public partial class PropertiesWindow
         bool propChanged = false;
         propChanged |= ImGuiExt.DragFloatHistory($"X##props{i.GetHashCode()}", i.X, val => i.X = val, cmd);
         propChanged |= ImGuiExt.DragFloatHistory($"Y##props{i.GetHashCode()}", i.Y, val => i.Y = val, cmd);
-        propChanged |= ImGuiExt.DragFloatHistory($"W##props{i.GetHashCode()}", i.W, val => i.W = val, cmd, minValue: 1);
-        propChanged |= ImGuiExt.DragFloatHistory($"H##props{i.GetHashCode()}", i.H, val => i.H = val, cmd, minValue: 1);
+        propChanged |= ImGuiExt.DragFloatHistory($"W##props{i.GetHashCode()}", i.W, val => i.W = val, cmd);
+        propChanged |= ImGuiExt.DragFloatHistory($"H##props{i.GetHashCode()}", i.H, val => i.H = val, cmd);
         return propChanged;
     }
 
