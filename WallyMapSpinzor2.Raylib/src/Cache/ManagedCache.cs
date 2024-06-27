@@ -13,15 +13,20 @@ public abstract class ManagedCache<K, V> where K : notnull
 
     public void Load(K k)
     {
+        if (Cache.ContainsKey(k))
+            return;
         V v = LoadInternal(k);
         Cache[k] = v;
     }
 
     public void LoadInThread(K k)
     {
+        if (Cache.ContainsKey(k))
+            return;
         lock (_loading)
         {
-            if (_loading.Contains(k) || Cache.ContainsKey(k)) return;
+            if (_loading.Contains(k))
+                return;
             _loading.Add(k);
         }
 

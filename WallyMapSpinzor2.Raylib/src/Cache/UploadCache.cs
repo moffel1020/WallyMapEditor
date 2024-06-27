@@ -17,6 +17,8 @@ public abstract class UploadCache<K, I, V> where K : notnull
 
     public void Load(K k)
     {
+        if (Cache.ContainsKey(k))
+            return;
         I i = LoadIntermediate(k);
         V v = IntermediateToValue(i);
         UnloadIntermediate(i);
@@ -25,7 +27,8 @@ public abstract class UploadCache<K, I, V> where K : notnull
 
     public void LoadInThread(K k)
     {
-        if (_queueSet.Contains(k)) return;
+        if (Cache.ContainsKey(k) || _queueSet.Contains(k))
+            return;
         _queueSet.Add(k);
 
         Task.Run(() =>
