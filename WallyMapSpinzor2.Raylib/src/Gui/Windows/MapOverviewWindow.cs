@@ -310,18 +310,18 @@ public class MapOverviewWindow
         LevelAnim la => $"({la.InstanceName})",
 
         MovingPlatform mp => $"({mp.PlatID})",
-        Respawn r => $"({r.X}, {r.Y})",
-        AbstractItemSpawn i => $"({i.X}, {i.Y}, {i.W}, {i.H})",
-        AbstractCollision c => $"({c.X1}, {c.Y1}, {c.X2}, {c.Y2})",
-        AbstractVolume v => $"(team {v.Team} - {v.X}, {v.Y}, {v.W}, {v.H})",
-        AbstractAsset a => $"({a.AssetName ?? a.X + ", " + a.Y})",
+        Respawn r => $"({r.X:0.###}, {r.Y:0.###})",
+        AbstractItemSpawn i => $"({i.X:0.###}, {i.Y:0.###}, {i.W:0.###}, {i.H:0.###})",
+        AbstractCollision c => $"({c.X1:0.###}, {c.Y1:0.###}, {c.X2:0.###}, {c.Y2:0.###})",
+        AbstractVolume v => $"(team {v.Team} - {v.X:0.###}, {v.Y:0.###}, {v.W:0.###}, {v.H:0.###})",
+        AbstractAsset a => $"({a.AssetName ?? $"{a.X:0.###}, {a.Y:0.###}"})",
         NavNode n => $"({NavNode.NavIDToString(n.NavID, n.Type)})",
 
         LevelSound ls => $"({ls.SoundEventName})",
 
         WaveData w => $"({w.ID})",
         CustomPath cp => $"({cp.Points.Length} points)",
-        Point p => $"({p.X}, {p.Y})",
+        Point p => $"({p.X:0.###}, {p.Y:0.###})",
         Group g => $"({g.GetCount(2)}/{g.GetCount(3)}/{g.GetCount(4)} {PropertiesWindow.BehaviorToString(g.Behavior)})",
 
         DynamicCollision dc => $"({dc.PlatID})",
