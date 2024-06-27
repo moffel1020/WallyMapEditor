@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Raylib_cs;
 using Rl = Raylib_cs.Raylib;
 using SwfLib.Tags;
@@ -277,7 +276,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         {
             string boneName = loader.BoneNames[bone.Id - 1]; // bone id is 1 indexed
             (int, bool)? boneType;
-            if (BoneDatabase.BoneTypeDict.TryGetValue(boneName, out var boneType_))
+            if (BoneDatabase.BoneTypeDict.TryGetValue(boneName, out (int, bool) boneType_))
                 boneType = boneType_;
             else
                 boneType = null;
