@@ -6,10 +6,9 @@ namespace WallyMapSpinzor2.Raylib;
 
 public class DragCircle(double x, double y)
 {
-    public const int RADIUS = 30;
-
-    public static Raylib_cs.Color Color => Raylib_cs.Color.Gray with { A = 190 };
-    public static Raylib_cs.Color UsingColor => Raylib_cs.Color.White with { A = 190 };
+    public float Radius { get; set; } = 30;
+    public Raylib_cs.Color Color { get; set; } = Raylib_cs.Color.Gray with { A = 190 };
+    public Raylib_cs.Color UsingColor { get; set; } = Raylib_cs.Color.White with { A = 190 };
 
     public double X { get; set; } = x;
     public double Y { get; set; } = y;
@@ -22,15 +21,15 @@ public class DragCircle(double x, double y)
     public void Draw(OverlayData data)
     {
         if (Hovered || Dragging)
-            Rl.DrawCircleV(Coords, RADIUS, UsingColor);
+            Rl.DrawCircleV(Coords, Radius, UsingColor);
         else
-            Rl.DrawCircleV(Coords, RADIUS, Color);
+            Rl.DrawCircleV(Coords, Radius, Color);
     }
 
     public void Update(OverlayData data, bool allowDragging)
     {
         Vector2 worldPos = data.Viewport.ScreenToWorld(Rl.GetMousePosition(), data.Cam);
-        Hovered = data.Viewport.Hovered && Rl.CheckCollisionPointCircle(worldPos, Coords, RADIUS);
+        Hovered = data.Viewport.Hovered && Rl.CheckCollisionPointCircle(worldPos, Coords, Radius);
 
         if (!allowDragging) Dragging = false;
 
