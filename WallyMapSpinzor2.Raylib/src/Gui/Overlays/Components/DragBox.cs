@@ -45,20 +45,24 @@ public class DragBox(double x, double y, double w, double h)
 
     public void Draw(OverlayData data)
     {
+        float x = (float)X;
+        float y = (float)Y;
+        float w = (float)W;
+        float h = (float)H;
         // i love float casts
         if (Hovered || Dragging)
         {
-            Rl.DrawLineEx(new ((float)X, (float)Y), new((float)X + (float)W, (float)Y), LINE_SIZE, UsingColor);
-            Rl.DrawLineEx(new((float)X + (float)W, (float)Y), new((float)X + (float)W, (float)Y + (float)H), LINE_SIZE, UsingColor);
-            Rl.DrawLineEx(new((float)X + (float)W, (float)Y + (float)H), new((float)X, (float)Y + (float)H), LINE_SIZE, UsingColor);
-            Rl.DrawLineEx(new((float)X, (float)Y + (float)H), new((float)X, (float)Y), LINE_SIZE, UsingColor);
+            Rl.DrawLineEx(new(x, y), new(x + w, y), LINE_SIZE, UsingColor);
+            Rl.DrawLineEx(new(x + w, y), new(x + w, y + h), LINE_SIZE, UsingColor);
+            Rl.DrawLineEx(new(x + w, y + h), new(x, y + h), LINE_SIZE, UsingColor);
+            Rl.DrawLineEx(new(x, y + h), new(x, y), LINE_SIZE, UsingColor);
         }
         else
         {
-            Rl.DrawLineEx(new ((float)X, (float)Y), new((float)X + (float)W, (float)Y), LINE_SIZE, Color);
-            Rl.DrawLineEx(new((float)X + (float)W, (float)Y), new((float)X + (float)W, (float)Y + (float)H), LINE_SIZE, Color);
-            Rl.DrawLineEx(new((float)X + (float)W, (float)Y + (float)H), new((float)X, (float)Y + (float)H), LINE_SIZE, Color);
-            Rl.DrawLineEx(new((float)X, (float)Y + (float)H), new((float)X, (float)Y), LINE_SIZE, Color);
+            Rl.DrawLineEx(new(x, y), new(x + w, y), LINE_SIZE, Color);
+            Rl.DrawLineEx(new(x + w, y), new(x + w, y + h), LINE_SIZE, Color);
+            Rl.DrawLineEx(new(x + w, y + h), new(x, y + h), LINE_SIZE, Color);
+            Rl.DrawLineEx(new(x, y + h), new(x, y), LINE_SIZE, Color);
         }
     }
 }
