@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using System.Xml.Linq;
+using Raylib_cs;
+using Rl = Raylib_cs.Raylib;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -46,5 +48,23 @@ public class RenderConfigDefault : IDeserializable, ISerializable
     public void Serialize(XElement e)
     {
         ConfigDefault.Serialize(e);
+    }
+
+    public void ApplyCmdlineOverrides(CommandLineArgs args)
+    {
+        if (args.TryGetArg("--defaultConfig", out string? defaultConfig))
+        {
+            if (!File.Exists(defaultConfig))
+                Rl.TraceLog(TraceLogLevel.Warning, "Default config path does not exist");
+            else
+                try
+                {
+                    ConfigDefault = Utils.DeserializeFromPath<RenderConfigDefault>(defaultConfig).ConfigDefault;
+                }
+                catch
+                {
+                    Rl.TraceLog(TraceLogLevel.Warning, "Default config path leads to an invalid file");
+                }
+        }
     }
 }

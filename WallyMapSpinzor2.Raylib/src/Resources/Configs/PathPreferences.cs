@@ -87,4 +87,24 @@ public class PathPreferences : IDeserializable, ISerializable
         _brawlhallaPath = path;
         BrawlhallaAirPath ??= Path.Combine(_brawlhallaPath, "BrawlhallaAir.swf");
     }
+
+    public void ApplyCmdlineOverrides(CommandLineArgs args)
+    {
+        if (args.TryGetArg("--brawlPath", out string? brawlPath))
+            BrawlhallaPath = brawlPath;
+        if (args.TryGetArg("--brawlAir", out string? brawlAir))
+            BrawlhallaAirPath = brawlAir;
+        if (args.TryGetArg("--levelDesc", out string? levelDesc))
+            LevelDescPath = levelDesc;
+        if (args.TryGetArg("--levelType", out string? levelType))
+            LevelTypePath = levelType;
+        if (args.TryGetArg("--levelTypes", out string? levelTypes))
+            LevelTypesPath = levelTypes;
+        if (args.TryGetArg("--levelSetTypes", out string? levelSetTypes))
+            LevelSetTypesPath = levelSetTypes;
+        if (args.TryGetArg("--boneTypes", out string? boneTypes))
+            BoneTypesPath = boneTypes;
+        if (args.TryGetArg("--swzKey", out string? swzKey))
+            DecryptionKey = swzKey;
+    }
 }

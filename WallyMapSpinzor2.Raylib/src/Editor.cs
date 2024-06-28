@@ -17,6 +17,7 @@ namespace WallyMapSpinzor2.Raylib;
 
 public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault)
 {
+    public const string WINDOW_NAME = "WallyMapSpinzor2.Raylib";
     public const float ZOOM_INCREMENT = 0.15f;
     public const float MIN_ZOOM = 0.01f;
     public const float MAX_ZOOM = 5.0f;
@@ -49,79 +50,25 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
     public MousePickingFramebuffer PickingFramebuffer { get; set; } = new();
 
-    public void LoadMap(string ldPath, string? ltPath, string? lstPath, string? btPath)
-    {
-        if (btPath is null && BoneNames is null)
-            throw new Exception("Trying to load a map without a BoneTypes.xml file, and without a bone name list already loaded");
-        if (btPath is not null)
-        {
-            using FileStream bonesFile = new(btPath, FileMode.Open, FileAccess.Read);
-            BoneNames = [.. XElement.Load(bonesFile).Elements("Bone").Select(e => e.Value)];
-        }
-        LevelDesc ld = Utils.DeserializeFromPath<LevelDesc>(ldPath);
-        LevelTypes lt = ltPath is null ? new() { Levels = [] } : Utils.DeserializeFromPath<LevelTypes>(ltPath);
-        LevelSetTypes lst = lstPath is null ? new() { Playlists = [] } : Utils.DeserializeFromPath<LevelSetTypes>(lstPath);
-
-        // scuffed xml parse error handling
-        if (ld.CameraBounds is null) throw new System.Xml.XmlException("LevelDesc xml did not contain essential elements");
-
-        Selection.Object = null;
-        CommandHistory.Clear();
-        if (Canvas is not null)
-        {
-            Canvas.Loader.BoneNames = BoneNames!;
-            Canvas.ClearTextureCache();
-        }
-
-        Level l = new(ld, lt, lst);
-        if (l.Type is null)
-        {
-            l.Type = DefaultLevelType;
-            l.Type.LevelName = ld.LevelName;
-        }
-        MapData = l;
-        // it's fine if there are no playlists here, they will be selected when exporting
-
-        ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
-        _state.Reset();
-    }
-
-    public void LoadMap(Level l, string[] boneNames)
-    {
-        BoneNames = boneNames;
-        Selection.Object = null;
-        CommandHistory.Clear();
-        if (Canvas is not null)
-        {
-            Canvas.Loader.BoneNames = boneNames;
-            Canvas.ClearTextureCache();
-        }
-
-        MapData = l;
-        ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
-        _state.Reset();
-    }
-
-    public static LevelType DefaultLevelType => new()
-    {
-        LevelName = "UnknownLevel",
-        DisplayName = "Unkown Level",
-        AssetName = "a_Level_Unknown",
-        FileName = "Level_Wacky.swf",
-        DevOnly = false,
-        TestLevel = false,
-        LevelID = 0,
-        CrateColorA = new(120, 120, 120),
-        CrateColorB = new(120, 120, 120),
-        LeftKill = 500,
-        RightKill = 500,
-        TopKill = 500,
-        BottomKill = 500,
-        BGMusic = "Level09Theme", // certified banger
-        ThumbnailPNGFile = "wally.jpg"
-    };
-
     public void Run()
+    {
+        Setup();
+
+        while (!Rl.WindowShouldClose())
+        {
+            float delta = Rl.GetFrameTime();
+            _config.Time += TimeSpan.FromSeconds(_config.RenderSpeed * delta);
+            Time += TimeSpan.FromSeconds(delta);
+            Draw();
+            Update();
+        }
+
+        PathPrefs.Save();
+        ConfigDefault.Save();
+        Rl.CloseWindow();
+    }
+
+    public void Setup()
     {
 #if DEBUG
         Rl.SetTraceLogLevel(TraceLogLevel.All);
@@ -141,7 +88,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         }
 
         Rl.SetConfigFlags(ConfigFlags.VSyncHint);
-        Rl.InitWindow(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT, "WallyMapSpinzor2.Raylib");
+        Rl.InitWindow(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT, WINDOW_NAME);
         Rl.SetWindowState(ConfigFlags.ResizableWindow);
         rlImGui.Setup(true, true);
         Style.Apply();
@@ -160,19 +107,6 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
         ResetCam(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT);
         PickingFramebuffer.Load(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT);
-
-        while (!Rl.WindowShouldClose())
-        {
-            float delta = Rl.GetFrameTime();
-            _config.Time += TimeSpan.FromSeconds(_config.RenderSpeed * delta);
-            Time += TimeSpan.FromSeconds(delta);
-            Draw();
-            Update();
-        }
-
-        PathPrefs.Save();
-        ConfigDefault.Save();
-        Rl.CloseWindow();
     }
 
     private void Draw()
@@ -355,6 +289,78 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             }
         }
     }
+
+    public void LoadMap(string ldPath, string? ltPath, string? lstPath, string? btPath)
+    {
+        if (btPath is null && BoneNames is null)
+            throw new Exception("Trying to load a map without a BoneTypes.xml file, and without a bone name list already loaded");
+        if (btPath is not null)
+        {
+            using FileStream bonesFile = new(btPath, FileMode.Open, FileAccess.Read);
+            BoneNames = [.. XElement.Load(bonesFile).Elements("Bone").Select(e => e.Value)];
+        }
+        LevelDesc ld = Utils.DeserializeFromPath<LevelDesc>(ldPath);
+        LevelTypes lt = ltPath is null ? new() { Levels = [] } : Utils.DeserializeFromPath<LevelTypes>(ltPath);
+        LevelSetTypes lst = lstPath is null ? new() { Playlists = [] } : Utils.DeserializeFromPath<LevelSetTypes>(lstPath);
+
+        // scuffed xml parse error handling
+        if (ld.CameraBounds is null) throw new System.Xml.XmlException("LevelDesc xml did not contain essential elements");
+
+        Selection.Object = null;
+        CommandHistory.Clear();
+        if (Canvas is not null)
+        {
+            Canvas.Loader.BoneNames = BoneNames!;
+            Canvas.ClearTextureCache();
+        }
+
+        Level l = new(ld, lt, lst);
+        if (l.Type is null)
+        {
+            l.Type = DefaultLevelType;
+            l.Type.LevelName = ld.LevelName;
+        }
+        MapData = l;
+        // it's fine if there are no playlists here, they will be selected when exporting
+
+        ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
+        _state.Reset();
+    }
+
+    public void LoadMap(Level l, string[] boneNames)
+    {
+        BoneNames = boneNames;
+        Selection.Object = null;
+        CommandHistory.Clear();
+        if (Canvas is not null)
+        {
+            Canvas.Loader.BoneNames = boneNames;
+            Canvas.ClearTextureCache();
+        }
+
+        MapData = l;
+        ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
+        _state.Reset();
+    }
+
+    public static LevelType DefaultLevelType => new()
+    {
+        LevelName = "UnknownLevel",
+        DisplayName = "Unkown Level",
+        AssetName = "a_Level_Unknown",
+        FileName = "Level_Wacky.swf",
+        DevOnly = false,
+        TestLevel = false,
+        LevelID = 0,
+        CrateColorA = new(120, 120, 120),
+        CrateColorB = new(120, 120, 120),
+        LeftKill = 500,
+        RightKill = 500,
+        TopKill = 500,
+        BottomKill = 500,
+        BGMusic = "Level09Theme", // certified banger
+        ThumbnailPNGFile = "wally.jpg"
+    };
 
     public Vector2 ScreenToWorld(Vector2 screenPos) =>
         Rl.GetScreenToWorld2D(screenPos - ViewportWindow.Bounds.P1, _cam);
