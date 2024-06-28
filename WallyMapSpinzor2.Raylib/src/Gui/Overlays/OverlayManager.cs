@@ -27,6 +27,7 @@ public class OverlayManager
         AbstractCollision ac => new CollisionOverlay(ac),
         Respawn r => new RespawnOverlay(r),
         AbstractItemSpawn i => new ItemSpawnOverlay(i),
+        NavNode n => new NavNodeOverlay(n),
         _ => null
     };
 }
