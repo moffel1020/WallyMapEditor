@@ -27,7 +27,7 @@ public abstract class UploadCache<K, I, V> where K : notnull
 
     public void LoadInThread(K k)
     {
-        if (Cache.ContainsKey(k) || _queueSet.Contains(k))
+        if (_queueSet.Contains(k) || Cache.ContainsKey(k))
             return;
         _queueSet.Add(k);
 

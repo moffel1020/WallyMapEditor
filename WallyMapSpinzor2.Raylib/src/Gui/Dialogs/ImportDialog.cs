@@ -97,9 +97,9 @@ public class ImportDialog(Editor editor, PathPreferences prefs) : IDialog
         if (prefs.DecryptionKey.Length > 0 && _decryptedLt is null && ImGuiExt.WithDisabledButton(_decrypting, "Decrypt"))
         {
             _decrypting = true;
+            _loadingStatus = "decrypting...";
             Task.Run(() =>
             {
-                _loadingStatus = "decrypting...";
                 try
                 {
                     DecryptSwzFiles(prefs.BrawlhallaPath!);

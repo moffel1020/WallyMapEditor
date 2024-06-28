@@ -9,7 +9,9 @@ public class TextureCache : UploadCache<string, Image, Texture2DWrapper>
     protected override Image LoadIntermediate(string path)
     {
         path = Path.GetFullPath(path);
-        return Utils.LoadRlImage(path);
+        Image image = Utils.LoadRlImage(path);
+        Rl.ImageAlphaPremultiply(ref image);
+        return image;
     }
 
     protected override Texture2DWrapper IntermediateToValue(Image img)

@@ -10,6 +10,7 @@ using System.Text;
 using Rl = Raylib_cs.Raylib;
 
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 using SwfLib;
 using SwfLib.Tags;
@@ -67,26 +68,41 @@ public static class Utils
 
     public static Raylib_cs.Color WmsColorToRlColor(Color c) => new(c.R, c.G, c.B, c.A);
 
-    public static Raylib_cs.Image ImgSharpImageToRlImage(Image image)
+    public static Raylib_cs.Image ImgSharpImageToRlImage(Image<Rgba32> image)
     {
-        using MemoryStream ms = new();
-        image.SaveAsQoi(ms);
-        Raylib_cs.Image img = Rl.LoadImageFromMemory(".qoi", ms.ToArray());
-        Rl.ImageAlphaPremultiply(ref img);
+        Raylib_cs.Image img;
+        unsafe
+        {
+            int bufferSize = image.Width * image.Height * image.PixelType.BitsPerPixel / 8;
+            // use Rl alloc so GC doesn't free the memory
+            void* bufferPtr = Rl.MemAlloc(bufferSize);
+            // create span so ImageSharp can write to the memory
+            Span<byte> buffer = new(bufferPtr, bufferSize);
+            image.CopyPixelDataTo(buffer);
+            img = new()
+            {
+                Data = bufferPtr,
+                Width = image.Width,
+                Height = image.Height,
+                Mipmaps = 1,
+                Format = Raylib_cs.PixelFormat.UncompressedR8G8B8A8,
+            };
+        }
         return img;
     }
 
     public static Raylib_cs.Image LoadRlImage(string path)
     {
-        //brawlhalla only supports JPG, so this is fine
+        Raylib_cs.Image img;
         if (path.EndsWith(".jpg"))
         {
-            using Image image = Image.Load(path);
-            return ImgSharpImageToRlImage(image);
+            using Image<Rgba32> image = Image.Load<Rgba32>(path);
+            img = ImgSharpImageToRlImage(image);
         }
-
-        Raylib_cs.Image img = Rl.LoadImage(path);
-        Rl.ImageAlphaPremultiply(ref img);
+        else
+        {
+            img = Rl.LoadImage(path);
+        }
         return img;
     }
 

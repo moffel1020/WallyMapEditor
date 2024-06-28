@@ -3,6 +3,7 @@ using System.Numerics;
 
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 using SwiffCheese.Exporting;
 using SwiffCheese.Shapes;
@@ -16,6 +17,7 @@ namespace WallyMapSpinzor2.Raylib;
 
 public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCache.ShapeData, Texture2DWrapper>
 {
+    private const int RASTER_SCALE = 1;
     private const int SWF_UNIT_DIVISOR = 20;
     private const double ANIM_SCALE_MULTIPLIER = 1.2;
 
@@ -38,10 +40,16 @@ public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCach
         Vector2 offset = new(-offsetX, -offsetY);
         int imageW = (int)Math.Floor(w + (x - offsetX) + animScale) + 2;
         int imageH = (int)Math.Floor(h + (y - offsetY) + animScale) + 2;
-        using Image<Rgba32> image = new(imageW, imageH, new Rgba32(255, 255, 255, 0));
-        ImageSharpShapeExporter exporter = new(image, offset, SWF_UNIT_DIVISOR);
-        compiledShape.Export(exporter);
-        Raylib_cs.Image img = Utils.ImgSharpImageToRlImage(image);
+
+        Raylib_cs.Image img;
+        using (Image<Rgba32> image = new(RASTER_SCALE * imageW, RASTER_SCALE * imageH, new Rgba32(255, 255, 255, 0)))
+        {
+            ImageSharpShapeExporter exporter = new(image, RASTER_SCALE * offset, 1f * SWF_UNIT_DIVISOR / RASTER_SCALE);
+            compiledShape.Export(exporter);
+            image.Mutate(ctx => ctx.Resize(imageW, imageH));
+            img = Utils.ImgSharpImageToRlImage(image);
+        }
+        Rl.ImageAlphaPremultiply(ref img);
         return new ShapeData(img, offsetX, offsetY);
     }
 
