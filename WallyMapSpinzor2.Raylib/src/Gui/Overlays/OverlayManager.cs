@@ -24,6 +24,8 @@ public class OverlayManager
 
     private static IOverlay? CreateOverlay(SelectionContext selection) => selection.Object switch
     {
+        CameraBounds cb => new CameraBoundsOverlay(cb),
+        SpawnBotBounds sbb => new SpawnBotBoundsOverlay(sbb),
         AbstractCollision ac => new CollisionOverlay(ac),
         Respawn r => new RespawnOverlay(r),
         AbstractItemSpawn i => new ItemSpawnOverlay(i),
