@@ -267,6 +267,11 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             // if (Rl.IsKeyPressed(KeyboardKey.R)) LoadMap();
         }
 
+        if (!wantCaptureKeyboard && Rl.IsKeyDown(KeyboardKey.F11))
+        {
+            Rl.ToggleFullscreen();
+        }
+
         if (!wantCaptureKeyboard && Rl.IsKeyPressed(KeyboardKey.P))
         {
             if (MapData is Level l && Canvas is not null)
