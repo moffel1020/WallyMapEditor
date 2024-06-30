@@ -1,7 +1,4 @@
 using System;
-using System.Numerics;
-using Rl = Raylib_cs.Raylib;
-
 namespace WallyMapSpinzor2.Raylib;
 
 public class AssetOverlay(AbstractAsset asset) : IOverlay
@@ -62,8 +59,7 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
                 asset.Transform * (MoveRect.X, MoveRect.Y)));
         }
 
-        return dragging || TopLeft.Hovered || TopRight.Hovered || BotLeft.Hovered || BotRight.Hovered
-            || MoveRect.Dragging || MoveRect.Hovered;
+        return dragging || MoveRect.Dragging;
     }
 
     private bool UpdateCircles(OverlayData data, Transform trans, Transform invTrans)

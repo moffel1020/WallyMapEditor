@@ -74,8 +74,7 @@ public class VolumeOverlay(AbstractVolume volume) : IOverlay
                 ((int)TopLeft.X, (int)TopLeft.Y, (int)(TopRight.X - TopLeft.X), (int)(BotLeft.Y - TopLeft.Y))));
         }
 
-        bool resizing = dragging || TopLeft.Hovered || TopRight.Hovered || BotLeft.Hovered || BotRight.Hovered;
-        MoveRect.Update(data, !resizing);
+        MoveRect.Update(data, !dragging);
 
         if (MoveRect.Dragging)
         {
@@ -85,6 +84,6 @@ public class VolumeOverlay(AbstractVolume volume) : IOverlay
                 ((int)MoveRect.X, (int)MoveRect.Y)));
         }
 
-        return resizing || MoveRect.Dragging || MoveRect.Hovered;
+        return dragging || MoveRect.Dragging;
     }
 }

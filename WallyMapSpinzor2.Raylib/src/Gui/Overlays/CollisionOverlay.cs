@@ -55,10 +55,7 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
                 (Anchor.X - dynOffsetX, Anchor.Y - dynOffsetY)));
         }
 
-        return
-            Circle1.Dragging || Circle1.Hovered ||
-            Circle2.Dragging || Circle2.Hovered ||
-            Anchor.Dragging || Anchor.Hovered;
+        return Circle1.Dragging || Circle2.Dragging || Anchor.Dragging;
     }
 
     public void Draw(OverlayData data)

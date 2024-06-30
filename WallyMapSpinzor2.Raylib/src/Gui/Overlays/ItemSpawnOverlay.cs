@@ -80,7 +80,6 @@ public class ItemSpawnOverlay(AbstractItemSpawn item) : IOverlay
                 (MoveRect.X - offsetX, MoveRect.Y - offsetY)));
         }
 
-        return dragging || TopLeft.Hovered || TopRight.Hovered || BotLeft.Hovered || BotRight.Hovered
-            || MoveRect.Dragging || MoveRect.Hovered;
+        return dragging || MoveRect.Dragging;
     }
 }

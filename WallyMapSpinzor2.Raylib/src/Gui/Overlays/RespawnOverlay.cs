@@ -30,6 +30,6 @@ public class RespawnOverlay(Respawn res) : IOverlay
                 (Box.Middle.Item1 - offsetX, Box.Middle.Item2 - offsetY)));
         }
 
-        return Box.Dragging || Box.Hovered;
+        return Box.Dragging;
     }
 }

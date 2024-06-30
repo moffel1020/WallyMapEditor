@@ -66,8 +66,7 @@ public class SpawnBotBoundsOverlay(SpawnBotBounds bounds) : IOverlay
                 (TopLeft.X, TopLeft.Y, TopRight.X - TopLeft.X, BotLeft.Y - TopLeft.Y)));
         }
 
-        bool resizing = dragging || TopLeft.Hovered || TopRight.Hovered || BotLeft.Hovered || BotRight.Hovered;
-        MoveRect.Update(data, !resizing);
+        MoveRect.Update(data, !dragging);
 
         if (MoveRect.Dragging)
         {
@@ -77,6 +76,6 @@ public class SpawnBotBoundsOverlay(SpawnBotBounds bounds) : IOverlay
                 (MoveRect.X, MoveRect.Y)));
         }
 
-        return resizing || MoveRect.Dragging || MoveRect.Hovered;
+        return dragging || MoveRect.Dragging;
     }
 }
