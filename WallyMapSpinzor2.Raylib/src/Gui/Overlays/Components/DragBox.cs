@@ -36,7 +36,7 @@ public class DragBox(double x, double y, double w, double h)
 
         Hovered = data.Viewport.Hovered && Utils.CheckCollisionPointRec(worldPos, new((float)X, (float)Y, (float)W, (float)H));
 
-        if (!allowDragging) 
+        if (!allowDragging)
         {
             _mouseDragOffset = (0, 0);
             Dragging = false;
@@ -53,7 +53,6 @@ public class DragBox(double x, double y, double w, double h)
             _mouseDragOffset = (Middle.Item1 - worldX, Middle.Item2 - worldY);
             Dragging = true;
         }
-
 
         if (Dragging) Middle = (worldPos.X + _mouseDragOffset.Item1, worldPos.Y + _mouseDragOffset.Item2);
     }

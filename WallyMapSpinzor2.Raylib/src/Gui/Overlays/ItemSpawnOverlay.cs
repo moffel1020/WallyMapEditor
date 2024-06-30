@@ -70,8 +70,7 @@ public class ItemSpawnOverlay(AbstractItemSpawn item) : IOverlay
                 (TopLeft.X - offsetX, TopLeft.Y - offsetY, TopRight.X - TopLeft.X, BotLeft.Y - TopLeft.Y)));
         }
 
-        bool resizing = dragging || TopLeft.Hovered || TopRight.Hovered || BotLeft.Hovered || BotRight.Hovered;
-        MoveRect.Update(data, !resizing);
+        MoveRect.Update(data, !dragging);
 
         if (MoveRect.Dragging)
         {
@@ -81,6 +80,7 @@ public class ItemSpawnOverlay(AbstractItemSpawn item) : IOverlay
                 (MoveRect.X - offsetX, MoveRect.Y - offsetY)));
         }
 
-        return resizing || MoveRect.Dragging || MoveRect.Hovered;
+        return dragging || TopLeft.Hovered || TopRight.Hovered || BotLeft.Hovered || BotRight.Hovered
+            || MoveRect.Dragging || MoveRect.Hovered;
     }
 }

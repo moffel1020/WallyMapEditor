@@ -57,8 +57,7 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
                 (newX, newY, newW, newH)));
         }
 
-        bool resizing = dragging || TopLeft.Hovered || TopRight.Hovered || BotLeft.Hovered || BotRight.Hovered;
-        MoveRect.Update(data, !resizing);
+        MoveRect.Update(data, !dragging);
         (newX, newY) = asset.Transform * (MoveRect.X, MoveRect.Y);
 
         if (MoveRect.Dragging)
@@ -69,7 +68,8 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
                 (newX, newY)));
         }
 
-        return resizing || MoveRect.Dragging || MoveRect.Hovered;
+        return dragging || TopLeft.Hovered || TopRight.Hovered || BotLeft.Hovered || BotRight.Hovered
+            || MoveRect.Dragging || MoveRect.Hovered;
     }
 
     private bool UpdateCircles(Vector2 mouseWorldPos, OverlayData data)
