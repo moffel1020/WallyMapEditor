@@ -30,6 +30,7 @@ public class OverlayManager
         Respawn r => new RespawnOverlay(r),
         AbstractItemSpawn i => new ItemSpawnOverlay(i),
         AbstractVolume v => new VolumeOverlay(v),
+        AbstractAsset a when a.AssetName is not null => new AssetOverlay(a),
         NavNode n => new NavNodeOverlay(n),
         _ => null
     };
