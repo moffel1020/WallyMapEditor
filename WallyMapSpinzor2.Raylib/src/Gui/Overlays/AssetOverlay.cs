@@ -37,16 +37,11 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
         (MoveRect.X, MoveRect.Y) = (0, 0);
         (MoveRect.W, MoveRect.H) = (asset.W.Value, asset.H.Value);
 
+        bool dragging = UpdateCircles(data, trans, inv);
+
         TransfromDragCircles(inv);
-
-        Vector2 worldPosVec = data.Viewport.ScreenToWorld(Rl.GetMousePosition(), data.Cam);
-        (double worldX, double worldY) = inv * (worldPosVec.X, worldPosVec.Y);
-        (worldPosVec.X, worldPosVec.Y) = ((float)worldX, (float)worldY);
-        bool dragging = UpdateCircles(worldPosVec, data);
-
         (double newW, double newH) = (TopRight.X - TopLeft.X, BotLeft.Y - TopLeft.Y);
         (double newX, double newY) = asset.Transform * TopLeft.Position;
-
         TransfromDragCircles(trans);
 
         if (dragging)
@@ -58,53 +53,53 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
         }
 
         MoveRect.Update(data, !dragging);
-        (newX, newY) = asset.Transform * (MoveRect.X, MoveRect.Y);
 
         if (MoveRect.Dragging)
         {
             cmd.Add(new PropChangeCommand<(double, double)>(
                 val => (asset.X, asset.Y) = val,
                 (asset.X, asset.Y),
-                (newX, newY)));
+                asset.Transform * (MoveRect.X, MoveRect.Y)));
         }
 
         return dragging || TopLeft.Hovered || TopRight.Hovered || BotLeft.Hovered || BotRight.Hovered
             || MoveRect.Dragging || MoveRect.Hovered;
     }
 
-    private bool UpdateCircles(Vector2 mouseWorldPos, OverlayData data)
+    private bool UpdateCircles(OverlayData data, Transform trans, Transform invTrans)
     {
-        TopLeft.Update(data, true, mouseWorldPos);
+        TopLeft.Update(data, true);
+        bool dragging = TopLeft.Dragging;
+        TopRight.Update(data, !dragging);
+        dragging |= TopRight.Dragging;
+        BotLeft.Update(data, !dragging);
+        dragging |= BotLeft.Dragging;
+        BotRight.Update(data, !dragging);
+        dragging |= BotRight.Dragging;
+
+        TransfromDragCircles(invTrans);
         if (TopLeft.Dragging)
         {
             BotLeft.X = TopLeft.X;
             TopRight.Y = TopLeft.Y;
         }
-        bool dragging = TopLeft.Dragging;
-
-        TopRight.Update(data, !dragging, mouseWorldPos);
-        if (!dragging && TopRight.Dragging)
+        else if (TopRight.Dragging)
         {
             BotRight.X = TopRight.X;
             TopLeft.Y = TopRight.Y;
         }
-        dragging |= TopRight.Dragging;
-
-        BotLeft.Update(data, !dragging, mouseWorldPos);
-        if (!dragging && BotLeft.Dragging)
+        else if (BotLeft.Dragging)
         {
             TopLeft.X = BotLeft.X;
             BotRight.Y = BotLeft.Y;
         }
-        dragging |= BotLeft.Dragging;
-
-        BotRight.Update(data, !dragging, mouseWorldPos);
-        if (!dragging && BotRight.Dragging)
+        else if (BotRight.Dragging)
         {
             TopRight.X = BotRight.X;
             BotLeft.Y = BotRight.Y;
         }
-        dragging |= BotRight.Dragging;
+        TransfromDragCircles(trans);
+
         return dragging;
     }
 

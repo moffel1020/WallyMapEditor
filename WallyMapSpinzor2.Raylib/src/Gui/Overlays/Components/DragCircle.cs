@@ -34,10 +34,10 @@ public class DragCircle(double x, double y)
             Rl.DrawCircleV(Coords, Radius, Color);
     }
 
-    public void Update(OverlayData data, bool allowDragging, Vector2? mouseWorldPos = null)
+    public void Update(OverlayData data, bool allowDragging)
     {
-        mouseWorldPos ??= data.Viewport.ScreenToWorld(Rl.GetMousePosition(), data.Cam);
-        Hovered = data.Viewport.Hovered && Rl.CheckCollisionPointCircle(mouseWorldPos!.Value, Coords, Radius);
+        Vector2 mousePos = data.Viewport.ScreenToWorld(Rl.GetMousePosition(), data.Cam);
+        Hovered = data.Viewport.Hovered && Rl.CheckCollisionPointCircle(mousePos, Coords, Radius);
 
         if (!allowDragging)
         {
@@ -53,10 +53,10 @@ public class DragCircle(double x, double y)
 
         if (allowDragging && Hovered && Rl.IsMouseButtonPressed(MouseButton.Left))
         {
-            _mouseDragOffset = (X - mouseWorldPos.Value.X, Y - mouseWorldPos.Value.Y);
+            _mouseDragOffset = (X - mousePos.X, Y - mousePos.Y);
             Dragging = true;
         }
 
-        if (Dragging) (X, Y) = (mouseWorldPos.Value.X + _mouseDragOffset.Item1, mouseWorldPos.Value.Y + _mouseDragOffset.Item2);
+        if (Dragging) (X, Y) = (mousePos.X + _mouseDragOffset.Item1, mousePos.Y + _mouseDragOffset.Item2);
     }
 }
