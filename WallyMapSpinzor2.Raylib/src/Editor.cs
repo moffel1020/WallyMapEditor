@@ -243,7 +243,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
     private void Update()
     {
-        bool wasUsing = OverlayManager.IsUsing; // hack for not selecting picking new object when using overlay
+        bool usingOverlay = OverlayManager.IsUsing;
         OverlayData data = new()
         {
             Viewport = ViewportWindow,
@@ -252,6 +252,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             Config = _config,
         };
         OverlayManager.Update(Selection, data, CommandHistory);
+        usingOverlay |= OverlayManager.IsUsing;
 
         ImGuiIOPtr io = ImGui.GetIO();
         bool wantCaptureKeyboard = io.WantCaptureKeyboard;
@@ -265,12 +266,8 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
                 _cam.Zoom = Math.Clamp(_cam.Zoom + wheel * ZOOM_INCREMENT * _cam.Zoom, MIN_ZOOM, MAX_ZOOM);
             }
 
-            if (!OverlayManager.IsUsing && !wasUsing && Rl.IsMouseButtonReleased(MouseButton.Left))
-            {
+            if (!usingOverlay && Rl.IsMouseButtonReleased(MouseButton.Left))
                 Selection.Object = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, MapData, _cam, _config, _state);
-                // TODO: we might want a way to associate objects with their parents. 
-                // for example when selecting a hard collision we probably want to get the parent dynamic collision if it exists, when selecting an asset we want the platform
-            }
 
             if (Rl.IsMouseButtonDown(MouseButton.Right))
             {

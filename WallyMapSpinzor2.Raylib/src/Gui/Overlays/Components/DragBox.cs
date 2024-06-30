@@ -26,25 +26,36 @@ public class DragBox(double x, double y, double w, double h)
         set => (X, Y) = (value.Item1 - W / 2, value.Item2 - H / 2);
     }
 
-    public Vector2 Coords => new((float)X, (float)Y);
+    private (double, double) _mouseDragOffset;
 
     public void Update(OverlayData data, bool allowDragging)
     {
         Vector2 worldPos = data.Viewport.ScreenToWorld(Rl.GetMousePosition(), data.Cam);
-        (double worldX, double worldY)= Transform.CreateInverse(Transform) * (worldPos.X, worldPos.Y);
+        (double worldX, double worldY) = Transform.CreateInverse(Transform) * (worldPos.X, worldPos.Y);
         (worldPos.X, worldPos.Y) = ((float)worldX, (float)worldY);
 
         Hovered = data.Viewport.Hovered && Utils.CheckCollisionPointRec(worldPos, new((float)X, (float)Y, (float)W, (float)H));
 
-        if (!allowDragging) Dragging = false;
-
-        if (allowDragging && Hovered && Rl.IsMouseButtonPressed(MouseButton.Left))
-            Dragging = true;
+        if (!allowDragging) 
+        {
+            _mouseDragOffset = (0, 0);
+            Dragging = false;
+        }
 
         if (allowDragging && Dragging && Rl.IsMouseButtonReleased(MouseButton.Left))
+        {
+            _mouseDragOffset = (0, 0);
             Dragging = false;
+        }
 
-        if (Dragging) Middle = (worldPos.X, worldPos.Y);
+        if (allowDragging && Hovered && Rl.IsMouseButtonPressed(MouseButton.Left))
+        {
+            _mouseDragOffset = (Middle.Item1 - worldX, Middle.Item2 - worldY);
+            Dragging = true;
+        }
+
+
+        if (Dragging) Middle = (worldPos.X + _mouseDragOffset.Item1, worldPos.Y + _mouseDragOffset.Item2);
     }
 
     public void Draw(OverlayData data)

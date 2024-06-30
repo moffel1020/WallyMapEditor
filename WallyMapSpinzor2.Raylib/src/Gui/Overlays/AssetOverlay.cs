@@ -25,7 +25,7 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
     {
         if (asset.AssetName is null) throw new ArgumentException("AssetOverlay used on asset without AssetName");
 
-        Transform trans = FullTransform(asset, data.Context); 
+        Transform trans = FullTransform(asset, data.Context);
         Transform inv = Transform.CreateInverse(trans);
 
         (TopLeft.X, TopLeft.Y) = (trans.TranslateX, trans.TranslateY);
