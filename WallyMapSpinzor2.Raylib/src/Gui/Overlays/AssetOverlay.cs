@@ -10,6 +10,7 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
     public DragCircle TopRight { get; set; } = new(0, 0);
     public DragCircle BotLeft { get; set; } = new(0, 0);
     public DragCircle BotRight { get; set; } = new(0, 0);
+    public DragBox MoveRect { get; set; } = new(0, 0, 0, 0);
 
     public void Draw(OverlayData data)
     {
@@ -17,6 +18,7 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
         TopRight.Draw(data);
         BotLeft.Draw(data);
         BotRight.Draw(data);
+        MoveRect.Draw(data);
     }
 
     public bool Update(OverlayData data, CommandHistory cmd)
@@ -30,6 +32,10 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
         (TopRight.X, TopRight.Y) = trans * (asset.W!.Value, 0);
         (BotLeft.X, BotLeft.Y) = trans * (0, asset.H!.Value);
         (BotRight.X, BotRight.Y) = trans * (asset.W!.Value, asset.H!.Value);
+
+        MoveRect.Transform = trans;
+        (MoveRect.X, MoveRect.Y) = (0, 0);
+        (MoveRect.W, MoveRect.H) = (asset.W.Value, asset.H.Value);
 
         TransfromDragCircles(inv);
 
@@ -51,7 +57,19 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
                 (newX, newY, newW, newH)));
         }
 
-        return dragging || TopLeft.Hovered || TopRight.Hovered || BotLeft.Hovered || BotRight.Hovered;
+        bool resizing = dragging || TopLeft.Hovered || TopRight.Hovered || BotLeft.Hovered || BotRight.Hovered;
+        MoveRect.Update(data, !resizing);
+        (newX, newY) = asset.Transform * (MoveRect.X, MoveRect.Y);
+
+        if (MoveRect.Dragging)
+        {
+            cmd.Add(new PropChangeCommand<(double, double)>(
+                val => (asset.X, asset.Y) = val,
+                (asset.X, asset.Y),
+                (newX, newY)));
+        }
+
+        return resizing || MoveRect.Dragging || MoveRect.Hovered;
     }
 
     private bool UpdateCircles(Vector2 mouseWorldPos, OverlayData data)

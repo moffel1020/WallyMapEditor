@@ -15,6 +15,7 @@ public class DragBox(double x, double y, double w, double h)
     public double Y { get; set; } = y;
     public double W { get; set; } = w;
     public double H { get; set; } = h;
+    public Transform Transform { get; set; } = Transform.IDENTITY;
 
     public bool Hovered { get; private set; }
     public bool Dragging { get; private set; }
@@ -30,7 +31,10 @@ public class DragBox(double x, double y, double w, double h)
     public void Update(OverlayData data, bool allowDragging)
     {
         Vector2 worldPos = data.Viewport.ScreenToWorld(Rl.GetMousePosition(), data.Cam);
-        Hovered = data.Viewport.Hovered && Utils.CheckCollisionPointRec(worldPos, new(Coords, new((float)W, (float)H)));
+        (double worldX, double worldY)= Transform.CreateInverse(Transform) * (worldPos.X, worldPos.Y);
+        (worldPos.X, worldPos.Y) = ((float)worldX, (float)worldY);
+
+        Hovered = data.Viewport.Hovered && Utils.CheckCollisionPointRec(worldPos, new((float)X, (float)Y, (float)W, (float)H));
 
         if (!allowDragging) Dragging = false;
 
@@ -45,24 +49,29 @@ public class DragBox(double x, double y, double w, double h)
 
     public void Draw(OverlayData data)
     {
-        float x = (float)X;
-        float y = (float)Y;
-        float w = (float)W;
-        float h = (float)H;
-        // i love float casts
+        (double x1, double y1) = Transform * (X, Y);
+        (double x2, double y2) = Transform * (X, Y + H);
+        (double x3, double y3) = Transform * (X + W, Y);
+        (double x4, double y4) = Transform * (X + W, Y + H);
+
+        (float tlX, float tlY) = ((float)x1, (float)y1);
+        (float trX, float trY) = ((float)x2, (float)y2);
+        (float blX, float blY) = ((float)x3, (float)y3);
+        (float brX, float brY) = ((float)x4, (float)y4);
+
         if (Hovered || Dragging)
         {
-            Rl.DrawLineEx(new(x, y), new(x + w, y), LINE_SIZE, UsingColor);
-            Rl.DrawLineEx(new(x + w, y), new(x + w, y + h), LINE_SIZE, UsingColor);
-            Rl.DrawLineEx(new(x + w, y + h), new(x, y + h), LINE_SIZE, UsingColor);
-            Rl.DrawLineEx(new(x, y + h), new(x, y), LINE_SIZE, UsingColor);
+            Rl.DrawLineEx(new(tlX, tlY), new(trX, trY), LINE_SIZE, UsingColor);
+            Rl.DrawLineEx(new(tlX, tlY), new(blX, blY), LINE_SIZE, UsingColor);
+            Rl.DrawLineEx(new(trX, trY), new(brX, brY), LINE_SIZE, UsingColor);
+            Rl.DrawLineEx(new(blX, blY), new(brX, brY), LINE_SIZE, UsingColor);
         }
         else
         {
-            Rl.DrawLineEx(new(x, y), new(x + w, y), LINE_SIZE, Color);
-            Rl.DrawLineEx(new(x + w, y), new(x + w, y + h), LINE_SIZE, Color);
-            Rl.DrawLineEx(new(x + w, y + h), new(x, y + h), LINE_SIZE, Color);
-            Rl.DrawLineEx(new(x, y + h), new(x, y), LINE_SIZE, Color);
+            Rl.DrawLineEx(new(tlX, tlY), new(trX, trY), LINE_SIZE, Color);
+            Rl.DrawLineEx(new(tlX, tlY), new(blX, blY), LINE_SIZE, Color);
+            Rl.DrawLineEx(new(trX, trY), new(brX, brY), LINE_SIZE, Color);
+            Rl.DrawLineEx(new(blX, blY), new(brX, brY), LINE_SIZE, Color);
         }
     }
 }

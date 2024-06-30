@@ -16,12 +16,12 @@ public class DragCircle(double x, double y)
     public bool Hovered { get; private set; }
     public bool Dragging { get; private set; }
 
-    public Vector2 Coords => new((float)X, (float)Y);
+    private Vector2 Coords => new((float)X, (float)Y);
 
-    public Position Position
+    public (double, double) Position
     {
-        get => new(X, Y);
-        set => (X, Y) = (value.X, value.Y);
+        get => (X, Y);
+        set => (X, Y) = value;
     }
 
     public void Draw(OverlayData data)
