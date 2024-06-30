@@ -17,7 +17,7 @@ public partial class PropertiesWindow
         propChanged |= ImGuiExt.DragNullableIntHistory("LoopIdx", w.LoopIdx == 0 ? null : w.LoopIdx, 1, val => w.LoopIdx = val ?? 0, cmd, minValue: 1, maxValue: w.Groups.Length - 1);
         if (ImGui.CollapsingHeader($"CustomPaths##props{w.GetHashCode()}"))
         {
-            propChanged |= ImGuiExt.EditArrayHistory("", w.CustomPaths, val => w.CustomPaths = val,
+            propChanged |= ImGuiExt.EditArrayHistory("##custompathslist", w.CustomPaths, val => w.CustomPaths = val,
             CreateNewCustomPath,
             (int index) =>
             {
@@ -33,7 +33,7 @@ public partial class PropertiesWindow
         }
         if (ImGui.CollapsingHeader($"Groups##props{w.GetHashCode()}"))
         {
-            propChanged |= ImGuiExt.EditArrayHistory("", w.Groups, val => w.Groups = val,
+            propChanged |= ImGuiExt.EditArrayHistory("##groupslist", w.Groups, val => w.Groups = val,
             CreateNewGroup,
             (int index) =>
             {
