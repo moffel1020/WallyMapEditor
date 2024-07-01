@@ -54,9 +54,7 @@ public partial class PropertiesWindow
             "anchor",
             $"AnchorX##props{ac.GetHashCode()}", $"AnchorY##props{ac.GetHashCode()}",
             ac.AnchorX, ac.AnchorY,
-            // these default values look weird when the collision is on a moving platform
-            // but the user will adjust it anyways so it's ok
-            (ac.X1 + ac.X2) / 2, (ac.Y1 + ac.Y2) / 2,
+            (ac.X1 + ac.X2) / 2 + (ac.Parent?.X ?? 0), (ac.Y1 + ac.Y2) / 2 + (ac.Parent?.Y ?? 0),
             (val1, val2) => (ac.AnchorX, ac.AnchorY) = (val1, val2),
             cmd
         );
