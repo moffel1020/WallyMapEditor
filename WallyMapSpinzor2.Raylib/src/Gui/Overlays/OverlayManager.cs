@@ -32,6 +32,11 @@ public class OverlayManager
         AbstractVolume v => new VolumeOverlay(v),
         AbstractAsset a when a.AssetName is not null => new AssetOverlay(a),
         NavNode n => new NavNodeOverlay(n),
+        // ugly. maybe create separate class for each?
+        DynamicCollision dc => new AbstracyDynamicOverlay<DynamicCollision, AbstractCollision>(dc),
+        DynamicItemSpawn dis => new AbstracyDynamicOverlay<DynamicItemSpawn, AbstractItemSpawn>(dis),
+        DynamicRespawn dr => new AbstracyDynamicOverlay<DynamicRespawn, Respawn>(dr),
+        DynamicNavNode dn => new AbstracyDynamicOverlay<DynamicNavNode, NavNode>(dn),
         _ => null
     };
 }
