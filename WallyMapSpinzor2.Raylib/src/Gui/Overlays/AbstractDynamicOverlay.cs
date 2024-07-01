@@ -21,7 +21,7 @@ public class AbstracyDynamicOverlay<T, U>(T dyn) : IOverlay
     public bool Update(OverlayData data, CommandHistory cmd)
     {
         if (!data.Context.PlatIDDynamicOffset.TryGetValue(dyn.PlatID, out (double, double) dynOffset))
-            throw new Exception($"Attempt to draw overlay for dynamic object with PlatID {dyn.PlatID}, but dynamic offset dictionary did not contain that PlatID");
+            throw new Exception($"Attempt to update overlay for dynamic object with PlatID {dyn.PlatID}, but dynamic offset dictionary did not contain that PlatID");
         (double offsetX, double offsetY) = dynOffset;
         (Position.X, Position.Y) = (dyn.X + offsetX, dyn.Y + offsetY);
         Position.Update(data, true);
