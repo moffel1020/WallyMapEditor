@@ -147,7 +147,7 @@ public static class Utils
     {
         XElement e = serializable.SerializeToXElement();
         using FileStream toFile = new(toPath, FileMode.Create, FileAccess.Write);
-        using XmlWriter xmlw = XmlWriter.Create(toFile, minify ? StandardSaveSettings : MinifiedSaveSettings);
+        using XmlWriter xmlw = XmlWriter.Create(toFile, minify ? MinifiedSaveSettings : StandardSaveSettings);
         e.Save(xmlw);
     }
 
@@ -156,7 +156,7 @@ public static class Utils
     {
         XElement e = serializable.SerializeToXElement();
         using StringWriter sw = new();
-        using XmlWriter xmlw = XmlWriter.Create(sw, minify ? StandardSaveSettings : MinifiedSaveSettings);
+        using XmlWriter xmlw = XmlWriter.Create(sw, minify ? MinifiedSaveSettings : StandardSaveSettings);
         e.Save(xmlw);
         xmlw.Flush();
         return sw.ToString();
