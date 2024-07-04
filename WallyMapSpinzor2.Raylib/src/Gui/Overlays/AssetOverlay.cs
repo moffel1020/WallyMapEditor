@@ -11,6 +11,11 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
 
     public void Draw(OverlayData data)
     {
+        TopLeft.Color = TopRight.Color = BotLeft.Color = BotRight.Color = data.OverlayConfig.ColorAssetCorner;
+        TopLeft.UsingColor = TopRight.UsingColor = BotLeft.UsingColor = BotRight.UsingColor = data.OverlayConfig.UsingColorAssetCorner;
+        MoveRect.Color = data.OverlayConfig.ColorAssetBox;
+        MoveRect.UsingColor = data.OverlayConfig.UsingColorAssetBox;
+
         TopLeft.Draw(data);
         TopRight.Draw(data);
         BotLeft.Draw(data);
@@ -21,6 +26,8 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
     public bool Update(OverlayData data, CommandHistory cmd)
     {
         if (asset.AssetName is null) throw new ArgumentException("AssetOverlay used on asset without AssetName");
+
+        TopLeft.Radius = TopRight.Radius = BotLeft.Radius = BotRight.Radius = data.OverlayConfig.RadiusAssetCorner;
 
         Transform trans = FullTransform(asset, data.Context);
         Transform inv = Transform.CreateInverse(trans);

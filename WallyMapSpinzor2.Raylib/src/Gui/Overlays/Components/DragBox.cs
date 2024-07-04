@@ -8,8 +8,8 @@ public class DragBox(double x, double y, double w, double h)
 {
     public const int LINE_SIZE = 5;
 
-    public static Raylib_cs.Color Color => Raylib_cs.Color.Gray with { A = 190 };
-    public static Raylib_cs.Color UsingColor => Raylib_cs.Color.White with { A = 190 };
+    public Raylib_cs.Color Color { get; set; } = Raylib_cs.Color.Gray with { A = 190 };
+    public Raylib_cs.Color UsingColor { get; set; } = Raylib_cs.Color.White with { A = 190 };
 
     public double X { get; set; } = x;
     public double Y { get; set; } = y;

@@ -45,7 +45,8 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
     public CommandHistory CommandHistory { get; set; } = new();
     public SelectionContext Selection { get; set; } = new();
 
-    private readonly RenderConfig _config = RenderConfig.Default;
+    private readonly RenderConfig _renderConfig = RenderConfig.Default;
+    private readonly OverlayConfig _overlayConfig = OverlayConfig.Default;
     private readonly RenderState _state = new();
     private RenderContext _context = new();
 
@@ -60,7 +61,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         while (!Rl.WindowShouldClose())
         {
             float delta = Rl.GetFrameTime();
-            _config.Time += TimeSpan.FromSeconds(_config.RenderSpeed * delta);
+            _renderConfig.Time += TimeSpan.FromSeconds(_renderConfig.RenderSpeed * delta);
             Time += TimeSpan.FromSeconds(delta);
             Draw();
             Update();
@@ -79,7 +80,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         Rl.SetTraceLogLevel(TraceLogLevel.Warning);
 #endif
 
-        _config.Deserialize(ConfigDefault.SerializeToXElement());
+        _renderConfig.Deserialize(ConfigDefault.SerializeToXElement());
 
         if (PathPrefs.LevelDescPath is not null && PathPrefs.BoneTypesPath is not null)
         {
@@ -132,7 +133,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             Canvas.CameraMatrix = Rl.GetCameraMatrix2D(_cam);
 
             _context = new();
-            MapData?.DrawOn(Canvas, Transform.IDENTITY, _config, _context, _state);
+            MapData?.DrawOn(Canvas, Transform.IDENTITY, _renderConfig, _context, _state);
             Canvas.FinalizeDraw();
         }
 
@@ -141,7 +142,8 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             Viewport = ViewportWindow,
             Cam = _cam,
             Context = _context,
-            Config = _config,
+            RenderConfig = _renderConfig,
+            OverlayConfig = _overlayConfig,
         };
         OverlayManager.Draw(data);
 
@@ -160,7 +162,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         if (ViewportWindow.Open)
             ViewportWindow.Show();
         if (RenderConfigWindow.Open)
-            RenderConfigWindow.Show(_config, ConfigDefault, PathPrefs);
+            RenderConfigWindow.Show(_renderConfig, ConfigDefault, PathPrefs);
         if (MapOverviewWindow.Open && MapData is Level l)
             MapOverviewWindow.Show(l, CommandHistory, PathPrefs, Loader, Selection);
 
@@ -249,7 +251,8 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             Viewport = ViewportWindow,
             Cam = _cam,
             Context = _context,
-            Config = _config,
+            RenderConfig = _renderConfig,
+            OverlayConfig = _overlayConfig,
         };
         OverlayManager.Update(Selection, data, CommandHistory);
         usingOverlay |= OverlayManager.IsUsing;
@@ -267,7 +270,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             }
 
             if (!usingOverlay && Rl.IsMouseButtonReleased(MouseButton.Left))
-                Selection.Object = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, MapData, _cam, _config, _state);
+                Selection.Object = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, MapData, _cam, _renderConfig, _state);
 
             if (Rl.IsMouseButtonDown(MouseButton.Right))
             {
@@ -421,7 +424,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         Rl.ClearBackground(Raylib_cs.Color.Blank);
         Rl.BeginMode2D(camera);
         Canvas.CameraMatrix = Rl.GetCameraMatrix2D(camera);
-        MapData?.DrawOn(Canvas, Transform.IDENTITY, _config, new RenderContext(), _state);
+        MapData?.DrawOn(Canvas, Transform.IDENTITY, _renderConfig, new RenderContext(), _state);
         Canvas.FinalizeDraw();
         Rl.EndMode2D();
         Rl.EndTextureMode();

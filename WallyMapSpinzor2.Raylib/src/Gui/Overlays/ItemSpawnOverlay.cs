@@ -11,6 +11,9 @@ public class ItemSpawnOverlay(AbstractItemSpawn item) : IOverlay
 
     public void Draw(OverlayData data)
     {
+        MoveRect.Color = TopLeft.Color = TopRight.Color = BotLeft.Color = BotRight.Color = data.OverlayConfig.ColorItemSpawnBox;
+        MoveRect.UsingColor = TopLeft.UsingColor = TopRight.UsingColor = BotLeft.UsingColor = BotRight.UsingColor = data.OverlayConfig.UsingColorItemSpawnBox;
+
         TopLeft.Draw(data);
         TopRight.Draw(data);
         BotLeft.Draw(data);
@@ -20,6 +23,8 @@ public class ItemSpawnOverlay(AbstractItemSpawn item) : IOverlay
 
     public bool Update(OverlayData data, CommandHistory cmd)
     {
+        TopLeft.Radius = TopRight.Radius = BotLeft.Radius = BotRight.Radius = data.OverlayConfig.RadiusItemSpawnCorner;
+
         (double offsetX, double offsetY) = (0, 0);
         if (item.Parent is not null && data.Context.PlatIDDynamicOffset.TryGetValue(item.Parent.PlatID, out (double, double) dynOffset))
             (offsetX, offsetY) = (item.Parent.X + dynOffset.Item1, item.Parent.Y + dynOffset.Item2);

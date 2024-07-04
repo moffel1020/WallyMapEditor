@@ -20,6 +20,8 @@ public class VolumeOverlay(AbstractVolume volume) : IOverlay
 
     public bool Update(OverlayData data, CommandHistory cmd)
     {
+        TopLeft.Radius = TopRight.Radius = BotLeft.Radius = BotRight.Radius = data.OverlayConfig.RadiusVolumeCorner;
+
         (TopLeft.X, TopLeft.Y) = (volume.X, volume.Y);
         (TopRight.X, TopRight.Y) = (volume.X + volume.W, volume.Y);
         (BotLeft.X, BotLeft.Y) = (volume.X, volume.Y + volume.H);

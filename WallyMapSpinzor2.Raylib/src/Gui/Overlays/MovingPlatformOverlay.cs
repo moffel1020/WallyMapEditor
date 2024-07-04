@@ -4,20 +4,20 @@ namespace WallyMapSpinzor2.Raylib;
 
 public class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
 {
-    public DragCircle Position { get; set; } = new(plat.X, plat.Y)
-    {
-        Radius = 70,
-        Color = Raylib_cs.Color.Red with { A = 190 },
-        UsingColor = Raylib_cs.Color.Pink with { A = 190 },
-    };
+    public DragCircle Position { get; set; } = new(plat.X, plat.Y);
 
     public void Draw(OverlayData data)
     {
+        Position.Color = data.OverlayConfig.ColorMovingPlatformPosition;
+        Position.UsingColor = data.OverlayConfig.UsingColorMovingPlatformPosition;
+
         Position.Draw(data);
     }
 
     public bool Update(OverlayData data, CommandHistory cmd)
     {
+        Position.Radius = data.OverlayConfig.RadiusMovingPlatformPosition;
+
         if (!data.Context.PlatIDMovingPlatformOffset.TryGetValue(plat.PlatID, out (double, double) platOffset))
             throw new Exception($"Attempt to update overlay for moving platform with PlatID {plat.PlatID}, but moving platform offset dictionary did not contain that PlatID");
         (double offsetX, double offsetY) = platOffset;

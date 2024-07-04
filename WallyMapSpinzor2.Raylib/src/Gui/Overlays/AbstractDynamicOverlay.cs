@@ -6,20 +6,20 @@ public class AbstracyDynamicOverlay<T, U>(T dyn) : IOverlay
     where T : AbstractDynamic<U>
     where U : ISerializable, IDeserializable, IDrawable
 {
-    public DragCircle Position { get; set; } = new(dyn.X, dyn.Y)
-    {
-        Radius = 70,
-        Color = Raylib_cs.Color.Red with { A = 190 },
-        UsingColor = Raylib_cs.Color.Pink with { A = 190 },
-    };
+    public DragCircle Position { get; set; } = new(dyn.X, dyn.Y);
 
     public void Draw(OverlayData data)
     {
+        Position.Color = data.OverlayConfig.ColorDynamicPosition;
+        Position.UsingColor = data.OverlayConfig.UsingColorDynamicPosition;
+
         Position.Draw(data);
     }
 
     public bool Update(OverlayData data, CommandHistory cmd)
     {
+        Position.Radius = data.OverlayConfig.RadiusDynamicPosition;
+
         if (!data.Context.PlatIDDynamicOffset.TryGetValue(dyn.PlatID, out (double, double) dynOffset))
             throw new Exception($"Attempt to update overlay for dynamic object with PlatID {dyn.PlatID}, but dynamic offset dictionary did not contain that PlatID");
         (double offsetX, double offsetY) = dynOffset;

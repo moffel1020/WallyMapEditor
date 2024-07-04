@@ -2,11 +2,11 @@ namespace WallyMapSpinzor2.Raylib;
 
 public class NavNodeOverlay(NavNode node) : IOverlay
 {
-    public const int SIZE_OFFSET = 40;
-
     public DragBox Box { get; set; } = new(node.X, node.Y, 0, 0);
     public void Draw(OverlayData data)
     {
+        Box.Color = data.OverlayConfig.ColorNavNodeBox;
+        Box.UsingColor = data.OverlayConfig.UsingColorNavNodeBox;
         Box.Draw(data);
     }
 
@@ -16,8 +16,8 @@ public class NavNodeOverlay(NavNode node) : IOverlay
         if (node.Parent is not null && data.Context.PlatIDDynamicOffset.TryGetValue(node.Parent.PlatID, out (double, double) dynOffset))
             (offsetX, offsetY) = (node.Parent.X + dynOffset.Item1, node.Parent.Y + dynOffset.Item2);
 
-        Box.W = data.Config.RadiusRespawn * 2 + SIZE_OFFSET;
-        Box.H = data.Config.RadiusRespawn * 2 + SIZE_OFFSET;
+        Box.W = data.RenderConfig.RadiusNavNode * 2 + data.OverlayConfig.SizeOffsetNavNodeBox;
+        Box.H = data.RenderConfig.RadiusNavNode * 2 + data.OverlayConfig.SizeOffsetNavNodeBox;
         Box.Middle = (node.X + offsetX, node.Y + offsetY);
 
         Box.Update(data, true);

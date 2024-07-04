@@ -2,15 +2,18 @@ namespace WallyMapSpinzor2.Raylib;
 
 public class CameraBoundsOverlay(CameraBounds bounds) : IOverlay
 {
-    public DragCircle TopLeft { get; set; } = new(bounds.X, bounds.Y) { Radius = 100 };
-    public DragCircle TopRight { get; set; } = new(bounds.X + bounds.W, bounds.Y) { Radius = 100 };
-    public DragCircle BotLeft { get; set; } = new(bounds.X, bounds.Y + bounds.H) { Radius = 100 };
-    public DragCircle BotRight { get; set; } = new(bounds.X + bounds.W, bounds.Y + bounds.H) { Radius = 100 };
+    public DragCircle TopLeft { get; set; } = new(bounds.X, bounds.Y);
+    public DragCircle TopRight { get; set; } = new(bounds.X + bounds.W, bounds.Y);
+    public DragCircle BotLeft { get; set; } = new(bounds.X, bounds.Y + bounds.H);
+    public DragCircle BotRight { get; set; } = new(bounds.X + bounds.W, bounds.Y + bounds.H);
 
     public DragBox MoveRect { get; set; } = new(bounds.X, bounds.Y, bounds.W, bounds.H);
 
     public void Draw(OverlayData data)
     {
+        MoveRect.Color = TopLeft.Color = TopRight.Color = BotLeft.Color = BotRight.Color = data.OverlayConfig.ColorCameraBoundsBox;
+        MoveRect.UsingColor = TopLeft.UsingColor = TopRight.UsingColor = BotLeft.UsingColor = BotRight.UsingColor = data.OverlayConfig.UsingColorCameraBoundsBox;
+
         TopLeft.Draw(data);
         TopRight.Draw(data);
         BotLeft.Draw(data);
@@ -20,6 +23,8 @@ public class CameraBoundsOverlay(CameraBounds bounds) : IOverlay
 
     public bool Update(OverlayData data, CommandHistory cmd)
     {
+        TopLeft.Radius = TopRight.Radius = BotLeft.Radius = BotRight.Radius = data.OverlayConfig.RadiusCameraBoundsCorner;
+
         (TopLeft.X, TopLeft.Y) = (bounds.X, bounds.Y);
         (TopRight.X, TopRight.Y) = (bounds.X + bounds.W, bounds.Y);
         (BotLeft.X, BotLeft.Y) = (bounds.X, bounds.Y + bounds.H);

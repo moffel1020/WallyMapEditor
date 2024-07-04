@@ -2,11 +2,10 @@ namespace WallyMapSpinzor2.Raylib;
 
 public class RespawnOverlay(Respawn res) : IOverlay
 {
-    public const int SIZE_OFFSET = 40;
-
     public DragBox Box { get; set; } = new(res.X, res.Y, 0, 0);
     public void Draw(OverlayData data)
     {
+        Box.Color = data.OverlayConfig.ColorRespawnBox;
         Box.Draw(data);
     }
 
@@ -16,8 +15,8 @@ public class RespawnOverlay(Respawn res) : IOverlay
         if (res.Parent is not null && data.Context.PlatIDDynamicOffset.TryGetValue(res.Parent.PlatID, out (double, double) dynOffset))
             (offsetX, offsetY) = (res.Parent.X + dynOffset.Item1, res.Parent.Y + dynOffset.Item2);
 
-        Box.W = data.Config.RadiusRespawn * 2 + SIZE_OFFSET;
-        Box.H = data.Config.RadiusRespawn * 2 + SIZE_OFFSET;
+        Box.W = data.RenderConfig.RadiusRespawn * 2 + data.OverlayConfig.SizeOffsetRespawnBox;
+        Box.H = data.RenderConfig.RadiusRespawn * 2 + data.OverlayConfig.SizeOffsetRespawnBox;
         Box.Middle = (res.X + offsetX, res.Y + offsetY);
 
         Box.Update(data, true);

@@ -332,4 +332,8 @@ public static class Wms2RlUtils
 
         return Rl.CheckCollisionPointRec(point, rec);
     }
+
+    public static uint RlColorToHex(Raylib_cs.Color color) => (uint)((color.R << 24) | (color.G << 16) | (color.B << 8) | color.A);
+    public static Raylib_cs.Color HexToRlColor(uint hex) => new((byte)(hex >> 24), (byte)(hex >> 16), (byte)(hex >> 8), (byte)hex);
+    public static Raylib_cs.Color? ParseRlColorOrNull(string? s) => s is null ? null : HexToRlColor(Convert.ToUInt32(s, 16));
 }

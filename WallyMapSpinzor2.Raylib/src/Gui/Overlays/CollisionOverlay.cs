@@ -4,17 +4,15 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
 {
     public DragCircle Circle1 { get; set; } = new(col.X1, col.Y1);
     public DragCircle Circle2 { get; set; } = new(col.X2, col.Y2);
-
-    public DragCircle Anchor { get; set; } = new(col.AnchorX ?? double.NaN, col.AnchorY ?? double.NaN)
-    {
-        Color = Raylib_cs.Color.DarkGreen with { A = 190 },
-        UsingColor = Raylib_cs.Color.Green with { A = 190 },
-    };
+    public DragCircle Anchor { get; set; } = new(col.AnchorX ?? double.NaN, col.AnchorY ?? double.NaN);
 
     private bool HasAnchor => !double.IsNaN(Anchor.X) && !double.IsNaN(Anchor.Y);
 
     public bool Update(OverlayData data, CommandHistory cmd)
     {
+        Circle1.Radius = Circle2.Radius = data.OverlayConfig.RadiusCollisionPoint;
+        Anchor.Radius = data.OverlayConfig.RadiusCollisionAnchor;
+
         (double offsetX, double offsetY) = (0, 0);
         (double dynOffsetX, double dynOffsetY) = (0, 0);
         if (col.Parent is not null && data.Context.PlatIDDynamicOffset.TryGetValue(col.Parent.PlatID, out (double, double) dynOffset))
@@ -60,6 +58,10 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
 
     public void Draw(OverlayData data)
     {
+        Circle1.Color = Circle2.Color = data.OverlayConfig.ColorCollisionPoint;
+        Circle1.UsingColor = Circle2.UsingColor = data.OverlayConfig.UsingColorCollisionPoint;
+        Anchor.Color = data.OverlayConfig.ColorCollisionAnchor;
+        Anchor.UsingColor = data.OverlayConfig.UsingColorCollisionAnchor;
         Circle1.Draw(data);
         Circle2.Draw(data);
         if (HasAnchor) Anchor.Draw(data);
