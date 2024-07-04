@@ -23,7 +23,7 @@ using AbcDisassembler;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public static class Utils
+public static class Wms2RlUtils
 {
     public static readonly XmlWriterSettings StandardSaveSettings = new()
     {

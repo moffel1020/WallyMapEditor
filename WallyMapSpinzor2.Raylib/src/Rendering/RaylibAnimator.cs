@@ -485,13 +485,13 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
             if (file.ShapeTags.TryGetValue(layer.CharacterId, out DefineShapeXTag shape))
             {
                 ushort shapeId = shape.ShapeID;
-                result.AddRange(BuildSwfShape(filePath, shapeId, animScale, tint, opacity, trans * Utils.SwfMatrixToTransform(layer.Matrix)));
+                result.AddRange(BuildSwfShape(filePath, shapeId, animScale, tint, opacity, trans * Wms2RlUtils.SwfMatrixToTransform(layer.Matrix)));
             }
             // is a sprite
             else if (file.SpriteTags.TryGetValue(layer.CharacterId, out DefineSpriteTag? childSprite))
             {
                 ushort childSpriteId = childSprite.SpriteID;
-                result.AddRange(BuildSwfSprite(filePath, childSpriteId, frame + layer.FrameOffset, animScale, tint, opacity, trans * Utils.SwfMatrixToTransform(layer.Matrix)));
+                result.AddRange(BuildSwfSprite(filePath, childSpriteId, frame + layer.FrameOffset, animScale, tint, opacity, trans * Wms2RlUtils.SwfMatrixToTransform(layer.Matrix)));
             }
         }
         return [.. result];

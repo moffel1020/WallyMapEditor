@@ -34,7 +34,7 @@ public class DragBox(double x, double y, double w, double h)
         (double worldX, double worldY) = Transform.CreateInverse(Transform) * (worldPos.X, worldPos.Y);
         (worldPos.X, worldPos.Y) = ((float)worldX, (float)worldY);
 
-        Hovered = data.Viewport.Hovered && Utils.CheckCollisionPointRec(worldPos, new((float)X, (float)Y, (float)W, (float)H));
+        Hovered = data.Viewport.Hovered && Wms2RlUtils.CheckCollisionPointRec(worldPos, new((float)X, (float)Y, (float)W, (float)H));
 
         if (!allowDragging)
         {

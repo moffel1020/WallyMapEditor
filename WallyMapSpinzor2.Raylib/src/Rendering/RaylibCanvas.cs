@@ -32,7 +32,7 @@ public partial class RaylibCanvas : ICanvas
 
         DrawingQueue.Push((caller, () =>
         {
-            Rl.DrawCircleV(new((float)x, (float)y), (float)radius, Utils.WmsColorToRlColor(color));
+            Rl.DrawCircleV(new((float)x, (float)y), (float)radius, Wms2RlUtils.WmsColorToRlColor(color));
         }
         ), (int)priority);
     }
@@ -44,7 +44,7 @@ public partial class RaylibCanvas : ICanvas
 
         DrawingQueue.Push((caller, () =>
         {
-            Rl.DrawLineV(new((float)x1, (float)y1), new((float)x2, (float)y2), Utils.WmsColorToRlColor(color));
+            Rl.DrawLineV(new((float)x1, (float)y1), new((float)x2, (float)y2), Wms2RlUtils.WmsColorToRlColor(color));
         }
         ), (int)priority);
     }
@@ -53,8 +53,8 @@ public partial class RaylibCanvas : ICanvas
     {
         if (!Matrix4x4.Invert(CameraMatrix, out Matrix4x4 invertedMat))
             throw new ArgumentException("Camera transform is not invertible");
-        Transform cam = Utils.Matrix4x4ToTransform(CameraMatrix);
-        Transform inv = Utils.Matrix4x4ToTransform(invertedMat);
+        Transform cam = Wms2RlUtils.Matrix4x4ToTransform(CameraMatrix);
+        Transform inv = Wms2RlUtils.Matrix4x4ToTransform(invertedMat);
 
         (x1, y1) = cam * trans * (x1, y1);
         (x2, y2) = cam * trans * (x2, y2);
@@ -141,7 +141,7 @@ public partial class RaylibCanvas : ICanvas
         (double, double)[] texCoords = [(0, 0), (0, 1), (1, 1), (1, 0), (0, 0)];
         (double, double)[] points = [trans * (xMin, yMin), trans * (xMin, yMax), trans * (xMax, yMax), trans * (xMax, yMin), trans * (xMin, yMin)];
         // raylib requires that the points be in counterclockwise order
-        if (Utils.IsPolygonClockwise(points))
+        if (Wms2RlUtils.IsPolygonClockwise(points))
         {
             Array.Reverse(texCoords);
             Array.Reverse(points);
@@ -166,7 +166,7 @@ public partial class RaylibCanvas : ICanvas
         (double xMax, double yMax) = (x + w, y + h);
         (double, double)[] points = [trans * (xMin, yMin), trans * (xMin, yMax), trans * (xMax, yMax), trans * (xMax, yMin), trans * (xMin, yMin)];
         // raylib requires that the points be in counterclockwise order
-        if (Utils.IsPolygonClockwise(points))
+        if (Wms2RlUtils.IsPolygonClockwise(points))
         {
             Array.Reverse(points);
         }

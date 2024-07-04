@@ -39,7 +39,7 @@ partial class PropertiesWindow
                         {
                             string path = dialogResult.Path;
                             string newAssetName = Path.GetRelativePath(assetDir, path).Replace("\\", "/");
-                            if (!Utils.IsInDirectory(data.PathPrefs.BrawlhallaPath, path))
+                            if (!Wms2RlUtils.IsInDirectory(data.PathPrefs.BrawlhallaPath, path))
                             {
                                 _assetErrorText = "Asset has to be inside brawlhalla directory";
                             }
