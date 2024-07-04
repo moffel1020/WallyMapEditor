@@ -11,10 +11,8 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
 
     public void Draw(OverlayData data)
     {
-        TopLeft.Color = TopRight.Color = BotLeft.Color = BotRight.Color = data.OverlayConfig.ColorAssetCorner;
-        TopLeft.UsingColor = TopRight.UsingColor = BotLeft.UsingColor = BotRight.UsingColor = data.OverlayConfig.UsingColorAssetCorner;
-        MoveRect.Color = data.OverlayConfig.ColorAssetBox;
-        MoveRect.UsingColor = data.OverlayConfig.UsingColorAssetBox;
+        MoveRect.Color = TopLeft.Color = TopRight.Color = BotLeft.Color = BotRight.Color = data.OverlayConfig.ColorAssetBox;
+        MoveRect.UsingColor = TopLeft.UsingColor = TopRight.UsingColor = BotLeft.UsingColor = BotRight.UsingColor = data.OverlayConfig.UsingColorAssetBox;
 
         TopLeft.Draw(data);
         TopRight.Draw(data);

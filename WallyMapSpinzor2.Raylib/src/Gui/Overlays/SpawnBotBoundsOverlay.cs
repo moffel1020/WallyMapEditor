@@ -11,10 +11,8 @@ public class SpawnBotBoundsOverlay(SpawnBotBounds bounds) : IOverlay
 
     public void Draw(OverlayData data)
     {
-        TopLeft.Color = TopRight.Color = BotLeft.Color = BotRight.Color = data.OverlayConfig.ColorSpawnBotBoundsCorner;
-        TopLeft.UsingColor = TopRight.UsingColor = BotLeft.UsingColor = BotRight.UsingColor = data.OverlayConfig.UsingColorSpawnBotBoundsCorner;
-        MoveRect.Color = data.OverlayConfig.ColorSpawnBotBoundsBox;
-        MoveRect.UsingColor = data.OverlayConfig.UsingColorSpawnBotBoundsBox;
+        MoveRect.Color = TopLeft.Color = TopRight.Color = BotLeft.Color = BotRight.Color = data.OverlayConfig.ColorSpawnBotBoundsBox;
+        MoveRect.UsingColor = TopLeft.UsingColor = TopRight.UsingColor = BotLeft.UsingColor = BotRight.UsingColor = data.OverlayConfig.UsingColorSpawnBotBoundsBox;
 
         TopLeft.Draw(data);
         TopRight.Draw(data);
