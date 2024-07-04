@@ -15,7 +15,7 @@ public partial class PropertiesWindow
         ImGui.Separator();
         if (mp.AssetName is null && ImGui.CollapsingHeader("Children"))
         {
-            propChanged |= ImGuiExt.EditArrayHistory("", mp.Assets, val => mp.Assets = val,
+            propChanged |= ImGuiExt.EditArrayHistory("##mpchildren", mp.Assets, val => mp.Assets = val,
             CreateNewMovingPlatformChild,
             (int index) =>
             {

@@ -40,7 +40,7 @@ partial class PropertiesWindow
 
         if (p.AssetName is null && ImGui.CollapsingHeader("Children"))
         {
-            propChanged |= ImGuiExt.EditArrayHistory("", p.AssetChildren!, val => p.AssetChildren = val,
+            propChanged |= ImGuiExt.EditArrayHistory($"##platfromChildren{p.GetHashCode()}", p.AssetChildren!, val => p.AssetChildren = val,
             CreateNewPlatformChild,
             (int index) =>
             {

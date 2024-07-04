@@ -14,7 +14,7 @@ public partial class PropertiesWindow
 
         if (ImGui.CollapsingHeader("Children"))
         {
-            propChanged |= ImGuiExt.EditArrayHistory("", ad.Children, val => ad.Children = val,
+            propChanged |= ImGuiExt.EditArrayHistory($"##dynamicChildren{ad.GetHashCode()}", ad.Children, val => ad.Children = val,
             CreateDynamicChild<T>,
             (int index) =>
             {
