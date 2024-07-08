@@ -1,4 +1,5 @@
 using System;
+
 namespace WallyMapSpinzor2.Raylib;
 
 public class AssetOverlay(AbstractAsset asset) : IOverlay
@@ -8,17 +9,24 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
     public DragCircle BotLeft { get; set; } = new(0, 0);
     public DragCircle BotRight { get; set; } = new(0, 0);
     public DragBox MoveRect { get; set; } = new(0, 0, 0, 0);
+    public RotatePoint RotatePoint { get; set; } = new(0, 0);
 
     public void Draw(OverlayData data)
     {
         MoveRect.Color = TopLeft.Color = TopRight.Color = BotLeft.Color = BotRight.Color = data.OverlayConfig.ColorAssetBox;
         MoveRect.UsingColor = TopLeft.UsingColor = TopRight.UsingColor = BotLeft.UsingColor = BotRight.UsingColor = data.OverlayConfig.UsingColorAssetBox;
+        RotatePoint.LineColor = data.OverlayConfig.ColorAssetRotationLine;
 
-        TopLeft.Draw(data);
-        TopRight.Draw(data);
-        BotLeft.Draw(data);
-        BotRight.Draw(data);
+        if (!RotatePoint.Active)
+        {
+            TopLeft.Draw(data);
+            TopRight.Draw(data);
+            BotLeft.Draw(data);
+            BotRight.Draw(data);
+        }
+
         MoveRect.Draw(data);
+        RotatePoint.Draw(data);
     }
 
     public bool Update(OverlayData data, CommandHistory cmd)
@@ -39,6 +47,13 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
         (MoveRect.X, MoveRect.Y) = (0, 0);
         (MoveRect.W, MoveRect.H) = (asset.W.Value, asset.H.Value);
 
+        (RotatePoint.X, RotatePoint.Y) = (trans.TranslateX, trans.TranslateY);
+        RotatePoint.Update(data, true, asset.Rotation * Math.PI / 180);
+        if (RotatePoint.Active)
+        {
+            cmd.Add(new PropChangeCommand<double>(val => asset.Rotation = val, asset.Rotation, RotatePoint.Rotation * 180 / Math.PI));
+        }
+
         bool dragging = UpdateCircles(data, trans, inv);
 
         TransfromDragCircles(inv);
@@ -54,7 +69,7 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
                 (newX, newY, newW, newH)));
         }
 
-        MoveRect.Update(data, !dragging);
+        MoveRect.Update(data, !dragging && !RotatePoint.Active);
 
         if (MoveRect.Dragging)
         {
@@ -64,18 +79,18 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
                 asset.Transform * (MoveRect.X, MoveRect.Y)));
         }
 
-        return dragging || MoveRect.Dragging;
+        return dragging || MoveRect.Dragging || RotatePoint.Active;
     }
 
     private bool UpdateCircles(OverlayData data, Transform trans, Transform invTrans)
     {
-        TopLeft.Update(data, true);
+        TopLeft.Update(data, !RotatePoint.Active);
         bool dragging = TopLeft.Dragging;
-        TopRight.Update(data, !dragging);
+        TopRight.Update(data, !dragging && !RotatePoint.Active);
         dragging |= TopRight.Dragging;
-        BotLeft.Update(data, !dragging);
+        BotLeft.Update(data, !dragging && !RotatePoint.Active);
         dragging |= BotLeft.Dragging;
-        BotRight.Update(data, !dragging);
+        BotRight.Update(data, !dragging && !RotatePoint.Active);
         dragging |= BotRight.Dragging;
 
         TransfromDragCircles(invTrans);

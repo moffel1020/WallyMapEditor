@@ -50,6 +50,8 @@ public class OverlayConfig : ISerializable, IDeserializable
     public required Raylib_cs.Color ColorMovingPlatformPosition { get; set; }
     public required Raylib_cs.Color UsingColorMovingPlatformPosition { get; set; }
 
+    public required Raylib_cs.Color ColorAssetRotationLine { get; set; }
+
     public void Deserialize(XElement e)
     {
         OverlayConfig @default = Default;
@@ -87,6 +89,7 @@ public class OverlayConfig : ISerializable, IDeserializable
         UsingColorDynamicPosition = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorDynamicPosition))) ?? @default.UsingColorDynamicPosition;
         ColorMovingPlatformPosition = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorMovingPlatformPosition))) ?? @default.ColorMovingPlatformPosition;
         UsingColorMovingPlatformPosition = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorMovingPlatformPosition))) ?? @default.UsingColorMovingPlatformPosition;
+        ColorAssetRotationLine = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorAssetRotationLine))) ?? @default.ColorAssetRotationLine;
     }
 
     public void Serialize(XElement e)
@@ -125,6 +128,7 @@ public class OverlayConfig : ISerializable, IDeserializable
         e.AddChild(nameof(UsingColorDynamicPosition), "0x" + Wms2RlUtils.RlColorToHex(UsingColorDynamicPosition));
         e.AddChild(nameof(ColorMovingPlatformPosition), "0x" + Wms2RlUtils.RlColorToHex(ColorMovingPlatformPosition));
         e.AddChild(nameof(UsingColorMovingPlatformPosition), "0x" + Wms2RlUtils.RlColorToHex(UsingColorMovingPlatformPosition));
+        e.AddChild(nameof(ColorAssetRotationLine), "0x" + Wms2RlUtils.RlColorToHex(ColorAssetRotationLine));
     }
 
     private const float DEFAULT_RADIUS = 30;
@@ -138,6 +142,7 @@ public class OverlayConfig : ISerializable, IDeserializable
     private static readonly Raylib_cs.Color TransparentGreen = Raylib_cs.Color.Green with { A = OPACITY };
     private static readonly Raylib_cs.Color TransparentRed = Raylib_cs.Color.Red with { A = OPACITY };
     private static readonly Raylib_cs.Color TransparentPink = Raylib_cs.Color.Pink with { A = OPACITY };
+    private static readonly Raylib_cs.Color OpaqueWhite = Raylib_cs.Color.White;
 
     public static OverlayConfig Default => new()
     {
@@ -175,5 +180,6 @@ public class OverlayConfig : ISerializable, IDeserializable
         UsingColorDynamicPosition = TransparentPink,
         ColorMovingPlatformPosition = TransparentRed,
         UsingColorMovingPlatformPosition = TransparentPink,
+        ColorAssetRotationLine = OpaqueWhite,
     };
 }

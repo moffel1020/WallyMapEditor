@@ -20,7 +20,7 @@ public class DragBox(double x, double y, double w, double h)
     public bool Hovered { get; private set; }
     public bool Dragging { get; private set; }
 
-    public (double, double) Middle
+    public (double, double) Middle // doesn't account for transform
     {
         get => (X + W / 2, Y + H / 2);
         set => (X, Y) = (value.Item1 - W / 2, value.Item2 - H / 2);
