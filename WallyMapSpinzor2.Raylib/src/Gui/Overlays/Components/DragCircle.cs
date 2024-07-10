@@ -1,14 +1,15 @@
 using System.Numerics;
 using Raylib_cs;
 using Rl = Raylib_cs.Raylib;
+using RlColor = Raylib_cs.Color;
 
 namespace WallyMapSpinzor2.Raylib;
 
 public class DragCircle(double x, double y)
 {
     public float Radius { get; set; } = 30;
-    public Raylib_cs.Color Color { get; set; } = Raylib_cs.Color.Gray with { A = 190 };
-    public Raylib_cs.Color UsingColor { get; set; } = Raylib_cs.Color.White with { A = 190 };
+    public RlColor Color { get; set; } = RlColor.Gray with { A = 190 };
+    public RlColor UsingColor { get; set; } = RlColor.White with { A = 190 };
 
     public double X { get; set; } = x;
     public double Y { get; set; } = y;

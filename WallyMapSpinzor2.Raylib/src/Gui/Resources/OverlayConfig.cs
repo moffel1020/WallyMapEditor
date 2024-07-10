@@ -1,4 +1,5 @@
 using System.Xml.Linq;
+using RlColor = Raylib_cs.Color;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -18,39 +19,39 @@ public class OverlayConfig : ISerializable, IDeserializable
     public required double SizeOffsetRespawnBox { get; set; }
     public required double SizeOffsetNavNodeBox { get; set; }
 
-    public required Raylib_cs.Color ColorCollisionPoint { get; set; }
-    public required Raylib_cs.Color UsingColorCollisionPoint { get; set; }
-    public required Raylib_cs.Color ColorCollisionAnchor { get; set; }
-    public required Raylib_cs.Color UsingColorCollisionAnchor { get; set; }
+    public required RlColor ColorCollisionPoint { get; set; }
+    public required RlColor UsingColorCollisionPoint { get; set; }
+    public required RlColor ColorCollisionAnchor { get; set; }
+    public required RlColor UsingColorCollisionAnchor { get; set; }
 
-    public required Raylib_cs.Color ColorItemSpawnBox { get; set; }
-    public required Raylib_cs.Color UsingColorItemSpawnBox { get; set; }
+    public required RlColor ColorItemSpawnBox { get; set; }
+    public required RlColor UsingColorItemSpawnBox { get; set; }
 
-    public required Raylib_cs.Color ColorRespawnBox { get; set; }
-    public required Raylib_cs.Color UsingColorRespawnBox { get; set; }
+    public required RlColor ColorRespawnBox { get; set; }
+    public required RlColor UsingColorRespawnBox { get; set; }
 
-    public required Raylib_cs.Color ColorNavNodeBox { get; set; }
-    public required Raylib_cs.Color UsingColorNavNodeBox { get; set; }
+    public required RlColor ColorNavNodeBox { get; set; }
+    public required RlColor UsingColorNavNodeBox { get; set; }
 
-    public required Raylib_cs.Color ColorAssetBox { get; set; }
-    public required Raylib_cs.Color UsingColorAssetBox { get; set; }
+    public required RlColor ColorAssetBox { get; set; }
+    public required RlColor UsingColorAssetBox { get; set; }
 
-    public required Raylib_cs.Color ColorVolumeBox { get; set; }
-    public required Raylib_cs.Color UsingColorVolumeBox { get; set; }
+    public required RlColor ColorVolumeBox { get; set; }
+    public required RlColor UsingColorVolumeBox { get; set; }
 
-    public required Raylib_cs.Color ColorCameraBoundsBox { get; set; }
-    public required Raylib_cs.Color UsingColorCameraBoundsBox { get; set; }
+    public required RlColor ColorCameraBoundsBox { get; set; }
+    public required RlColor UsingColorCameraBoundsBox { get; set; }
 
-    public required Raylib_cs.Color ColorSpawnBotBoundsBox { get; set; }
-    public required Raylib_cs.Color UsingColorSpawnBotBoundsBox { get; set; }
+    public required RlColor ColorSpawnBotBoundsBox { get; set; }
+    public required RlColor UsingColorSpawnBotBoundsBox { get; set; }
 
-    public required Raylib_cs.Color ColorDynamicPosition { get; set; }
-    public required Raylib_cs.Color UsingColorDynamicPosition { get; set; }
+    public required RlColor ColorDynamicPosition { get; set; }
+    public required RlColor UsingColorDynamicPosition { get; set; }
 
-    public required Raylib_cs.Color ColorMovingPlatformPosition { get; set; }
-    public required Raylib_cs.Color UsingColorMovingPlatformPosition { get; set; }
+    public required RlColor ColorMovingPlatformPosition { get; set; }
+    public required RlColor UsingColorMovingPlatformPosition { get; set; }
 
-    public required Raylib_cs.Color ColorAssetRotationLine { get; set; }
+    public required RlColor ColorAssetRotationLine { get; set; }
 
     public void Deserialize(XElement e)
     {
@@ -136,13 +137,13 @@ public class OverlayConfig : ISerializable, IDeserializable
     private const float DEFAULT_LARGE_RADIUS = 100;
     private const float DEFAULT_SIZE_OFFSET = 40;
     private const byte OPACITY = 190;
-    private static readonly Raylib_cs.Color TransparentGray = Raylib_cs.Color.Gray with { A = OPACITY };
-    private static readonly Raylib_cs.Color TransparentWhite = Raylib_cs.Color.White with { A = OPACITY };
-    private static readonly Raylib_cs.Color TransparentDarkGreen = Raylib_cs.Color.DarkGreen with { A = OPACITY };
-    private static readonly Raylib_cs.Color TransparentGreen = Raylib_cs.Color.Green with { A = OPACITY };
-    private static readonly Raylib_cs.Color TransparentRed = Raylib_cs.Color.Red with { A = OPACITY };
-    private static readonly Raylib_cs.Color TransparentPink = Raylib_cs.Color.Pink with { A = OPACITY };
-    private static readonly Raylib_cs.Color OpaqueWhite = Raylib_cs.Color.White;
+    private static readonly RlColor TransparentGray = RlColor.Gray with { A = OPACITY };
+    private static readonly RlColor TransparentWhite = RlColor.White with { A = OPACITY };
+    private static readonly RlColor TransparentDarkGreen = RlColor.DarkGreen with { A = OPACITY };
+    private static readonly RlColor TransparentGreen = RlColor.Green with { A = OPACITY };
+    private static readonly RlColor TransparentRed = RlColor.Red with { A = OPACITY };
+    private static readonly RlColor TransparentPink = RlColor.Pink with { A = OPACITY };
+    private static readonly RlColor OpaqueWhite = RlColor.White;
 
     public static OverlayConfig Default => new()
     {

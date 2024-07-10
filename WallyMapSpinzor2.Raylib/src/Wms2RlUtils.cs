@@ -8,6 +8,8 @@ using System.Xml.Linq;
 using System.Text;
 
 using Rl = Raylib_cs.Raylib;
+using RlColor = Raylib_cs.Color;
+using RlImage = Raylib_cs.Image;
 
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -66,11 +68,11 @@ public static class Wms2RlUtils
         return false;
     }
 
-    public static Raylib_cs.Color WmsColorToRlColor(Color c) => new(c.R, c.G, c.B, c.A);
+    public static RlColor WmsColorToRlColor(Color c) => new(c.R, c.G, c.B, c.A);
 
-    public static Raylib_cs.Image ImgSharpImageToRlImage(Image<Rgba32> image)
+    public static RlImage ImgSharpImageToRlImage(Image<Rgba32> image)
     {
-        Raylib_cs.Image img;
+        RlImage img;
         unsafe
         {
             int bufferSize = image.Width * image.Height * image.PixelType.BitsPerPixel / 8;
@@ -91,9 +93,9 @@ public static class Wms2RlUtils
         return img;
     }
 
-    public static Raylib_cs.Image LoadRlImage(string path)
+    public static RlImage LoadRlImage(string path)
     {
-        Raylib_cs.Image img;
+        RlImage img;
         if (path.EndsWith(".jpg"))
         {
             using Image<Rgba32> image = Image.Load<Rgba32>(path);
@@ -333,7 +335,7 @@ public static class Wms2RlUtils
         return Rl.CheckCollisionPointRec(point, rec);
     }
 
-    public static uint RlColorToHex(Raylib_cs.Color color) => (uint)((color.R << 24) | (color.G << 16) | (color.B << 8) | color.A);
-    public static Raylib_cs.Color HexToRlColor(uint hex) => new((byte)(hex >> 24), (byte)(hex >> 16), (byte)(hex >> 8), (byte)hex);
-    public static Raylib_cs.Color? ParseRlColorOrNull(string? s) => s is null ? null : HexToRlColor(Convert.ToUInt32(s, 16));
+    public static uint RlColorToHex(RlColor color) => (uint)((color.R << 24) | (color.G << 16) | (color.B << 8) | color.A);
+    public static RlColor HexToRlColor(uint hex) => new((byte)(hex >> 24), (byte)(hex >> 16), (byte)(hex >> 8), (byte)hex);
+    public static RlColor? ParseRlColorOrNull(string? s) => s is null ? null : HexToRlColor(Convert.ToUInt32(s, 16));
 }

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 using Raylib_cs;
 using Rl = Raylib_cs.Raylib;
+using RlColor = Raylib_cs.Color;
 using rlImGui_cs;
 using ImGuiNET;
 using NativeFileDialogSharp;
@@ -116,7 +117,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
     private void Draw()
     {
         Rl.BeginDrawing();
-        Rl.ClearBackground(Raylib_cs.Color.Black);
+        Rl.ClearBackground(RlColor.Black);
         Rlgl.SetLineWidth(Math.Max(LINE_WIDTH * _cam.Zoom, 1));
         rlImGui.Begin();
 
@@ -125,7 +126,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         Rl.BeginTextureMode(ViewportWindow.Framebuffer);
         Rl.BeginMode2D(_cam);
 
-        Rl.ClearBackground(Raylib_cs.Color.Black);
+        Rl.ClearBackground(RlColor.Black);
         if (PathPrefs.BrawlhallaPath is not null)
         {
             Loader ??= new(PathPrefs.BrawlhallaPath, BoneNames!);
@@ -421,7 +422,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         Camera2D camera = new(new(0, 0), new(x, y), 0, 1);
         Rlgl.SetLineWidth(Math.Max(LINE_WIDTH * camera.Zoom, 1));
         Rl.BeginTextureMode(renderTexture);
-        Rl.ClearBackground(Raylib_cs.Color.Blank);
+        Rl.ClearBackground(RlColor.Blank);
         Rl.BeginMode2D(camera);
         Canvas.CameraMatrix = Rl.GetCameraMatrix2D(camera);
         MapData?.DrawOn(Canvas, Transform.IDENTITY, _renderConfig, new RenderContext(), _state);

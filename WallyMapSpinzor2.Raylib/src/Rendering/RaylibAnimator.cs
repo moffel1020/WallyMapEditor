@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Raylib_cs;
 using Rl = Raylib_cs.Raylib;
+using RlColor = Raylib_cs.Color;
 using SwfLib.Tags;
 using SwiffCheese.Wrappers;
 using WallyAnmSpinzor;
@@ -173,7 +174,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
             rect.UpdateWith(x, y, w, h);
         RenderRectCache[(gfx, animName)] = rect;
         Rl.BeginTextureMode(rect.RenderTexture);
-        Rl.ClearBackground(Raylib_cs.Color.Blank);
+        Rl.ClearBackground(RlColor.Blank);
         canvas.DrawAnim(gfx, animName, frame, Transform.CreateTranslate(-rect.Rect.XMin, -rect.Rect.YMin), DrawPriorityEnum.BACKGROUND, null);
         if (withDebug)
         {

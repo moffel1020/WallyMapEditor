@@ -2,6 +2,7 @@ using System;
 using System.Numerics;
 using Raylib_cs;
 using Rl = Raylib_cs.Raylib;
+using RlColor = Raylib_cs.Color;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -12,7 +13,7 @@ public class RotatePoint(double x, double y)
     public double Y { get; set; } = y;
     public bool Active { get; private set; }
 
-    public Raylib_cs.Color LineColor { get; set; } = Raylib_cs.Color.White;
+    public RlColor LineColor { get; set; } = RlColor.White;
 
     private double _mouseRotationOffset;
     private Vector2 Coords => new((float)X, (float)Y);
