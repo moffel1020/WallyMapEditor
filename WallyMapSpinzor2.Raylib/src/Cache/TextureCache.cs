@@ -1,25 +1,23 @@
 using System.IO;
-using Raylib_cs;
-using Rl = Raylib_cs.Raylib;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public class TextureCache : UploadCache<string, Image, Texture2DWrapper>
+public class TextureCache : UploadCache<string, RlImage, Texture2DWrapper>
 {
-    protected override Image LoadIntermediate(string path)
+    protected override RlImage LoadIntermediate(string path)
     {
         path = Path.GetFullPath(path);
-        Image image = Wms2RlUtils.LoadRlImage(path);
+        RlImage image = Wms2RlUtils.LoadRlImage(path);
         Rl.ImageAlphaPremultiply(ref image);
         return image;
     }
 
-    protected override Texture2DWrapper IntermediateToValue(Image img)
+    protected override Texture2DWrapper IntermediateToValue(RlImage img)
     {
         return new(Rl.LoadTextureFromImage(img));
     }
 
-    protected override void UnloadIntermediate(Image img)
+    protected override void UnloadIntermediate(RlImage img)
     {
         Rl.UnloadImage(img);
     }

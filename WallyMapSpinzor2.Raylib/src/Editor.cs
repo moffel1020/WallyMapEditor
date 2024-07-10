@@ -8,8 +8,6 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Raylib_cs;
-using Rl = Raylib_cs.Raylib;
-using RlColor = Raylib_cs.Color;
 using rlImGui_cs;
 using ImGuiNET;
 using NativeFileDialogSharp;

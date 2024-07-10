@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Raylib_cs;
-using Rl = Raylib_cs.Raylib;
-using RlColor = Raylib_cs.Color;
 using SwfLib.Tags;
 using SwiffCheese.Wrappers;
 using WallyAnmSpinzor;

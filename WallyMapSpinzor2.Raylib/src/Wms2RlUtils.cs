@@ -1,3 +1,7 @@
+global using Rl = Raylib_cs.Raylib;
+global using RlColor = Raylib_cs.Color;
+global using RlImage = Raylib_cs.Image;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,10 +10,6 @@ using System.Numerics;
 using System.Xml;
 using System.Xml.Linq;
 using System.Text;
-
-using Rl = Raylib_cs.Raylib;
-using RlColor = Raylib_cs.Color;
-using RlImage = Raylib_cs.Image;
 
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;

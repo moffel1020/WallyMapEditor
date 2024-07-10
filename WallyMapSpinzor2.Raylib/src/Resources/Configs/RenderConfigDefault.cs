@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Xml.Linq;
 using Raylib_cs;
-using Rl = Raylib_cs.Raylib;
 
 namespace WallyMapSpinzor2.Raylib;
 

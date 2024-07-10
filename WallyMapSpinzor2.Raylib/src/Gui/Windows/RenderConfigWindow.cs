@@ -6,7 +6,6 @@ using System.Xml.Linq;
 using ImGuiNET;
 using NativeFileDialogSharp;
 using Raylib_cs;
-using Rl = Raylib_cs.Raylib;
 
 namespace WallyMapSpinzor2.Raylib;
 

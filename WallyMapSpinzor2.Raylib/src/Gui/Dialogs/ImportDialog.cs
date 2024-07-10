@@ -8,7 +8,6 @@ using System.Xml.Linq;
 using NativeFileDialogSharp;
 
 using Raylib_cs;
-using Rl = Raylib_cs.Raylib;
 using ImGuiNET;
 
 using SwfLib.Tags.ActionsTags;

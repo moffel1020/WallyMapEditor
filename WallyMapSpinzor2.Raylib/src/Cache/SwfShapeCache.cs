@@ -11,8 +11,6 @@ using SwiffCheese.Utils;
 using SwiffCheese.Wrappers;
 
 using Raylib_cs;
-using Rl = Raylib_cs.Raylib;
-using RlImage = Raylib_cs.Image;
 
 namespace WallyMapSpinzor2.Raylib;
 

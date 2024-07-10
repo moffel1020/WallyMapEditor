@@ -1,7 +1,6 @@
 using System.Numerics;
 
 using Raylib_cs;
-using Rl = Raylib_cs.Raylib;
 using ImGuiNET;
 using rlImGui_cs;
 

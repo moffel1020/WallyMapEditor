@@ -3,7 +3,6 @@ using System.Numerics;
 using System.IO;
 using System.Threading.Tasks;
 
-using Rl = Raylib_cs.Raylib;
 using Raylib_cs;
 
 using ImGuiNET;

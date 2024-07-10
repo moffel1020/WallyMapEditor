@@ -1,6 +1,5 @@
 using ImGuiNET;
 using Raylib_cs;
-using Rl = Raylib_cs.Raylib;
 
 namespace WallyMapSpinzor2.Raylib;
 

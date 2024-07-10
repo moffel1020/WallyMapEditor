@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using ImGuiNET;
 
 using Raylib_cs;
-using Rl = Raylib_cs.Raylib;
 
 using NativeFileDialogSharp;
 

@@ -1,7 +1,6 @@
 using System;
 using System.Numerics;
 
-using Rl = Raylib_cs.Raylib;
 using Raylib_cs;
 
 namespace WallyMapSpinzor2.Raylib;
