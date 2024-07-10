@@ -43,7 +43,10 @@ public class RotatePoint(double x, double y)
         if (Active) Rotation = (CalculateAngle(Coords, _mouseWorldPos) - _mouseRotationOffset) % Math.Tau;
     }
 
+    // Remove unused parameter 'data' if it is not part of a shipped public API [WallyMapSpinzor2.Raylib]
+#pragma warning disable IDE0060
     public void Draw(OverlayData data)
+#pragma warning restore IDE0060
     {
         if (Active) Rl.DrawLineV(Coords, _mouseWorldPos, LineColor);
     }

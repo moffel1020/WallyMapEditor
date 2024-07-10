@@ -22,9 +22,10 @@ partial class PropertiesWindow
         return propChanged;
     }
 
-    // unused variable warning (cmd is unused)
+    // Remove unused parameter 'cmd' if it is not part of a shipped public API [WallyMapSpinzor2.Raylib]
 #pragma warning disable IDE0060
     public static bool ShowGfxProps(Gfx g, CommandHistory cmd, PropertiesWindowData data)
+#pragma warning restore IDE0060
     {
         bool propChanged = false;
         ImGui.Text("AnimFile: " + g.AnimFile);
@@ -42,5 +43,4 @@ partial class PropertiesWindow
         ImGui.Text("AnimScale: " + g.AnimScale);
         return propChanged;
     }
-#pragma warning restore IDE0060
 }
