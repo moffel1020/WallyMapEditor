@@ -33,6 +33,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         foreach (BoneSprite bone in bones)
         {
             Texture2DWrapper texture = bone.Texture;
+            // TODO: need to turn this into a ColorTransform
             float tintR = bone.Tint == 0 ? 1 : ((byte)(bone.Tint >> 16) / 256f);
             float tintG = bone.Tint == 0 ? 1 : ((byte)(bone.Tint >> 8) / 256f);
             float tintB = bone.Tint == 0 ? 1 : ((byte)(bone.Tint >> 0) / 256f);
@@ -47,6 +48,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
 
     public int? GetAnimationFrameCount(Gfx gfx, string animName)
     {
+        // TODO: check how exactly the game does this
         if (gfx.AnimFile.StartsWith("SFX_"))
         {
             SwfFileData? swf = loader.LoadSwf(gfx.AnimFile);
@@ -224,6 +226,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
     private BoneSprite[] BuildAnim(Gfx gfx, string animName, int frame, Transform trans, int loopLimit = -1)
     {
         trans *= Transform.CreateScale(gfx.AnimScale, gfx.AnimScale);
+        // TODO: check how the game does this
         // swf animation
         if (gfx.AnimFile.StartsWith("SFX_"))
         {

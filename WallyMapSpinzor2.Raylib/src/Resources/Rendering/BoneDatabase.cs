@@ -6,6 +6,7 @@ public static class BoneDatabase
 {
     static BoneDatabase()
     {
+        // taken directly from the game
         Register1("a_WeaponCrateReady", 3);
         Register1("a_WeaponCratePickUp", 3);
         Register1("a_WeaponCrateImpact", 3);

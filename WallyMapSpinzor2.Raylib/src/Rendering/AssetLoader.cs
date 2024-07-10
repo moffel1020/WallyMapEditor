@@ -20,12 +20,12 @@ public class AssetLoader
     {
         this.brawlPath = brawlPath;
         BoneNames = boneNames;
-        LoadAnm("MapArtAnims");
-        LoadAnm("ATLA_MapArtAnims");
-        LoadAnm("GameModes");
+        LoadAnmInThread("MapArtAnims");
+        LoadAnmInThread("ATLA_MapArtAnims");
+        LoadAnmInThread("GameModes");
     }
 
-    private void LoadAnm(string name)
+    private void LoadAnmInThread(string name)
     {
         Task.Run(() =>
         {
@@ -44,14 +44,15 @@ public class AssetLoader
     {
         string finalPath = Path.Combine(brawlPath, "mapArt", path);
         TextureCache.Cache.TryGetValue(finalPath, out Texture2DWrapper? texture);
-        if (texture is not null) return texture;
-
+        if (texture is not null)
+            return texture;
         TextureCache.LoadInThread(finalPath);
-        return Texture2DWrapper.Default; // placeholder white texture until the image is read from disk
+        return Texture2DWrapper.Default;
     }
 
     private static string GetRealSwfPath(string filename)
     {
+        // TODO: this conversion should be done by reading BoneSources.xml
         if (filename.StartsWith("Animation_"))
             return Path.Combine("bones", "Bones_" + filename["Animation_".Length..]);
         return filename;
