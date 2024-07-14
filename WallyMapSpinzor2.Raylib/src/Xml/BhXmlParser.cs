@@ -11,14 +11,13 @@ namespace WallyMapSpinzor2.Raylib;
 // which is the parser brawlhalla uses
 public static class BhXmlParser
 {
-    private static readonly FrozenDictionary<string, char> ESCAPES = new Dictionary<string, char>
-    {
-        ["lt"] = '<',
-        ["gt"] = '>',
-        ["amp"] = '&',
-        ["quot"] = '"',
-        ["apos"] = '\'',
-    }.ToFrozenDictionary();
+    private static readonly FrozenDictionary<string, char> ESCAPES = ((KeyValuePair<string, char>[])[
+        new("lt", '<'),
+        new("gt", '>'),
+        new("amp", '&'),
+        new("quot", '"'),
+        new("apos", '\''),
+    ]).ToFrozenDictionary();
 
     private static void AddChild(this XNode e, XNode c)
     {
