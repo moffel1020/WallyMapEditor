@@ -9,8 +9,6 @@ namespace WallyMapSpinzor2.Raylib;
 
 // ported from: https://github.com/HaxeFoundation/haxe/blob/development/std/haxe/xml/Parser.hx
 // which is the parser brawlhalla uses
-
-// for some reason there is only XCData, and no XPCData, so this port does not properly parse PCData
 public static class BhXmlParser
 {
     private static readonly FrozenDictionary<string, char> ESCAPES = new Dictionary<string, char>
@@ -130,8 +128,7 @@ public static class BhXmlParser
                     if (c == '<')
                     {
                         buf.Append(str, start, p - start);
-                        // FIXME: should be PCData
-                        XNode child = new XCData(buf.ToString());
+                        XNode child = new XText(buf.ToString());
                         buf.Clear();
                         parent!.AddChild(child);
                         nsubs++;
@@ -311,8 +308,7 @@ public static class BhXmlParser
                     {
                         case '>':
                             if (nsubs == 0)
-                                // FIXME: should be PCData
-                                parent!.AddChild(new XCData(""));
+                                parent!.AddChild(new XText(""));
                             return p;
                         default:
                             throw new BhXmlException("Expected >", str, p);
@@ -412,8 +408,7 @@ public static class BhXmlParser
             if (p != start || nsubs == 0)
             {
                 buf.Append(str, start, p - start);
-                // FIXME: should be PCData
-                parent!.AddChild(new XCData(buf.ToString()));
+                parent!.AddChild(new XText(buf.ToString()));
             }
             return p;
         }
@@ -422,8 +417,7 @@ public static class BhXmlParser
         {
             buf.Append('&');
             buf.Append(str, start, p - start);
-            // FIXME: should be PCData
-            parent!.AddChild(new XCData(buf.ToString()));
+            parent!.AddChild(new XText(buf.ToString()));
             return p;
         }
 
