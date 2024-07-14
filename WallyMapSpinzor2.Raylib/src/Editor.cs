@@ -326,7 +326,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         if (btPath is not null)
         {
             using FileStream bonesFile = new(btPath, FileMode.Open, FileAccess.Read);
-            BoneNames = [.. XElement.Load(bonesFile).Elements("Bone").Select(e => e.Value)];
+            BoneNames = [.. BhXmlParser.Load(bonesFile).Elements("Bone").Select(e => e.Value)];
         }
         PowerNames = ptPath is not null ? Wms2RlUtils.ParsePowerTypes(File.ReadAllText(ptPath)) : null;
         LevelDesc ld = Wms2RlUtils.DeserializeFromPath<LevelDesc>(ldPath);

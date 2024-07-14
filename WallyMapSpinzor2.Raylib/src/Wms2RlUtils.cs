@@ -128,28 +128,8 @@ public static class Wms2RlUtils
         return area > 0;
     }
 
-    public static T DeserializeFromPath<T>(string fromPath)
-        where T : IDeserializable, new()
-    {
-        XElement element;
-        using (FileStream fromFile = new(fromPath, FileMode.Open, FileAccess.Read))
-        {
-            // bmg moment
-            if (fromPath.EndsWith("RefineryDoors.xml"))
-            {
-                string content;
-                using (StreamReader reader = new(fromFile))
-                    content = reader.ReadToEnd();
-                content = content.Replace("--->", "-->");
-                element = XElement.Parse(content);
-            }
-            else
-            {
-                element = XElement.Load(fromFile);
-            }
-        }
-        return element.DeserializeTo<T>();
-    }
+    public static T DeserializeFromPath<T>(string fromPath) where T : IDeserializable, new() =>
+        DeserializeFromString<T>(File.ReadAllText(fromPath));
 
     public static void SerializeToPath<T>(T serializable, string toPath, bool minify = false)
         where T : ISerializable
@@ -174,9 +154,7 @@ public static class Wms2RlUtils
     public static T DeserializeFromString<T>(string xmldata)
         where T : IDeserializable, new()
     {
-        // bmg moment
-        xmldata = xmldata.Replace("--->", "-->");
-        XElement element = XElement.Parse(xmldata);
+        XElement element = BhXmlParser.Parse(xmldata).Elements().First();
         return element.DeserializeTo<T>();
     }
 
