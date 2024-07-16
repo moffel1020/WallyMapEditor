@@ -15,7 +15,6 @@ public class DragCircle(double x, double y)
     public bool Hovered { get; private set; }
     public bool Dragging { get; private set; }
 
-
     public (double, double) Position
     {
         get => (X, Y);

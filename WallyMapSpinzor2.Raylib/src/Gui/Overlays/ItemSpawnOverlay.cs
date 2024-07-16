@@ -2,89 +2,43 @@ namespace WallyMapSpinzor2.Raylib;
 
 public class ItemSpawnOverlay(AbstractItemSpawn item) : IOverlay
 {
-    public DragCircle TopLeft { get; set; } = new(item.X, item.Y);
-    public DragCircle TopRight { get; set; } = new(item.X + item.W, item.Y);
-    public DragCircle BotLeft { get; set; } = new(item.X, item.Y + item.H);
-    public DragCircle BotRight { get; set; } = new(item.X + item.W, item.Y + item.H);
-
-    public DragBox MoveRect { get; set; } = new(item.X, item.Y, item.W, item.H);
+    public ResizableDragBox ResizableBox { get; set; } = new(item.X, item.Y, item.W, item.H);
 
     public void Draw(OverlayData data)
     {
-        MoveRect.Color = TopLeft.Color = TopRight.Color = BotLeft.Color = BotRight.Color = data.OverlayConfig.ColorItemSpawnBox;
-        MoveRect.UsingColor = TopLeft.UsingColor = TopRight.UsingColor = BotLeft.UsingColor = BotRight.UsingColor = data.OverlayConfig.UsingColorItemSpawnBox;
+        ResizableBox.Color = data.OverlayConfig.ColorItemSpawnBox;
+        ResizableBox.UsingColor = data.OverlayConfig.UsingColorItemSpawnBox;
 
-        TopLeft.Draw(data);
-        TopRight.Draw(data);
-        BotLeft.Draw(data);
-        BotRight.Draw(data);
-        MoveRect.Draw(data);
+        ResizableBox.Draw(data);
     }
 
     public bool Update(OverlayData data, CommandHistory cmd)
     {
-        TopLeft.Radius = TopRight.Radius = BotLeft.Radius = BotRight.Radius = data.OverlayConfig.RadiusItemSpawnCorner;
+        ResizableBox.CircleRadius = data.OverlayConfig.RadiusItemSpawnCorner;
 
         (double offsetX, double offsetY) = (0, 0);
         if (item.Parent is not null && data.Context.PlatIDDynamicOffset.TryGetValue(item.Parent.PlatID, out (double, double) dynOffset))
             (offsetX, offsetY) = (item.Parent.X + dynOffset.Item1, item.Parent.Y + dynOffset.Item2);
 
-        (TopLeft.X, TopLeft.Y) = (item.X + offsetX, item.Y + offsetY);
-        (TopRight.X, TopRight.Y) = (item.X + offsetX + item.W, item.Y + offsetY);
-        (BotLeft.X, BotLeft.Y) = (item.X + offsetX, item.Y + offsetY + item.H);
-        (BotRight.X, BotRight.Y) = (item.X + offsetX + item.W, item.Y + offsetY + item.H);
-        (MoveRect.X, MoveRect.Y, MoveRect.W, MoveRect.H) = (item.X + offsetX, item.Y + offsetY, item.W, item.H);
+        ResizableBox.Update(data, item.X + offsetX, item.Y + offsetY, item.W, item.H);
+        (double x, double y, double w, double h) = ResizableBox.Bounds;
 
-        TopLeft.Update(data, true);
-        if (TopLeft.Dragging)
-        {
-            BotLeft.X = TopLeft.X;
-            TopRight.Y = TopLeft.Y;
-        }
-        bool dragging = TopLeft.Dragging;
-
-        TopRight.Update(data, !dragging);
-        if (!dragging && TopRight.Dragging)
-        {
-            BotRight.X = TopRight.X;
-            TopLeft.Y = TopRight.Y;
-        }
-        dragging |= TopRight.Dragging;
-
-        BotLeft.Update(data, !dragging);
-        if (!dragging && BotLeft.Dragging)
-        {
-            TopLeft.X = BotLeft.X;
-            BotRight.Y = BotLeft.Y;
-        }
-        dragging |= BotLeft.Dragging;
-
-        BotRight.Update(data, !dragging);
-        if (!dragging && BotRight.Dragging)
-        {
-            TopRight.X = BotRight.X;
-            BotLeft.Y = BotRight.Y;
-        }
-        dragging |= BotRight.Dragging;
-
-        if (dragging)
+        if (ResizableBox.Resizing)
         {
             cmd.Add(new PropChangeCommand<(double, double, double, double)>(
                 val => (item.X, item.Y, item.W, item.H) = val,
                 (item.X, item.Y, item.W, item.H),
-                (TopLeft.X - offsetX, TopLeft.Y - offsetY, TopRight.X - TopLeft.X, BotLeft.Y - TopLeft.Y)));
+                (x - offsetX, y - offsetY, w, h)));
         }
 
-        MoveRect.Update(data, !dragging);
-
-        if (MoveRect.Dragging)
+        if (ResizableBox.Moving)
         {
             cmd.Add(new PropChangeCommand<(double, double)>(
                 val => (item.X, item.Y) = val,
                 (item.X, item.Y),
-                (MoveRect.X - offsetX, MoveRect.Y - offsetY)));
+                (x - offsetX, y - offsetY)));
         }
 
-        return dragging || MoveRect.Dragging;
+        return ResizableBox.Moving || ResizableBox.Resizing;
     }
 }

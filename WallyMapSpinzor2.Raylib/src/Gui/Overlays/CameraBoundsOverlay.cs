@@ -2,85 +2,39 @@ namespace WallyMapSpinzor2.Raylib;
 
 public class CameraBoundsOverlay(CameraBounds bounds) : IOverlay
 {
-    public DragCircle TopLeft { get; set; } = new(bounds.X, bounds.Y);
-    public DragCircle TopRight { get; set; } = new(bounds.X + bounds.W, bounds.Y);
-    public DragCircle BotLeft { get; set; } = new(bounds.X, bounds.Y + bounds.H);
-    public DragCircle BotRight { get; set; } = new(bounds.X + bounds.W, bounds.Y + bounds.H);
-
-    public DragBox MoveRect { get; set; } = new(bounds.X, bounds.Y, bounds.W, bounds.H);
+    public ResizableDragBox ResizableBox { get; set; } = new(bounds.X, bounds.Y, bounds.W, bounds.H);
 
     public void Draw(OverlayData data)
     {
-        MoveRect.Color = TopLeft.Color = TopRight.Color = BotLeft.Color = BotRight.Color = data.OverlayConfig.ColorCameraBoundsBox;
-        MoveRect.UsingColor = TopLeft.UsingColor = TopRight.UsingColor = BotLeft.UsingColor = BotRight.UsingColor = data.OverlayConfig.UsingColorCameraBoundsBox;
+        ResizableBox.Color = data.OverlayConfig.ColorCameraBoundsBox;
+        ResizableBox.UsingColor = data.OverlayConfig.UsingColorCameraBoundsBox;
 
-        TopLeft.Draw(data);
-        TopRight.Draw(data);
-        BotLeft.Draw(data);
-        BotRight.Draw(data);
-        MoveRect.Draw(data);
+        ResizableBox.Draw(data);
     }
 
     public bool Update(OverlayData data, CommandHistory cmd)
     {
-        TopLeft.Radius = TopRight.Radius = BotLeft.Radius = BotRight.Radius = data.OverlayConfig.RadiusCameraBoundsCorner;
+        ResizableBox.CircleRadius = data.OverlayConfig.RadiusCameraBoundsCorner;
 
-        (TopLeft.X, TopLeft.Y) = (bounds.X, bounds.Y);
-        (TopRight.X, TopRight.Y) = (bounds.X + bounds.W, bounds.Y);
-        (BotLeft.X, BotLeft.Y) = (bounds.X, bounds.Y + bounds.H);
-        (BotRight.X, BotRight.Y) = (bounds.X + bounds.W, bounds.Y + bounds.H);
-        (MoveRect.X, MoveRect.Y, MoveRect.W, MoveRect.H) = (bounds.X, bounds.Y, bounds.W, bounds.H);
+        ResizableBox.Update(data, bounds.X, bounds.Y, bounds.W, bounds.H);
+        (double x, double y, double w, double h) = ResizableBox.Bounds;
 
-        TopLeft.Update(data, true);
-        if (TopLeft.Dragging)
-        {
-            BotLeft.X = TopLeft.X;
-            TopRight.Y = TopLeft.Y;
-        }
-        bool dragging = TopLeft.Dragging;
-
-        TopRight.Update(data, !dragging);
-        if (!dragging && TopRight.Dragging)
-        {
-            BotRight.X = TopRight.X;
-            TopLeft.Y = TopRight.Y;
-        }
-        dragging |= TopRight.Dragging;
-
-        BotLeft.Update(data, !dragging);
-        if (!dragging && BotLeft.Dragging)
-        {
-            TopLeft.X = BotLeft.X;
-            BotRight.Y = BotLeft.Y;
-        }
-        dragging |= BotLeft.Dragging;
-
-        BotRight.Update(data, !dragging);
-        if (!dragging && BotRight.Dragging)
-        {
-            TopRight.X = BotRight.X;
-            BotLeft.Y = BotRight.Y;
-        }
-        dragging |= BotRight.Dragging;
-
-        if (dragging)
+        if (ResizableBox.Resizing)
         {
             cmd.Add(new PropChangeCommand<(double, double, double, double)>(
                 val => (bounds.X, bounds.Y, bounds.W, bounds.H) = val,
                 (bounds.X, bounds.Y, bounds.W, bounds.H),
-                (TopLeft.X, TopLeft.Y, TopRight.X - TopLeft.X, BotLeft.Y - TopLeft.Y)));
+                (x, y, w, h)));
         }
 
-        MoveRect.Update(data, !dragging);
-
-        if (MoveRect.Dragging)
+        if (ResizableBox.Moving)
         {
             cmd.Add(new PropChangeCommand<(double, double)>(
                 val => (bounds.X, bounds.Y) = val,
                 (bounds.X, bounds.Y),
-                (MoveRect.X, MoveRect.Y)));
+                (x, y)));
         }
 
-        return dragging || MoveRect.Dragging;
+        return ResizableBox.Moving || ResizableBox.Resizing;
     }
 }
