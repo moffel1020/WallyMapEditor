@@ -28,11 +28,12 @@ public class OverlayManager
         SpawnBotBounds sbb => new SpawnBotBoundsOverlay(sbb),
         AbstractCollision ac => new CollisionOverlay(ac),
         Respawn r => new RespawnOverlay(r),
+        MovingPlatform mp => new MovingPlatformOverlay(mp),
         AbstractItemSpawn i => new ItemSpawnOverlay(i),
         AbstractVolume v => new VolumeOverlay(v),
         AbstractAsset a when a.AssetName is not null => new AssetOverlay(a),
+        AbstractAsset a => new ParentAssetOverlay(a),
         NavNode n => new NavNodeOverlay(n),
-        MovingPlatform mp => new MovingPlatformOverlay(mp),
         // ugly. maybe create separate class for each?
         DynamicCollision dc => new AbstracyDynamicOverlay<DynamicCollision, AbstractCollision>(dc),
         DynamicItemSpawn dis => new AbstracyDynamicOverlay<DynamicItemSpawn, AbstractItemSpawn>(dis),

@@ -119,7 +119,7 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
         return dragging;
     }
 
-    private static Transform FullTransform(AbstractAsset? a, RenderContext context) => a switch
+    public static Transform FullTransform(AbstractAsset? a, RenderContext context) => a switch
     {
         MovingPlatform m => GetMovingPlatformTransform(m, context),
         AbstractAsset => FullTransform(a.Parent, context) * a.Transform,

@@ -9,6 +9,7 @@ public class OverlayConfig : ISerializable, IDeserializable
     public required float RadiusItemSpawnCorner { get; set; }
     public required float RadiusNavNodePosition { get; set; }
     public required float RadiusAssetCorner { get; set; }
+    public required float RadiusParentAssetPosition { get; set; }
     public required float RadiusVolumeCorner { get; set; }
     public required float RadiusCameraBoundsCorner { get; set; }
     public required float RadiusSpawnBotBoundsCorner { get; set; }
@@ -34,6 +35,11 @@ public class OverlayConfig : ISerializable, IDeserializable
 
     public required RlColor ColorAssetBox { get; set; }
     public required RlColor UsingColorAssetBox { get; set; }
+    public required RlColor ColorAssetRotationLine { get; set; }
+
+    public required RlColor ColorParentAssetPosition { get; set; }
+    public required RlColor UsingColorParentAssetPosition { get; set; }
+    public required RlColor ColorParentAssetRotationLine { get; set; }
 
     public required RlColor ColorVolumeBox { get; set; }
     public required RlColor UsingColorVolumeBox { get; set; }
@@ -50,7 +56,6 @@ public class OverlayConfig : ISerializable, IDeserializable
     public required RlColor ColorMovingPlatformPosition { get; set; }
     public required RlColor UsingColorMovingPlatformPosition { get; set; }
 
-    public required RlColor ColorAssetRotationLine { get; set; }
 
     public void Deserialize(XElement e)
     {
@@ -59,6 +64,7 @@ public class OverlayConfig : ISerializable, IDeserializable
         RadiusCollisionAnchor = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusCollisionAnchor))) ?? @default.RadiusCollisionAnchor;
         RadiusItemSpawnCorner = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusItemSpawnCorner))) ?? @default.RadiusItemSpawnCorner;
         RadiusAssetCorner = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusAssetCorner))) ?? @default.RadiusAssetCorner;
+        RadiusParentAssetPosition = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusParentAssetPosition))) ?? @default.RadiusParentAssetPosition;
         RadiusVolumeCorner = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusVolumeCorner))) ?? @default.RadiusVolumeCorner;
         RadiusNavNodePosition = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusNavNodePosition))) ?? @default.RadiusNavNodePosition;
         RadiusCameraBoundsCorner = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusCameraBoundsCorner))) ?? @default.RadiusCameraBoundsCorner;
@@ -79,6 +85,10 @@ public class OverlayConfig : ISerializable, IDeserializable
         UsingColorNavNodeBox = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorNavNodeBox))) ?? @default.UsingColorNavNodeBox;
         ColorAssetBox = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorAssetBox))) ?? @default.ColorAssetBox;
         UsingColorAssetBox = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorAssetBox))) ?? @default.UsingColorAssetBox;
+        ColorAssetRotationLine = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorAssetRotationLine))) ?? @default.ColorAssetRotationLine;
+        ColorParentAssetPosition = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorParentAssetPosition))) ?? @default.ColorParentAssetPosition;
+        UsingColorParentAssetPosition = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorParentAssetPosition))) ?? @default.UsingColorParentAssetPosition;
+        ColorParentAssetRotationLine = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorParentAssetRotationLine))) ?? @default.ColorParentAssetRotationLine;
         ColorVolumeBox = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorVolumeBox))) ?? @default.ColorVolumeBox;
         UsingColorVolumeBox = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorVolumeBox))) ?? @default.UsingColorVolumeBox;
         ColorCameraBoundsBox = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorCameraBoundsBox))) ?? @default.ColorCameraBoundsBox;
@@ -89,7 +99,6 @@ public class OverlayConfig : ISerializable, IDeserializable
         UsingColorDynamicPosition = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorDynamicPosition))) ?? @default.UsingColorDynamicPosition;
         ColorMovingPlatformPosition = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorMovingPlatformPosition))) ?? @default.ColorMovingPlatformPosition;
         UsingColorMovingPlatformPosition = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorMovingPlatformPosition))) ?? @default.UsingColorMovingPlatformPosition;
-        ColorAssetRotationLine = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorAssetRotationLine))) ?? @default.ColorAssetRotationLine;
     }
 
     public void Serialize(XElement e)
@@ -98,6 +107,7 @@ public class OverlayConfig : ISerializable, IDeserializable
         e.AddChild(nameof(RadiusCollisionAnchor), RadiusCollisionAnchor);
         e.AddChild(nameof(RadiusItemSpawnCorner), RadiusItemSpawnCorner);
         e.AddChild(nameof(RadiusAssetCorner), RadiusAssetCorner);
+        e.AddChild(nameof(RadiusParentAssetPosition), RadiusParentAssetPosition);
         e.AddChild(nameof(RadiusVolumeCorner), RadiusVolumeCorner);
         e.AddChild(nameof(RadiusNavNodePosition), RadiusNavNodePosition);
         e.AddChild(nameof(RadiusCameraBoundsCorner), RadiusCameraBoundsCorner);
@@ -118,6 +128,10 @@ public class OverlayConfig : ISerializable, IDeserializable
         e.AddChild(nameof(UsingColorNavNodeBox), "0x" + Wms2RlUtils.RlColorToHex(UsingColorNavNodeBox));
         e.AddChild(nameof(ColorAssetBox), "0x" + Wms2RlUtils.RlColorToHex(ColorAssetBox));
         e.AddChild(nameof(UsingColorAssetBox), "0x" + Wms2RlUtils.RlColorToHex(UsingColorAssetBox));
+        e.AddChild(nameof(ColorAssetRotationLine), "0x" + Wms2RlUtils.RlColorToHex(ColorAssetRotationLine));
+        e.AddChild(nameof(ColorParentAssetPosition), "0x" + Wms2RlUtils.RlColorToHex(ColorParentAssetPosition));
+        e.AddChild(nameof(UsingColorParentAssetPosition), "0x" + Wms2RlUtils.RlColorToHex(UsingColorParentAssetPosition));
+        e.AddChild(nameof(ColorParentAssetRotationLine), "0x" + Wms2RlUtils.RlColorToHex(ColorParentAssetRotationLine));
         e.AddChild(nameof(ColorVolumeBox), "0x" + Wms2RlUtils.RlColorToHex(ColorVolumeBox));
         e.AddChild(nameof(UsingColorVolumeBox), "0x" + Wms2RlUtils.RlColorToHex(UsingColorVolumeBox));
         e.AddChild(nameof(ColorCameraBoundsBox), "0x" + Wms2RlUtils.RlColorToHex(ColorCameraBoundsBox));
@@ -128,7 +142,6 @@ public class OverlayConfig : ISerializable, IDeserializable
         e.AddChild(nameof(UsingColorDynamicPosition), "0x" + Wms2RlUtils.RlColorToHex(UsingColorDynamicPosition));
         e.AddChild(nameof(ColorMovingPlatformPosition), "0x" + Wms2RlUtils.RlColorToHex(ColorMovingPlatformPosition));
         e.AddChild(nameof(UsingColorMovingPlatformPosition), "0x" + Wms2RlUtils.RlColorToHex(UsingColorMovingPlatformPosition));
-        e.AddChild(nameof(ColorAssetRotationLine), "0x" + Wms2RlUtils.RlColorToHex(ColorAssetRotationLine));
     }
 
     private const float DEFAULT_RADIUS = 30;
@@ -150,6 +163,7 @@ public class OverlayConfig : ISerializable, IDeserializable
         RadiusCollisionAnchor = DEFAULT_RADIUS,
         RadiusItemSpawnCorner = DEFAULT_RADIUS,
         RadiusAssetCorner = DEFAULT_RADIUS,
+        RadiusParentAssetPosition = DEFAULT_MID_RADIUS,
         RadiusVolumeCorner = DEFAULT_RADIUS,
         RadiusNavNodePosition = DEFAULT_RADIUS,
         RadiusCameraBoundsCorner = DEFAULT_LARGE_RADIUS,
@@ -170,6 +184,10 @@ public class OverlayConfig : ISerializable, IDeserializable
         UsingColorNavNodeBox = TransparentWhite,
         ColorAssetBox = TransparentGray,
         UsingColorAssetBox = TransparentWhite,
+        ColorAssetRotationLine = OpaqueWhite,
+        ColorParentAssetPosition = TransparentRed,
+        UsingColorParentAssetPosition = TransparentPink,
+        ColorParentAssetRotationLine = OpaqueWhite,
         ColorVolumeBox = TransparentGray,
         UsingColorVolumeBox = TransparentWhite,
         ColorCameraBoundsBox = TransparentGray,
@@ -180,6 +198,5 @@ public class OverlayConfig : ISerializable, IDeserializable
         UsingColorDynamicPosition = TransparentPink,
         ColorMovingPlatformPosition = TransparentRed,
         UsingColorMovingPlatformPosition = TransparentPink,
-        ColorAssetRotationLine = OpaqueWhite,
     };
 }
