@@ -139,6 +139,16 @@ public class MapOverviewWindow
 
         if (ImGui.CollapsingHeader("Camera Bounds##overview"))
         {
+            if (l.Type is not null)
+            {
+                _propChanged |= ImGuiExt.CheckboxHistory("FixedCamera", l.Type.FixedCamera ?? false, val => l.Type.FixedCamera = val ? val : null, cmd);
+                _propChanged |= ImGuiExt.CheckboxHistory("FixedWidth", l.Type.FixedWidth ?? false, val => l.Type.FixedWidth = val ? val : null, cmd);
+                _propChanged |= ImGuiExt.CheckboxHistory("ShowPlatsDuringMove", l.Type.ShowPlatsDuringMove ?? false, val => l.Type.ShowPlatsDuringMove = val ? val : null, cmd);
+                ImGuiExt.WithDisabled(l.Type.ShowPlatsDuringMove == true, () =>
+                {
+                    _propChanged |= ImGuiExt.CheckboxHistory("ShowLavaLevelDuringMove", l.Type.ShowLavaLevelDuringMove ?? false, val => l.Type.ShowLavaLevelDuringMove = val ? val : null, cmd);
+                });
+            }
             _propChanged |= PropertiesWindow.ShowCameraBoundsProps(l.Desc.CameraBounds, cmd);
         }
 
