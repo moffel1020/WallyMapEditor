@@ -15,9 +15,12 @@ public class OverlayConfig : ISerializable, IDeserializable
     public required float RadiusSpawnBotBoundsCorner { get; set; }
     public required float RadiusDynamicPosition { get; set; }
     public required float RadiusMovingPlatformPosition { get; set; }
+    public required float RadiusKeyFramePosition { get; set; }
 
     public required double SizeOffsetRespawnBox { get; set; }
     public required double SizeOffsetNavNodeBox { get; set; }
+
+    public required int FontSizeKeyFrameNum { get; set; }
 
     public required RlColor ColorCollisionPoint { get; set; }
     public required RlColor UsingColorCollisionPoint { get; set; }
@@ -56,6 +59,9 @@ public class OverlayConfig : ISerializable, IDeserializable
     public required RlColor ColorMovingPlatformPosition { get; set; }
     public required RlColor UsingColorMovingPlatformPosition { get; set; }
 
+    public required RlColor ColorKeyFramePosition { get; set; }
+    public required RlColor UsingColorKeyFramePosition { get; set; }
+    public required RlColor TextColorKeyFrameNum { get; set; }
 
     public void Deserialize(XElement e)
     {
@@ -71,8 +77,10 @@ public class OverlayConfig : ISerializable, IDeserializable
         RadiusSpawnBotBoundsCorner = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusSpawnBotBoundsCorner))) ?? @default.RadiusSpawnBotBoundsCorner;
         RadiusDynamicPosition = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusDynamicPosition))) ?? @default.RadiusDynamicPosition;
         RadiusMovingPlatformPosition = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusMovingPlatformPosition))) ?? @default.RadiusMovingPlatformPosition;
+        RadiusKeyFramePosition = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusKeyFramePosition))) ?? @default.RadiusKeyFramePosition;
         SizeOffsetRespawnBox = Utils.ParseDoubleOrNull(e.GetElementValue(nameof(SizeOffsetRespawnBox))) ?? @default.SizeOffsetRespawnBox;
         SizeOffsetNavNodeBox = Utils.ParseDoubleOrNull(e.GetElementValue(nameof(SizeOffsetNavNodeBox))) ?? @default.SizeOffsetNavNodeBox;
+        FontSizeKeyFrameNum = Utils.ParseIntOrNull(e.GetElementValue(nameof(FontSizeKeyFrameNum))) ?? @default.FontSizeKeyFrameNum;
         ColorCollisionPoint = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorCollisionPoint))) ?? @default.ColorCollisionPoint;
         UsingColorCollisionPoint = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorCollisionPoint))) ?? @default.UsingColorCollisionPoint;
         ColorCollisionAnchor = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorCollisionAnchor))) ?? @default.ColorCollisionAnchor;
@@ -99,6 +107,9 @@ public class OverlayConfig : ISerializable, IDeserializable
         UsingColorDynamicPosition = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorDynamicPosition))) ?? @default.UsingColorDynamicPosition;
         ColorMovingPlatformPosition = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorMovingPlatformPosition))) ?? @default.ColorMovingPlatformPosition;
         UsingColorMovingPlatformPosition = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorMovingPlatformPosition))) ?? @default.UsingColorMovingPlatformPosition;
+        ColorKeyFramePosition = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorKeyFramePosition))) ?? @default.ColorKeyFramePosition;
+        UsingColorKeyFramePosition = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorKeyFramePosition))) ?? @default.UsingColorKeyFramePosition;
+        TextColorKeyFrameNum = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(TextColorKeyFrameNum))) ?? @default.TextColorKeyFrameNum;
     }
 
     public void Serialize(XElement e)
@@ -114,8 +125,10 @@ public class OverlayConfig : ISerializable, IDeserializable
         e.AddChild(nameof(RadiusSpawnBotBoundsCorner), RadiusSpawnBotBoundsCorner);
         e.AddChild(nameof(RadiusDynamicPosition), RadiusDynamicPosition);
         e.AddChild(nameof(RadiusMovingPlatformPosition), RadiusMovingPlatformPosition);
+        e.AddChild(nameof(RadiusKeyFramePosition), RadiusKeyFramePosition);
         e.AddChild(nameof(SizeOffsetRespawnBox), SizeOffsetRespawnBox);
         e.AddChild(nameof(SizeOffsetNavNodeBox), SizeOffsetNavNodeBox);
+        e.AddChild(nameof(FontSizeKeyFrameNum), FontSizeKeyFrameNum);
         e.AddChild(nameof(ColorCollisionPoint), "0x" + Wms2RlUtils.RlColorToHex(ColorCollisionPoint));
         e.AddChild(nameof(UsingColorCollisionPoint), "0x" + Wms2RlUtils.RlColorToHex(UsingColorCollisionPoint));
         e.AddChild(nameof(ColorCollisionAnchor), "0x" + Wms2RlUtils.RlColorToHex(ColorCollisionAnchor));
@@ -142,12 +155,16 @@ public class OverlayConfig : ISerializable, IDeserializable
         e.AddChild(nameof(UsingColorDynamicPosition), "0x" + Wms2RlUtils.RlColorToHex(UsingColorDynamicPosition));
         e.AddChild(nameof(ColorMovingPlatformPosition), "0x" + Wms2RlUtils.RlColorToHex(ColorMovingPlatformPosition));
         e.AddChild(nameof(UsingColorMovingPlatformPosition), "0x" + Wms2RlUtils.RlColorToHex(UsingColorMovingPlatformPosition));
+        e.AddChild(nameof(ColorKeyFramePosition), "0x" + Wms2RlUtils.RlColorToHex(ColorKeyFramePosition));
+        e.AddChild(nameof(UsingColorKeyFramePosition), "0x" + Wms2RlUtils.RlColorToHex(UsingColorKeyFramePosition));
+        e.AddChild(nameof(TextColorKeyFrameNum), "0x" + Wms2RlUtils.RlColorToHex(TextColorKeyFrameNum));
     }
 
     private const float DEFAULT_RADIUS = 30;
     private const float DEFAULT_MID_RADIUS = 70;
     private const float DEFAULT_LARGE_RADIUS = 100;
     private const float DEFAULT_SIZE_OFFSET = 40;
+    private const int DEFAULT_FONT_SIZE = 32;
     private const byte OPACITY = 190;
     private static readonly RlColor TransparentGray = RlColor.Gray with { A = OPACITY };
     private static readonly RlColor TransparentWhite = RlColor.White with { A = OPACITY };
@@ -155,6 +172,8 @@ public class OverlayConfig : ISerializable, IDeserializable
     private static readonly RlColor TransparentGreen = RlColor.Green with { A = OPACITY };
     private static readonly RlColor TransparentRed = RlColor.Red with { A = OPACITY };
     private static readonly RlColor TransparentPink = RlColor.Pink with { A = OPACITY };
+    private static readonly RlColor TransparentYellow = RlColor.Yellow with { A = OPACITY };
+    private static readonly RlColor TransparentOrange = RlColor.Orange with { A = OPACITY };
     private static readonly RlColor OpaqueWhite = RlColor.White;
 
     public static OverlayConfig Default => new()
@@ -170,8 +189,10 @@ public class OverlayConfig : ISerializable, IDeserializable
         RadiusSpawnBotBoundsCorner = DEFAULT_LARGE_RADIUS,
         RadiusDynamicPosition = DEFAULT_MID_RADIUS,
         RadiusMovingPlatformPosition = DEFAULT_MID_RADIUS,
+        RadiusKeyFramePosition = DEFAULT_RADIUS,
         SizeOffsetNavNodeBox = DEFAULT_SIZE_OFFSET,
         SizeOffsetRespawnBox = DEFAULT_SIZE_OFFSET,
+        FontSizeKeyFrameNum = DEFAULT_FONT_SIZE,
         ColorCollisionPoint = TransparentGray,
         UsingColorCollisionPoint = TransparentWhite,
         ColorCollisionAnchor = TransparentDarkGreen,
@@ -198,5 +219,8 @@ public class OverlayConfig : ISerializable, IDeserializable
         UsingColorDynamicPosition = TransparentPink,
         ColorMovingPlatformPosition = TransparentRed,
         UsingColorMovingPlatformPosition = TransparentPink,
+        ColorKeyFramePosition = TransparentYellow,
+        UsingColorKeyFramePosition = TransparentOrange,
+        TextColorKeyFrameNum = OpaqueWhite,
     };
 }
