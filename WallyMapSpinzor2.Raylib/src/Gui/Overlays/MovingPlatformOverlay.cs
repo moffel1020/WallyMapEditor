@@ -59,7 +59,7 @@ public class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
 
     private static IEnumerable<(KeyFrame, int)> EnumerateKeyFrames(IEnumerable<AbstractKeyFrame> abstractKeyFrames)
     {
-        Queue<(AbstractKeyFrame, int)> toProcess = new(abstractKeyFrames.Zip(Enumerable.Repeat(0, abstractKeyFrames.Count())));
+        Queue<(AbstractKeyFrame, int)> toProcess = new(abstractKeyFrames.Select(k => (k, 0)));
 
         while (toProcess.Count > 0)
         {
