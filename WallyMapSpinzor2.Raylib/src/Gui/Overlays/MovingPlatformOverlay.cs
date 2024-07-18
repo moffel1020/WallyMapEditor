@@ -57,21 +57,18 @@ public class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
         return Position.Dragging || dragging;
     }
 
-    private static IEnumerable<(KeyFrame, int)> EnumerateKeyFrames(IEnumerable<AbstractKeyFrame> abstractKeyFrames)
+    private static IEnumerable<(KeyFrame, int)> EnumerateKeyFrames(IEnumerable<AbstractKeyFrame> abstractKeyFrames, int parentNum = 0)
     {
-        Queue<(AbstractKeyFrame, int)> toProcess = new(abstractKeyFrames.Select(k => (k, 0)));
-
-        while (toProcess.Count > 0)
+        foreach (AbstractKeyFrame akf in abstractKeyFrames)
         {
-            (AbstractKeyFrame akf, int num) = toProcess.Dequeue();
             if (akf is KeyFrame kf)
             {
-                yield return (kf, num + kf.FrameNum);
+                yield return (kf, parentNum + kf.FrameNum);
             }
             else if (akf is Phase p)
             {
-                foreach (AbstractKeyFrame child in p.KeyFrames)
-                    toProcess.Enqueue((child, p.StartFrame + num));
+                foreach ((KeyFrame kf2, int num) in EnumerateKeyFrames(p.KeyFrames, parentNum + p.StartFrame))
+                    yield return (kf2, num);
             }
             else
             {
