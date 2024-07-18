@@ -10,7 +10,7 @@ public partial class PropertiesWindow
     public static bool ShowCollisionProps(AbstractCollision ac, CommandHistory cmd, PropertiesWindowData data) => ac switch
     {
         AbstractPressurePlateCollision pc => ShowAbstractPressurePlateCollisionProps(pc, cmd, data),
-        LavaCollision lc => ShowLavaCollisionProps(lc, cmd),
+        LavaCollision lc => ShowLavaCollisionProps(lc, cmd, data),
         _ => ShowAbstractCollisionProps(ac, cmd)
     };
 
@@ -79,7 +79,6 @@ public partial class PropertiesWindow
         propChanged |= ImGuiExt.CheckboxHistory($"FaceLeft##props{pc.GetHashCode()}", pc.FaceLeft, val => pc.FaceLeft = val, cmd);
         //TODO: add FireOffsetX, FireOffsetY
 
-        //TODO: allow modifying
         if (data.PowerNames is null)
         {
             ImGui.Text("In order to edit the TrapPowers, import powerTypes.csv");
@@ -115,12 +114,26 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
-    public static bool ShowLavaCollisionProps(LavaCollision lc, CommandHistory cmd)
+    public static bool ShowLavaCollisionProps(LavaCollision lc, CommandHistory cmd, PropertiesWindowData data)
     {
         bool propChanged = ShowAbstractCollisionProps(lc, cmd);
 
         ImGui.SeparatorText($"Lava collision props##props{lc.GetHashCode()}");
-        ImGui.Text("LavaPower: " + lc.LavaPower); //TODO: allow modifying
+        if (data.PowerNames is null)
+        {
+            ImGui.Text("In order to edit the LavaPower, import powerTypes.csv");
+            ImGui.Spacing();
+            ImGui.Text("LavaPower: " + lc.LavaPower);
+        }
+        else
+        {
+            string newPower = ImGuiExt.StringCombo("LavaPower", lc.LavaPower, data.PowerNames);
+            if (lc.LavaPower != newPower)
+            {
+                cmd.Add(new PropChangeCommand<string>(val => lc.LavaPower = val, lc.LavaPower, newPower));
+                propChanged = true;
+            }
+        }
 
         return propChanged;
     }
