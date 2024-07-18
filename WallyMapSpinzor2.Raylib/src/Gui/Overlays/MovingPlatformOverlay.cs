@@ -16,7 +16,8 @@ public class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
         Position.UsingColor = data.OverlayConfig.UsingColorMovingPlatformPosition;
 
         Position.Draw(data);
-        foreach (KeyFrameOverlay kfo in KeyFrameCircles.Values)
+        // draw higher framenum keyframes ontop of lower framenum keyframes
+        foreach (KeyFrameOverlay kfo in KeyFrameCircles.Values.OrderBy(k => k.FrameNumOverride))
             kfo.Draw(data);
     }
 
@@ -25,7 +26,9 @@ public class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
         Position.Radius = data.OverlayConfig.RadiusMovingPlatformPosition;
 
         bool dragging = false;
-        foreach ((KeyFrame kf, int num) in EnumerateKeyFrames(plat.Animation.KeyFrames))
+        // we go through the keyframes in the reverse order
+        // this gives higher framenum keyframes priority
+        foreach ((KeyFrame kf, int num) in EnumerateKeyFrames(plat.Animation.KeyFrames).Reverse())
         {
             if (!KeyFrameCircles.ContainsKey(kf))
                 KeyFrameCircles[kf] = new(kf);
