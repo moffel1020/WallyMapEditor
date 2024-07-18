@@ -41,7 +41,7 @@ public partial class PropertiesWindow
         if (ImGui.CollapsingHeader("KeyFrames"))
         {
             propChanged |=
-            ImGuiExt.EditArrayHistory("", anim.KeyFrames, val => anim.KeyFrames = val,
+            ImGuiExt.EditArrayHistory("##animationFrames", anim.KeyFrames, val => anim.KeyFrames = val,
             // create
             () => CreateKeyFrame(LastKeyFrameNum(anim.KeyFrames)),
             // edit

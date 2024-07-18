@@ -6,7 +6,7 @@ public partial class PropertiesWindow
     {
         bool propChanged = false;
         propChanged |= ImGuiExt.DragIntHistory("StartFrame", phase.StartFrame, val => phase.StartFrame = val, cmd, minValue: minStartFrame, maxValue: maxFrameNum);
-        propChanged |= ImGuiExt.EditArrayHistory("", phase.KeyFrames, val => phase.KeyFrames = val,
+        propChanged |= ImGuiExt.EditArrayHistory($"##phaseFrames{phase.GetHashCode()}", phase.KeyFrames, val => phase.KeyFrames = val,
             // create
             () => CreateKeyFrame(LastKeyFrameNum(phase.KeyFrames), phase),
             // edit

@@ -82,7 +82,7 @@ partial class PropertiesWindow
     public static Platform DefaultPlatformWithAssetName(Vector2 pos) => new()
     {
         InstanceName = "Custom_Platform",
-        AssetName = "../Battlehill/SK_Small_Plat.png",
+        AssetName = "../BattleHill/SK_Small_Plat.png",
         X = pos.X,
         Y = pos.Y,
         W = 750,

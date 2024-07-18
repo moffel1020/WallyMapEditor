@@ -54,7 +54,7 @@ public partial class PropertiesWindow
         bool propChanged = false;
         if (ImGui.CollapsingHeader($"Points##props{cp.GetHashCode()}"))
         {
-            propChanged |= ImGuiExt.EditArrayHistory("", cp.Points, val => cp.Points = val,
+            propChanged |= ImGuiExt.EditArrayHistory($"##custompathPoints{cp.GetHashCode()}", cp.Points, val => cp.Points = val,
             CreateNewPoint,
             (int index) =>
             {
