@@ -326,9 +326,6 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
             if (!customArtMaybe.TryGetValue(out CustomArt? customArt))
                 continue;
             string customArtSuffix = customArt is not null ? $"_{customArt.Name}" : "";
-            // wtf
-            if (finalBoneName == "flash.display::MovieClip")
-                continue;
             bool visible = boneType switch
             {
                 null => true,
@@ -343,7 +340,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
                     _ => true,
                 }
             };
-            string swfPath = customArt?.FileName ?? Path.Combine("bones", $"Bones{gfx.AnimFile["Animation".Length..]}");
+            string swfPath = customArt?.FileName ?? AssetLoader.GetRealSwfPath(gfx.AnimFile);
             instances.Add(new()
             {
                 FilePath = swfPath,
