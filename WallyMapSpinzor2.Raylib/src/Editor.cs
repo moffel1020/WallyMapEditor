@@ -50,6 +50,8 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
     public MousePickingFramebuffer PickingFramebuffer { get; set; } = new();
 
+    private bool _showMainMenuBar = true;
+
     public void Run()
     {
         Setup();
@@ -142,7 +144,8 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
     private void Gui()
     {
         ImGui.DockSpaceOverViewport();
-        ShowMainMenuBar();
+        if (_showMainMenuBar)
+            ShowMainMenuBar();
 
         if (ViewportWindow.Open)
             ViewportWindow.Show();
@@ -267,9 +270,14 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             // if (Rl.IsKeyPressed(KeyboardKey.R)) LoadMap();
         }
 
-        if (!wantCaptureKeyboard && Rl.IsKeyDown(KeyboardKey.F11))
+        if (!wantCaptureKeyboard && Rl.IsKeyPressed(KeyboardKey.F11))
         {
             Rl.ToggleFullscreen();
+        }
+
+        if (!wantCaptureKeyboard && Rl.IsKeyPressed(KeyboardKey.F1))
+        {
+            _showMainMenuBar = !_showMainMenuBar;
         }
 
         if (!wantCaptureKeyboard && Rl.IsKeyPressed(KeyboardKey.P))
