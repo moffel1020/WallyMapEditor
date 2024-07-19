@@ -321,8 +321,9 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
                 otherHand = false;
                 handBoneName = "";
             }
-            CustomArt? customArt = FindCustomArt(boneName, finalBoneName, gfx.CustomArts, right, out bool needSwfLoad);
-            if (needSwfLoad)
+            Maybe<CustomArt?> customArtMaybe = FindCustomArt(boneName, finalBoneName, gfx.CustomArts, right);
+            // swf still needs to get loaded
+            if (!customArtMaybe.TryGetValue(out CustomArt? customArt))
                 continue;
             string customArtSuffix = customArt is not null ? $"_{customArt.Name}" : "";
             // wtf
@@ -445,9 +446,8 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         }
     }
 
-    private CustomArt? FindCustomArt(string ogBoneName, string boneName, CustomArt[] customArts, bool right, out bool needSwfLoad)
+    private Maybe<CustomArt?> FindCustomArt(string ogBoneName, string boneName, CustomArt[] customArts, bool right)
     {
-        needSwfLoad = false;
         uint artType = BoneDatabase.ArtTypeDict.GetValueOrDefault(ogBoneName, 0u);
         for (int i = customArts.Length - 1; i >= 0; --i)
         {
@@ -457,10 +457,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
                 // check that new sprite would exist
                 SwfFileData? swf = loader.LoadSwf(ca.FileName);
                 if (swf is null)
-                {
-                    needSwfLoad = true;
-                    return null;
-                }
+                    return Maybe<CustomArt?>.None;
                 if (swf.SymbolClass.ContainsKey($"{boneName}_{ca.Name}"))
                     return ca;
             }
