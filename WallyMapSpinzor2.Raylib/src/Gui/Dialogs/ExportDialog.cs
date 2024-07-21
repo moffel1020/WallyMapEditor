@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Threading.Tasks;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 
 using ImGuiNET;
 
@@ -23,7 +24,6 @@ public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
 {
     public bool _open = true;
     public bool Closed { get => !_open; }
-    private readonly IDrawable? _mapData = mapData;
 
     private string? _descPreview;
     private string? _typePreview;
@@ -35,11 +35,16 @@ public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
 
     private const int PREVIEW_SIZE = 25;
 
+    private int[] _backupNums = [];
+    private string[] _backupDisplayNames = [];
+    private int _selectedBackupIndex;
+    private bool _refreshListOnOpen = true;
+
     public void Show()
     {
         ImGui.SetNextWindowSizeConstraints(new(425, 425), new(int.MaxValue));
         ImGui.Begin("Export", ref _open, ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoCollapse);
-        if (_mapData is null)
+        if (mapData is null)
         {
             ImGui.Text("No map data open");
             return;
@@ -48,7 +53,7 @@ public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
         ImGui.BeginTabBar("exportTabBar", ImGuiTabBarFlags.None);
         if (ImGui.BeginTabItem("Game"))
         {
-            if (_mapData is Level level) ShowGameExportTab(level);
+            if (mapData is Level level) ShowGameExportTab(level);
             ImGui.EndTabItem();
         }
 
@@ -58,7 +63,7 @@ public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
             ImGui.EndTabItem();
         }
 
-        if (_mapData is Level l)
+        if (mapData is Level l)
         {
             if (ImGui.BeginTabItem("LevelType"))
             {
@@ -130,11 +135,59 @@ public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
                 }
             });
         }
+
+        if (prefs.BrawlhallaPath is not null && ImGui.CollapsingHeader("Previous backups"))
+        {
+            if (_refreshListOnOpen)
+            {
+                RefreshBackupList(prefs.BrawlhallaPath);
+                _refreshListOnOpen = false;
+            }
+
+            string[] backedUpFiles = [
+                Path.Combine(prefs.BrawlhallaPath, "Dynamic.swz"),
+                Path.Combine(prefs.BrawlhallaPath, "Init.swz"),
+                // Path.Combine(prefs.BrawlhallaPath, "Game.swz")
+            ];
+
+            ImGui.ListBox("Backups", ref _selectedBackupIndex, _backupDisplayNames, _backupDisplayNames.Length);
+            if (ImGuiExt.WithDisabledButton(_selectedBackupIndex < 0 || _selectedBackupIndex >= _backupDisplayNames.Length, "Restore"))
+            {
+                int backupNum = _backupNums[_selectedBackupIndex];
+
+                foreach (string path in backedUpFiles)
+                {
+                    if (File.Exists(path)) File.Delete(path);
+                    File.Move(Utils.CreateBackupPath(path, backupNum), path);
+                }
+
+                RefreshBackupList(prefs.BrawlhallaPath);
+            }
+
+            
+            ImGui.SameLine();
+            if (ImGui.Button("Refresh"))
+                RefreshBackupList(prefs.BrawlhallaPath);
+
+            ImGui.SameLine();
+            if (ImGui.Button("Delete"))
+            {
+                int backupNum = _backupNums[_selectedBackupIndex];
+                foreach (string path in backedUpFiles)
+                {
+                    string backupPath = Utils.CreateBackupPath(path, backupNum);
+                    if (File.Exists(backupPath)) File.Delete(backupPath);
+                }
+
+                RefreshBackupList(prefs.BrawlhallaPath!);
+            }
+
+        }
     }
 
     public void ShowLevelDescExportTab()
     {
-        LevelDesc? ld = _mapData switch
+        LevelDesc? ld = mapData switch
         {
             Level level => level.Desc,
             LevelDesc desc => desc,
@@ -290,5 +343,33 @@ public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
         Utils.SerializeSwzFilesToPath(dynamicPath, dynamicFiles.Values, key);
         Utils.SerializeSwzFilesToPath(initPath, initFiles.Values, key);
         // TODO: playlists
+
+        RefreshBackupList(prefs.BrawlhallaPath!);
+    }
+
+    private static int[] FindBackups(string dir)
+    {
+        string[] requiredFiles(int num) => [
+            Utils.CreateBackupPath(Path.Combine(dir, "Dynamic.swz"), num),
+            Utils.CreateBackupPath(Path.Combine(dir, "Init.Swz"), num),
+            // Utils.CreateBackupPath(Path.Combine(dir, "Game.Swz"), num),
+        ];
+
+        int[] validBackupNumbers = Directory.EnumerateFiles(dir)
+            .Where(p => p.Contains("_Backup"))
+            .Select(p => Path.GetFileNameWithoutExtension(p).Split("_Backup").Last())
+            .Where(n => int.TryParse(n, out _))
+            .Select(int.Parse)
+            .Distinct()
+            .Where(num => requiredFiles(num).All(File.Exists))
+            .ToArray();
+        
+        return validBackupNumbers;
+    }
+
+    private void RefreshBackupList(string brawlPath)
+    {
+        _backupNums = FindBackups(brawlPath);
+        _backupDisplayNames = _backupNums.Select(n => $"Backup {n} - {File.GetLastWriteTime(Path.Combine(brawlPath, $"Dynamic_Backup{n}.swz"))}").ToArray();
     }
 }

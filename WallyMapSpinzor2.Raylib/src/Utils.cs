@@ -273,13 +273,15 @@ public static class Utils
         return Path.Combine(dir, Path.ChangeExtension(modifier(name), ext));
     }
 
+    public static string CreateBackupPath(string path, int suffix) => ChangePathName(path, s => $"{s}_Backup{suffix}");
+
     public static void CreateBackupOfFile(string path)
     {
         int suffix = 1;
         string backupPath;
         do
         {
-            backupPath = ChangePathName(path, s => $"{s}_Backup{suffix}");
+            backupPath = CreateBackupPath(path, suffix);
             suffix++;
         } while (File.Exists(backupPath));
         using FileStream read = new(path, FileMode.Open, FileAccess.Read);
