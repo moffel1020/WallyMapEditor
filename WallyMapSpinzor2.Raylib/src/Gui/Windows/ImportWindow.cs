@@ -17,7 +17,7 @@ using AbcDisassembler;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public class ImportDialog(Editor editor, PathPreferences prefs) : IDialog
+public class ImportWindow(PathPreferences prefs)
 {
     private const int MAX_KEY_LENGTH = 9;
 
@@ -39,10 +39,10 @@ public class ImportDialog(Editor editor, PathPreferences prefs) : IDialog
     private bool _decrypting = false;
     private bool _keySearching = false;
 
-    private bool _open = true;
-    public bool Closed => !_open;
+    private bool _open;
+    public bool Open { get => _open; set => _open = value; }
 
-    public void Show()
+    public void Show(Editor editor)
     {
         ImGui.SetNextWindowSizeConstraints(new(500, 410), new(int.MaxValue));
         ImGui.Begin("Import", ref _open, ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoCollapse);
@@ -50,13 +50,13 @@ public class ImportDialog(Editor editor, PathPreferences prefs) : IDialog
         ImGui.BeginTabBar("importTabBar", ImGuiTabBarFlags.None);
         if (ImGui.BeginTabItem("Brawlhalla"))
         {
-            ShowGameImportTab();
+            ShowGameImportTab(editor);
             ImGui.EndTabItem();
         }
 
         if (ImGui.BeginTabItem("xml"))
         {
-            ShowXmlImportTab();
+            ShowXmlImportTab(editor);
             ImGui.EndTabItem();
         }
 
@@ -78,7 +78,7 @@ public class ImportDialog(Editor editor, PathPreferences prefs) : IDialog
         ImGui.End();
     }
 
-    private void ShowGameImportTab()
+    private void ShowGameImportTab(Editor editor)
     {
         ImGui.Text("Import from game swz files");
         ImGui.Separator();
@@ -209,7 +209,7 @@ public class ImportDialog(Editor editor, PathPreferences prefs) : IDialog
         }
     }
 
-    private void ShowXmlImportTab()
+    private void ShowXmlImportTab(Editor editor)
     {
         ImGui.PushTextWrapPos();
         ImGui.Text("Import from LevelDesc xml file, LevelTypes.xml, and LevelSetTypes.xml");

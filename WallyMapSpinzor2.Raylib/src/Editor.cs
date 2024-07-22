@@ -1,7 +1,6 @@
 using System;
 using System.Numerics;
 using System.IO;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using System.Linq;
@@ -40,7 +39,8 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
     public MapOverviewWindow MapOverviewWindow { get; set; } = new();
     public PropertiesWindow PropertiesWindow { get; set; } = new();
     public HistroyPanel HistoryPanel { get; set; } = new();
-    public List<IDialog> DialogWindows { get; set; } = [];
+    public ExportWindow ExportDialog { get; set; } = new(pathPrefs);
+    public ImportWindow ImportDialog { get; set; } = new(pathPrefs);
 
     public CommandHistory CommandHistory { get; set; } = new();
     public SelectionContext Selection { get; set; } = new();
@@ -86,7 +86,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         }
         else
         {
-            DialogWindows.Add(new ImportDialog(this, PathPrefs));
+            ImportDialog.Open = true;
         }
 
         Rl.SetConfigFlags(ConfigFlags.VSyncHint);
@@ -173,6 +173,11 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
         if (HistoryPanel.Open)
             HistoryPanel.Show(CommandHistory);
+    
+        if (ExportDialog.Open)
+            ExportDialog.Show(MapData);
+        if (ImportDialog.Open)
+            ImportDialog.Show(this);
 
         if (ViewportWindow.Hovered && (Rl.IsKeyPressed(KeyboardKey.Space) || Rl.IsMouseButtonPressed(MouseButton.Middle)))
         {
@@ -182,10 +187,6 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
         if (MapData is Level level)
             AddObjectPopup.Update(level, CommandHistory, Selection);
-
-        DialogWindows.RemoveAll(dialog => dialog.Closed);
-        foreach (IDialog d in DialogWindows)
-            d.Show();
     }
 
     private void ShowMainMenuBar()
@@ -194,8 +195,8 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
         if (ImGui.BeginMenu("File"))
         {
-            if (ImGui.MenuItem("Export")) DialogWindows.Add(new ExportDialog(MapData, PathPrefs));
-            if (ImGui.MenuItem("Import")) DialogWindows.Add(new ImportDialog(this, PathPrefs));
+            if (ImGui.MenuItem("Export")) ExportDialog.Open = true;
+            if (ImGui.MenuItem("Import")) ImportDialog.Open = true;
             ImGui.EndMenu();
         }
         if (ImGui.BeginMenu("Edit"))

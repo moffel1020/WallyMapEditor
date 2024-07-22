@@ -20,10 +20,10 @@ using BrawlhallaSwz;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
+public class ExportWindow(PathPreferences prefs)
 {
-    public bool _open = true;
-    public bool Closed { get => !_open; }
+    private bool _open;
+    public bool Open { get => _open; set => _open = value; }
 
     private string? _descPreview;
     private string? _typePreview;
@@ -40,7 +40,7 @@ public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
     private int _selectedBackupIndex;
     private bool _refreshListOnOpen = true;
 
-    public void Show()
+    public void Show(IDrawable? mapData)
     {
         ImGui.SetNextWindowSizeConstraints(new(425, 425), new(int.MaxValue));
         ImGui.Begin("Export", ref _open, ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoCollapse);
@@ -59,7 +59,11 @@ public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
 
         if (ImGui.BeginTabItem("LevelDesc"))
         {
-            ShowLevelDescExportTab();
+            if (mapData is Level level)
+                ShowLevelDescExportTab(level.Desc);
+            else if (mapData is LevelDesc desc)
+                ShowLevelDescExportTab(desc);
+
             ImGui.EndTabItem();
         }
 
@@ -98,7 +102,7 @@ public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
 
     public void ShowGameExportTab(Level l)
     {
-        ImGui.Text("Export to game swz files");
+        ImGui.Text($"Export {l.Desc.LevelName} to game swz files");
         ImGui.PushTextWrapPos();
         ImGui.Text("This will override the game swz files and you will not be able to play online (even if you changed nothing). To play online again verify integrity of game files");
         ImGui.PopTextWrapPos();
@@ -164,7 +168,7 @@ public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
                 RefreshBackupList(prefs.BrawlhallaPath);
             }
 
-
+            
             ImGui.SameLine();
             if (ImGui.Button("Refresh"))
                 RefreshBackupList(prefs.BrawlhallaPath);
@@ -185,15 +189,8 @@ public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
         }
     }
 
-    public void ShowLevelDescExportTab()
+    public void ShowLevelDescExportTab(LevelDesc ld)
     {
-        LevelDesc? ld = mapData switch
-        {
-            Level level => level.Desc,
-            LevelDesc desc => desc,
-            _ => null
-        };
-
         if (ld is null) return;
 
         ImGui.Text("preview");
@@ -358,11 +355,12 @@ public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
         int[] validBackupNumbers = Directory.EnumerateFiles(dir)
             .Where(p => p.Contains("_Backup"))
             .Select(p => Path.GetFileNameWithoutExtension(p).Split("_Backup").Last())
-            .MapFilter(n => int.TryParse(n, out int i) ? i : Maybe<int>.None)
+            .Where(n => int.TryParse(n, out _))
+            .Select(int.Parse)
             .Distinct()
             .Where(num => requiredFiles(num).All(File.Exists))
             .ToArray();
-
+        
         return validBackupNumbers;
     }
 
