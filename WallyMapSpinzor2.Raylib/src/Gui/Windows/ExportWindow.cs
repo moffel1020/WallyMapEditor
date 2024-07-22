@@ -168,13 +168,13 @@ public class ExportWindow(PathPreferences prefs)
                 RefreshBackupList(prefs.BrawlhallaPath);
             }
 
-            
+
             ImGui.SameLine();
             if (ImGui.Button("Refresh"))
                 RefreshBackupList(prefs.BrawlhallaPath);
 
             ImGui.SameLine();
-            if (ImGui.Button("Delete"))
+            if (ImGuiExt.WithDisabledButton(_selectedBackupIndex < 0 || _selectedBackupIndex >= _backupDisplayNames.Length, "Delete"))
             {
                 int backupNum = _backupNums[_selectedBackupIndex];
                 foreach (string path in backedUpFiles)
@@ -360,7 +360,7 @@ public class ExportWindow(PathPreferences prefs)
             .Distinct()
             .Where(num => requiredFiles(num).All(File.Exists))
             .ToArray();
-        
+
         return validBackupNumbers;
     }
 

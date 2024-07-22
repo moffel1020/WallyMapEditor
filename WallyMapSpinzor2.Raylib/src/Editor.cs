@@ -173,7 +173,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
         if (HistoryPanel.Open)
             HistoryPanel.Show(CommandHistory);
-    
+
         if (ExportDialog.Open)
             ExportDialog.Show(MapData);
         if (ImportDialog.Open)
