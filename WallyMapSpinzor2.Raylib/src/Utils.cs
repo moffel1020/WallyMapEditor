@@ -318,4 +318,13 @@ public static class Utils
             (result[index], result[index + 1]) = (result[index + 1], result[index]);
         return result;
     }
+
+    public static IEnumerable<U> MapFilter<T, U>(this IEnumerable<T> enumerable, Func<T, Maybe<U>> map)
+    {
+        foreach (T t in enumerable)
+        {
+            if (map(t).TryGetValue(out U? u))
+                yield return u;
+        }
+    }
 }

@@ -164,7 +164,7 @@ public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
                 RefreshBackupList(prefs.BrawlhallaPath);
             }
 
-            
+
             ImGui.SameLine();
             if (ImGui.Button("Refresh"))
                 RefreshBackupList(prefs.BrawlhallaPath);
@@ -358,12 +358,11 @@ public class ExportDialog(IDrawable? mapData, PathPreferences prefs) : IDialog
         int[] validBackupNumbers = Directory.EnumerateFiles(dir)
             .Where(p => p.Contains("_Backup"))
             .Select(p => Path.GetFileNameWithoutExtension(p).Split("_Backup").Last())
-            .Where(n => int.TryParse(n, out _))
-            .Select(int.Parse)
+            .MapFilter(n => int.TryParse(n, out int i) ? i : Maybe<int>.None)
             .Distinct()
             .Where(num => requiredFiles(num).All(File.Exists))
             .ToArray();
-        
+
         return validBackupNumbers;
     }
 
