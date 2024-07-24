@@ -64,8 +64,7 @@ public class SwfFileData
         //find matching shape tags
         foreach (SwfTagBase tag in swf.Swf.Tags)
         {
-            //skip DefineShape4 because we don't support it
-            if (tag is ShapeBaseTag shape && shape is not DefineShape4Tag)
+            if (tag is ShapeBaseTag shape)
             {
                 swf.ShapeTags[shape.ShapeID] = new DefineShapeXTag(shape);
             }
