@@ -15,6 +15,9 @@ public class ParentAssetOverlay(AbstractAsset asset) : IOverlay
         RotatePoint.LineColor = data.OverlayConfig.ColorParentAssetRotationLine;
         ScaleGizmo.Color = data.OverlayConfig.ColorParentAssetScale;
         ScaleGizmo.UsingColor = data.OverlayConfig.UsingColorParentAssetScale;
+        ScaleGizmo.LineWidth = data.OverlayConfig.LineWidthParentAssetScale;
+        ScaleGizmo.Length = data.OverlayConfig.LengthParentAssetScale;
+        ScaleGizmo.Sensitivity = data.OverlayConfig.SensitivityParentAssetScale;
 
         Position.Draw(data);
         RotatePoint.Draw(data);
