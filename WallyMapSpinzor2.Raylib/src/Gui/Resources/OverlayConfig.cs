@@ -20,6 +20,10 @@ public class OverlayConfig : ISerializable, IDeserializable
     public required double SizeOffsetRespawnBox { get; set; }
     public required double SizeOffsetNavNodeBox { get; set; }
 
+    public required double LineWidthParentAssetScale { get; set; }
+    public required double LengthParentAssetScale { get; set; }
+    public required double SensitivityParentAssetScale { get; set; }
+
     public required int FontSizeKeyFrameNum { get; set; }
 
     public required RlColor ColorCollisionPoint { get; set; }
@@ -43,6 +47,8 @@ public class OverlayConfig : ISerializable, IDeserializable
     public required RlColor ColorParentAssetPosition { get; set; }
     public required RlColor UsingColorParentAssetPosition { get; set; }
     public required RlColor ColorParentAssetRotationLine { get; set; }
+    public required RlColor ColorParentAssetScale { get; set; }
+    public required RlColor UsingColorParentAssetScale { get; set; }
 
     public required RlColor ColorVolumeBox { get; set; }
     public required RlColor UsingColorVolumeBox { get; set; }
@@ -80,6 +86,9 @@ public class OverlayConfig : ISerializable, IDeserializable
         RadiusKeyFramePosition = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusKeyFramePosition))) ?? @default.RadiusKeyFramePosition;
         SizeOffsetRespawnBox = Utils.ParseDoubleOrNull(e.GetElementValue(nameof(SizeOffsetRespawnBox))) ?? @default.SizeOffsetRespawnBox;
         SizeOffsetNavNodeBox = Utils.ParseDoubleOrNull(e.GetElementValue(nameof(SizeOffsetNavNodeBox))) ?? @default.SizeOffsetNavNodeBox;
+        LineWidthParentAssetScale = Utils.ParseDoubleOrNull(e.GetElementValue(nameof(LineWidthParentAssetScale))) ?? @default.LineWidthParentAssetScale;
+        LengthParentAssetScale = Utils.ParseDoubleOrNull(e.GetElementValue(nameof(LengthParentAssetScale))) ?? @default.LengthParentAssetScale;
+        SensitivityParentAssetScale = Utils.ParseDoubleOrNull(e.GetElementValue(nameof(SensitivityParentAssetScale))) ?? @default.SensitivityParentAssetScale;
         FontSizeKeyFrameNum = Utils.ParseIntOrNull(e.GetElementValue(nameof(FontSizeKeyFrameNum))) ?? @default.FontSizeKeyFrameNum;
         ColorCollisionPoint = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorCollisionPoint))) ?? @default.ColorCollisionPoint;
         UsingColorCollisionPoint = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorCollisionPoint))) ?? @default.UsingColorCollisionPoint;
@@ -97,6 +106,8 @@ public class OverlayConfig : ISerializable, IDeserializable
         ColorParentAssetPosition = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorParentAssetPosition))) ?? @default.ColorParentAssetPosition;
         UsingColorParentAssetPosition = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorParentAssetPosition))) ?? @default.UsingColorParentAssetPosition;
         ColorParentAssetRotationLine = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorParentAssetRotationLine))) ?? @default.ColorParentAssetRotationLine;
+        ColorParentAssetScale = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorParentAssetScale))) ?? @default.ColorParentAssetScale;
+        UsingColorParentAssetScale = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorParentAssetScale))) ?? @default.UsingColorParentAssetScale;
         ColorVolumeBox = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorVolumeBox))) ?? @default.ColorVolumeBox;
         UsingColorVolumeBox = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorVolumeBox))) ?? @default.UsingColorVolumeBox;
         ColorCameraBoundsBox = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorCameraBoundsBox))) ?? @default.ColorCameraBoundsBox;
@@ -128,6 +139,9 @@ public class OverlayConfig : ISerializable, IDeserializable
         e.AddChild(nameof(RadiusKeyFramePosition), RadiusKeyFramePosition);
         e.AddChild(nameof(SizeOffsetRespawnBox), SizeOffsetRespawnBox);
         e.AddChild(nameof(SizeOffsetNavNodeBox), SizeOffsetNavNodeBox);
+        e.AddChild(nameof(LineWidthParentAssetScale), LineWidthParentAssetScale);
+        e.AddChild(nameof(LengthParentAssetScale), LengthParentAssetScale);
+        e.AddChild(nameof(SensitivityParentAssetScale), SensitivityParentAssetScale);
         e.AddChild(nameof(FontSizeKeyFrameNum), FontSizeKeyFrameNum);
         e.AddChild(nameof(ColorCollisionPoint), "0x" + Wms2RlUtils.RlColorToHex(ColorCollisionPoint));
         e.AddChild(nameof(UsingColorCollisionPoint), "0x" + Wms2RlUtils.RlColorToHex(UsingColorCollisionPoint));
@@ -144,6 +158,8 @@ public class OverlayConfig : ISerializable, IDeserializable
         e.AddChild(nameof(ColorAssetRotationLine), "0x" + Wms2RlUtils.RlColorToHex(ColorAssetRotationLine));
         e.AddChild(nameof(ColorParentAssetPosition), "0x" + Wms2RlUtils.RlColorToHex(ColorParentAssetPosition));
         e.AddChild(nameof(UsingColorParentAssetPosition), "0x" + Wms2RlUtils.RlColorToHex(UsingColorParentAssetPosition));
+        e.AddChild(nameof(ColorParentAssetScale), "0x" + Wms2RlUtils.RlColorToHex(ColorParentAssetScale));
+        e.AddChild(nameof(UsingColorParentAssetScale), "0x" + Wms2RlUtils.RlColorToHex(UsingColorParentAssetScale));
         e.AddChild(nameof(ColorParentAssetRotationLine), "0x" + Wms2RlUtils.RlColorToHex(ColorParentAssetRotationLine));
         e.AddChild(nameof(ColorVolumeBox), "0x" + Wms2RlUtils.RlColorToHex(ColorVolumeBox));
         e.AddChild(nameof(UsingColorVolumeBox), "0x" + Wms2RlUtils.RlColorToHex(UsingColorVolumeBox));
@@ -192,6 +208,9 @@ public class OverlayConfig : ISerializable, IDeserializable
         RadiusKeyFramePosition = DEFAULT_RADIUS,
         SizeOffsetNavNodeBox = DEFAULT_SIZE_OFFSET,
         SizeOffsetRespawnBox = DEFAULT_SIZE_OFFSET,
+        LineWidthParentAssetScale = 20,
+        LengthParentAssetScale = 250,
+        SensitivityParentAssetScale = 0.1,
         FontSizeKeyFrameNum = DEFAULT_FONT_SIZE,
         ColorCollisionPoint = TransparentGray,
         UsingColorCollisionPoint = TransparentWhite,
@@ -209,6 +228,8 @@ public class OverlayConfig : ISerializable, IDeserializable
         ColorParentAssetPosition = TransparentRed,
         UsingColorParentAssetPosition = TransparentPink,
         ColorParentAssetRotationLine = OpaqueWhite,
+        ColorParentAssetScale = RlColor.Yellow,
+        UsingColorParentAssetScale = RlColor.Orange,
         ColorVolumeBox = TransparentGray,
         UsingColorVolumeBox = TransparentWhite,
         ColorCameraBoundsBox = TransparentGray,

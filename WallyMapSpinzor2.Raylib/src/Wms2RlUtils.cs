@@ -335,6 +335,26 @@ public static class Wms2RlUtils
         return Rl.CheckCollisionPointRec(point, rec);
     }
 
+    public static bool CheckCollisionPointRotatedRec(Vector2 point, Raylib_cs.Rectangle rec, double rotation, Vector2 origin)
+    {
+        if (rotation != 0)
+        {
+            Vector2 center = new(rec.X, rec.Y);
+            float sin = (float)Math.Sin(-rotation);
+            float cos = (float)Math.Cos(-rotation);
+            Vector2 temp;
+
+            point -= center;
+            temp.X = point.X * cos - point.Y * sin;
+            temp.Y = point.X * sin + point.Y * cos;
+            point = temp + center;
+        }
+
+        rec.X -= origin.X;
+        rec.Y -= origin.Y;
+        return CheckCollisionPointRec(point, rec);
+    }
+
     public static uint RlColorToHex(RlColor color) => (uint)((color.R << 24) | (color.G << 16) | (color.B << 8) | color.A);
     public static RlColor HexToRlColor(uint hex) => new((byte)(hex >> 24), (byte)(hex >> 16), (byte)(hex >> 8), (byte)hex);
     public static RlColor? ParseRlColorOrNull(string? s) => s is null ? null : HexToRlColor(Convert.ToUInt32(s, 16));
