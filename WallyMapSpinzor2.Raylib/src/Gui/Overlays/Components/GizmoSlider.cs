@@ -30,7 +30,9 @@ public class GizmoSlider(double x, double y)
 #pragma warning restore IDE0060
     {
         Vector2 rotOrigin = new(0, (float)LineWidth / 2);
-        Rectangle rect = new((float)X, (float)Y, (float)Length, (float)LineWidth);
+        Rectangle rect = new((float)X, (float)Y, (float)(Length * Value), (float)LineWidth);
+        if (rect.Width < 0)
+            rect = new(rect.X + rect.Width, rect.Y, -rect.Width, rect.Height);
         if (Hovered || Dragging)
             Rl.DrawRectanglePro(rect, rotOrigin, Rotation, UsingColor);
         else
@@ -39,7 +41,7 @@ public class GizmoSlider(double x, double y)
 
     public void Update(OverlayData data, double currentValue, bool allowDragging)
     {
-        Rectangle rect = new((float)X, (float)Y, (float)Length, (float)LineWidth);
+        Rectangle rect = new((float)X, (float)Y, (float)(Length * currentValue), (float)LineWidth);
 
         Vector2 rotOrigin = new(0, (float)LineWidth / 2);
         Vector2 mousePos = data.Viewport.ScreenToWorld(Rl.GetMousePosition(), data.Cam);
