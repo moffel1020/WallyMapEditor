@@ -38,16 +38,16 @@ The program allows overriding any relevant brawlhalla file with a custom one, bu
 
 This list includes the dependencies from submodules.
 
-- SixLabors.ImageSharp (3.1.4) + SixLabors.ImageSharp.Drawing (2.1.3) - Image manipulation library. Used for flash vector graphics exporting.
+- SixLabors.ImageSharp (3.1.5) + SixLabors.ImageSharp.Drawing (2.1.4) - Image manipulation library. Used for flash vector graphics exporting.
 
 - NativeFileDialogSharp (0.5.0) - C# bindings for nativefiledialog, a C library for opening the platform's default file explorer dialog.
 
-- Raylib-cs (6.0.0) - C# bindings for Raylib, a C rendering library.
+- Raylib-cs (6.1.1) - C# bindings for Raylib, a C rendering library.
 
 - ImGui.NET (1.90.1.1) - C# bindings for ImGui, a C++ ui library.
 
-- rlImgui-cs (2.0.2) - C# library for bridging between Raylib-cs and ImGui.NET.
+- rlImgui-cs (2.0.3) - C# library for bridging between Raylib-cs and ImGui.NET.
 
 - SwfLib (1.0.5) - C# library for parsing .swf files.
 
-- OneOf (3.0.263) - C# tagged union library.
+- OneOf (3.0.271) - C# tagged union library.

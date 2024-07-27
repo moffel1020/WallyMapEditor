@@ -73,11 +73,16 @@ public static class Utils
         Raylib_cs.Image img;
         unsafe
         {
-            int bufferSize = image.Width * image.Height * image.PixelType.BitsPerPixel / 8;
+            long bufferSize = (long)image.Width * image.Height * image.PixelType.BitsPerPixel / 8;
+            if (bufferSize > int.MaxValue)
+            {
+                Rl.TraceLog(Raylib_cs.TraceLogLevel.Fatal, $"Image exceeded {int.MaxValue} bytes");
+                return default;
+            }
             // use Rl alloc so GC doesn't free the memory
-            void* bufferPtr = Rl.MemAlloc(bufferSize);
+            void* bufferPtr = Rl.MemAlloc((uint)bufferSize);
             // create span so ImageSharp can write to the memory
-            Span<byte> buffer = new(bufferPtr, bufferSize);
+            Span<byte> buffer = new(bufferPtr, (int)bufferSize);
             image.CopyPixelDataTo(buffer);
             img = new()
             {
