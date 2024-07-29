@@ -70,7 +70,11 @@ public class GizmoSlider(double x, double y)
 
         if (allowDragging && Hovered && Rl.IsMouseButtonPressed(MouseButton.Left))
         {
-            _lastMouseOffset = Vector2.Distance(mousePos, new((float)X, (float)Y));
+            Vector2 gizmoVec = new((float)Math.Cos(Rotation * Math.PI / 180), (float)Math.Sin(Rotation * Math.PI / 180));
+            Vector2 proj = Vector2.Dot(mousePos - new Vector2((float)X, (float)Y), gizmoVec) / Vector2.Dot(gizmoVec, gizmoVec) * gizmoVec;
+            int side = gizmoVec.X * proj.X < 0 || gizmoVec.Y * proj.Y < 0 ? -1 : 1;
+
+            _lastMouseOffset = side * proj.Length();
             Dragging = true;
         }
 
