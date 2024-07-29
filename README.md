@@ -44,9 +44,9 @@ This list includes the dependencies from submodules.
 
 - Raylib-cs (6.1.1) - C# bindings for Raylib, a C rendering library.
 
-- ImGui.NET (1.90.1.1) - C# bindings for ImGui, a C++ ui library.
+- ImGui.NET (1.90.9.1) - C# bindings for ImGui, a C++ ui library.
 
-- rlImgui-cs (2.0.3) - C# library for bridging between Raylib-cs and ImGui.NET.
+- rlImgui-cs (2.1.0) - C# library for bridging between Raylib-cs and ImGui.NET.
 
 - SwfLib (1.0.5) - C# library for parsing .swf files.
 

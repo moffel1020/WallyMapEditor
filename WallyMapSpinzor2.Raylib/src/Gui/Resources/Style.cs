@@ -66,9 +66,9 @@ public static class Style
         style.Colors[(int)ImGuiCol.ResizeGripActive] = new(0.40f, 0.44f, 0.47f, 1.00f);
         style.Colors[(int)ImGuiCol.Tab] = new(0.00f, 0.00f, 0.00f, 0.52f);
         style.Colors[(int)ImGuiCol.TabHovered] = new(0.14f, 0.14f, 0.14f, 1.00f);
-        style.Colors[(int)ImGuiCol.TabActive] = new(0.20f, 0.20f, 0.20f, 0.36f);
-        style.Colors[(int)ImGuiCol.TabUnfocused] = new(0.00f, 0.00f, 0.00f, 0.52f);
-        style.Colors[(int)ImGuiCol.TabUnfocusedActive] = new(0.14f, 0.14f, 0.14f, 1.00f);
+        style.Colors[(int)ImGuiCol.TabSelected] = new(0.20f, 0.20f, 0.20f, 0.36f);
+        style.Colors[(int)ImGuiCol.TabDimmed] = new(0.00f, 0.00f, 0.00f, 0.52f);
+        style.Colors[(int)ImGuiCol.TabDimmedSelected] = new(0.14f, 0.14f, 0.14f, 1.00f);
         style.Colors[(int)ImGuiCol.DockingPreview] = new(0.33f, 0.67f, 0.86f, 1.00f);
 
         style.Colors[(int)ImGuiCol.TableHeaderBg] = new(0.00f, 0.00f, 0.00f, 0.52f);

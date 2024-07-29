@@ -95,18 +95,6 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         rlImGui.Setup(true, true);
         Style.Apply();
 
-        /*
-        During rlImGui.Setup, GetClipboardText and SetClipboardText are created, and then their function ptr is used for the native callback.
-        However, the library does not keep a reference to them, so those delegates get disposed, causing copy/paste to possibly crash.
-        This re-implements that part of the code without the issue.
-        */
-        unsafe
-        {
-            ImGuiIOPtr io = ImGui.GetIO();
-            io.GetClipboardTextFn = Marshal.GetFunctionPointerForDelegate(static (IntPtr userData) => Rl.GetClipboardText());
-            io.SetClipboardTextFn = Marshal.GetFunctionPointerForDelegate(static (IntPtr userData, sbyte* text) => Rl.SetClipboardText(text));
-        }
-
         ResetCam(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT);
         PickingFramebuffer.Load(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT);
     }

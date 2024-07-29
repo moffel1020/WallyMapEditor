@@ -33,7 +33,7 @@
   <ItemGroup>
     <PackageReference Include="NativeFileDialogSharp" Version="0.5.0" />
     <PackageReference Include="Raylib-cs" Version="6.1.1" />
-    <PackageReference Include="rlImgui-cs" Version="2.0.3" />
+    <PackageReference Include="rlImgui-cs" Version="2.1.0" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.5" />
   </ItemGroup>
 
