@@ -183,8 +183,8 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
         if (ImGui.BeginMenu("File"))
         {
-            if (ImGui.MenuItem("Export")) ExportDialog.Open = true;
-            if (ImGui.MenuItem("Import")) ImportDialog.Open = true;
+            if (ImGui.MenuItem("Export")) ExportDialog = new(PathPrefs) { Open = true };
+            if (ImGui.MenuItem("Import")) ImportDialog = new(PathPrefs) { Open = true };
             ImGui.EndMenu();
         }
         if (ImGui.BeginMenu("Edit"))
