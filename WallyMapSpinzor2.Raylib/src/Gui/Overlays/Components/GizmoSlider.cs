@@ -32,7 +32,14 @@ public class GizmoSlider(double x, double y)
         Vector2 rotOrigin = new(0, (float)LineWidth / 2);
         Rectangle rect = new((float)X, (float)Y, (float)(Length * Value), (float)LineWidth);
         if (rect.Width < 0)
-            rect = new(rect.X + rect.Width, rect.Y, -rect.Width, rect.Height);
+        {
+            rect = new(
+                rect.X + rect.Width * (float)Math.Cos(Rotation * Math.PI / 180),
+                rect.Y + rect.Width * (float)Math.Sin(Rotation * Math.PI / 180),
+                -rect.Width, rect.Height
+            );
+        }
+
         if (Hovered || Dragging)
             Rl.DrawRectanglePro(rect, rotOrigin, Rotation, UsingColor);
         else
