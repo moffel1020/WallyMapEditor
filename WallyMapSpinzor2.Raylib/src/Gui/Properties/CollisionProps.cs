@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 
@@ -99,14 +99,11 @@ public partial class PropertiesWindow
             },
             (int index) =>
             {
-                bool changed = false;
-                string power = pc.TrapPowers[index];
-                string newPower = ImGuiExt.StringCombo($"##trappower{index}", power, data.PowerNames);
-                if (power != newPower)
-                {
-                    cmd.Add(new PropChangeCommand<string>(val => pc.TrapPowers[index] = val, power, newPower));
-                    changed = true;
-                }
+                ImGui.Text($"{pc.TrapPowers[index]}");
+                if (ImGui.Button($"Edit##trappower{index}"))
+                    ImGui.OpenPopup(POWER_POPUP_NAME + index);
+                bool changed = PowerEditPopup(data.PowerNames, pc.TrapPowers[index], val => pc.TrapPowers[index] = val, cmd, index.ToString());
+                ImGui.SameLine();
                 return changed;
             }, cmd, allowMove: false);
         }
@@ -127,12 +124,11 @@ public partial class PropertiesWindow
         }
         else
         {
-            string newPower = ImGuiExt.StringCombo("LavaPower", lc.LavaPower, data.PowerNames);
-            if (lc.LavaPower != newPower)
-            {
-                cmd.Add(new PropChangeCommand<string>(val => lc.LavaPower = val, lc.LavaPower, newPower));
-                propChanged = true;
-            }
+            ImGui.Text($"Power: {lc.LavaPower}");
+            ImGui.SameLine();
+            if (ImGui.Button("Edit##lavapower"))
+                ImGui.OpenPopup(POWER_POPUP_NAME);
+            propChanged |= PowerEditPopup(data.PowerNames, lc.LavaPower, val => lc.LavaPower = val, cmd);
         }
 
         return propChanged;
@@ -156,5 +152,32 @@ public partial class PropertiesWindow
             lcol.LavaPower = "LavaBurn";
         }
         return col;
+    }
+
+    private const string POWER_POPUP_NAME = "PowerEdit";
+    private static string _powerFilter = "";
+
+    private static bool PowerEditPopup(string[] allPowers, string currentPower, Action<string> change, CommandHistory cmd, string popupId = "")
+    {
+        bool propChanged = false;
+        if (ImGui.BeginPopup(POWER_POPUP_NAME + popupId, ImGuiWindowFlags.NoMove))
+        {
+            _powerFilter = ImGuiExt.InputText("Filter", _powerFilter, flags: ImGuiInputTextFlags.None);
+            string[] powers = allPowers
+                .Where(p => p.Contains(_powerFilter, StringComparison.InvariantCultureIgnoreCase))
+                .ToArray();
+
+            string newPower = ImGuiExt.StringListBox("Power", currentPower, powers, 320.0f);
+            if (currentPower != newPower)
+            {
+                cmd.Add(new PropChangeCommand<string>(change, currentPower, newPower));
+                propChanged = true;
+                ImGui.CloseCurrentPopup();
+            }
+
+            ImGui.EndPopup();
+        }
+
+        return propChanged;
     }
 }
