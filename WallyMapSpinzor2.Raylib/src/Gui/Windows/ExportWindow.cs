@@ -347,8 +347,8 @@ public class ExportWindow(PathPreferences prefs)
     {
         string[] requiredFiles(int num) => [
             Wms2RlUtils.CreateBackupPath(Path.Combine(dir, "Dynamic.swz"), num),
-            Wms2RlUtils.CreateBackupPath(Path.Combine(dir, "Init.Swz"), num),
-            // Wms2RlUtils.CreateBackupPath(Path.Combine(dir, "Game.Swz"), num),
+            Wms2RlUtils.CreateBackupPath(Path.Combine(dir, "Init.swz"), num),
+            // Wms2RlUtils.CreateBackupPath(Path.Combine(dir, "Game.swz"), num),
         ];
 
         int[] validBackupNumbers = Directory.EnumerateFiles(dir)
