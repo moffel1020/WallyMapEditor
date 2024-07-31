@@ -11,7 +11,6 @@ using SwiffCheese.Utils;
 using SwiffCheese.Wrappers;
 
 using Raylib_cs;
-using Rl = Raylib_cs.Raylib;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -22,7 +21,7 @@ public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCach
     private const double ANIM_SCALE_MULTIPLIER = 1.2;
 
     public readonly record struct TextureInfo(SwfFileData Swf, ushort ShapeId, double AnimScale);
-    public readonly record struct ShapeData(Raylib_cs.Image Img, int OffsetX, int OffsetY);
+    public readonly record struct ShapeData(RlImage Img, int OffsetX, int OffsetY);
 
     protected override ShapeData LoadIntermediate(TextureInfo textureInfo)
     {
@@ -41,13 +40,13 @@ public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCach
         int imageW = (int)Math.Floor(w + (x - offsetX) + animScale) + 2;
         int imageH = (int)Math.Floor(h + (y - offsetY) + animScale) + 2;
 
-        Raylib_cs.Image img;
+        RlImage img;
         using (Image<Rgba32> image = new(RASTER_SCALE * imageW, RASTER_SCALE * imageH, new Rgba32(255, 255, 255, 0)))
         {
             ImageSharpShapeExporter exporter = new(image, RASTER_SCALE * offset, 1f * SWF_UNIT_DIVISOR / RASTER_SCALE);
             compiledShape.Export(exporter);
             image.Mutate(ctx => ctx.Resize(imageW, imageH));
-            img = Utils.ImgSharpImageToRlImage(image);
+            img = Wms2RlUtils.ImgSharpImageToRlImage(image);
         }
         Rl.ImageAlphaPremultiply(ref img);
         return new ShapeData(img, offsetX, offsetY);
@@ -55,7 +54,7 @@ public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCach
 
     protected override Texture2DWrapper IntermediateToValue(ShapeData shapeData)
     {
-        (Raylib_cs.Image img, int offsetX, int offsetY) = shapeData;
+        (RlImage img, int offsetX, int offsetY) = shapeData;
         Texture2D texture = Rl.LoadTextureFromImage(img);
         Rl.SetTextureFilter(texture, TextureFilter.Bilinear);
         return new(texture, offsetX, offsetY);

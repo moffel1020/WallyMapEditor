@@ -3,7 +3,6 @@ using System.Numerics;
 using System.IO;
 using System.Threading.Tasks;
 
-using Rl = Raylib_cs.Raylib;
 using Raylib_cs;
 
 using ImGuiNET;
@@ -84,7 +83,7 @@ public class MapOverviewWindow
                         {
                             string path = dialogResult.Path;
                             string newThumnailPNGFile = Path.GetRelativePath(thumbnailPath, path).Replace("\\", "/");
-                            if (!Utils.IsInDirectory(pathPrefs.BrawlhallaPath, path))
+                            if (!Wms2RlUtils.IsInDirectory(pathPrefs.BrawlhallaPath, path))
                             {
                                 _thumbnailSelectError = "Thumbnail file has to be inside the brawlhalla directory";
                             }
@@ -275,7 +274,7 @@ public class MapOverviewWindow
                 {
                     if (selection.Object == o) selection.Object = null;
 
-                    T[] result = Utils.RemoveAt(values, i);
+                    T[] result = Wms2RlUtils.RemoveAt(values, i);
                     cmd.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
                     cmd.SetAllowMerge(false);
                     _propChanged |= true;
@@ -288,7 +287,7 @@ public class MapOverviewWindow
                 // couldn't get unicode char to work
                 if (ImGui.Button($"^##{o.GetHashCode()}"))
                 {
-                    T[] result = Utils.MoveUp(values, i);
+                    T[] result = Wms2RlUtils.MoveUp(values, i);
                     cmd.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
                     cmd.SetAllowMerge(false);
                     _propChanged |= true;
@@ -296,7 +295,7 @@ public class MapOverviewWindow
                 ImGui.SameLine();
                 if (ImGui.Button($"v##{o.GetHashCode()}"))
                 {
-                    T[] result = Utils.MoveDown(values, i);
+                    T[] result = Wms2RlUtils.MoveDown(values, i);
                     cmd.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
                     cmd.SetAllowMerge(false);
                     _propChanged |= true;
@@ -320,17 +319,18 @@ public class MapOverviewWindow
         LevelAnim la => $"({la.InstanceName})",
 
         MovingPlatform mp => $"({mp.PlatID})",
-        Respawn r => $"({r.X}, {r.Y})",
-        AbstractItemSpawn i => $"({i.X}, {i.Y}, {i.W}, {i.H})",
-        AbstractCollision c => $"({c.X1}, {c.Y1}, {c.X2}, {c.Y2})",
-        AbstractVolume v => $"(team {v.Team} - {v.X}, {v.Y}, {v.W}, {v.H})",
+        Respawn r => $"({r.X:0.###}, {r.Y:0.###})",
+        AbstractItemSpawn i => $"({i.X:0.###}, {i.Y:0.###}, {i.W:0.###}, {i.H:0.###})",
+        AbstractCollision c => $"({c.X1:0.###}, {c.Y1:0.###}, {c.X2:0.###}, {c.Y2:0.###})",
+        AbstractVolume v => $"(team {v.Team} - {v.X:0.###}, {v.Y:0.###}, {v.W:0.###}, {v.H:0.###})",
+        AbstractAsset a => $"({a.AssetName ?? $"{a.X:0.###}, {a.Y:0.###}"})",
         NavNode n => $"({NavNode.NavIDToString(n.NavID, n.Type)})",
 
         LevelSound ls => $"({ls.SoundEventName})",
 
         WaveData w => $"({w.ID})",
         CustomPath cp => $"({cp.Points.Length} points)",
-        Point p => $"({p.X}, {p.Y})",
+        Point p => $"({p.X:0.###}, {p.Y:0.###})",
         Group g => $"({g.GetCount(2)}/{g.GetCount(3)}/{g.GetCount(4)} {PropertiesWindow.BehaviorToString(g.Behavior)})",
 
         DynamicCollision dc => $"({dc.PlatID})",

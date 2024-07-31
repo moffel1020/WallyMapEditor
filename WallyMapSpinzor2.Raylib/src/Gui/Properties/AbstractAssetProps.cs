@@ -13,6 +13,14 @@ partial class PropertiesWindow
 
     public static bool ShowAbstractAssetProps(AbstractAsset a, CommandHistory cmd, PropertiesWindowData data)
     {
+        if (a.Parent is not null)
+        {
+            ImGui.Text($"Parent {a.Parent.GetType().Name}: ");
+            ImGui.SameLine();
+            if (ImGui.Button($"{MapOverviewWindow.GetExtraObjectInfo(a.Parent)}")) data.Selection.Object = a.Parent;
+            ImGui.Separator();
+        }
+
         bool propChanged = false;
         if (a.AssetName is not null)
         {
@@ -31,7 +39,7 @@ partial class PropertiesWindow
                         {
                             string path = dialogResult.Path;
                             string newAssetName = Path.GetRelativePath(assetDir, path).Replace("\\", "/");
-                            if (!Utils.IsInDirectory(data.PathPrefs.BrawlhallaPath, path))
+                            if (!Wms2RlUtils.IsInDirectory(data.PathPrefs.BrawlhallaPath, path))
                             {
                                 _assetErrorText = "Asset has to be inside brawlhalla directory";
                             }

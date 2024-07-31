@@ -1,3 +1,7 @@
+global using Rl = Raylib_cs.Raylib;
+global using RlColor = Raylib_cs.Color;
+global using RlImage = Raylib_cs.Image;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,8 +10,6 @@ using System.Numerics;
 using System.Xml;
 using System.Xml.Linq;
 using System.Text;
-
-using Rl = Raylib_cs.Raylib;
 
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -23,7 +25,7 @@ using AbcDisassembler;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public static class Utils
+public static class Wms2RlUtils
 {
     public static readonly XmlWriterSettings StandardSaveSettings = new()
     {
@@ -66,11 +68,11 @@ public static class Utils
         return false;
     }
 
-    public static Raylib_cs.Color WmsColorToRlColor(Color c) => new(c.R, c.G, c.B, c.A);
+    public static RlColor WmsColorToRlColor(Color c) => new(c.R, c.G, c.B, c.A);
 
-    public static Raylib_cs.Image ImgSharpImageToRlImage(Image<Rgba32> image)
+    public static RlImage ImgSharpImageToRlImage(Image<Rgba32> image)
     {
-        Raylib_cs.Image img;
+        RlImage img;
         unsafe
         {
             long bufferSize = (long)image.Width * image.Height * image.PixelType.BitsPerPixel / 8;
@@ -96,9 +98,9 @@ public static class Utils
         return img;
     }
 
-    public static Raylib_cs.Image LoadRlImage(string path)
+    public static RlImage LoadRlImage(string path)
     {
-        Raylib_cs.Image img;
+        RlImage img;
         if (path.EndsWith(".jpg"))
         {
             using Image<Rgba32> image = Image.Load<Rgba32>(path);
@@ -332,4 +334,44 @@ public static class Utils
                 yield return u;
         }
     }
+
+    public static bool CheckCollisionPointRec(Vector2 point, Raylib_cs.Rectangle rec)
+    {
+        if (rec.Width < 0)
+        {
+            rec.X += rec.Width;
+            rec.Width = -rec.Width;
+        }
+        if (rec.Height < 0)
+        {
+            rec.Y += rec.Height;
+            rec.Height = -rec.Height;
+        }
+
+        return Rl.CheckCollisionPointRec(point, rec);
+    }
+
+    public static bool CheckCollisionPointRotatedRec(Vector2 point, Raylib_cs.Rectangle rec, double rotation, Vector2 origin)
+    {
+        if (rotation != 0)
+        {
+            Vector2 center = new(rec.X, rec.Y);
+            float sin = (float)Math.Sin(-rotation);
+            float cos = (float)Math.Cos(-rotation);
+            Vector2 temp;
+
+            point -= center;
+            temp.X = point.X * cos - point.Y * sin;
+            temp.Y = point.X * sin + point.Y * cos;
+            point = temp + center;
+        }
+
+        rec.X -= origin.X;
+        rec.Y -= origin.Y;
+        return CheckCollisionPointRec(point, rec);
+    }
+
+    public static uint RlColorToHex(RlColor color) => (uint)((color.R << 24) | (color.G << 16) | (color.B << 8) | color.A);
+    public static RlColor HexToRlColor(uint hex) => new((byte)(hex >> 24), (byte)(hex >> 16), (byte)(hex >> 8), (byte)hex);
+    public static RlColor? ParseRlColorOrNull(string? s) => s is null ? null : HexToRlColor(Convert.ToUInt32(s, 16));
 }

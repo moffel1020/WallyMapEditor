@@ -40,8 +40,8 @@ partial class PropertiesWindow
 
         if (p.AssetName is null && ImGui.CollapsingHeader("Children"))
         {
-            propChanged |= ImGuiExt.EditArrayHistory($"##platfromChildren{p.GetHashCode()}", p.AssetChildren!, val => p.AssetChildren = val,
-            CreateNewPlatformChild,
+            propChanged |= ImGuiExt.EditArrayHistory("", p.AssetChildren!, val => p.AssetChildren = val,
+            () => CreateNewPlatformChild(p),
             (int index) =>
             {
                 if (index != 0)
@@ -53,6 +53,10 @@ partial class PropertiesWindow
                     changed |= ShowProperties(child, cmd, data);
                     ImGui.TreePop();
                 }
+
+                if (ImGui.Button($"Select##platchild{child.GetHashCode()}")) data.Selection.Object = child;
+                ImGui.SameLine();
+
                 return changed;
             }, cmd);
         }
@@ -60,7 +64,7 @@ partial class PropertiesWindow
         return propChanged;
     }
 
-    private static Maybe<AbstractAsset> CreateNewPlatformChild()
+    private static Maybe<AbstractAsset> CreateNewPlatformChild(Platform parent)
     {
         Maybe<AbstractAsset> result = new();
         if (ImGui.Button("Add new child"))
@@ -69,6 +73,7 @@ partial class PropertiesWindow
         if (ImGui.BeginPopup("AddChild##platform"))
         {
             result = AddObjectPopup.AddAssetMenu(new(0, 0), true);
+            result.DoIfSome(a => a.Parent = parent);
             ImGui.EndPopup();
         }
         return result;

@@ -15,8 +15,8 @@ public partial class PropertiesWindow
         ImGui.Separator();
         if (mp.AssetName is null && ImGui.CollapsingHeader("Children"))
         {
-            propChanged |= ImGuiExt.EditArrayHistory("##mpchildren", mp.Assets, val => mp.Assets = val,
-            CreateNewMovingPlatformChild,
+            propChanged |= ImGuiExt.EditArrayHistory("", mp.Assets, val => mp.Assets = val,
+            () => CreateNewMovingPlatformChild(mp),
             (int index) =>
             {
                 bool changed = false;
@@ -26,13 +26,17 @@ public partial class PropertiesWindow
                     changed |= ShowProperties(child, cmd, data);
                     ImGui.TreePop();
                 }
+
+                if (ImGui.Button($"Select##mpchild{index}")) data.Selection.Object = child;
+                ImGui.SameLine();
+
                 return changed;
             }, cmd);
         }
         return propChanged;
     }
 
-    private static Maybe<AbstractAsset> CreateNewMovingPlatformChild()
+    private static Maybe<AbstractAsset> CreateNewMovingPlatformChild(MovingPlatform parent)
     {
         Maybe<AbstractAsset> result = new();
         if (ImGui.Button("Add new child"))
@@ -41,6 +45,7 @@ public partial class PropertiesWindow
         if (ImGui.BeginPopup("AddChild##moving_platform"))
         {
             result = AddObjectPopup.AddAssetMenu(new(0, 0));
+            result.DoIfSome(a => a.Parent = parent);
             ImGui.EndPopup();
         }
         return result;

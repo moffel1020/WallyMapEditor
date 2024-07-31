@@ -1,7 +1,6 @@
 using System.Numerics;
 
 using Raylib_cs;
-using Rl = Raylib_cs.Raylib;
 using ImGuiNET;
 using rlImGui_cs;
 
@@ -33,6 +32,9 @@ public class ViewportWindow
 
         ImGui.PopStyleVar();
     }
+
+    public Vector2 ScreenToWorld(Vector2 screenPos, Camera2D cam) =>
+        Rl.GetScreenToWorld2D(screenPos - Bounds.P1, cam);
 
     private void CreateFramebuffer(int width, int height)
     {

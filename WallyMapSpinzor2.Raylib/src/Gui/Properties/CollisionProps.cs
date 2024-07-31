@@ -8,12 +8,20 @@ public partial class PropertiesWindow
     public static bool ShowCollisionProps(AbstractCollision ac, CommandHistory cmd, PropertiesWindowData data) => ac switch
     {
         AbstractPressurePlateCollision pc => ShowAbstractPressurePlateCollisionProps(pc, cmd, data),
-        LavaCollision lc => ShowLavaCollisionProps(lc, cmd),
-        _ => ShowAbstractCollisionProps(ac, cmd)
+        LavaCollision lc => ShowLavaCollisionProps(lc, cmd, data),
+        _ => ShowAbstractCollisionProps(ac, cmd, data)
     };
 
-    public static bool ShowAbstractCollisionProps(AbstractCollision ac, CommandHistory cmd)
+    public static bool ShowAbstractCollisionProps(AbstractCollision ac, CommandHistory cmd, PropertiesWindowData data)
     {
+        if (ac.Parent is not null)
+        {
+            ImGui.Text($"Parent DynamicCollision: ");
+            ImGui.SameLine();
+            if (ImGui.Button($"PlatID {ac.Parent.PlatID}")) data.Selection.Object = ac.Parent;
+            ImGui.Separator();
+        }
+
         bool propChanged = false;
         propChanged |= ImGuiExt.DragFloatHistory($"X1##props{ac.GetHashCode()}", ac.X1, val => ac.X1 = val, cmd);
         propChanged |= ImGuiExt.DragFloatHistory($"Y1##props{ac.GetHashCode()}", ac.Y1, val => ac.Y1 = val, cmd);
@@ -46,9 +54,7 @@ public partial class PropertiesWindow
             "anchor",
             $"AnchorX##props{ac.GetHashCode()}", $"AnchorY##props{ac.GetHashCode()}",
             ac.AnchorX, ac.AnchorY,
-            // these default values look weird when the collision is on a moving platform
-            // but the user will adjust it anyways so it's ok
-            (ac.X1 + ac.X2) / 2, (ac.Y1 + ac.Y2) / 2,
+            (ac.X1 + ac.X2) / 2 + (ac.Parent?.X ?? 0), (ac.Y1 + ac.Y2) / 2 + (ac.Parent?.Y ?? 0),
             (val1, val2) => (ac.AnchorX, ac.AnchorY) = (val1, val2),
             cmd
         );
@@ -63,7 +69,7 @@ public partial class PropertiesWindow
     public static bool ShowAbstractPressurePlateCollisionProps(AbstractPressurePlateCollision pc, CommandHistory cmd, PropertiesWindowData data)
     {
         bool propChanged = false;
-        propChanged |= ShowAbstractCollisionProps(pc, cmd);
+        propChanged |= ShowAbstractCollisionProps(pc, cmd, data);
         ImGui.SeparatorText($"Pressure plate props##props{pc.GetHashCode()}");
         ImGui.Text("AssetName: " + pc.AssetName);
         if (data.Canvas is not null)
@@ -85,9 +91,9 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
-    public static bool ShowLavaCollisionProps(LavaCollision lc, CommandHistory cmd)
+    public static bool ShowLavaCollisionProps(LavaCollision lc, CommandHistory cmd, PropertiesWindowData data)
     {
-        bool propChanged = ShowAbstractCollisionProps(lc, cmd);
+        bool propChanged = ShowAbstractCollisionProps(lc, cmd, data);
 
         ImGui.SeparatorText($"Lava collision props##props{lc.GetHashCode()}");
         ImGui.Text("LavaPower: " + lc.LavaPower); //TODO: allow modifying

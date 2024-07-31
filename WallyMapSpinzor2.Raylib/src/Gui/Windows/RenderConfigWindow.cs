@@ -6,7 +6,6 @@ using System.Xml.Linq;
 using ImGuiNET;
 using NativeFileDialogSharp;
 using Raylib_cs;
-using Rl = Raylib_cs.Raylib;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -25,7 +24,7 @@ public class RenderConfigWindow
 
     private static void SaveConfig(RenderConfig config, string path)
     {
-        Utils.SerializeToPath(config, path);
+        Wms2RlUtils.SerializeToPath(config, path);
     }
 
     public void Show(RenderConfig config, RenderConfigDefault configDefault, PathPreferences prefs)

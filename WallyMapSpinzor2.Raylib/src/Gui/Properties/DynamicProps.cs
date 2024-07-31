@@ -14,8 +14,8 @@ public partial class PropertiesWindow
 
         if (ImGui.CollapsingHeader("Children"))
         {
-            propChanged |= ImGuiExt.EditArrayHistory($"##dynamicChildren{ad.GetHashCode()}", ad.Children, val => ad.Children = val,
-            CreateDynamicChild<T>,
+            propChanged |= ImGuiExt.EditArrayHistory("", ad.Children, val => ad.Children = val,
+            () => CreateDynamicChild(ad),
             (int index) =>
             {
                 bool changed = false;
@@ -25,6 +25,10 @@ public partial class PropertiesWindow
                     changed |= ShowProperties(child, cmd, data);
                     ImGui.TreePop();
                 }
+
+                if (ImGui.Button($"Select##dyncol{child.GetHashCode()}")) data.Selection.Object = child;
+                ImGui.SameLine();
+
                 return changed;
             }, cmd);
         }
@@ -32,18 +36,16 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
-    private static Maybe<T> CreateDynamicChild<T>()
-    {
-        if (typeof(T) == typeof(AbstractCollision))
-            return CreateCollisionChild().Cast<T>();
-        if (typeof(T) == typeof(AbstractItemSpawn))
-            return CreateItemSpawnChild().Cast<T>();
-        if (typeof(T) == typeof(Respawn))
-            return CreateRespawnChild().Cast<T>();
-        return Maybe<T>.None;
-    }
+    private static Maybe<T> CreateDynamicChild<T>(AbstractDynamic<T> parent)
+        where T : IDeserializable, ISerializable, IDrawable => parent switch
+        {
+            DynamicCollision col => CreateCollisionChild(col).Cast<T>(),
+            DynamicItemSpawn item => CreateItemSpawnChild(item).Cast<T>(),
+            DynamicRespawn res => CreateRespawnChild(res).Cast<T>(),
+            _ => Maybe<T>.None
+        };
 
-    private static Maybe<AbstractCollision> CreateCollisionChild()
+    private static Maybe<AbstractCollision> CreateCollisionChild(DynamicCollision parent)
     {
         Maybe<AbstractCollision> result = new();
         if (ImGui.Button("Add new child"))
@@ -52,12 +54,13 @@ public partial class PropertiesWindow
         if (ImGui.BeginPopup("AddChild##dynamic"))
         {
             result = AddObjectPopup.AddCollisionMenu(new(0, 0));
+            result.DoIfSome(col => col.Parent = parent);
             ImGui.EndPopup();
         }
         return result;
     }
 
-    private static Maybe<AbstractItemSpawn> CreateItemSpawnChild()
+    private static Maybe<AbstractItemSpawn> CreateItemSpawnChild(DynamicItemSpawn parent)
     {
         Maybe<AbstractItemSpawn> result = new();
         if (ImGui.Button("Add new child"))
@@ -66,17 +69,19 @@ public partial class PropertiesWindow
         if (ImGui.BeginPopup("AddChild##dynamic"))
         {
             result = AddObjectPopup.AddItemSpawnMenu(new(0, 0));
+            result.DoIfSome(col => col.Parent = parent);
             ImGui.EndPopup();
         }
         return result;
     }
 
-    private static Maybe<Respawn> CreateRespawnChild()
+    private static Maybe<Respawn> CreateRespawnChild(DynamicRespawn parent)
     {
         Maybe<Respawn> result = new();
         if (ImGui.Button("Add new respawn"))
         {
             result = DefaultRespawn(new(0, 0));
+            result.Value.Parent = parent;
         }
         return result;
     }

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Raylib_cs;
-using Rl = Raylib_cs.Raylib;
 using SwfLib.Tags;
 using SwiffCheese.Wrappers;
 using WallyAnmSpinzor;
@@ -34,6 +33,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         foreach (BoneSprite bone in bones)
         {
             Texture2DWrapper texture = bone.Texture;
+            // TODO: need to turn this into a ColorTransform
             float tintR = bone.Tint == 0 ? 1 : ((byte)(bone.Tint >> 16) / 256f);
             float tintG = bone.Tint == 0 ? 1 : ((byte)(bone.Tint >> 8) / 256f);
             float tintB = bone.Tint == 0 ? 1 : ((byte)(bone.Tint >> 0) / 256f);
@@ -48,6 +48,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
 
     public int? GetAnimationFrameCount(Gfx gfx, string animName)
     {
+        // TODO: check how exactly the game does this
         if (gfx.AnimFile.StartsWith("SFX_"))
         {
             SwfFileData? swf = loader.LoadSwf(gfx.AnimFile);
@@ -173,7 +174,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
             rect.UpdateWith(x, y, w, h);
         RenderRectCache[(gfx, animName)] = rect;
         Rl.BeginTextureMode(rect.RenderTexture);
-        Rl.ClearBackground(Raylib_cs.Color.Blank);
+        Rl.ClearBackground(RlColor.Blank);
         canvas.DrawAnim(gfx, animName, frame, Transform.CreateTranslate(-rect.Rect.XMin, -rect.Rect.YMin), DrawPriorityEnum.BACKGROUND, null);
         if (withDebug)
         {
@@ -225,6 +226,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
     private BoneSprite[] BuildAnim(Gfx gfx, string animName, int frame, Transform trans, int loopLimit = -1)
     {
         trans *= Transform.CreateScale(gfx.AnimScale, gfx.AnimScale);
+        // TODO: check how the game does this
         // swf animation
         if (gfx.AnimFile.StartsWith("SFX_"))
         {
@@ -479,13 +481,13 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
             if (file.ShapeTags.TryGetValue(layer.CharacterId, out DefineShapeXTag shape))
             {
                 ushort shapeId = shape.ShapeID;
-                result.AddRange(BuildSwfShape(filePath, shapeId, animScale, tint, opacity, trans * Utils.SwfMatrixToTransform(layer.Matrix)));
+                result.AddRange(BuildSwfShape(filePath, shapeId, animScale, tint, opacity, trans * Wms2RlUtils.SwfMatrixToTransform(layer.Matrix)));
             }
             // is a sprite
             else if (file.SpriteTags.TryGetValue(layer.CharacterId, out DefineSpriteTag? childSprite))
             {
                 ushort childSpriteId = childSprite.SpriteID;
-                result.AddRange(BuildSwfSprite(filePath, childSpriteId, frame + layer.FrameOffset, animScale, tint, opacity, trans * Utils.SwfMatrixToTransform(layer.Matrix)));
+                result.AddRange(BuildSwfSprite(filePath, childSpriteId, frame + layer.FrameOffset, animScale, tint, opacity, trans * Wms2RlUtils.SwfMatrixToTransform(layer.Matrix)));
             }
         }
         return [.. result];

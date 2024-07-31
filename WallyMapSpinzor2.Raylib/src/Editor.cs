@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Raylib_cs;
-using Rl = Raylib_cs.Raylib;
 using rlImGui_cs;
 using ImGuiNET;
 using NativeFileDialogSharp;
@@ -42,11 +41,14 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
     public ExportWindow ExportDialog { get; set; } = new(pathPrefs);
     public ImportWindow ImportDialog { get; set; } = new(pathPrefs);
 
+    public OverlayManager OverlayManager { get; set; } = new();
     public CommandHistory CommandHistory { get; set; } = new();
     public SelectionContext Selection { get; set; } = new();
 
-    private readonly RenderConfig _config = RenderConfig.Default;
+    private readonly RenderConfig _renderConfig = RenderConfig.Default;
+    private readonly OverlayConfig _overlayConfig = OverlayConfig.Default;
     private readonly RenderState _state = new();
+    private RenderContext _context = new();
 
     public MousePickingFramebuffer PickingFramebuffer { get; set; } = new();
 
@@ -59,7 +61,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         while (!Rl.WindowShouldClose())
         {
             float delta = Rl.GetFrameTime();
-            _config.Time += TimeSpan.FromSeconds(_config.RenderSpeed * delta);
+            _renderConfig.Time += TimeSpan.FromSeconds(_renderConfig.RenderSpeed * delta);
             Time += TimeSpan.FromSeconds(delta);
             Draw();
             Update();
@@ -78,7 +80,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         Rl.SetTraceLogLevel(TraceLogLevel.Warning);
 #endif
 
-        _config.Deserialize(ConfigDefault.SerializeToXElement());
+        _renderConfig.Deserialize(ConfigDefault.SerializeToXElement());
 
         if (PathPrefs.LevelDescPath is not null && PathPrefs.BoneTypesPath is not null)
         {
@@ -102,7 +104,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
     private void Draw()
     {
         Rl.BeginDrawing();
-        Rl.ClearBackground(Raylib_cs.Color.Black);
+        Rl.ClearBackground(RlColor.Black);
         Rlgl.SetLineWidth(Math.Max(LINE_WIDTH * _cam.Zoom, 1));
         rlImGui.Begin();
 
@@ -111,16 +113,27 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         Rl.BeginTextureMode(ViewportWindow.Framebuffer);
         Rl.BeginMode2D(_cam);
 
-        Rl.ClearBackground(Raylib_cs.Color.Black);
+        Rl.ClearBackground(RlColor.Black);
         if (PathPrefs.BrawlhallaPath is not null)
         {
             Loader ??= new(PathPrefs.BrawlhallaPath, BoneNames!);
             Canvas ??= new(Loader);
             Canvas.CameraMatrix = Rl.GetCameraMatrix2D(_cam);
 
-            MapData?.DrawOn(Canvas, Transform.IDENTITY, _config, new RenderContext(), _state);
+            _context = new();
+            MapData?.DrawOn(Canvas, Transform.IDENTITY, _renderConfig, _context, _state);
             Canvas.FinalizeDraw();
         }
+
+        OverlayData data = new()
+        {
+            Viewport = ViewportWindow,
+            Cam = _cam,
+            Context = _context,
+            RenderConfig = _renderConfig,
+            OverlayConfig = _overlayConfig,
+        };
+        OverlayManager.Draw(data);
 
         Rl.EndMode2D();
         Rl.EndTextureMode();
@@ -138,7 +151,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         if (ViewportWindow.Open)
             ViewportWindow.Show();
         if (RenderConfigWindow.Open)
-            RenderConfigWindow.Show(_config, ConfigDefault, PathPrefs);
+            RenderConfigWindow.Show(_renderConfig, ConfigDefault, PathPrefs);
         if (MapOverviewWindow.Open && MapData is Level l)
             MapOverviewWindow.Show(l, CommandHistory, PathPrefs, Loader, Selection);
 
@@ -153,6 +166,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
                 Loader = Loader,
                 Level = MapData as Level,
                 PathPrefs = PathPrefs,
+                Selection = Selection,
             };
             PropertiesWindow.Show(Selection.Object, CommandHistory, data);
         }
@@ -170,7 +184,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         if (ViewportWindow.Hovered && (Rl.IsKeyPressed(KeyboardKey.Space) || Rl.IsMouseButtonPressed(MouseButton.Middle)))
         {
             ImGui.OpenPopup(AddObjectPopup.NAME);
-            AddObjectPopup.NewPos = ScreenToWorld(Rl.GetMousePosition());
+            AddObjectPopup.NewPos = ViewportWindow.ScreenToWorld(Rl.GetMousePosition(), _cam);
         }
 
         if (MapData is Level level)
@@ -221,6 +235,18 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
     private void Update()
     {
+        bool usingOverlay = OverlayManager.IsUsing;
+        OverlayData data = new()
+        {
+            Viewport = ViewportWindow,
+            Cam = _cam,
+            Context = _context,
+            RenderConfig = _renderConfig,
+            OverlayConfig = _overlayConfig,
+        };
+        OverlayManager.Update(Selection, data, CommandHistory);
+        usingOverlay |= OverlayManager.IsUsing;
+
         ImGuiIOPtr io = ImGui.GetIO();
         bool wantCaptureKeyboard = io.WantCaptureKeyboard;
         if (ViewportWindow.Hovered)
@@ -228,17 +254,13 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             float wheel = Rl.GetMouseWheelMove();
             if (wheel != 0)
             {
-                _cam.Target = ScreenToWorld(Rl.GetMousePosition());
+                _cam.Target = ViewportWindow.ScreenToWorld(Rl.GetMousePosition(), _cam);
                 _cam.Offset = Rl.GetMousePosition() - ViewportWindow.Bounds.P1;
                 _cam.Zoom = Math.Clamp(_cam.Zoom + wheel * ZOOM_INCREMENT * _cam.Zoom, MIN_ZOOM, MAX_ZOOM);
             }
 
-            if (Rl.IsMouseButtonReleased(MouseButton.Left))
-            {
-                Selection.Object = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, MapData, _cam, _config, _state);
-                // TODO: we might want a way to associate objects with their parents. 
-                // for example when selecting a hard collision we probably want to get the parent dynamic collision if it exists, when selecting an asset we want the platform
-            }
+            if (!usingOverlay && Rl.IsMouseButtonReleased(MouseButton.Left))
+                Selection.Object = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, MapData, _cam, _renderConfig, _state);
 
             if (Rl.IsMouseButtonDown(MouseButton.Right))
             {
@@ -256,6 +278,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         {
             if (Rl.IsKeyPressed(KeyboardKey.Z)) CommandHistory.Undo();
             if (Rl.IsKeyPressed(KeyboardKey.Y)) CommandHistory.Redo();
+            if (Rl.IsKeyPressed(KeyboardKey.D)) Selection.Object = null;
             // if (Rl.IsKeyPressed(KeyboardKey.R)) LoadMap();
         }
 
@@ -301,9 +324,9 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             using FileStream bonesFile = new(btPath, FileMode.Open, FileAccess.Read);
             BoneNames = [.. XElement.Load(bonesFile).Elements("Bone").Select(e => e.Value)];
         }
-        LevelDesc ld = Utils.DeserializeFromPath<LevelDesc>(ldPath);
-        LevelTypes lt = ltPath is null ? new() { Levels = [] } : Utils.DeserializeFromPath<LevelTypes>(ltPath);
-        LevelSetTypes lst = lstPath is null ? new() { Playlists = [] } : Utils.DeserializeFromPath<LevelSetTypes>(lstPath);
+        LevelDesc ld = Wms2RlUtils.DeserializeFromPath<LevelDesc>(ldPath);
+        LevelTypes lt = ltPath is null ? new() { Levels = [] } : Wms2RlUtils.DeserializeFromPath<LevelTypes>(ltPath);
+        LevelSetTypes lst = lstPath is null ? new() { Playlists = [] } : Wms2RlUtils.DeserializeFromPath<LevelSetTypes>(lstPath);
 
         // scuffed xml parse error handling
         if (ld.CameraBounds is null) throw new System.Xml.XmlException("LevelDesc xml did not contain essential elements");
@@ -393,10 +416,10 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         Camera2D camera = new(new(0, 0), new(x, y), 0, 1);
         Rlgl.SetLineWidth(Math.Max(LINE_WIDTH * camera.Zoom, 1));
         Rl.BeginTextureMode(renderTexture);
-        Rl.ClearBackground(Raylib_cs.Color.Blank);
+        Rl.ClearBackground(RlColor.Blank);
         Rl.BeginMode2D(camera);
         Canvas.CameraMatrix = Rl.GetCameraMatrix2D(camera);
-        MapData?.DrawOn(Canvas, Transform.IDENTITY, _config, new RenderContext(), _state);
+        MapData?.DrawOn(Canvas, Transform.IDENTITY, _renderConfig, new RenderContext(), _state);
         Canvas.FinalizeDraw();
         Rl.EndMode2D();
         Rl.EndTextureMode();

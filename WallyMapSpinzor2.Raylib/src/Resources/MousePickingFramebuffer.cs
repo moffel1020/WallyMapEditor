@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Raylib_cs;
-using Rl = Raylib_cs.Raylib;
 
 namespace WallyMapSpinzor2.Raylib;
 
@@ -100,7 +99,7 @@ public class MousePickingFramebuffer : IDisposable
         Rl.BeginMode2D(cam);
         Rlgl.DisableColorBlend();
 
-        Rl.ClearBackground(Raylib_cs.Color.Black);
+        Rl.ClearBackground(RlColor.Black);
         canvas.CameraMatrix = Rl.GetCameraMatrix2D(cam);
 
         mapData.DrawOn(canvas, Transform.IDENTITY, config, new RenderContext(), state);

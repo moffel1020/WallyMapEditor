@@ -35,7 +35,7 @@ public partial class PropertiesWindow
                     {
                         string path = dialogResult.Path;
                         string newAssetName = Path.GetRelativePath(backgroundDir, path).Replace("\\", "/");
-                        if (!Utils.IsInDirectory(data.PathPrefs.BrawlhallaPath, path))
+                        if (!Wms2RlUtils.IsInDirectory(data.PathPrefs.BrawlhallaPath, path))
                         {
                             _backgroundErrorText = "Asset has to be inside the brawlhalla directory";
                         }
@@ -68,7 +68,7 @@ public partial class PropertiesWindow
                     {
                         string path = dialogResult.Path;
                         string newAnimatedAssetName = Path.GetRelativePath(backgroundDir, path).Replace("\\", "/");
-                        if (!Utils.IsInDirectory(data.PathPrefs.BrawlhallaPath, path))
+                        if (!Wms2RlUtils.IsInDirectory(data.PathPrefs.BrawlhallaPath, path))
                         {
                             _backgroundErrorText = "Asset has to be inside the brawlhalla directory";
                         }
