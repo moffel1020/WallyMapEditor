@@ -162,7 +162,15 @@ public partial class PropertiesWindow
         bool propChanged = false;
         if (ImGui.BeginPopup(POWER_POPUP_NAME + popupId, ImGuiWindowFlags.NoMove))
         {
-            _powerFilter = ImGuiExt.InputText("Filter", _powerFilter, flags: ImGuiInputTextFlags.None);
+            _powerFilter = ImGuiExt.InputText("##powerfilter", _powerFilter, flags: ImGuiInputTextFlags.None);
+            if (_powerFilter != "")
+            {
+                ImGui.SameLine();
+                if (ImGui.Button("x")) _powerFilter = "";
+            }
+            ImGui.SameLine();
+            ImGui.Text("Filter");
+
             string[] powers = allPowers
                 .Where(p => p.Contains(_powerFilter, StringComparison.InvariantCultureIgnoreCase))
                 .ToArray();
