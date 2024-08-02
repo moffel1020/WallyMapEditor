@@ -18,7 +18,7 @@ namespace WallyMapSpinzor2.Raylib;
 
 public class ImportWindow(PathPreferences prefs)
 {
-    private const int MAX_KEY_LENGTH = 9;
+    public const int MAX_KEY_LENGTH = 9;
 
     private string? savedLdPath = prefs.LevelDescPath;
     private string? savedLtPath = prefs.LevelTypePath;
