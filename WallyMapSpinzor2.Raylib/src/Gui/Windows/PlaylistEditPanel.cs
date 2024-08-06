@@ -29,6 +29,7 @@ public static class PlaylistEditPanel
 
     private static int _importMethod;
     private static string? _swzImportError;
+    private static string _playlistFilter = "";
 
     public static void Show(Level l, PathPreferences prefs)
     {
@@ -55,16 +56,17 @@ public static class PlaylistEditPanel
             }
 
             _decyptionKey = ImGuiExt.InputText("Decryption key", _decyptionKey ?? prefs.DecryptionKey ?? "", ImportWindow.MAX_KEY_LENGTH, ImGuiInputTextFlags.CharsDecimal);
-            if (ImGuiExt.WithDisabledButton(_gameSwzPath is null || _decyptionKey is null || string.IsNullOrEmpty(_decyptionKey), "Import"))
+            if (ImGuiExt.WithDisabledButton(string.IsNullOrEmpty(_gameSwzPath) || string.IsNullOrEmpty(_decyptionKey), "Import"))
             {
                 try
                 {
                     uint key = uint.Parse(_decyptionKey!);
                     _levelSetTypes = Wms2RlUtils.DeserializeSwzFromPath<LevelSetTypes>(_gameSwzPath!, "LevelSetTypes.xml", key);
                     if (_levelSetTypes is null) throw new Exception("Could not deserialize Game.swz");
-                    _allPlaylists = _levelSetTypes.Playlists.Select(lst => lst.LevelSetName).Distinct().ToArray(); 
+                    _allPlaylists = _levelSetTypes.Playlists.Select(lst => lst.LevelSetName).Where(p => p != "Auto").Distinct().ToArray(); 
                     l.Playlists = l.Playlists.Where(p => _allPlaylists.Contains(p)).ToHashSet();
                     _swzImportError = null;
+                    _playlistFilter = "";
                 }
                 catch (Exception e)
                 {
@@ -91,15 +93,26 @@ public static class PlaylistEditPanel
             if (prefs.LevelSetTypesPath is not null && ImGui.Button("Import"))
             {
                 _levelSetTypes = Wms2RlUtils.DeserializeFromPath<LevelSetTypes>(prefs.LevelSetTypesPath);
-                _allPlaylists = _levelSetTypes.Playlists.Select(lst => lst.LevelSetName).Distinct().ToArray(); 
+                _allPlaylists = _levelSetTypes.Playlists.Select(lst => lst.LevelSetName).Where(p => p != "Auto").Distinct().ToArray(); 
                 l.Playlists = l.Playlists.Where(p => _allPlaylists.Contains(p)).ToHashSet();
+                _playlistFilter = "";
             }
         }
 
         if (_allPlaylists.Length != 0)
         {
-            ImGui.SeparatorText("Playlists");
-            foreach (string playlist in _allPlaylists)
+            ImGui.SeparatorText($"Playlists ({l.Playlists.Count})");
+            ImGui.InputText("##playlistfilter", ref _playlistFilter, 100);
+            if (_playlistFilter != "")
+            {
+                ImGui.SameLine();
+                if (ImGui.Button("x")) _playlistFilter = "";
+            }
+            ImGui.SameLine();
+            ImGui.Text("Filter");
+
+            string[] playlists = _allPlaylists.Where(p => p.Contains(_playlistFilter, StringComparison.InvariantCultureIgnoreCase)).ToArray();
+            foreach (string playlist in playlists)
             {
                 bool contained = l.Playlists.Contains(playlist);
                 if (ImGui.Checkbox(playlist, ref contained))
