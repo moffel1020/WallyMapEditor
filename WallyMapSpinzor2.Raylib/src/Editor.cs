@@ -388,6 +388,14 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         ThumbnailPNGFile = "wally.jpg"
     };
 
+    public static readonly string[] DefaultPlaylists = [
+        "StandardAll",
+        "StandardFFA",
+        "Standard1v1",
+        "Standard2v2",
+        "Standard3v3",
+    ];
+
     public Vector2 ScreenToWorld(Vector2 screenPos) =>
         Rl.GetScreenToWorld2D(screenPos - ViewportWindow.Bounds.P1, _cam);
 

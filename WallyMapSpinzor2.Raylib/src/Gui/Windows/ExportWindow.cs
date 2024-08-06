@@ -73,7 +73,7 @@ public class ExportWindow(PathPreferences prefs)
                 ShowLevelTypeExportTab(l);
                 ImGui.EndTabItem();
             }
-            if (ImGui.BeginTabItem("Playlists"))
+            if (ImGui.BeginTabItem("LevelSetTypes"))
             {
                 ShowPlaylistsExportTab(l);
                 ImGui.EndTabItem();
@@ -102,9 +102,7 @@ public class ExportWindow(PathPreferences prefs)
     public void ShowGameExportTab(Level l)
     {
         ImGui.Text($"Export {l.Desc.LevelName} to game swz files");
-        ImGui.PushTextWrapPos();
-        ImGui.Text("This will override the game swz files and you will not be able to play online (even if you changed nothing). To play online again verify integrity of game files");
-        ImGui.PopTextWrapPos();
+        ImGui.TextWrapped("This will override the game swz files and you will not be able to play online (even if you changed nothing). To play online again restore from backup or if that doesn't work verify integrity of game files");
         ImGui.Separator();
         if (ImGui.Button("Select Brawlhalla path"))
         {
@@ -123,7 +121,9 @@ public class ExportWindow(PathPreferences prefs)
         {
             ImGui.Separator();
             ImGui.TextWrapped("Warning: this level is not in any playlists so it will not be playable in game. Consider adding playlists here:");
-            if (ImGui.Button("Add playlists")) PlaylistEditPanel.Open = true;
+            if (ImGui.Button("Add default playlists")) l.Playlists = [.. Editor.DefaultPlaylists];
+            ImGui.Text("or");
+            if (ImGui.Button("Edit playlists manually")) PlaylistEditPanel.Open = true;
             ImGui.Separator();
         }
 
