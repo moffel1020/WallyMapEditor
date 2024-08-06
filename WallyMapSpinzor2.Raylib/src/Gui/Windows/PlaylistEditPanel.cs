@@ -56,7 +56,7 @@ public static class PlaylistEditPanel
             }
 
             _decyptionKey = ImGuiExt.InputText("Decryption key", _decyptionKey ?? prefs.DecryptionKey ?? "", ImportWindow.MAX_KEY_LENGTH, ImGuiInputTextFlags.CharsDecimal);
-            if (ImGuiExt.WithDisabledButton(string.IsNullOrEmpty(_gameSwzPath) || string.IsNullOrEmpty(_decyptionKey), "Import"))
+            if (ImGuiExt.WithDisabledButton(string.IsNullOrEmpty(_gameSwzPath) || string.IsNullOrEmpty(_decyptionKey), "Import##swz"))
             {
                 try
                 {
@@ -90,7 +90,7 @@ public static class PlaylistEditPanel
                 });
             }
 
-            if (prefs.LevelSetTypesPath is not null && ImGui.Button("Import"))
+            if (prefs.LevelSetTypesPath is not null && ImGui.Button("Import##lst"))
             {
                 _levelSetTypes = Wms2RlUtils.DeserializeFromPath<LevelSetTypes>(prefs.LevelSetTypesPath);
                 _allPlaylists = _levelSetTypes.Playlists.Select(lst => lst.LevelSetName).Where(p => p != "Auto").Distinct().ToArray(); 

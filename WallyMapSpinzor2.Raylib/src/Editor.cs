@@ -218,7 +218,6 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         }
         if (ImGui.BeginMenu("Tools"))
         {
-            if (ImGui.MenuItem("Edit Playlists", null, PlaylistEditPanel.Open)) PlaylistEditPanel.Open = !PlaylistEditPanel.Open;
             if (ImGui.MenuItem("History", null, HistoryPanel.Open)) HistoryPanel.Open = !HistoryPanel.Open;
             if (ImGui.MenuItem("Clear Cache"))
             {

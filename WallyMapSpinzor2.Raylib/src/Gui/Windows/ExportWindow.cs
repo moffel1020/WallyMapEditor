@@ -288,11 +288,58 @@ public class ExportWindow(PathPreferences prefs)
         }
     }
 
-    public static void ShowPlaylistsExportTab(Level l)
+    public void ShowPlaylistsExportTab(Level l)
     {
-        ImGui.Text($"{l.Desc.LevelName} is in playlists:");
-        foreach (string playlist in l.Playlists)
-            ImGui.BulletText(playlist);
+        ImGui.Text($"{l.Desc.LevelName} is in {l.Playlists.Count} playlists");
+        if (ImGui.TreeNode("Playlists"))
+        {
+            foreach (string playlist in l.Playlists)
+                ImGui.BulletText(playlist);
+            ImGui.TreePop();
+        }
+
+        if (ImGui.Button("Add/Remove playlists")) PlaylistEditPanel.Open = true;
+
+        ImGui.Separator();
+        ImGui.TextWrapped("Add selection to LevelSetTypes.xml");
+        if (ImGui.Button("Select LevelSetTypes.xml"))
+        {
+            Task.Run(() =>
+            {
+                DialogResult result = Dialog.FileOpen("xml", Path.GetDirectoryName(prefs.LevelSetTypesPath));
+                if (result.IsOk)
+                    prefs.LevelSetTypesPath = result.Path;
+            });
+        }
+        ImGui.SameLine();
+        ImGui.Text(prefs.LevelSetTypesPath ?? "Not Selected");
+
+        if (ImGuiExt.WithDisabledButton(string.IsNullOrEmpty(prefs.LevelSetTypesPath), "Export##lst"))
+        {
+            LevelSetTypes levelSetTypes = Wms2RlUtils.DeserializeFromPath<LevelSetTypes>(prefs.LevelSetTypesPath!);
+            foreach (string plName in l.Playlists)
+            {
+                foreach (LevelSetType lst in levelSetTypes.Playlists)
+                {
+                    if (l.Playlists.Contains(lst.LevelSetName))
+                    {
+                        if (!lst.LevelTypes.Contains(l.Desc.LevelName))
+                            lst.LevelTypes = [.. lst.LevelTypes, l.Desc.LevelName];
+                    }
+                    else
+                    {
+                        lst.LevelTypes = lst.LevelTypes.Where(n => n != l.Desc.LevelName).ToArray();
+                    }
+                }
+            }
+
+            Task.Run(() =>
+            {
+                DialogResult result = Dialog.FileSave("xml", Path.GetDirectoryName(prefs.LevelSetTypesPath));
+                if (result.IsOk)
+                    Wms2RlUtils.SerializeToPath(levelSetTypes, result.Path);
+            });
+        }
     }
 
     public void ExportToGameSwzFiles(Level l, bool backup)
