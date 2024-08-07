@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 
@@ -83,10 +85,34 @@ public partial class PropertiesWindow
         propChanged |= ImGuiExt.CheckboxHistory($"FaceLeft##props{pc.GetHashCode()}", pc.FaceLeft, val => pc.FaceLeft = val, cmd);
         //TODO: add FireOffsetX, FireOffsetY
 
-        //TODO: allow modifying
-        ImGui.Text("TrapPowers:");
-        foreach (string power in pc.TrapPowers)
-            ImGui.BulletText(power);
+        if (data.PowerNames is null)
+        {
+            ImGui.Text("In order to edit the TrapPowers, import powerTypes.csv");
+            ImGui.Spacing();
+            ImGui.Text("TrapPowers:");
+            foreach (string power in pc.TrapPowers)
+                ImGui.BulletText(power);
+        }
+        else
+        {
+            propChanged |= ImGuiExt.EditArrayHistory("TrapPowers", pc.TrapPowers, val => pc.TrapPowers = val,
+            () =>
+            {
+                Maybe<string> result = new();
+                if (ImGui.Button("Add new power"))
+                    result = data.PowerNames[0];
+                return result;
+            },
+            (int index) =>
+            {
+                ImGui.Text($"{pc.TrapPowers[index]}");
+                if (ImGui.Button($"Edit##trappower{index}"))
+                    ImGui.OpenPopup(POWER_POPUP_NAME + index);
+                bool changed = PowerEditPopup(data.PowerNames, pc.TrapPowers[index], val => pc.TrapPowers[index] = val, cmd, index.ToString());
+                ImGui.SameLine();
+                return changed;
+            }, cmd, allowMove: false);
+        }
 
         return propChanged;
     }
@@ -96,7 +122,20 @@ public partial class PropertiesWindow
         bool propChanged = ShowAbstractCollisionProps(lc, cmd, data);
 
         ImGui.SeparatorText($"Lava collision props##props{lc.GetHashCode()}");
-        ImGui.Text("LavaPower: " + lc.LavaPower); //TODO: allow modifying
+        if (data.PowerNames is null)
+        {
+            ImGui.Text("In order to edit the LavaPower, import powerTypes.csv");
+            ImGui.Spacing();
+            ImGui.Text("LavaPower: " + lc.LavaPower);
+        }
+        else
+        {
+            ImGui.Text($"Power: {lc.LavaPower}");
+            ImGui.SameLine();
+            if (ImGui.Button("Edit##lavapower"))
+                ImGui.OpenPopup(POWER_POPUP_NAME);
+            propChanged |= PowerEditPopup(data.PowerNames, lc.LavaPower, val => lc.LavaPower = val, cmd);
+        }
 
         return propChanged;
     }
@@ -119,5 +158,44 @@ public partial class PropertiesWindow
             lcol.LavaPower = "LavaBurn";
         }
         return col;
+    }
+
+    private const string POWER_POPUP_NAME = "PowerEdit";
+    private static string _powerFilter = "";
+
+    private static bool PowerEditPopup(string[] allPowers, string currentPower, Action<string> change, CommandHistory cmd, string popupId = "")
+    {
+        bool propChanged = false;
+        if (ImGui.BeginPopup(POWER_POPUP_NAME + popupId, ImGuiWindowFlags.NoMove))
+        {
+            _powerFilter = ImGuiExt.InputText("##powerfilter", _powerFilter, flags: ImGuiInputTextFlags.None);
+            if (_powerFilter != "")
+            {
+                ImGui.SameLine();
+                if (ImGui.Button("x")) _powerFilter = "";
+            }
+            ImGui.SameLine();
+            ImGui.Text("Filter");
+            ImGui.SameLine();
+            ImGui.TextDisabled("(?)");
+            if (ImGui.IsItemHovered()) 
+                ImGui.SetTooltip("Search through all powertypes in the game. Note that not all powers will be compatible with traps/lava and changing this can crash the game.");
+
+            string[] powers = allPowers
+                .Where(p => p.Contains(_powerFilter, StringComparison.InvariantCultureIgnoreCase))
+                .ToArray();
+
+            string newPower = ImGuiExt.StringListBox("Power", currentPower, powers, 320.0f);
+            if (currentPower != newPower)
+            {
+                cmd.Add(new PropChangeCommand<string>(change, currentPower, newPower));
+                propChanged = true;
+                ImGui.CloseCurrentPopup();
+            }
+
+            ImGui.EndPopup();
+        }
+
+        return propChanged;
     }
 }

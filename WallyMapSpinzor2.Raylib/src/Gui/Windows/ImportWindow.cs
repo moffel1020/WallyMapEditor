@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -24,6 +25,7 @@ public class ImportWindow(PathPreferences prefs)
     private string? savedLtPath = prefs.LevelTypePath;
     private string? savedLstPath = prefs.LevelSetTypesPath;
     private string? savedBtPath = prefs.BoneTypesPath;
+    private string? savedPtPath = prefs.PowerTypesPath;
 
     private readonly Dictionary<string, string> levelDescFiles = [];
     private string _levelDescFileFilter = "";
@@ -31,6 +33,7 @@ public class ImportWindow(PathPreferences prefs)
     private LevelTypes? _decryptedLt;
     private LevelSetTypes? _decryptedLst;
     private string[]? _boneNames;
+    private string[]? _powerNames;
 
     private string? _loadingError;
     private string? _loadingStatus;
@@ -141,7 +144,7 @@ public class ImportWindow(PathPreferences prefs)
                     LevelDesc ld = Wms2RlUtils.DeserializeFromString<LevelDesc>(levelDescFiles[_pickedFileName!]);
                     _loadingStatus = null;
                     _loadingError = null;
-                    editor.LoadMap(new Level(ld, _decryptedLt, _decryptedLst), _boneNames);
+                    editor.LoadMapFromLevel(new Level(ld, _decryptedLt, _decryptedLst), _boneNames, _powerNames);
                 }
                 catch (Exception e)
                 {
@@ -228,7 +231,7 @@ public class ImportWindow(PathPreferences prefs)
         ImGui.SameLine();
         ImGui.Text(savedLdPath ?? "None");
 
-        if (ImGui.Button("BoneTypes"))
+        if (ImGui.Button("BoneTypes.xml"))
         {
             Task.Run(() =>
             {
@@ -239,6 +242,20 @@ public class ImportWindow(PathPreferences prefs)
         }
         ImGui.SameLine();
         ImGui.Text(savedBtPath ?? "None");
+
+        if (ImGui.Button("powerTypes.csv (optional)"))
+        {
+            Task.Run(() =>
+            {
+                DialogResult result = Dialog.FileOpen("csv", Path.GetDirectoryName(savedPtPath));
+                if (result.IsOk)
+                    savedPtPath = result.Path;
+            });
+        }
+        ImGui.SameLine();
+        if (savedPtPath is not null && ImGui.Button("x##pt")) savedPtPath = null;
+        ImGui.SameLine();
+        ImGui.Text(savedPtPath ?? "None");
 
         if (ImGui.Button("LevelTypes.xml (optional)"))
         {
@@ -274,7 +291,7 @@ public class ImportWindow(PathPreferences prefs)
             _loadingStatus = "loading...";
             try
             {
-                editor.LoadMap(savedLdPath, savedLtPath, savedLstPath, savedBtPath);
+                editor.LoadMapFromPaths(savedLdPath, savedLtPath, savedLstPath, savedBtPath, savedPtPath);
                 _open = false;
                 _loadingStatus = null;
                 _loadingError = null;
@@ -282,6 +299,7 @@ public class ImportWindow(PathPreferences prefs)
                 prefs.LevelTypePath = savedLtPath;
                 prefs.LevelSetTypesPath = savedLstPath;
                 prefs.BoneTypesPath = savedBtPath;
+                prefs.PowerTypesPath = savedPtPath;
             }
             catch (Exception e)
             {
@@ -311,12 +329,16 @@ public class ImportWindow(PathPreferences prefs)
 
         _decryptedLt = Wms2RlUtils.DeserializeSwzFromPath<LevelTypes>(initPath, "LevelTypes.xml", key);
         _decryptedLst = Wms2RlUtils.DeserializeSwzFromPath<LevelSetTypes>(gamePath, "LevelSetTypes.xml", key);
-        string? boneFileContent = Wms2RlUtils.GetFileInSwzFromPath(initPath, "BoneTypes.xml", key);
-        if (boneFileContent is null)
+        string? boneTypesContent = Wms2RlUtils.GetFileInSwzFromPath(initPath, "BoneTypes.xml", key);
+        string? powerTypesContent = Wms2RlUtils.GetFileInSwzFromPath(gamePath, "powerTypes.csv", key);
+        if (boneTypesContent is null)
             _boneNames = null;
         else
         {
-            _boneNames = [.. XElement.Parse(boneFileContent).Elements("Bone").Select(e => e.Value)];
+            _boneNames = [.. XElement.Parse(boneTypesContent).Elements("Bone").Select(e => e.Value)];
         }
+
+        if (powerTypesContent is not null)
+            _powerNames = Wms2RlUtils.ParsePowerTypes(powerTypesContent);
     }
 }

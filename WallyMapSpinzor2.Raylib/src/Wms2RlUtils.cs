@@ -23,6 +23,8 @@ using BrawlhallaSwz;
 
 using AbcDisassembler;
 
+using nietras.SeparatedValues;
+
 namespace WallyMapSpinzor2.Raylib;
 
 public static class Wms2RlUtils
@@ -374,4 +376,12 @@ public static class Wms2RlUtils
     public static uint RlColorToHex(RlColor color) => (uint)((color.R << 24) | (color.G << 16) | (color.B << 8) | color.A);
     public static RlColor HexToRlColor(uint hex) => new((byte)(hex >> 24), (byte)(hex >> 16), (byte)(hex >> 8), (byte)hex);
     public static RlColor? ParseRlColorOrNull(string? s) => s is null ? null : HexToRlColor(Convert.ToUInt32(s, 16));
+
+    public static string[]? ParsePowerTypes(string str)
+    {
+        int lineEnd = str.IndexOf('\n');
+        str = str[(lineEnd + 1)..];
+        using SepReader reader = Sep.New(',').Reader().FromText(str);
+        return [.. reader.Enumerate(row => row[0].ToString())];
+    }
 }

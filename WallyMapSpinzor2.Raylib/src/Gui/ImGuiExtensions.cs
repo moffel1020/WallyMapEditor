@@ -80,6 +80,32 @@ public static class ImGuiExt
         return options[valueIndex];
     }
 
+    public static string StringListBox(string label, string value, string[] options, int heightItems = 8)
+    {
+        int valueIndex = Array.FindIndex(options, s => s == value);
+        if (valueIndex == -1) valueIndex = 0; // prevent out of bounds if value is not in options
+        ImGui.ListBox(label, ref valueIndex, options, options.Length, heightItems);
+        return options[valueIndex];
+    }
+
+    public static string StringListBox(string label, string value, string[] options, float width, int heightItems = 8)
+    {
+        if (ImGui.BeginListBox(label, new(width, heightItems * ImGui.GetTextLineHeightWithSpacing())))
+        {
+            int valueIndex = Array.FindIndex(options, s => s == value);
+            if (valueIndex == -1) valueIndex = 0;
+
+            foreach (string option in options)
+            {
+                if (ImGui.Selectable(option, value == option))
+                    value = option;
+            }
+            ImGui.EndListBox();
+        }
+
+        return value;
+    }
+
     public static string StringEnumCombo(string label, Type type, string currentName, bool includeNone)
     {
         int current = Enum.TryParse(type, currentName, out object? result) ? (int)result : 0;

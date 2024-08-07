@@ -10,4 +10,5 @@ public class PropertiesWindowData
     public required Level? Level { get; init; }
     public required PathPreferences PathPrefs { get; init; }
     public required SelectionContext Selection { get; init; }
+    public required string[]? PowerNames { get; init; }
 }
