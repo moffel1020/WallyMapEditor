@@ -3,12 +3,12 @@ using ImGuiNET;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public class HistroyPanel
+public static class HistoryPanel
 {
-    private bool _open = false;
-    public bool Open { get => _open; set => _open = value; }
+    private static bool _open = false;
+    public static bool Open { get => _open; set => _open = value; }
 
-    public void Show(CommandHistory history)
+    public static void Show(CommandHistory history)
     {
         ImGui.Begin("History", ref _open, ImGuiWindowFlags.NoDocking);
 

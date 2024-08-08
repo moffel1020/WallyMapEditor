@@ -60,6 +60,7 @@ public class MapOverviewWindow
 
             ImGui.Text($"LevelID: {l.Type.LevelID}");
             ImGui.Separator();
+
             _propChanged |= ImGuiExt.InputTextHistory("AssetName", l.Type.AssetName ?? "", val => l.Type.AssetName = val == "" ? null : val, cmd);
             if (ImGui.IsItemHovered()) ImGui.SetTooltip("Note: this doesn't do anything in game");
             _propChanged |= ImGuiExt.InputTextHistory("FileName", l.Type.FileName ?? "", val => l.Type.FileName = val == "" ? null : val, cmd);
@@ -69,6 +70,15 @@ public class MapOverviewWindow
             _propChanged |= ImGuiExt.CheckboxHistory("DevOnly", l.Type.DevOnly, val => l.Type.DevOnly = val, cmd);
             _propChanged |= ImGuiExt.CheckboxHistory("TestLevel", l.Type.TestLevel, val => l.Type.TestLevel = val, cmd);
             ImGui.Separator();
+
+            ImGui.Text($"Playlists: {l.Playlists.Count}");
+            string playlistsText = string.Join(",", l.Playlists);
+            if (ImGui.IsItemHovered()) ImGui.SetTooltip(playlistsText);
+            ImGui.SameLine();
+            if (ImGui.Button("Edit##playlists")) PlaylistEditPanel.Open = true;
+            if (ImGui.IsItemHovered()) ImGui.SetTooltip(playlistsText);
+            ImGui.Separator();
+
             ImGui.Text("ThumbnailPNGFile: " + (l.Type.ThumbnailPNGFile ?? "None"));
             if (pathPrefs.BrawlhallaPath is not null)
             {

@@ -38,7 +38,6 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
     public RenderConfigWindow RenderConfigWindow { get; set; } = new();
     public MapOverviewWindow MapOverviewWindow { get; set; } = new();
     public PropertiesWindow PropertiesWindow { get; set; } = new();
-    public HistroyPanel HistoryPanel { get; set; } = new();
     public ExportWindow ExportDialog { get; set; } = new(pathPrefs);
     public ImportWindow ImportDialog { get; set; } = new(pathPrefs);
 
@@ -177,6 +176,8 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
         if (HistoryPanel.Open)
             HistoryPanel.Show(CommandHistory);
+        if (PlaylistEditPanel.Open && MapData is Level lv)
+            PlaylistEditPanel.Show(lv, PathPrefs);
 
         if (ExportDialog.Open)
             ExportDialog.Show(MapData);
@@ -391,6 +392,14 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         BGMusic = "Level09Theme", // certified banger
         ThumbnailPNGFile = "wally.jpg"
     };
+
+    public static readonly string[] DefaultPlaylists = [
+        "StandardAll",
+        "StandardFFA",
+        "Standard1v1",
+        "Standard2v2",
+        "Standard3v3",
+    ];
 
     public Vector2 ScreenToWorld(Vector2 screenPos) =>
         Rl.GetScreenToWorld2D(screenPos - ViewportWindow.Bounds.P1, _cam);

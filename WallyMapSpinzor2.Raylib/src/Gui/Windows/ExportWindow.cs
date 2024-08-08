@@ -73,7 +73,7 @@ public class ExportWindow(PathPreferences prefs)
                 ShowLevelTypeExportTab(l);
                 ImGui.EndTabItem();
             }
-            if (ImGui.BeginTabItem("Playlists"))
+            if (ImGui.BeginTabItem("LevelSetTypes"))
             {
                 ShowPlaylistsExportTab(l);
                 ImGui.EndTabItem();
@@ -102,9 +102,7 @@ public class ExportWindow(PathPreferences prefs)
     public void ShowGameExportTab(Level l)
     {
         ImGui.Text($"Export {l.Desc.LevelName} to game swz files");
-        ImGui.PushTextWrapPos();
-        ImGui.Text("This will override the game swz files and you will not be able to play online (even if you changed nothing). To play online again verify integrity of game files");
-        ImGui.PopTextWrapPos();
+        ImGui.TextWrapped("This will override the game swz files and you will not be able to play online (even if you changed nothing). To play online again restore from backup or if that doesn't work verify integrity of game files");
         ImGui.Separator();
         if (ImGui.Button("Select Brawlhalla path"))
         {
@@ -118,6 +116,16 @@ public class ExportWindow(PathPreferences prefs)
         ImGui.Text($"Path: {prefs.BrawlhallaPath}");
 
         ImGui.Checkbox("Create backup for swz files", ref _backup);
+
+        if (l.Playlists.Count == 0)
+        {
+            ImGui.Separator();
+            ImGui.TextWrapped("Warning: this level is not in any playlists so it will not be playable in game. Consider adding playlists here:");
+            if (ImGui.Button("Add default playlists")) l.Playlists = [.. Editor.DefaultPlaylists];
+            ImGui.Text("or");
+            if (ImGui.Button("Edit playlists manually")) PlaylistEditPanel.Open = true;
+            ImGui.Separator();
+        }
 
         if (ImGui.Button("Export"))
         {
@@ -150,7 +158,7 @@ public class ExportWindow(PathPreferences prefs)
             string[] backedUpFiles = [
                 Path.Combine(prefs.BrawlhallaPath, "Dynamic.swz"),
                 Path.Combine(prefs.BrawlhallaPath, "Init.swz"),
-                // Path.Combine(prefs.BrawlhallaPath, "Game.swz")
+                Path.Combine(prefs.BrawlhallaPath, "Game.swz")
             ];
 
             ImGui.ListBox("Backups", ref _selectedBackupIndex, _backupDisplayNames, _backupDisplayNames.Length);
@@ -288,11 +296,44 @@ public class ExportWindow(PathPreferences prefs)
         }
     }
 
-    public static void ShowPlaylistsExportTab(Level l)
+    public void ShowPlaylistsExportTab(Level l)
     {
-        ImGui.Text($"{l.Desc.LevelName} is in playlists:");
-        foreach (string playlist in l.Playlists)
-            ImGui.BulletText(playlist);
+        ImGui.Text($"{l.Desc.LevelName} is in {l.Playlists.Count} playlists");
+        if (ImGui.TreeNode("Playlists"))
+        {
+            foreach (string playlist in l.Playlists)
+                ImGui.BulletText(playlist);
+            ImGui.TreePop();
+        }
+
+        if (ImGui.Button("Add/Remove playlists")) PlaylistEditPanel.Open = true;
+
+        ImGui.Separator();
+        ImGui.TextWrapped("Add selection to LevelSetTypes.xml");
+        if (ImGui.Button("Select LevelSetTypes.xml"))
+        {
+            Task.Run(() =>
+            {
+                DialogResult result = Dialog.FileOpen("xml", Path.GetDirectoryName(prefs.LevelSetTypesPath));
+                if (result.IsOk)
+                    prefs.LevelSetTypesPath = result.Path;
+            });
+        }
+        ImGui.SameLine();
+        ImGui.Text(prefs.LevelSetTypesPath ?? "Not Selected");
+
+        if (ImGuiExt.WithDisabledButton(string.IsNullOrEmpty(prefs.LevelSetTypesPath), "Export##lst"))
+        {
+            LevelSetTypes levelSetTypes = Wms2RlUtils.DeserializeFromPath<LevelSetTypes>(prefs.LevelSetTypesPath!);
+            UpdatePlaylists(levelSetTypes, l);
+
+            Task.Run(() =>
+            {
+                DialogResult result = Dialog.FileSave("xml", Path.GetDirectoryName(prefs.LevelSetTypesPath));
+                if (result.IsOk)
+                    Wms2RlUtils.SerializeToPath(levelSetTypes, result.Path);
+            });
+        }
     }
 
     public void ExportToGameSwzFiles(Level l, bool backup)
@@ -311,14 +352,14 @@ public class ExportWindow(PathPreferences prefs)
 
         string dynamicPath = Path.Combine(prefs.BrawlhallaPath!, "Dynamic.swz");
         string initPath = Path.Combine(prefs.BrawlhallaPath!, "Init.swz");
-        //string gamePath = Path.Combine(prefs.BrawlhallaPath!, "Game.swz");
+        string gamePath = Path.Combine(prefs.BrawlhallaPath!, "Game.swz");
 
         if (backup)
         {
             _exportStatus = "creating backup...";
             Wms2RlUtils.CreateBackupOfFile(dynamicPath);
             Wms2RlUtils.CreateBackupOfFile(initPath);
-            //Utils.CreateBackupOfFile(gamePath);
+            Wms2RlUtils.CreateBackupOfFile(gamePath);
         }
 
         _exportStatus = "reading swz...";
@@ -335,10 +376,17 @@ public class ExportWindow(PathPreferences prefs)
         lts.AddOrUpdateLevelType(l.Type ?? throw new ArgumentNullException("l.Type"));
         initFiles["LevelTypes.xml"] = Wms2RlUtils.SerializeToString(lts, true);
 
+        Dictionary<string, string> gameFiles = [];
+        foreach (string content in Wms2RlUtils.GetFilesInSwz(gamePath, key))
+            gameFiles.Add(SwzUtils.GetFileName(content), content);
+        LevelSetTypes lst = Wms2RlUtils.DeserializeFromString<LevelSetTypes>(gameFiles["LevelSetTypes.xml"]);
+        UpdatePlaylists(lst, l);
+        gameFiles["LevelSetTypes.xml"] = Wms2RlUtils.SerializeToString(lst, true);
+
         _exportStatus = "creating new swz...";
         Wms2RlUtils.SerializeSwzFilesToPath(dynamicPath, dynamicFiles.Values, key);
         Wms2RlUtils.SerializeSwzFilesToPath(initPath, initFiles.Values, key);
-        // TODO: playlists
+        Wms2RlUtils.SerializeSwzFilesToPath(gamePath, gameFiles.Values, key);
 
         RefreshBackupList(prefs.BrawlhallaPath!);
     }
@@ -348,7 +396,7 @@ public class ExportWindow(PathPreferences prefs)
         string[] requiredFiles(int num) => [
             Wms2RlUtils.CreateBackupPath(Path.Combine(dir, "Dynamic.swz"), num),
             Wms2RlUtils.CreateBackupPath(Path.Combine(dir, "Init.swz"), num),
-            // Wms2RlUtils.CreateBackupPath(Path.Combine(dir, "Game.swz"), num),
+            Wms2RlUtils.CreateBackupPath(Path.Combine(dir, "Game.swz"), num),
         ];
 
         int[] validBackupNumbers = Directory.EnumerateFiles(dir)
@@ -366,5 +414,24 @@ public class ExportWindow(PathPreferences prefs)
     {
         _backupNums = FindBackups(brawlPath);
         _backupDisplayNames = _backupNums.Select(n => $"Backup {n} - {File.GetLastWriteTime(Path.Combine(brawlPath, $"Dynamic_Backup{n}.swz"))}").ToArray();
+    }
+
+    public static void UpdatePlaylists(LevelSetTypes levelSetTypes, Level l)
+    {
+        foreach (string plName in l.Playlists)
+        {
+            foreach (LevelSetType lst in levelSetTypes.Playlists)
+            {
+                if (l.Playlists.Contains(lst.LevelSetName))
+                {
+                    if (!lst.LevelTypes.Contains(l.Desc.LevelName))
+                        lst.LevelTypes = [.. lst.LevelTypes, l.Desc.LevelName];
+                }
+                else
+                {
+                    lst.LevelTypes = lst.LevelTypes.Where(n => n != l.Desc.LevelName).ToArray();
+                }
+            }
+        }
     }
 }
