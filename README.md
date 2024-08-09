@@ -51,3 +51,5 @@ This list includes the dependencies from submodules.
 - SwfLib (1.0.5) - C# library for parsing .swf files.
 
 - OneOf (3.0.271) - C# tagged union library.
+
+- Sep (0.5.2) - C# csv parsing library.
