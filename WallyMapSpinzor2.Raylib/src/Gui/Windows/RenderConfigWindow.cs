@@ -19,7 +19,7 @@ public class RenderConfigWindow
     {
         XElement element;
         using (FileStream stream = new(path, FileMode.Open, FileAccess.Read))
-            element = BhXmlParser.Load(stream).Elements().First();
+            element = XElement.Load(stream);
         config.Deserialize(element);
     }
 

@@ -324,14 +324,14 @@ public class ExportWindow(PathPreferences prefs)
 
         if (ImGuiExt.WithDisabledButton(string.IsNullOrEmpty(prefs.LevelSetTypesPath), "Export##lst"))
         {
-            LevelSetTypes levelSetTypes = Wms2RlUtils.DeserializeFromPath<LevelSetTypes>(prefs.LevelSetTypesPath!);
+            LevelSetTypes levelSetTypes = Wms2RlUtils.DeserializeFromPath<LevelSetTypes>(prefs.LevelSetTypesPath!, bhstyle: true);
             UpdatePlaylists(levelSetTypes, l);
 
             Task.Run(() =>
             {
                 DialogResult result = Dialog.FileSave("xml", Path.GetDirectoryName(prefs.LevelSetTypesPath));
                 if (result.IsOk)
-                    Wms2RlUtils.SerializeToPath(levelSetTypes, result.Path);
+                    Wms2RlUtils.SerializeToPath(levelSetTypes, result.Path, bhstyle: true);
             });
         }
     }
@@ -379,9 +379,9 @@ public class ExportWindow(PathPreferences prefs)
         Dictionary<string, string> gameFiles = [];
         foreach (string content in Wms2RlUtils.GetFilesInSwz(gamePath, key))
             gameFiles.Add(SwzUtils.GetFileName(content), content);
-        LevelSetTypes lst = Wms2RlUtils.DeserializeFromString<LevelSetTypes>(gameFiles["LevelSetTypes.xml"]);
+        LevelSetTypes lst = Wms2RlUtils.DeserializeFromString<LevelSetTypes>(gameFiles["LevelSetTypes.xml"], bhstyle: true);
         UpdatePlaylists(lst, l);
-        gameFiles["LevelSetTypes.xml"] = Wms2RlUtils.SerializeToString(lst, true);
+        gameFiles["LevelSetTypes.xml"] = Wms2RlUtils.SerializeToString(lst, minify: true, bhstyle: true);
 
         _exportStatus = "creating new swz...";
         Wms2RlUtils.SerializeSwzFilesToPath(dynamicPath, dynamicFiles.Values, key);

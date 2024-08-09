@@ -63,7 +63,7 @@ public static class PlaylistEditPanel
                 try
                 {
                     uint key = uint.Parse(_decyptionKey!);
-                    _levelSetTypes = Wms2RlUtils.DeserializeSwzFromPath<LevelSetTypes>(_gameSwzPath!, "LevelSetTypes.xml", key);
+                    _levelSetTypes = Wms2RlUtils.DeserializeSwzFromPath<LevelSetTypes>(_gameSwzPath!, "LevelSetTypes.xml", key, bhstyle: true);
                     if (_levelSetTypes is null) throw new Exception("Could not deserialize Game.swz");
                     _allPlaylists = _levelSetTypes.Playlists.Select(lst => lst.LevelSetName).Where(p => p != "Auto").Distinct().ToArray();
                     l.Playlists = l.Playlists.Where(p => _allPlaylists.Contains(p)).ToHashSet();
@@ -94,7 +94,7 @@ public static class PlaylistEditPanel
 
             if (prefs.LevelSetTypesPath is not null && ImGui.Button("Import##lst"))
             {
-                _levelSetTypes = Wms2RlUtils.DeserializeFromPath<LevelSetTypes>(prefs.LevelSetTypesPath);
+                _levelSetTypes = Wms2RlUtils.DeserializeFromPath<LevelSetTypes>(prefs.LevelSetTypesPath, bhstyle: true);
                 _allPlaylists = _levelSetTypes.Playlists.Select(lst => lst.LevelSetName).Where(p => p != "Auto").Distinct().ToArray();
                 l.Playlists = l.Playlists.Where(p => _allPlaylists.Contains(p)).ToHashSet();
                 _playlistFilter = "";
