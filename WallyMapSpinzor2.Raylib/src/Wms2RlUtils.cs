@@ -132,7 +132,8 @@ public static class Wms2RlUtils
     {
         if (bhstyle)
         {
-            return DeserializeFromString<T>(File.ReadAllText(fromPath), true);
+            return DeserializeFromPath<T>(fromPath, bhstyle: false);
+            // return DeserializeFromString<T>(File.ReadAllText(fromPath), true);
         }
         else
         {
@@ -148,9 +149,12 @@ public static class Wms2RlUtils
         using FileStream toFile = new(toPath, FileMode.Create, FileAccess.Write);
         if (bhstyle)
         {
+            SerializeToPath<T>(serializable, toPath, minify, bhstyle: false);
+            /*
             string str = BhXmlPrinter.Print(e, !minify);
             using StreamWriter writer = new(toFile);
             writer.Write(str);
+            */
         }
         else
         {
@@ -165,7 +169,8 @@ public static class Wms2RlUtils
         XElement e = serializable.SerializeToXElement();
         if (bhstyle)
         {
-            return BhXmlPrinter.Print(e, !minify);
+            return SerializeToString<T>(serializable, minify, bhstyle: false);
+            // return BhXmlPrinter.Print(e, !minify);
         }
         else
         {
