@@ -237,6 +237,30 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
     private void Update()
     {
+        ImGuiIOPtr io = ImGui.GetIO();
+        bool wantCaptureKeyboard = io.WantCaptureKeyboard;
+
+        if (ViewportWindow.Hovered)
+        {
+            float wheel = Rl.GetMouseWheelMove();
+            if (wheel != 0)
+            {
+                _cam.Target = ViewportWindow.ScreenToWorld(Rl.GetMousePosition(), _cam);
+                _cam.Offset = Rl.GetMousePosition() - ViewportWindow.Bounds.P1;
+                _cam.Zoom = Math.Clamp(_cam.Zoom + wheel * ZOOM_INCREMENT * _cam.Zoom, MIN_ZOOM, MAX_ZOOM);
+            }
+
+            if (Rl.IsMouseButtonDown(MouseButton.Right))
+            {
+                Vector2 delta = Rl.GetMouseDelta();
+                delta = Raymath.Vector2Scale(delta, -1.0f / _cam.Zoom);
+                _cam.Target += delta;
+            }
+
+            if (!wantCaptureKeyboard && Rl.IsKeyPressed(KeyboardKey.R) && !Rl.IsKeyDown(KeyboardKey.LeftControl))
+                ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
+        }
+
         bool usingOverlay = OverlayManager.IsUsing;
         OverlayData data = new()
         {
@@ -249,32 +273,8 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         OverlayManager.Update(Selection, data, CommandHistory);
         usingOverlay |= OverlayManager.IsUsing;
 
-        ImGuiIOPtr io = ImGui.GetIO();
-        bool wantCaptureKeyboard = io.WantCaptureKeyboard;
-        if (ViewportWindow.Hovered)
-        {
-            float wheel = Rl.GetMouseWheelMove();
-            if (wheel != 0)
-            {
-                _cam.Target = ViewportWindow.ScreenToWorld(Rl.GetMousePosition(), _cam);
-                _cam.Offset = Rl.GetMousePosition() - ViewportWindow.Bounds.P1;
-                _cam.Zoom = Math.Clamp(_cam.Zoom + wheel * ZOOM_INCREMENT * _cam.Zoom, MIN_ZOOM, MAX_ZOOM);
-            }
-
-            if (!usingOverlay && Rl.IsMouseButtonReleased(MouseButton.Left))
-                Selection.Object = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, MapData, _cam, _renderConfig, _state);
-
-            if (Rl.IsMouseButtonDown(MouseButton.Right))
-            {
-                Vector2 delta = Rl.GetMouseDelta();
-                delta = Raymath.Vector2Scale(delta, -1.0f / _cam.Zoom);
-                _cam.Target += delta;
-            }
-
-            // R. no ctrl.
-            if (!wantCaptureKeyboard && Rl.IsKeyPressed(KeyboardKey.R) && !Rl.IsKeyDown(KeyboardKey.LeftControl))
-                ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
-        }
+        if (ViewportWindow.Hovered && !usingOverlay && Rl.IsMouseButtonReleased(MouseButton.Left))
+            Selection.Object = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, MapData, _cam, _renderConfig, _state);
 
         if (!wantCaptureKeyboard && Rl.IsKeyDown(KeyboardKey.LeftControl))
         {
@@ -284,14 +284,10 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             // if (Rl.IsKeyPressed(KeyboardKey.R)) LoadMap();
         }
 
-        if (!wantCaptureKeyboard && Rl.IsKeyPressed(KeyboardKey.F11))
+        if (!wantCaptureKeyboard)
         {
-            Rl.ToggleFullscreen();
-        }
-
-        if (!wantCaptureKeyboard && Rl.IsKeyPressed(KeyboardKey.F1))
-        {
-            _showMainMenuBar = !_showMainMenuBar;
+            if (Rl.IsKeyPressed(KeyboardKey.F11)) Rl.ToggleFullscreen();
+            if (Rl.IsKeyPressed(KeyboardKey.F1)) _showMainMenuBar = !_showMainMenuBar;
         }
 
         if (!wantCaptureKeyboard && Rl.IsKeyPressed(KeyboardKey.P))
