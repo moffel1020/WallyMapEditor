@@ -70,7 +70,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         Rl.CloseWindow();
     }
 
-    public void Setup()
+    private void Setup()
     {
 #if DEBUG
         Rl.SetTraceLogLevel(TraceLogLevel.All);
@@ -218,17 +218,15 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         }
         if (ImGui.BeginMenu("Tools"))
         {
+            if (ImGui.MenuItem("Save image", "P")) ExportWorldImage();
+            if (ImGui.MenuItem("Center Camera", "R")) ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
             if (ImGui.MenuItem("History", null, HistoryPanel.Open)) HistoryPanel.Open = !HistoryPanel.Open;
-            if (ImGui.MenuItem("Clear Cache"))
-            {
-                Canvas?.ClearTextureCache();
-            }
+            if (ImGui.MenuItem("Clear Cache")) Canvas?.ClearTextureCache();
             if (PathPrefs.LevelDescPath is not null && (BoneNames is not null || PathPrefs.BoneTypesPath is not null) &&
                 ImGui.MenuItem("Reload Map", "Ctrl+R"))
             {
                 LoadMapFromPaths(PathPrefs.LevelDescPath, PathPrefs.LevelTypePath, PathPrefs.LevelSetTypesPath, PathPrefs.BoneTypesPath, PathPrefs.PowerTypesPath);
             }
-            if (ImGui.MenuItem("Center Camera", "R")) ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
             ImGui.EndMenu();
         }
 
@@ -291,26 +289,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         }
 
         if (!wantCaptureKeyboard && Rl.IsKeyPressed(KeyboardKey.P))
-        {
-            if (MapData is Level l && Canvas is not null)
-            {
-                Image image = GetWorldRect((float)l.Desc.CameraBounds.X, (float)l.Desc.CameraBounds.Y, (int)l.Desc.CameraBounds.W, (int)l.Desc.CameraBounds.H);
-                Task.Run(() =>
-                {
-                    string extension = "png";
-                    Rl.ImageFlipVertical(ref image);
-                    DialogResult dialogResult = Dialog.FileSave(extension);
-                    if (dialogResult.IsOk)
-                    {
-                        string path = dialogResult.Path;
-                        if (!Path.HasExtension(path) || Path.GetExtension(path) != extension)
-                            path = Path.ChangeExtension(path, extension);
-                        Rl.ExportImage(image, path);
-                    }
-                    Rl.UnloadImage(image);
-                });
-            }
-        }
+            ExportWorldImage();
     }
 
     public void LoadMapFromPaths(string ldPath, string? ltPath, string? lstPath, string? btPath, string? ptPath)
@@ -414,6 +393,28 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         _cam.Offset = new(0);
         _cam.Target = new((float)bounds.X, (float)bounds.Y);
         _cam.Zoom = (float)scale;
+    }
+
+    public void ExportWorldImage()
+    {
+        if (MapData is Level l && Canvas is not null)
+        {
+            Image image = GetWorldRect((float)l.Desc.CameraBounds.X, (float)l.Desc.CameraBounds.Y, (int)l.Desc.CameraBounds.W, (int)l.Desc.CameraBounds.H);
+            Task.Run(() =>
+            {
+                string extension = "png";
+                Rl.ImageFlipVertical(ref image);
+                DialogResult dialogResult = Dialog.FileSave(extension);
+                if (dialogResult.IsOk)
+                {
+                    string path = dialogResult.Path;
+                    if (!Path.HasExtension(path) || Path.GetExtension(path) != extension)
+                        path = Path.ChangeExtension(path, extension);
+                    Rl.ExportImage(image, path);
+                }
+                Rl.UnloadImage(image);
+            });
+        }
     }
 
     public Image GetWorldRect(float x, float y, int w, int h)
