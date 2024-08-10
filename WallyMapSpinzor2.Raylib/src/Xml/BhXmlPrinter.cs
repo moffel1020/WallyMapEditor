@@ -25,29 +25,15 @@ public partial class BhXmlPrinter
     {
         StringBuilder buf = new();
         foreach (char c in s)
-            switch (c)
+            buf.Append(c switch
             {
-                case '&':
-                    buf.Append("&amp;");
-                    break;
-                case '<':
-                    buf.Append("&lt;");
-                    break;
-                case '>':
-                    buf.Append("&gt;");
-                    break;
-                case '"':
-                    if (quotes)
-                        buf.Append("&quot;");
-                    break;
-                case '\'':
-                    if (quotes)
-                        buf.Append("&#039;");
-                    break;
-                default:
-                    buf.Append(c);
-                    break;
-            }
+                '&' => "&amp;",
+                '<' => "&lt;",
+                '>' => "&gt;",
+                '"' when quotes => "&quot;",
+                '\'' when quotes => "&#039;",
+                _ => c,
+            });
         return buf.ToString();
     }
 
