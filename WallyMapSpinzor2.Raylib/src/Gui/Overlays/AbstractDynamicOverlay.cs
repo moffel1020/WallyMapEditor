@@ -2,9 +2,8 @@ using System;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public class AbstracyDynamicOverlay<T, U>(T dyn) : IOverlay
-    where T : AbstractDynamic<U>
-    where U : ISerializable, IDeserializable, IDrawable
+public class AbstracyDynamicOverlay<T>(AbstractDynamic<T> dyn) : IOverlay
+    where T : ISerializable, IDeserializable, IDrawable
 {
     public DragCircle Position { get; set; } = new(dyn.X, dyn.Y);
 
