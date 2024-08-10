@@ -207,6 +207,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         {
             if (ImGui.MenuItem("Undo", "Ctrl+Z")) CommandHistory.Undo();
             if (ImGui.MenuItem("Redo", "Ctrl+Y")) CommandHistory.Redo();
+            if (ImGui.MenuItem("Deselect", "Ctrl+D")) Selection.Object = null;
             ImGui.EndMenu();
         }
         if (ImGui.BeginMenu("View"))
