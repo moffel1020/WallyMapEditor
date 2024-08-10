@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
@@ -18,7 +19,7 @@ public class RenderConfigWindow
     {
         XElement element;
         using (FileStream stream = new(path, FileMode.Open, FileAccess.Read))
-            element = XElement.Load(path);
+            element = XElement.Load(stream);
         config.Deserialize(element);
     }
 

@@ -141,7 +141,7 @@ public class ImportWindow(PathPreferences prefs)
                 _loadingStatus = "loading...";
                 try
                 {
-                    LevelDesc ld = Wms2RlUtils.DeserializeFromString<LevelDesc>(levelDescFiles[_pickedFileName!]);
+                    LevelDesc ld = Wms2RlUtils.DeserializeFromString<LevelDesc>(levelDescFiles[_pickedFileName!], bhstyle: true);
                     _loadingStatus = null;
                     _loadingError = null;
                     editor.LoadMapFromLevel(new Level(ld, _decryptedLt, _decryptedLst), _boneNames, _powerNames);
@@ -327,8 +327,8 @@ public class ImportWindow(PathPreferences prefs)
             levelDescFiles.Add(name["LevelDesc_".Length..], file);
         }
 
-        _decryptedLt = Wms2RlUtils.DeserializeSwzFromPath<LevelTypes>(initPath, "LevelTypes.xml", key);
-        _decryptedLst = Wms2RlUtils.DeserializeSwzFromPath<LevelSetTypes>(gamePath, "LevelSetTypes.xml", key);
+        _decryptedLt = Wms2RlUtils.DeserializeSwzFromPath<LevelTypes>(initPath, "LevelTypes.xml", key, bhstyle: true);
+        _decryptedLst = Wms2RlUtils.DeserializeSwzFromPath<LevelSetTypes>(gamePath, "LevelSetTypes.xml", key, bhstyle: true);
         string? boneTypesContent = Wms2RlUtils.GetFileInSwzFromPath(initPath, "BoneTypes.xml", key);
         string? powerTypesContent = Wms2RlUtils.GetFileInSwzFromPath(gamePath, "powerTypes.csv", key);
         if (boneTypesContent is null)

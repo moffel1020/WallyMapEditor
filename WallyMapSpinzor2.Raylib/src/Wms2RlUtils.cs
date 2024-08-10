@@ -128,56 +128,67 @@ public static class Wms2RlUtils
         return area > 0;
     }
 
-    public static T DeserializeFromPath<T>(string fromPath)
-        where T : IDeserializable, new()
+    public static T DeserializeFromPath<T>(string fromPath, bool bhstyle = false) where T : IDeserializable, new()
     {
-        XElement element;
-        using (FileStream fromFile = new(fromPath, FileMode.Open, FileAccess.Read))
+        if (bhstyle)
         {
-            // bmg moment
-            if (fromPath.EndsWith("RefineryDoors.xml"))
-            {
-                string content;
-                using (StreamReader reader = new(fromFile))
-                    content = reader.ReadToEnd();
-                content = content.Replace("--->", "-->");
-                element = XElement.Parse(content);
-            }
-            else
-            {
-                element = XElement.Load(fromFile);
-            }
+            return DeserializeFromString<T>(File.ReadAllText(fromPath), true);
         }
-        return element.DeserializeTo<T>();
+        else
+        {
+            using FileStream stream = new(fromPath, FileMode.Open, FileAccess.Read);
+            return XElement.Load(stream).DeserializeTo<T>();
+        }
     }
 
-    public static void SerializeToPath<T>(T serializable, string toPath, bool minify = false)
+    public static void SerializeToPath<T>(T serializable, string toPath, bool minify = false, bool bhstyle = false)
         where T : ISerializable
     {
         XElement e = serializable.SerializeToXElement();
         using FileStream toFile = new(toPath, FileMode.Create, FileAccess.Write);
-        using XmlWriter xmlw = XmlWriter.Create(toFile, minify ? MinifiedSaveSettings : StandardSaveSettings);
-        e.Save(xmlw);
+        if (bhstyle)
+        {
+            string str = BhXmlPrinter.Print(e, !minify);
+            using StreamWriter writer = new(toFile);
+            writer.Write(str);
+        }
+        else
+        {
+            using XmlWriter writer = XmlWriter.Create(toFile, minify ? MinifiedSaveSettings : StandardSaveSettings);
+            e.Save(writer);
+        }
     }
 
-    public static string SerializeToString<T>(T serializable, bool minify = false)
+    public static string SerializeToString<T>(T serializable, bool minify = false, bool bhstyle = false)
         where T : ISerializable
     {
         XElement e = serializable.SerializeToXElement();
-        using StringWriter sw = new();
-        using XmlWriter xmlw = XmlWriter.Create(sw, minify ? MinifiedSaveSettings : StandardSaveSettings);
-        e.Save(xmlw);
-        xmlw.Flush();
-        return sw.ToString();
+        if (bhstyle)
+        {
+            return BhXmlPrinter.Print(e, !minify);
+        }
+        else
+        {
+            using StringWriter sw = new();
+            using XmlWriter writer = XmlWriter.Create(sw, minify ? MinifiedSaveSettings : StandardSaveSettings);
+            e.Save(writer);
+            writer.Flush();
+            return sw.ToString();
+        }
     }
 
-    public static T DeserializeFromString<T>(string xmldata)
+    public static T DeserializeFromString<T>(string xmldata, bool bhstyle = false)
         where T : IDeserializable, new()
     {
-        // bmg moment
-        xmldata = xmldata.Replace("--->", "-->");
-        XElement element = XElement.Parse(xmldata);
-        return element.DeserializeTo<T>();
+        if (bhstyle)
+        {
+            XElement element = BhXmlParser.Parse(xmldata).Elements().First();
+            return element.DeserializeTo<T>();
+        }
+        else
+        {
+            return XElement.Parse(xmldata).DeserializeTo<T>();
+        }
     }
 
     public static IEnumerable<string> GetFilesInSwz(string swzPath, uint key)
@@ -191,12 +202,12 @@ public static class Wms2RlUtils
     public static string? GetFileInSwzFromPath(string swzPath, string filename, uint key) =>
         GetFilesInSwz(swzPath, key).FirstOrDefault(file => SwzUtils.GetFileName(file) == filename);
 
-    public static T? DeserializeSwzFromPath<T>(string swzPath, string filename, uint key)
+    public static T? DeserializeSwzFromPath<T>(string swzPath, string filename, uint key, bool bhstyle = false)
         where T : IDeserializable, new()
     {
         string? content = GetFileInSwzFromPath(swzPath, filename, key);
         if (content is null) return default;
-        return DeserializeFromString<T>(content);
+        return DeserializeFromString<T>(content, bhstyle);
     }
 
     public static void SerializeSwzFilesToPath(string swzPath, IEnumerable<string> swzFiles, uint key)
