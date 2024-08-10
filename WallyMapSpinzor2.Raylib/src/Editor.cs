@@ -90,8 +90,9 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         }
 
         Rl.SetConfigFlags(ConfigFlags.VSyncHint);
+        Rl.SetConfigFlags(ConfigFlags.ResizableWindow);
         Rl.InitWindow(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT, WINDOW_NAME);
-        Rl.SetWindowState(ConfigFlags.ResizableWindow);
+        Rl.SetExitKey(KeyboardKey.Null);
         rlImGui.Setup(true, true);
         Style.Apply();
 
