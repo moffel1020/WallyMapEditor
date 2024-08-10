@@ -52,6 +52,26 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
     private bool _showMainMenuBar = true;
 
+    private OverlayData OverlayData => new()
+    {
+        Viewport = ViewportWindow,
+        Cam = _cam,
+        Context = _context,
+        RenderConfig = _renderConfig,
+        OverlayConfig = _overlayConfig,
+    };
+
+    private PropertiesWindowData PropertiesWindowData => new()
+    {
+        Time = Time,
+        Canvas = Canvas,
+        Loader = Loader,
+        Level = MapData as Level,
+        PathPrefs = PathPrefs,
+        Selection = Selection,
+        PowerNames = PowerNames,
+    };
+
     public void Run()
     {
         Setup();
@@ -124,15 +144,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             Canvas.FinalizeDraw();
         }
 
-        OverlayData data = new()
-        {
-            Viewport = ViewportWindow,
-            Cam = _cam,
-            Context = _context,
-            RenderConfig = _renderConfig,
-            OverlayConfig = _overlayConfig,
-        };
-        OverlayManager.Draw(data);
+        OverlayManager.Draw(OverlayData);
 
         Rl.EndMode2D();
         Rl.EndTextureMode();
@@ -157,19 +169,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         if (Selection.Object is not null)
             PropertiesWindow.Open = true;
         if (PropertiesWindow.Open && Selection.Object is not null)
-        {
-            PropertiesWindowData data = new()
-            {
-                Time = Time,
-                Canvas = Canvas,
-                Loader = Loader,
-                Level = MapData as Level,
-                PathPrefs = PathPrefs,
-                Selection = Selection,
-                PowerNames = PowerNames,
-            };
-            PropertiesWindow.Show(Selection.Object, CommandHistory, data);
-        }
+            PropertiesWindow.Show(Selection.Object, CommandHistory, PropertiesWindowData);
         if (!PropertiesWindow.Open)
             Selection.Object = null;
 
@@ -262,15 +262,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         }
 
         bool usingOverlay = OverlayManager.IsUsing;
-        OverlayData data = new()
-        {
-            Viewport = ViewportWindow,
-            Cam = _cam,
-            Context = _context,
-            RenderConfig = _renderConfig,
-            OverlayConfig = _overlayConfig,
-        };
-        OverlayManager.Update(Selection, data, CommandHistory);
+        OverlayManager.Update(Selection, OverlayData, CommandHistory);
         usingOverlay |= OverlayManager.IsUsing;
 
         if (ViewportWindow.Hovered && !usingOverlay && Rl.IsMouseButtonReleased(MouseButton.Left))
