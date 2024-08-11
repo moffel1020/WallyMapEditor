@@ -33,7 +33,6 @@ public static class PlaylistEditPanel
 
     public static void Show(Level l, PathPreferences prefs)
     {
-
         ImGui.SetNextWindowSizeConstraints(new(500, 410), new(int.MaxValue));
         ImGui.Begin("Playlist editor", ref _open, ImGuiWindowFlags.NoDocking);
 

@@ -178,7 +178,7 @@ public partial class PropertiesWindow
             ImGui.Text("Filter");
             ImGui.SameLine();
             ImGui.TextDisabled("(?)");
-            if (ImGui.IsItemHovered()) 
+            if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("Search through all powertypes in the game. Note that not all powers will be compatible with traps/lava and changing this can crash the game.");
 
             string[] powers = allPowers

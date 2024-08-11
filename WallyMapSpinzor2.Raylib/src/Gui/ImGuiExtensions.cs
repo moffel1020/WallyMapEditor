@@ -49,7 +49,7 @@ public static class ImGuiExt
         return v;
     }
 
-    public static string InputTextWithCallback(string label, string value, ImGuiInputTextCallback callback, uint maxLength = 512, ImGuiInputTextFlags flags = ImGuiInputTextFlags.None)
+    public static string InputTextWithCallback(string label, string value, ImGuiInputTextCallback callback, uint maxLength = 512, ImGuiInputTextFlags flags = ImGuiInputTextFlags.CallbackCharFilter)
     {
         string v = value;
         ImGui.InputText(label, ref v, maxLength, flags, callback);

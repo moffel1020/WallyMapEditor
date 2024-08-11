@@ -22,7 +22,7 @@ public class MapOverviewWindow
     private string? _thumbnailSelectError;
 
     // type ImGuiInputTextCallback
-    private unsafe static int LevelNameFilter(ImGuiInputTextCallbackData* data) => (char)data->EventChar switch
+    public unsafe static int LevelNameFilter(ImGuiInputTextCallbackData* data) => (char)data->EventChar switch
     {
         >= 'a' and <= 'z' => 0,
         >= 'A' and <= 'Z' => 0,
@@ -73,10 +73,10 @@ public class MapOverviewWindow
 
             ImGui.Text($"Playlists: {l.Playlists.Count}");
             string playlistsText = string.Join(",", l.Playlists);
-            if (ImGui.IsItemHovered()) ImGui.SetTooltip(playlistsText);
+            if (l.Playlists.Count != 0 && ImGui.IsItemHovered()) ImGui.SetTooltip(playlistsText);
             ImGui.SameLine();
             if (ImGui.Button("Edit##playlists")) PlaylistEditPanel.Open = true;
-            if (ImGui.IsItemHovered()) ImGui.SetTooltip(playlistsText);
+            if (l.Playlists.Count != 0 && ImGui.IsItemHovered()) ImGui.SetTooltip(playlistsText);
             ImGui.Separator();
 
             ImGui.Text("ThumbnailPNGFile: " + (l.Type.ThumbnailPNGFile ?? "None"));

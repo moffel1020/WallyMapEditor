@@ -185,12 +185,14 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
         if (ViewportWindow.Hovered && (Rl.IsKeyPressed(KeyboardKey.Space) || Rl.IsMouseButtonPressed(MouseButton.Middle)))
         {
-            ImGui.OpenPopup(AddObjectPopup.NAME);
+            AddObjectPopup.Open();
             AddObjectPopup.NewPos = ViewportWindow.ScreenToWorld(Rl.GetMousePosition(), _cam);
         }
 
         if (MapData is Level level)
             AddObjectPopup.Update(level, CommandHistory, Selection);
+
+        NewLevelModal.Update(this, PathPrefs);
     }
 
     private void ShowMainMenuBar()
@@ -199,6 +201,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
         if (ImGui.BeginMenu("File"))
         {
+            if (ImGui.MenuItem("New")) NewLevelModal.Open();
             if (ImGui.MenuItem("Export")) ExportDialog = new(PathPrefs) { Open = true };
             if (ImGui.MenuItem("Import")) ImportDialog = new(PathPrefs) { Open = true };
             ImGui.EndMenu();
@@ -340,6 +343,46 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
         _state.Reset();
     }
+
+    public static LevelDesc DefaultLevelDesc => new()
+    {
+        AssetDir = "UnknownLevel",
+        LevelName = "UnknownLevel",
+        SlowMult = 1,
+        CameraBounds = new()
+        {
+            X = 0,
+            Y = 0,
+            W = 5000,
+            H = 3000
+        },
+        SpawnBotBounds = new()
+        {
+            X = 1500,
+            Y = 1000,
+            W = 2000,
+            H = 1000,
+        },
+        Backgrounds = [new() { AssetName = "BG_Brawlhaven.jpg", W = 2048, H = 1151 }],
+        LevelSounds = [],
+        Assets = [],
+        LevelAnims = [],
+        LevelAnimations = [],
+        Volumes = [],
+        Collisions = [],
+        DynamicCollisions = [],
+        Respawns = [],
+        DynamicRespawns = [],
+        ItemSpawns = [],
+        DynamicItemSpawns = [],
+        NavNodes = [
+            new NavNode() { X = 2000, Y = 3000, NavID = 1, Type = NavNodeTypeEnum.G, Path = [(2, NavNodeTypeEnum.G)] },
+            new NavNode() { X = 3000, Y = 3000, NavID = 2, Type = NavNodeTypeEnum.G, Path = [(1, NavNodeTypeEnum.G)] },
+        ],
+        DynamicNavNodes = [],
+        WaveDatas = [],
+        AnimatedBackgrounds = [],
+    };
 
     public static LevelType DefaultLevelType => new()
     {

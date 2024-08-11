@@ -6,60 +6,67 @@ namespace WallyMapSpinzor2.Raylib;
 public static class AddObjectPopup
 {
     public const string NAME = "addobject";
+    private static bool _shouldOpen;
+    public static void Open() => _shouldOpen = true;
 
     public static Vector2 NewPos { get; set; }
 
     public static void Update(Level l, CommandHistory cmd, SelectionContext selection)
     {
-        if (ImGui.BeginPopup(NAME))
+        if (_shouldOpen)
         {
-            ImGui.SeparatorText("Add new object");
-            if (ImGui.BeginMenu("Collision"))
-            {
-                Maybe<AbstractCollision> maybeAc = AddCollisionMenu(NewPos);
-                if (maybeAc.TryGetValue(out AbstractCollision? ac))
-                {
-                    cmd.Add(new PropChangeCommand<AbstractCollision[]>(val => l.Desc.Collisions = val, l.Desc.Collisions, [.. l.Desc.Collisions, ac]));
-                    cmd.SetAllowMerge(false);
-                    selection.Object = ac;
-                }
-
-                ImGui.EndMenu();
-            }
-            if (ImGui.BeginMenu("ItemSpawn"))
-            {
-                Maybe<AbstractItemSpawn> maybeItem = AddItemSpawnMenu(NewPos);
-                if (maybeItem.TryGetValue(out AbstractItemSpawn? item))
-                {
-                    cmd.Add(new PropChangeCommand<AbstractItemSpawn[]>(val => l.Desc.ItemSpawns = val, l.Desc.ItemSpawns, [.. l.Desc.ItemSpawns, item]));
-                    cmd.SetAllowMerge(false);
-                    selection.Object = item;
-                }
-
-                ImGui.EndMenu();
-            }
-            if (ImGui.MenuItem("Respawn"))
-            {
-                Respawn res = PropertiesWindow.DefaultRespawn(NewPos);
-                cmd.Add(new PropChangeCommand<Respawn[]>(val => l.Desc.Respawns = val, l.Desc.Respawns, [.. l.Desc.Respawns, res]));
-                cmd.SetAllowMerge(false);
-                selection.Object = res;
-                ImGui.CloseCurrentPopup();
-            }
-            if (ImGui.BeginMenu("Platform"))
-            {
-                Maybe<AbstractAsset> maybeAsset = AddAssetMenu(NewPos);
-                if (maybeAsset.TryGetValue(out AbstractAsset? asset))
-                {
-                    cmd.Add(new PropChangeCommand<AbstractAsset[]>(val => l.Desc.Assets = val, l.Desc.Assets, [.. l.Desc.Assets, asset]));
-                    cmd.SetAllowMerge(false);
-                    selection.Object = asset;
-                }
-                ImGui.EndMenu();
-            }
-
-            ImGui.EndPopup();
+            ImGui.OpenPopup(NAME);
+            _shouldOpen = false;
         }
+
+        if (!ImGui.BeginPopup(NAME)) return;
+
+        ImGui.SeparatorText("Add new object");
+        if (ImGui.BeginMenu("Collision"))
+        {
+            Maybe<AbstractCollision> maybeAc = AddCollisionMenu(NewPos);
+            if (maybeAc.TryGetValue(out AbstractCollision? ac))
+            {
+                cmd.Add(new PropChangeCommand<AbstractCollision[]>(val => l.Desc.Collisions = val, l.Desc.Collisions, [.. l.Desc.Collisions, ac]));
+                cmd.SetAllowMerge(false);
+                selection.Object = ac;
+            }
+
+            ImGui.EndMenu();
+        }
+        if (ImGui.BeginMenu("ItemSpawn"))
+        {
+            Maybe<AbstractItemSpawn> maybeItem = AddItemSpawnMenu(NewPos);
+            if (maybeItem.TryGetValue(out AbstractItemSpawn? item))
+            {
+                cmd.Add(new PropChangeCommand<AbstractItemSpawn[]>(val => l.Desc.ItemSpawns = val, l.Desc.ItemSpawns, [.. l.Desc.ItemSpawns, item]));
+                cmd.SetAllowMerge(false);
+                selection.Object = item;
+            }
+
+            ImGui.EndMenu();
+        }
+        if (ImGui.MenuItem("Respawn"))
+        {
+            Respawn res = PropertiesWindow.DefaultRespawn(NewPos);
+            cmd.Add(new PropChangeCommand<Respawn[]>(val => l.Desc.Respawns = val, l.Desc.Respawns, [.. l.Desc.Respawns, res]));
+            cmd.SetAllowMerge(false);
+            selection.Object = res;
+            ImGui.CloseCurrentPopup();
+        }
+        if (ImGui.BeginMenu("Platform"))
+        {
+            Maybe<AbstractAsset> maybeAsset = AddAssetMenu(NewPos);
+            if (maybeAsset.TryGetValue(out AbstractAsset? asset))
+            {
+                cmd.Add(new PropChangeCommand<AbstractAsset[]>(val => l.Desc.Assets = val, l.Desc.Assets, [.. l.Desc.Assets, asset]));
+                cmd.SetAllowMerge(false);
+                selection.Object = asset;
+            }
+            ImGui.EndMenu();
+        }
+
+        ImGui.EndPopup();
     }
 
     public static Maybe<AbstractCollision> AddCollisionMenu(Vector2 pos)
