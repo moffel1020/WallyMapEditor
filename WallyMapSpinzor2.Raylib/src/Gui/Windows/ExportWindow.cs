@@ -343,7 +343,7 @@ public class ExportWindow(PathPreferences prefs)
         _exportStatus = "finding swz key...";
         if (Wms2RlUtils.GetDoABCDefineTag(Path.Combine(prefs.BrawlhallaPath!, "BrawlhallaAir.swf")) is not DoABCDefineTag abcTag)
             throw new InvalidDataException("Could not find decryption key");
-        AbcFile abcFile = AbcFile.Read(abcTag.ABCData);
+        AbcFile abcFile = AbcFile.Read(new MemoryStream(abcTag.ABCData));
 
         uint key = Wms2RlUtils.FindDecryptionKey(abcFile) ?? throw new InvalidDataException("Could not find decryption key");
         prefs.DecryptionKey = key.ToString();

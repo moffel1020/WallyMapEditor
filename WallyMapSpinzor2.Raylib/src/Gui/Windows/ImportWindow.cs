@@ -180,7 +180,7 @@ public class ImportWindow(PathPreferences prefs)
                 {
                     if (Wms2RlUtils.GetDoABCDefineTag(prefs.BrawlhallaAirPath) is DoABCDefineTag abcTag)
                     {
-                        AbcFile abc = AbcFile.Read(abcTag.ABCData);
+                        AbcFile abc = AbcFile.Read(new MemoryStream(abcTag.ABCData));
                         uint? key = Wms2RlUtils.FindDecryptionKey(abc);
                         if (key is not null)
                         {
