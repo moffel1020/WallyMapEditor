@@ -6,6 +6,8 @@ namespace WallyMapSpinzor2.Raylib;
 
 public class RotatePoint(double x, double y)
 {
+    public const double ANGLE_SNAP = 45 * Math.PI / 180;
+
     public double Rotation { get; set; } // radians
     public double X { get; set; } = x;
     public double Y { get; set; } = y;
@@ -38,7 +40,13 @@ public class RotatePoint(double x, double y)
             Active = true;
         }
 
-        if (Active) Rotation = (CalculateAngle(Coords, _mouseWorldPos) - _mouseRotationOffset) % Math.Tau;
+        if (Active)
+        {
+            Rotation = (CalculateAngle(Coords, _mouseWorldPos) - _mouseRotationOffset) % Math.Tau;
+
+            if (Rl.IsKeyDown(KeyboardKey.LeftShift))
+                Rotation = ANGLE_SNAP * (int)Math.Round(Rotation / ANGLE_SNAP);
+        }
     }
 
     // Remove unused parameter 'data' if it is not part of a shipped public API [WallyMapSpinzor2.Raylib]
