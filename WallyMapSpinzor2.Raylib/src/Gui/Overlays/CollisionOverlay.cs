@@ -1,3 +1,5 @@
+using System;
+
 namespace WallyMapSpinzor2.Raylib;
 
 public class CollisionOverlay(AbstractCollision col) : IOverlay
@@ -31,6 +33,9 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
 
         if (Circle1.Dragging)
         {
+            if (Rl.IsKeyDown(Raylib_cs.KeyboardKey.LeftShift))
+                LockAxisDrag(Circle1, Circle2);
+
             cmd.Add(new PropChangeCommand<(double, double)>(
                 val => (col.X1, col.Y1) = val,
                 (col.X1, col.Y1),
@@ -39,6 +44,10 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
 
         if (Circle2.Dragging)
         {
+
+            if (Rl.IsKeyDown(Raylib_cs.KeyboardKey.LeftShift))
+                LockAxisDrag(Circle2, Circle1);
+
             cmd.Add(new PropChangeCommand<(double, double)>(
                 val => (col.X2, col.Y2) = val,
                 (col.X2, col.Y2),
@@ -65,5 +74,16 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
         Circle1.Draw(data);
         Circle2.Draw(data);
         if (HasAnchor) Anchor.Draw(data);
+    }
+
+    private static void LockAxisDrag(DragCircle dragging, DragCircle other)
+    {
+        (double newX, double newY) = (dragging.X, dragging.Y);
+        if (Math.Abs(dragging.X - other.X) < Math.Abs(dragging.Y - other.Y))
+            newX = other.X;
+        else
+            newY = other.Y;
+
+        (dragging.X, dragging.Y) = (newX, newY);
     }
 }
