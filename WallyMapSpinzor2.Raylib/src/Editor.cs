@@ -59,6 +59,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         Context = _context,
         RenderConfig = _renderConfig,
         OverlayConfig = _overlayConfig,
+        Level = MapData as Level,
     };
 
     private PropertiesWindowData PropertiesWindowData => new()

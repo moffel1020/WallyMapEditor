@@ -26,7 +26,6 @@ public partial class PropertiesWindow
     }
 
     // TODO: for collision and itemspawns, add the ability to change their types
-    // TODO: hardcollision should be edited as a shape rather than an individual collision, if they are not a shape they wont work properly ingame
     private static bool ShowProperties(object o, CommandHistory cmd, PropertiesWindowData data) => o switch
     {
         Respawn r => ShowRespawnProps(r, cmd, data),

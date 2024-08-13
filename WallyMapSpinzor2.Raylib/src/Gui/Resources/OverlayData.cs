@@ -9,4 +9,5 @@ public class OverlayData
     public required RenderContext Context { get; init; }
     public required RenderConfig RenderConfig { get; init; }
     public required OverlayConfig OverlayConfig { get; init; }
+    public required Level? Level { get; init; }
 }
