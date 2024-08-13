@@ -11,6 +11,9 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
     public DragCircle Circle2 { get; set; } = new(col.X2, col.Y2);
     public DragCircle Anchor { get; set; } = new(col.AnchorX ?? double.NaN, col.AnchorY ?? double.NaN);
 
+    public RlColor SnapPointColor { get; set; } = RlColor.Green;
+    public double SnapPointRadius { get; set; } = 30;
+
     private bool HasAnchor => !double.IsNaN(Anchor.X) && !double.IsNaN(Anchor.Y);
     private (double, double)? _snapToPoint;
 
@@ -85,6 +88,9 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
         Circle1.UsingColor = Circle2.UsingColor = data.OverlayConfig.UsingColorCollisionPoint;
         Anchor.Color = data.OverlayConfig.ColorCollisionAnchor;
         Anchor.UsingColor = data.OverlayConfig.UsingColorCollisionAnchor;
+        SnapPointRadius = data.OverlayConfig.RadiusCollisionSnapPoint;
+        SnapPointColor = data.OverlayConfig.ColorCollisionSnapPoint;
+
         Circle1.Draw(data);
         Circle2.Draw(data);
         if (HasAnchor) Anchor.Draw(data);
@@ -95,7 +101,7 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
             if ((Circle1.Dragging && DistanceSquared(px, py, Circle1.X, Circle1.Y) < SNAP_POINT_VISIBLE_DISTANCE)
                 || (Circle2.Dragging && DistanceSquared(px, py, Circle2.X, Circle2.Y) < SNAP_POINT_VISIBLE_DISTANCE))
             {
-                Rl.DrawCircle((int)px, (int)py, 30, RlColor.Green);
+                Rl.DrawCircle((int)px, (int)py, (float)SnapPointRadius, SnapPointColor);
             }
         }
     }

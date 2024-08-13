@@ -6,6 +6,7 @@ public class OverlayConfig : ISerializable, IDeserializable
 {
     public required float RadiusCollisionPoint { get; set; }
     public required float RadiusCollisionAnchor { get; set; }
+    public required float RadiusCollisionSnapPoint { get; set; }
     public required float RadiusItemSpawnCorner { get; set; }
     public required float RadiusNavNodePosition { get; set; }
     public required float RadiusAssetCorner { get; set; }
@@ -30,6 +31,7 @@ public class OverlayConfig : ISerializable, IDeserializable
     public required RlColor UsingColorCollisionPoint { get; set; }
     public required RlColor ColorCollisionAnchor { get; set; }
     public required RlColor UsingColorCollisionAnchor { get; set; }
+    public required RlColor ColorCollisionSnapPoint { get; set; }
 
     public required RlColor ColorItemSpawnBox { get; set; }
     public required RlColor UsingColorItemSpawnBox { get; set; }
@@ -74,6 +76,7 @@ public class OverlayConfig : ISerializable, IDeserializable
         OverlayConfig @default = Default;
         RadiusCollisionPoint = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusCollisionPoint))) ?? @default.RadiusCollisionPoint;
         RadiusCollisionAnchor = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusCollisionAnchor))) ?? @default.RadiusCollisionAnchor;
+        RadiusCollisionSnapPoint = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusCollisionSnapPoint))) ?? @default.RadiusCollisionSnapPoint;
         RadiusItemSpawnCorner = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusItemSpawnCorner))) ?? @default.RadiusItemSpawnCorner;
         RadiusAssetCorner = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusAssetCorner))) ?? @default.RadiusAssetCorner;
         RadiusParentAssetPosition = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusParentAssetPosition))) ?? @default.RadiusParentAssetPosition;
@@ -94,6 +97,7 @@ public class OverlayConfig : ISerializable, IDeserializable
         UsingColorCollisionPoint = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorCollisionPoint))) ?? @default.UsingColorCollisionPoint;
         ColorCollisionAnchor = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorCollisionAnchor))) ?? @default.ColorCollisionAnchor;
         UsingColorCollisionAnchor = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorCollisionAnchor))) ?? @default.UsingColorCollisionAnchor;
+        ColorCollisionSnapPoint = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorCollisionSnapPoint ))) ?? @default.ColorCollisionSnapPoint ;
         ColorItemSpawnBox = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorItemSpawnBox))) ?? @default.ColorItemSpawnBox;
         UsingColorItemSpawnBox = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorItemSpawnBox))) ?? @default.UsingColorItemSpawnBox;
         ColorRespawnBox = Wms2RlUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorRespawnBox))) ?? @default.ColorRespawnBox;
@@ -127,6 +131,7 @@ public class OverlayConfig : ISerializable, IDeserializable
     {
         e.AddChild(nameof(RadiusCollisionPoint), RadiusCollisionPoint);
         e.AddChild(nameof(RadiusCollisionAnchor), RadiusCollisionAnchor);
+        e.AddChild(nameof(RadiusCollisionSnapPoint), RadiusCollisionSnapPoint);
         e.AddChild(nameof(RadiusItemSpawnCorner), RadiusItemSpawnCorner);
         e.AddChild(nameof(RadiusAssetCorner), RadiusAssetCorner);
         e.AddChild(nameof(RadiusParentAssetPosition), RadiusParentAssetPosition);
@@ -147,6 +152,7 @@ public class OverlayConfig : ISerializable, IDeserializable
         e.AddChild(nameof(UsingColorCollisionPoint), "0x" + Wms2RlUtils.RlColorToHex(UsingColorCollisionPoint));
         e.AddChild(nameof(ColorCollisionAnchor), "0x" + Wms2RlUtils.RlColorToHex(ColorCollisionAnchor));
         e.AddChild(nameof(UsingColorCollisionAnchor), "0x" + Wms2RlUtils.RlColorToHex(UsingColorCollisionAnchor));
+        e.AddChild(nameof(ColorCollisionSnapPoint), "0x" + Wms2RlUtils.RlColorToHex(ColorCollisionSnapPoint));
         e.AddChild(nameof(ColorItemSpawnBox), "0x" + Wms2RlUtils.RlColorToHex(ColorItemSpawnBox));
         e.AddChild(nameof(UsingColorItemSpawnBox), "0x" + Wms2RlUtils.RlColorToHex(UsingColorItemSpawnBox));
         e.AddChild(nameof(ColorRespawnBox), "0x" + Wms2RlUtils.RlColorToHex(ColorRespawnBox));
@@ -190,12 +196,12 @@ public class OverlayConfig : ISerializable, IDeserializable
     private static readonly RlColor TransparentPink = RlColor.Pink with { A = OPACITY };
     private static readonly RlColor TransparentYellow = RlColor.Yellow with { A = OPACITY };
     private static readonly RlColor TransparentOrange = RlColor.Orange with { A = OPACITY };
-    private static readonly RlColor OpaqueWhite = RlColor.White;
 
     public static OverlayConfig Default => new()
     {
         RadiusCollisionPoint = DEFAULT_RADIUS,
         RadiusCollisionAnchor = DEFAULT_RADIUS,
+        RadiusCollisionSnapPoint = DEFAULT_RADIUS,
         RadiusItemSpawnCorner = DEFAULT_RADIUS,
         RadiusAssetCorner = DEFAULT_RADIUS,
         RadiusParentAssetPosition = DEFAULT_MID_RADIUS,
@@ -216,6 +222,7 @@ public class OverlayConfig : ISerializable, IDeserializable
         UsingColorCollisionPoint = TransparentWhite,
         ColorCollisionAnchor = TransparentDarkGreen,
         UsingColorCollisionAnchor = TransparentGreen,
+        ColorCollisionSnapPoint = TransparentWhite,
         ColorItemSpawnBox = TransparentGray,
         UsingColorItemSpawnBox = TransparentWhite,
         ColorRespawnBox = TransparentGray,
@@ -224,10 +231,10 @@ public class OverlayConfig : ISerializable, IDeserializable
         UsingColorNavNodeBox = TransparentWhite,
         ColorAssetBox = TransparentGray,
         UsingColorAssetBox = TransparentWhite,
-        ColorAssetRotationLine = OpaqueWhite,
+        ColorAssetRotationLine = RlColor.White,
         ColorParentAssetPosition = TransparentRed,
         UsingColorParentAssetPosition = TransparentPink,
-        ColorParentAssetRotationLine = OpaqueWhite,
+        ColorParentAssetRotationLine = RlColor.White,
         ColorParentAssetScale = RlColor.Yellow,
         UsingColorParentAssetScale = RlColor.Orange,
         ColorVolumeBox = TransparentGray,
@@ -242,6 +249,6 @@ public class OverlayConfig : ISerializable, IDeserializable
         UsingColorMovingPlatformPosition = TransparentPink,
         ColorKeyFramePosition = TransparentYellow,
         UsingColorKeyFramePosition = TransparentOrange,
-        TextColorKeyFrameNum = OpaqueWhite,
+        TextColorKeyFrameNum = RlColor.White,
     };
 }
