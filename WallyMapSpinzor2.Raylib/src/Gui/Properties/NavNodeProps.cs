@@ -22,8 +22,8 @@ public partial class PropertiesWindow
         [.. Enum.GetValues<NavNodeTypeEnum>().Where(t => t != NavNodeTypeEnum.D)], cmd);
 
         ImGui.TextWrapped("Path: " + string.Join(", ", n.Path.Select(nn => nn.Item1)));
-        propChanged |= ImGuiExt.DragFloatHistory("X", n.X, val => n.X = val, cmd);
-        propChanged |= ImGuiExt.DragFloatHistory("Y", n.Y, val => n.Y = val, cmd);
+        propChanged |= ImGuiExt.DragDoubleHistory("X", n.X, val => n.X = val, cmd);
+        propChanged |= ImGuiExt.DragDoubleHistory("Y", n.Y, val => n.Y = val, cmd);
         return propChanged;
     }
 

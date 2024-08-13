@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using ImGuiNET;
 using Raylib_cs;
 
@@ -15,7 +16,7 @@ public static class ImGuiExt
         return value;
     }
 
-    public static int DragInt(string label, int value, int speed = 1, int minValue = int.MinValue, int maxValue = int.MaxValue)
+    public static int DragInt(string label, int value, float speed = 1, int minValue = int.MinValue, int maxValue = int.MaxValue)
     {
         ImGui.DragInt(label, ref value, speed, minValue, maxValue);
         return value;
@@ -27,10 +28,21 @@ public static class ImGuiExt
         return value;
     }
 
-    public static double DragFloat(string label, double value, double speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
+    public static void DragDouble(string label, ref double value, float speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
     {
-        float v = (float)value;
-        ImGui.DragFloat(label, ref v, (float)speed, (float)minValue, (float)maxValue);
+        unsafe
+        {
+            IntPtr valuePtr = (IntPtr)Unsafe.AsPointer(ref value);
+            IntPtr minValuePtr = (IntPtr)(&minValue);
+            IntPtr maxValuePtr = (IntPtr)(&maxValue);
+            ImGui.DragScalar(label, ImGuiDataType.Double, valuePtr, speed, minValuePtr, maxValuePtr);
+        }
+    }
+
+    public static double DragDouble(string label, double value, float speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
+    {
+        double v = value;
+        DragDouble(label, ref v, speed, minValue, maxValue);
         return v;
     }
 
@@ -149,11 +161,11 @@ public static class ImGuiExt
         return WithDisabled(disabled, () => ImGui.Button(label));
     }
 
-    public static bool DragFloatHistory(string label, double value, Action<double> changeCommand, CommandHistory cmd, double speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
+    public static bool DragDoubleHistory(string label, double value, Action<double> changeCommand, CommandHistory cmd, float speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
     {
         double oldVal = value;
-        double newVal = DragFloat(label, value, speed, minValue, maxValue);
-        if (newVal != (float)oldVal)
+        double newVal = DragDouble(label, value, speed, minValue, maxValue);
+        if (newVal != oldVal)
         {
             cmd.Add(new PropChangeCommand<double>(changeCommand, oldVal, newVal));
             return true;
@@ -162,11 +174,11 @@ public static class ImGuiExt
         return false;
     }
 
-    public static bool DragNullableFloatHistory(string label, double? value, double defaultValue, Action<double?> changeCommand, CommandHistory cmd, double speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
+    public static bool DragNullableDoubleHistory(string label, double? value, double defaultValue, Action<double?> changeCommand, CommandHistory cmd, float speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
     {
         if (value is not null)
         {
-            bool dragged = DragFloatHistory(label, value.Value, x => changeCommand(x), cmd, speed, minValue, maxValue);
+            bool dragged = DragDoubleHistory(label, value.Value, x => changeCommand(x), cmd, speed, minValue, maxValue);
             ImGui.SameLine();
             if (ImGui.Button("Remove##" + label))
             {
@@ -188,7 +200,7 @@ public static class ImGuiExt
         return false;
     }
 
-    public static bool DragIntHistory(string label, int value, Action<int> changeCommand, CommandHistory cmd, int speed = 1, int minValue = int.MinValue, int maxValue = int.MaxValue)
+    public static bool DragIntHistory(string label, int value, Action<int> changeCommand, CommandHistory cmd, float speed = 1, int minValue = int.MinValue, int maxValue = int.MaxValue)
     {
         int oldVal = value;
         int newVal = DragInt(label, value, speed, minValue, maxValue);
@@ -201,7 +213,7 @@ public static class ImGuiExt
         return false;
     }
 
-    public static bool DragNullableIntHistory(string label, int? value, int defaultValue, Action<int?> changeCommand, CommandHistory cmd, int speed = 1, int minValue = int.MinValue, int maxValue = int.MaxValue)
+    public static bool DragNullableIntHistory(string label, int? value, int defaultValue, Action<int?> changeCommand, CommandHistory cmd, float speed = 1, int minValue = int.MinValue, int maxValue = int.MaxValue)
     {
         if (value is not null)
         {
@@ -266,14 +278,14 @@ public static class ImGuiExt
         return false;
     }
 
-    public static bool DragNullableFloatPairHistory(
+    public static bool DragNullableDoublePairHistory(
         string mainLabel,
         string label1, string label2,
         double? value1, double? value2,
         double default1, double default2,
         Action<double?, double?> changeCommand,
         CommandHistory cmd,
-        double speed1 = 1, double speed2 = 1,
+        float speed1 = 1, float speed2 = 1,
         double minValue1 = double.MinValue, double minValue2 = double.MaxValue,
         double maxValue1 = double.MinValue, double maxValue2 = double.MaxValue
     )
@@ -281,8 +293,8 @@ public static class ImGuiExt
         bool propChanged = false;
         if (value1 is not null && value2 is not null)
         {
-            propChanged |= DragFloatHistory(label1, value1.Value, val => changeCommand(val, value2.Value), cmd, speed: speed1, minValue: minValue1, maxValue: maxValue1);
-            propChanged |= DragFloatHistory(label2, value2.Value, val => changeCommand(value1.Value, val), cmd, speed: speed2, minValue: minValue2, maxValue: maxValue2);
+            propChanged |= DragDoubleHistory(label1, value1.Value, val => changeCommand(val, value2.Value), cmd, speed: speed1, minValue: minValue1, maxValue: maxValue1);
+            propChanged |= DragDoubleHistory(label2, value2.Value, val => changeCommand(value1.Value, val), cmd, speed: speed2, minValue: minValue2, maxValue: maxValue2);
             if (ImGui.Button("Remove##" + mainLabel))
             {
                 cmd.Add(new PropChangeCommand<(double?, double?)>(

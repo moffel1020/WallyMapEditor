@@ -27,14 +27,14 @@ partial class PropertiesWindow
         // badly named prop. is actually "play even if animated backgrounds are off".
         propChanged |= ImGuiExt.CheckboxHistory("IgnoreOnBlurBG", la.IgnoreOnBlurBG, val => la.IgnoreOnBlurBG = val, cmd);
         // because of how LevelAnimation works, these will only affect the position of the next playing animation
-        propChanged |= ImGuiExt.DragFloatHistory("PositionX", la.PositionX, val => la.PositionX = val, cmd);
-        propChanged |= ImGuiExt.DragFloatHistory("PositionY", la.PositionY, val => la.PositionY = val, cmd);
-        propChanged |= ImGuiExt.DragFloatHistory("RandX", la.RandX, val => la.RandX = val, cmd);
-        propChanged |= ImGuiExt.DragFloatHistory("RandY", la.RandY, val => la.RandY = val, cmd);
+        propChanged |= ImGuiExt.DragDoubleHistory("PositionX", la.PositionX, val => la.PositionX = val, cmd);
+        propChanged |= ImGuiExt.DragDoubleHistory("PositionY", la.PositionY, val => la.PositionY = val, cmd);
+        propChanged |= ImGuiExt.DragDoubleHistory("RandX", la.RandX, val => la.RandX = val, cmd);
+        propChanged |= ImGuiExt.DragDoubleHistory("RandY", la.RandY, val => la.RandY = val, cmd);
         // Scale affect the gfx AnimScale, which requires remaking the texture.
         ImGui.Text("Scale: " + la.Scale);
         // Rotation is in radians. For ease of editing, map it to degrees.
-        propChanged |= ImGuiExt.DragFloatHistory("Rotation", la.Rotation * 180 / Math.PI, val => la.Rotation = BrawlhallaMath.SafeMod(val, 360.0) * Math.PI / 180, cmd);
+        propChanged |= ImGuiExt.DragDoubleHistory("Rotation", la.Rotation * 180 / Math.PI, val => la.Rotation = BrawlhallaMath.SafeMod(val, 360.0) * Math.PI / 180, cmd);
         propChanged |= ImGuiExt.CheckboxHistory("Flip", la.Flip, val => la.Flip = val, cmd);
         ImGui.Separator();
         // changing these props can desync the timing. don't wanna do that.

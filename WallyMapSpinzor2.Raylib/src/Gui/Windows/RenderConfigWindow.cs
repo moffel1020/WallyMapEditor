@@ -95,7 +95,7 @@ public class RenderConfigWindow
         }
 
         ImGui.SeparatorText("General##config");
-        config.RenderSpeed = ImGuiExt.DragFloat("Render speed##config", config.RenderSpeed, speed: 0.1);
+        config.RenderSpeed = ImGuiExt.DragDouble("Render speed##config", config.RenderSpeed, speed: 0.1f);
         if (ImGui.Button("Reset time##config"))
             config.Time = TimeSpan.FromSeconds(0);
 
@@ -159,7 +159,7 @@ public class RenderConfigWindow
                 for (int i = 0; i < 3; ++i)
                 {
                     config.ShowBombsketballBombTimers[i] = ImGuiExt.Checkbox($"Show timer {i + 1}##config", config.ShowBombsketballBombTimers[i]);
-                    config.BombsketballBombTimerFrames[i] = ImGuiExt.DragFloat($"Timer {i + 1} frames##config", config.BombsketballBombTimerFrames[i], minValue: 0, maxValue: frames[i] - 1 / 16.0);
+                    config.BombsketballBombTimerFrames[i] = ImGuiExt.DragDouble($"Timer {i + 1} frames##config", config.BombsketballBombTimerFrames[i], minValue: 0, maxValue: frames[i] - 1 / 16.0);
                 }
             }
             ImGui.Separator();
@@ -194,19 +194,19 @@ public class RenderConfigWindow
 
         if (ImGui.TreeNode("Size##config"))
         {
-            config.RadiusRespawn = ImGuiExt.DragFloat("Respawn radius##config", config.RadiusRespawn, minValue: 0);
-            config.RadiusZombieSpawn = ImGuiExt.DragFloat("Zombie spawn radius##config", config.RadiusZombieSpawn, minValue: 0);
-            config.RadiusNavNode = ImGuiExt.DragFloat("NavNode radius##config", config.RadiusNavNode, minValue: 0);
-            config.RadiusHordePathPoint = ImGuiExt.DragFloat("Horde path point radius##config", config.RadiusHordePathPoint, minValue: 0);
-            config.RadiusFireOffsetLocation = ImGuiExt.DragFloat("Fire offset location radius##config", config.RadiusFireOffsetLocation, minValue: 0);
-            config.LengthCollisionNormal = ImGuiExt.DragFloat("Collision normal length##config", config.LengthCollisionNormal, minValue: 0);
-            config.LengthFireDirectionArrow = ImGuiExt.DragFloat("Fire direction arrow length##config", config.LengthFireDirectionArrow, minValue: 0);
-            config.OffsetNavLineArrowSide = ImGuiExt.DragFloat("Offset navnode arrow side##config", config.OffsetNavLineArrowSide, minValue: 0);
-            config.OffsetNavLineArrowBack = ImGuiExt.DragFloat("Offset navnode arrow back##config", config.OffsetNavLineArrowBack);
-            config.OffsetHordePathArrowSide = ImGuiExt.DragFloat("Offset horde path arrow side##config", config.OffsetHordePathArrowSide, minValue: 0);
-            config.OffsetHordePathArrowBack = ImGuiExt.DragFloat("Offset horde path arrow back##config", config.OffsetHordePathArrowBack);
-            config.OffsetFireDirectionArrowSide = ImGuiExt.DragFloat("Offset fire direction arrow side##config", config.OffsetFireDirectionArrowSide, minValue: 0);
-            config.OffsetFireDirectionArrowBack = ImGuiExt.DragFloat("Offset fire direction arrow back##config", config.OffsetFireDirectionArrowBack);
+            config.RadiusRespawn = ImGuiExt.DragDouble("Respawn radius##config", config.RadiusRespawn, minValue: 0);
+            config.RadiusZombieSpawn = ImGuiExt.DragDouble("Zombie spawn radius##config", config.RadiusZombieSpawn, minValue: 0);
+            config.RadiusNavNode = ImGuiExt.DragDouble("NavNode radius##config", config.RadiusNavNode, minValue: 0);
+            config.RadiusHordePathPoint = ImGuiExt.DragDouble("Horde path point radius##config", config.RadiusHordePathPoint, minValue: 0);
+            config.RadiusFireOffsetLocation = ImGuiExt.DragDouble("Fire offset location radius##config", config.RadiusFireOffsetLocation, minValue: 0);
+            config.LengthCollisionNormal = ImGuiExt.DragDouble("Collision normal length##config", config.LengthCollisionNormal, minValue: 0);
+            config.LengthFireDirectionArrow = ImGuiExt.DragDouble("Fire direction arrow length##config", config.LengthFireDirectionArrow, minValue: 0);
+            config.OffsetNavLineArrowSide = ImGuiExt.DragDouble("Offset navnode arrow side##config", config.OffsetNavLineArrowSide, minValue: 0);
+            config.OffsetNavLineArrowBack = ImGuiExt.DragDouble("Offset navnode arrow back##config", config.OffsetNavLineArrowBack);
+            config.OffsetHordePathArrowSide = ImGuiExt.DragDouble("Offset horde path arrow side##config", config.OffsetHordePathArrowSide, minValue: 0);
+            config.OffsetHordePathArrowBack = ImGuiExt.DragDouble("Offset horde path arrow back##config", config.OffsetHordePathArrowBack);
+            config.OffsetFireDirectionArrowSide = ImGuiExt.DragDouble("Offset fire direction arrow side##config", config.OffsetFireDirectionArrowSide, minValue: 0);
+            config.OffsetFireDirectionArrowBack = ImGuiExt.DragDouble("Offset fire direction arrow back##config", config.OffsetFireDirectionArrowBack);
             ImGui.TreePop();
         }
 
