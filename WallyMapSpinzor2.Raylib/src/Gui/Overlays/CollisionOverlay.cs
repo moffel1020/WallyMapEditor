@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using Raylib_cs;
 
 namespace WallyMapSpinzor2.Raylib;
@@ -101,7 +102,7 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
             if ((Circle1.Dragging && DistanceSquared(px, py, Circle1.X, Circle1.Y) < SNAP_POINT_VISIBLE_DISTANCE)
                 || (Circle2.Dragging && DistanceSquared(px, py, Circle2.X, Circle2.Y) < SNAP_POINT_VISIBLE_DISTANCE))
             {
-                Rl.DrawCircle((int)px, (int)py, (float)SnapPointRadius, SnapPointColor);
+                Rl.DrawCircleV(new Vector2((float)px, (float)py), (float)SnapPointRadius, SnapPointColor);
             }
         }
     }
@@ -126,7 +127,7 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
             .Concat(CollisionPointsAbsolute(data.Level.Desc.DynamicCollisions, data.Context, current))
             .OrderBy(p => DistanceSquared(dragging.X, dragging.Y, p.Item1, p.Item2))
             .FirstOrDefault();
-        
+
         if (closest is not null && DistanceSquared(dragging.X, dragging.Y, closest.Value.Item1, closest.Value.Item2) <= MAX_SNAP_DISTANCE)
             (dragging.X, dragging.Y) = (closest.Value.Item1, closest.Value.Item2);
 
