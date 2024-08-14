@@ -10,7 +10,7 @@ public partial class PropertiesWindow
         bool propChanged = false;
 
         propChanged |= ImGuiExt.DragNullableIntHistory("NumFrames", anim.NumFrames, LastKeyFrameNum(anim.KeyFrames), val => anim.NumFrames = val, cmd, minValue: LastKeyFrameNum(anim.KeyFrames));
-        propChanged |= ImGuiExt.DragNullableFloatHistory("SlowMult", anim.SlowMult, 1, val => anim.SlowMult = val, cmd, speed: 0.05);
+        propChanged |= ImGuiExt.DragNullableDoubleHistory("SlowMult", anim.SlowMult, 1, val => anim.SlowMult = val, cmd, speed: 0.05f);
         propChanged |= ImGuiExt.DragIntHistory("StartFrame", anim.StartFrame, val => anim.StartFrame = val, cmd, minValue: 0, maxValue: anim.NumFrames ?? int.MaxValue);
         propChanged |= ImGuiExt.CheckboxHistory("EaseIn", anim.EaseIn, val => anim.EaseIn = val, cmd);
         propChanged |= ImGuiExt.CheckboxHistory("EaseOut", anim.EaseOut, val => anim.EaseOut = val, cmd);
@@ -18,8 +18,8 @@ public partial class PropertiesWindow
 
         if (anim.HasCenter)
         {
-            propChanged |= ImGuiExt.DragFloatHistory("CenterX", anim.CenterX!.Value, val => anim.CenterX = val, cmd);
-            propChanged |= ImGuiExt.DragFloatHistory("CenterY", anim.CenterY!.Value, val => anim.CenterY = val, cmd);
+            propChanged |= ImGuiExt.DragDoubleHistory("CenterX", anim.CenterX!.Value, val => anim.CenterX = val, cmd);
+            propChanged |= ImGuiExt.DragDoubleHistory("CenterY", anim.CenterY!.Value, val => anim.CenterY = val, cmd);
             if (ImGui.Button("Remove center"))
             {
                 propChanged = true;

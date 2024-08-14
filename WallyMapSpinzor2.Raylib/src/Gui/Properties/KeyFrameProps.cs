@@ -11,13 +11,13 @@ public partial class PropertiesWindow
 
         propChanged |= ImGuiExt.DragIntHistory("FrameNum", k.FrameNum, val => k.FrameNum = val, cmd, minValue: minFrameNum, maxValue: maxFrameNum);
 
-        propChanged |= ImGuiExt.DragFloatHistory("X", k.X, val => k.X = val, cmd);
-        propChanged |= ImGuiExt.DragFloatHistory("Y", k.Y, val => k.Y = val, cmd);
+        propChanged |= ImGuiExt.DragDoubleHistory("X", k.X, val => k.X = val, cmd);
+        propChanged |= ImGuiExt.DragDoubleHistory("Y", k.Y, val => k.Y = val, cmd);
         // not implemented in the renderer yet. also stored as radians for some reason.
-        //propChanged |= ImGuiExt.DragFloatHistory("Rotation", k.Rotation, val => k.Rotation = BrawlhallaMath.SafeMod(val, 360.0), cmd, speed: 0.2);
+        //propChanged |= ImGuiExt.DragDoubleHistory("Rotation", k.Rotation, val => k.Rotation = BrawlhallaMath.SafeMod(val, 360.0), cmd, speed: 0.2f);
 
-        propChanged |= ImGuiExt.DragNullableFloatHistory("CenterX", k.CenterX, 0, val => k.CenterX = val, cmd);
-        propChanged |= ImGuiExt.DragNullableFloatHistory("CenterY", k.CenterY, 0, val => k.CenterY = val, cmd);
+        propChanged |= ImGuiExt.DragNullableDoubleHistory("CenterX", k.CenterX, 0, val => k.CenterX = val, cmd);
+        propChanged |= ImGuiExt.DragNullableDoubleHistory("CenterY", k.CenterY, 0, val => k.CenterY = val, cmd);
         ImGui.Spacing();
         propChanged |= ImGuiExt.NullableCheckboxHistory("EaseIn", k.EaseIn, false, val => k.EaseIn = val, cmd);
         propChanged |= ImGuiExt.NullableCheckboxHistory("EaseOut", k.EaseOut, false, val => k.EaseOut = val, cmd);

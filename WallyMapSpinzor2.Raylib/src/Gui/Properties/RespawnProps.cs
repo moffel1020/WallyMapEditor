@@ -16,8 +16,8 @@ public partial class PropertiesWindow
         }
 
         bool propChanged = false;
-        propChanged |= ImGuiExt.DragFloatHistory("X", r.X, val => r.X = val, cmd);
-        propChanged |= ImGuiExt.DragFloatHistory("Y", r.Y, val => r.Y = val, cmd);
+        propChanged |= ImGuiExt.DragDoubleHistory("X", r.X, val => r.X = val, cmd);
+        propChanged |= ImGuiExt.DragDoubleHistory("Y", r.Y, val => r.Y = val, cmd);
 
         if (r.ExpandedInit && r.Initial) r.Initial = false;
         ImGuiExt.WithDisabled(r.ExpandedInit, () =>

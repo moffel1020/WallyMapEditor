@@ -122,7 +122,7 @@ public class MapOverviewWindow
             ImGui.Separator();
         }
 
-        _propChanged |= ImGuiExt.DragFloatHistory("default SlowMult##overview", l.Desc.SlowMult, val => l.Desc.SlowMult = val, cmd, speed: 0.05);
+        _propChanged |= ImGuiExt.DragDoubleHistory("default SlowMult##overview", l.Desc.SlowMult, val => l.Desc.SlowMult = val, cmd, speed: 0.05f);
         _propChanged |= ImGuiExt.DragIntHistory("default NumFrames##overview", l.Desc.NumFrames, val => l.Desc.NumFrames = val, cmd, minValue: 0);
 
         if (l.Type is not null && l.Type.LevelName != "Random")

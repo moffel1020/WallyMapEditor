@@ -8,8 +8,8 @@ public partial class PropertiesWindow
     {
         bool propChanged = false;
         ImGui.Text("PlatID: " + mp.PlatID);
-        propChanged |= ImGuiExt.DragFloatHistory("X##mp", mp.X, val => mp.X = val, cmd);
-        propChanged |= ImGuiExt.DragFloatHistory("Y##mp", mp.Y, val => mp.Y = val, cmd);
+        propChanged |= ImGuiExt.DragDoubleHistory("X##mp", mp.X, val => mp.X = val, cmd);
+        propChanged |= ImGuiExt.DragDoubleHistory("Y##mp", mp.Y, val => mp.Y = val, cmd);
         if (ImGui.CollapsingHeader("Animation"))
             propChanged |= ShowAnimationProps(mp.Animation, cmd);
         ImGui.Separator();

@@ -14,8 +14,8 @@ public partial class PropertiesWindow
         propChanged |= ImGuiExt.DragIntHistory("Y", ts.Y, val => ts.Y = val, cmd);
         propChanged |= ImGuiExt.DragIntHistory("DoubleDigitsOnesX", ts.DoubleDigitsOnesX, val => ts.DoubleDigitsOnesX = val, cmd);
         propChanged |= ImGuiExt.DragIntHistory("DoubleDigitsTensX", ts.DoubleDigitsTensX, val => ts.DoubleDigitsTensX = val, cmd);
-        propChanged |= ImGuiExt.DragFloatHistory("DoubleDigitsY", ts.DoubleDigitsY, val => ts.DoubleDigitsY = val, cmd);
-        propChanged |= ImGuiExt.DragFloatHistory("DoubleDigitsScale", ts.DoubleDigitsScale, val => ts.DoubleDigitsScale = val, cmd);
+        propChanged |= ImGuiExt.DragDoubleHistory("DoubleDigitsY", ts.DoubleDigitsY, val => ts.DoubleDigitsY = val, cmd);
+        propChanged |= ImGuiExt.DragDoubleHistory("DoubleDigitsScale", ts.DoubleDigitsScale, val => ts.DoubleDigitsScale = val, cmd);
         return propChanged;
     }
 }

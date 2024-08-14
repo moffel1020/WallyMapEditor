@@ -15,8 +15,8 @@ partial class PropertiesWindow
             propChanged = true;
         }
         ImGui.Text("AssetName: " + la.AssetName);
-        propChanged |= ImGuiExt.DragFloatHistory("X", la.X, val => la.X = val, cmd);
-        propChanged |= ImGuiExt.DragFloatHistory("Y", la.Y, val => la.Y = val, cmd);
+        propChanged |= ImGuiExt.DragDoubleHistory("X", la.X, val => la.X = val, cmd);
+        propChanged |= ImGuiExt.DragDoubleHistory("Y", la.Y, val => la.Y = val, cmd);
 
         return propChanged;
     }
