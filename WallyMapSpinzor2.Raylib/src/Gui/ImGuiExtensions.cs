@@ -166,7 +166,7 @@ public static class ImGuiExt
         double oldVal = value;
         double newVal = DragDouble(label, value, speed, minValue, maxValue);
         // prevent NaN from fucking up history
-        if (double.IsNaN(newVal) != double.IsNaN(oldVal) && newVal != oldVal)
+        if (newVal != oldVal && (!double.IsNaN(newVal) || !double.IsNaN(oldVal)))
         {
             cmd.Add(new PropChangeCommand<double>(changeCommand, oldVal, newVal));
             return true;
