@@ -21,6 +21,8 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
     private const double MAX_SNAP_DISTANCE = 4000;  // squared distance
     private const double SNAP_POINT_VISIBLE_DISTANCE = 100000; // squared distance
 
+    private const int ROUND_DECIMALS = 6;
+
     public bool Update(OverlayData data, CommandHistory cmd)
     {
         Circle1.Radius = Circle2.Radius = data.OverlayConfig.RadiusCollisionPoint;
@@ -54,7 +56,7 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
             cmd.Add(new PropChangeCommand<(double, double)>(
                 val => (col.X1, col.Y1) = val,
                 (col.X1, col.Y1),
-                (Circle1.X - offsetX, Circle1.Y - offsetY)));
+                (Math.Round(Circle1.X - offsetX, ROUND_DECIMALS), Math.Round(Circle1.Y - offsetY, ROUND_DECIMALS))));
         }
 
         if (Circle2.Dragging)
@@ -69,7 +71,7 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
             cmd.Add(new PropChangeCommand<(double, double)>(
                 val => (col.X2, col.Y2) = val,
                 (col.X2, col.Y2),
-                (Circle2.X - offsetX, Circle2.Y - offsetY)));
+                (Math.Round(Circle2.X - offsetX, ROUND_DECIMALS), Math.Round(Circle2.Y - offsetY, ROUND_DECIMALS))));
         }
 
         if (HasAnchor && Anchor.Dragging)
