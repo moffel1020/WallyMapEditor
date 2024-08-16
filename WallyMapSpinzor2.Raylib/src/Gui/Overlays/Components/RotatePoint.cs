@@ -2,7 +2,7 @@ using System;
 using System.Numerics;
 using Raylib_cs;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class RotatePoint(double x, double y)
 {

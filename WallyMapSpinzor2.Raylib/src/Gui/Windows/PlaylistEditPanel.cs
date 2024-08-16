@@ -2,10 +2,11 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using WallyMapSpinzor2;
 using ImGuiNET;
 using NativeFileDialogSharp;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public static class PlaylistEditPanel
 {

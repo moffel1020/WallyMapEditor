@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml.Linq;
+using WallyMapSpinzor2;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 // ported from: https://github.com/HaxeFoundation/haxe/blob/development/std/haxe/xml/Parser.hx
 // which is the parser brawlhalla uses

@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using WallyAnmSpinzor;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class AssetLoader
 {

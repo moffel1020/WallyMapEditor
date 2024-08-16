@@ -1,7 +1,7 @@
 using System.Numerics;
 using Raylib_cs;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class DragCircle(double x, double y)
 {

@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class SwfFileCache : ManagedCache<string, SwfFileData?>
 {

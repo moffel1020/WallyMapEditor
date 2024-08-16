@@ -2,7 +2,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public partial class BhXmlPrinter
 {

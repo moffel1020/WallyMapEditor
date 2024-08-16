@@ -1,6 +1,7 @@
 using System;
+using WallyMapSpinzor2;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class ParentAssetOverlay(AbstractAsset asset) : IOverlay
 {

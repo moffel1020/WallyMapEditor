@@ -1,21 +1,20 @@
 using System;
-using System.Text;
 using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
-using NativeFileDialogSharp;
-
-using Raylib_cs;
-using ImGuiNET;
-
-using SwfLib.Tags.ActionsTags;
+using WallyMapSpinzor2;
 using BrawlhallaSwz;
 using AbcDisassembler;
 
-namespace WallyMapSpinzor2.Raylib;
+using Raylib_cs;
+using ImGuiNET;
+using NativeFileDialogSharp;
+using SwfLib.Tags.ActionsTags;
+
+namespace WallyMapEditor;
 
 public class ImportWindow(PathPreferences prefs)
 {

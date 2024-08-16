@@ -1,11 +1,12 @@
 using System.IO;
 using System.Numerics;
 using System.Threading.Tasks;
+using WallyMapSpinzor2;
 using ImGuiNET;
 using rlImGui_cs;
 using NativeFileDialogSharp;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public partial class PropertiesWindow
 {

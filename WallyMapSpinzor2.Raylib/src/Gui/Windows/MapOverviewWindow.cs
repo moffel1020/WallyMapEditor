@@ -3,14 +3,14 @@ using System.Numerics;
 using System.IO;
 using System.Threading.Tasks;
 
-using Raylib_cs;
+using WallyMapSpinzor2;
 
+using Raylib_cs;
 using ImGuiNET;
 using rlImGui_cs;
-
 using NativeFileDialogSharp;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class MapOverviewWindow
 {
@@ -168,8 +168,8 @@ public class MapOverviewWindow
 
         if (l.Type is not null && ImGui.CollapsingHeader("Weapon Spawn Color##overview") && l.Type.CrateColorA is not null && l.Type.CrateColorB is not null)
         {
-            Color colA = ImGuiExt.ColorPicker3("Outer##crateColorA", new(l.Type.CrateColorA.Value.R, l.Type.CrateColorA.Value.G, l.Type.CrateColorA.Value.B, 255));
-            Color colB = ImGuiExt.ColorPicker3("Inner##crateColorB", new(l.Type.CrateColorB.Value.R, l.Type.CrateColorB.Value.G, l.Type.CrateColorB.Value.B, 255));
+            WmsColor colA = ImGuiExt.ColorPicker3("Outer##crateColorA", new(l.Type.CrateColorA.Value.R, l.Type.CrateColorA.Value.G, l.Type.CrateColorA.Value.B, 255));
+            WmsColor colB = ImGuiExt.ColorPicker3("Inner##crateColorB", new(l.Type.CrateColorB.Value.R, l.Type.CrateColorB.Value.G, l.Type.CrateColorB.Value.B, 255));
             CrateColor crateColA = new(colA.R, colA.G, colA.B);
             CrateColor crateColB = new(colB.R, colB.G, colB.B);
 

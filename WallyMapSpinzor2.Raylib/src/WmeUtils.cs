@@ -1,6 +1,8 @@
 global using Rl = Raylib_cs.Raylib;
 global using RlColor = Raylib_cs.Color;
 global using RlImage = Raylib_cs.Image;
+global using WmsColor = WallyMapSpinzor2.Color;
+global using WmsTransform = WallyMapSpinzor2.Transform;
 
 using System;
 using System.Collections.Generic;
@@ -11,6 +13,10 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Text;
 
+using WallyMapSpinzor2;
+using BrawlhallaSwz;
+using AbcDisassembler;
+
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
@@ -19,13 +25,9 @@ using SwfLib.Tags;
 using SwfLib.Tags.ActionsTags;
 using SwfLib.Data;
 
-using BrawlhallaSwz;
-
-using AbcDisassembler;
-
 using nietras.SeparatedValues;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public static class WmeUtils
 {
@@ -70,7 +72,7 @@ public static class WmeUtils
         return false;
     }
 
-    public static RlColor WmsColorToRlColor(Color c) => new(c.R, c.G, c.B, c.A);
+    public static RlColor WmsColorToRlColor(WmsColor c) => new(c.R, c.G, c.B, c.A);
 
     public static RlImage ImgSharpImageToRlImage(Image<Rgba32> image)
     {

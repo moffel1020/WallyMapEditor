@@ -5,19 +5,16 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 
-using ImGuiNET;
-
-using Raylib_cs;
-
-using NativeFileDialogSharp;
-
-using SwfLib.Tags.ActionsTags;
-
+using WallyMapSpinzor2;
 using AbcDisassembler;
-
 using BrawlhallaSwz;
 
-namespace WallyMapSpinzor2.Raylib;
+using ImGuiNET;
+using Raylib_cs;
+using NativeFileDialogSharp;
+using SwfLib.Tags.ActionsTags;
+
+namespace WallyMapEditor;
 
 public class ExportWindow(PathPreferences prefs)
 {

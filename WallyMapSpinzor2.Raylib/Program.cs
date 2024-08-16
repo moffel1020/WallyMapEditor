@@ -1,4 +1,4 @@
-using WallyMapSpinzor2.Raylib;
+using WallyMapEditor;
 
 CommandLineArgs cmdArgs = CommandLineArgs.CreateFromArgs(args);
 

@@ -1,6 +1,6 @@
 using System;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class PropChangeCommand<T>(Action<T> changeAction, T oldVal, T newVal) : ICommand
 {

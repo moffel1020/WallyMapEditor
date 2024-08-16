@@ -1,14 +1,15 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+
+using WallyMapSpinzor2;
 
 using ImGuiNET;
 using NativeFileDialogSharp;
 using Raylib_cs;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class RenderConfigWindow
 {

@@ -4,7 +4,7 @@ using Raylib_cs;
 using ImGuiNET;
 using rlImGui_cs;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class ViewportWindow
 {

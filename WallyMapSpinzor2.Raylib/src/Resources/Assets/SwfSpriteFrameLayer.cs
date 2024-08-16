@@ -1,7 +1,7 @@
 using SwfLib.Data;
 using SwfLib.Tags.DisplayListTags;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class SwfSpriteFrameLayer
 {

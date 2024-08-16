@@ -1,9 +1,10 @@
 using System;
 using System.Linq;
 using System.Numerics;
+using WallyMapSpinzor2;
 using ImGuiNET;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public partial class PropertiesWindow
 {

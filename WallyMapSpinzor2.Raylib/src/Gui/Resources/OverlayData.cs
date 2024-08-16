@@ -1,6 +1,7 @@
+using WallyMapSpinzor2;
 using Raylib_cs;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class OverlayData
 {

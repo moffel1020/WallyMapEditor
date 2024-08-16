@@ -1,7 +1,7 @@
 using System.Linq;
 using ImGuiNET;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public static class HistoryPanel
 {

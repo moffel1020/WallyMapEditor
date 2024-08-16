@@ -1,7 +1,8 @@
 using System.Numerics;
+using WallyMapSpinzor2;
 using Raylib_cs;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class DragBox(double x, double y, double w, double h)
 {
@@ -14,7 +15,7 @@ public class DragBox(double x, double y, double w, double h)
     public double Y { get; set; } = y;
     public double W { get; set; } = w;
     public double H { get; set; } = h;
-    public Transform Transform { get; set; } = Transform.IDENTITY;
+    public WmsTransform Transform { get; set; } = WmsTransform.IDENTITY;
 
     public bool Hovered { get; private set; }
     public bool Dragging { get; private set; }
@@ -30,7 +31,7 @@ public class DragBox(double x, double y, double w, double h)
     public void Update(OverlayData data, bool allowDragging)
     {
         Vector2 worldPos = data.Viewport.ScreenToWorld(Rl.GetMousePosition(), data.Cam);
-        (double worldX, double worldY) = Transform.CreateInverse(Transform) * (worldPos.X, worldPos.Y);
+        (double worldX, double worldY) = WmsTransform.CreateInverse(Transform) * (worldPos.X, worldPos.Y);
         (worldPos.X, worldPos.Y) = ((float)worldX, (float)worldY);
 
         Hovered = data.Viewport.Hovered && WmeUtils.CheckCollisionPointRec(worldPos, new((float)X, (float)Y, (float)W, (float)H));

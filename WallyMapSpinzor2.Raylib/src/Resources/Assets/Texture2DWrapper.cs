@@ -1,7 +1,7 @@
 using System;
 using Raylib_cs;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class Texture2DWrapper : IDisposable
 {

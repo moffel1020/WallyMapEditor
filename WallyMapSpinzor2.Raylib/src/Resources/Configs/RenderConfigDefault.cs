@@ -2,8 +2,9 @@ using System;
 using System.IO;
 using System.Xml.Linq;
 using Raylib_cs;
+using WallyMapSpinzor2;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class RenderConfigDefault : IDeserializable, ISerializable
 {

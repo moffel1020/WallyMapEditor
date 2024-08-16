@@ -1,4 +1,4 @@
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class SwfSpriteCache : ManagedCache<SwfSpriteCache.SpriteInfo, SwfSprite?>
 {

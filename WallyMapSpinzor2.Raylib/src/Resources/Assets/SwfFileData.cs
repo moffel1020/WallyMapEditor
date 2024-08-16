@@ -10,7 +10,7 @@ using SwfLib.Tags.ShapeTags;
 
 using SwiffCheese.Wrappers;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class SwfFileData
 {

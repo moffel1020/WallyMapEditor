@@ -1,7 +1,7 @@
 using System;
 using Raylib_cs;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public struct RenderRect(double x, double y, double w, double h) : IDisposable
 {

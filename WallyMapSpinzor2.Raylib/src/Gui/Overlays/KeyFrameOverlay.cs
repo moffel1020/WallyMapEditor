@@ -1,4 +1,6 @@
-namespace WallyMapSpinzor2.Raylib;
+using WallyMapSpinzor2;
+
+namespace WallyMapEditor;
 
 public class KeyFrameOverlay(KeyFrame kf) : IOverlay
 {

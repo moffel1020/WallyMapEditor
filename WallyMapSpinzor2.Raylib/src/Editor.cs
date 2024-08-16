@@ -4,12 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
+using WallyMapSpinzor2;
+
 using Raylib_cs;
 using rlImGui_cs;
 using ImGuiNET;
 using NativeFileDialogSharp;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault)
 {
@@ -141,7 +143,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             Canvas.CameraMatrix = Rl.GetCameraMatrix2D(_cam);
 
             _context = new();
-            MapData?.DrawOn(Canvas, Transform.IDENTITY, _renderConfig, _context, _state);
+            MapData?.DrawOn(Canvas, WmsTransform.IDENTITY, _renderConfig, _context, _state);
             Canvas.FinalizeDraw();
         }
 
@@ -466,7 +468,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         Rl.ClearBackground(RlColor.Blank);
         Rl.BeginMode2D(camera);
         Canvas.CameraMatrix = Rl.GetCameraMatrix2D(camera);
-        MapData?.DrawOn(Canvas, Transform.IDENTITY, _renderConfig, new RenderContext(), _state);
+        MapData?.DrawOn(Canvas, WmsTransform.IDENTITY, _renderConfig, new RenderContext(), _state);
         Canvas.FinalizeDraw();
         Rl.EndMode2D();
         Rl.EndTextureMode();

@@ -1,9 +1,9 @@
 using System;
 using System.Numerics;
-
+using WallyMapSpinzor2;
 using Raylib_cs;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public partial class RaylibCanvas : ICanvas
 {
@@ -24,7 +24,7 @@ public partial class RaylibCanvas : ICanvas
         Animator.ClearCache();
     }
 
-    public void DrawCircle(double x, double y, double radius, Color color, Transform trans, DrawPriorityEnum priority, object? caller)
+    public void DrawCircle(double x, double y, double radius, WmsColor color, WmsTransform trans, DrawPriorityEnum priority, object? caller)
     {
         // FIXME: doesn't account for transformations affecting radius (could be turned into an ellipse)
         (x, y) = trans * (x, y);
@@ -36,7 +36,7 @@ public partial class RaylibCanvas : ICanvas
         ), (int)priority);
     }
 
-    public void DrawLine(double x1, double y1, double x2, double y2, Color color, Transform trans, DrawPriorityEnum priority, object? caller)
+    public void DrawLine(double x1, double y1, double x2, double y2, WmsColor color, WmsTransform trans, DrawPriorityEnum priority, object? caller)
     {
         (x1, y1) = trans * (x1, y1);
         (x2, y2) = trans * (x2, y2);
@@ -48,12 +48,12 @@ public partial class RaylibCanvas : ICanvas
         ), (int)priority);
     }
 
-    public void DrawLineMultiColor(double x1, double y1, double x2, double y2, Color[] colors, Transform trans, DrawPriorityEnum priority, object? caller)
+    public void DrawLineMultiColor(double x1, double y1, double x2, double y2, WmsColor[] colors, WmsTransform trans, DrawPriorityEnum priority, object? caller)
     {
         if (!Matrix4x4.Invert(CameraMatrix, out Matrix4x4 invertedMat))
             throw new ArgumentException("Camera transform is not invertible");
-        Transform cam = WmeUtils.Matrix4x4ToTransform(CameraMatrix);
-        Transform inv = WmeUtils.Matrix4x4ToTransform(invertedMat);
+        WmsTransform cam = WmeUtils.Matrix4x4ToTransform(CameraMatrix);
+        WmsTransform inv = WmeUtils.Matrix4x4ToTransform(invertedMat);
 
         (x1, y1) = cam * trans * (x1, y1);
         (x2, y2) = cam * trans * (x2, y2);
@@ -73,7 +73,7 @@ public partial class RaylibCanvas : ICanvas
         }
     }
 
-    public void DrawRect(double x, double y, double w, double h, bool filled, Color color, Transform trans, DrawPriorityEnum priority, object? caller)
+    public void DrawRect(double x, double y, double w, double h, bool filled, WmsColor color, WmsTransform trans, DrawPriorityEnum priority, object? caller)
     {
         DrawingQueue.Push((caller, () =>
         {
@@ -92,12 +92,12 @@ public partial class RaylibCanvas : ICanvas
         ), (int)priority);
     }
 
-    public void DrawString(double x, double y, string text, double fontSize, Color color, Transform trans, DrawPriorityEnum priority, object? caller)
+    public void DrawString(double x, double y, string text, double fontSize, WmsColor color, WmsTransform trans, DrawPriorityEnum priority, object? caller)
     {
 
     }
 
-    public void DrawTexture(string path, double x, double y, Transform trans, DrawPriorityEnum priority, object? caller)
+    public void DrawTexture(string path, double x, double y, WmsTransform trans, DrawPriorityEnum priority, object? caller)
     {
         Texture2DWrapper texture = Loader.LoadTextureFromPath(path);
         DrawingQueue.Push((caller, () =>
@@ -107,7 +107,7 @@ public partial class RaylibCanvas : ICanvas
         ), (int)priority);
     }
 
-    public void DrawTextureRect(string path, double x, double y, double? w, double? h, Transform trans, DrawPriorityEnum priority, object? caller)
+    public void DrawTextureRect(string path, double x, double y, double? w, double? h, WmsTransform trans, DrawPriorityEnum priority, object? caller)
     {
         Texture2DWrapper texture = Loader.LoadTextureFromPath(path);
         w ??= texture.Texture.Width;
@@ -119,7 +119,7 @@ public partial class RaylibCanvas : ICanvas
         ), (int)priority);
     }
 
-    public void DrawAnim(Gfx gfx, string animName, int frame, Transform trans, DrawPriorityEnum priority, object? caller, int loopLimit = -1)
+    public void DrawAnim(Gfx gfx, string animName, int frame, WmsTransform trans, DrawPriorityEnum priority, object? caller, int loopLimit = -1)
     {
         Animator.DrawAnim(gfx, animName, frame, trans, priority, caller, loopLimit);
     }
@@ -129,7 +129,7 @@ public partial class RaylibCanvas : ICanvas
         return Animator.GetAnimationFrameCount(gfx, animName);
     }
 
-    public static void DrawTextureWithTransform(Texture2D texture, double x, double y, double w, double h, Transform trans, float tintR = 1, float tintG = 1, float tintB = 1, float tintA = 1)
+    public static void DrawTextureWithTransform(Texture2D texture, double x, double y, double w, double h, WmsTransform trans, float tintR = 1, float tintG = 1, float tintB = 1, float tintA = 1)
     {
         Rl.BeginBlendMode(BlendMode.AlphaPremultiply);
         Rlgl.SetTexture(texture.Id);
@@ -157,7 +157,7 @@ public partial class RaylibCanvas : ICanvas
         Rl.EndBlendMode();
     }
 
-    public static void DrawRectWithTransform(double x, double y, double w, double h, Transform trans, Color color)
+    public static void DrawRectWithTransform(double x, double y, double w, double h, WmsTransform trans, WmsColor color)
     {
         Rlgl.Begin(DrawMode.Quads);
         Rlgl.Color4ub(color.R, color.G, color.B, color.A);

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public abstract class UploadCache<K, I, V> where K : notnull
 {

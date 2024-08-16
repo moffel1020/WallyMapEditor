@@ -1,19 +1,19 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using Raylib_cs;
 using SwfLib.Tags;
 using SwiffCheese.Wrappers;
 using WallyAnmSpinzor;
+using WallyMapSpinzor2;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
 {
     private readonly struct BoneSprite
     {
         public required Texture2DWrapper Texture { get; init; }
-        public required Transform Transform { get; init; }
+        public required WmsTransform Transform { get; init; }
         public required uint Tint { get; init; }
         public required double Opacity { get; init; }
     }
@@ -27,7 +27,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         public required bool Visible { get; set; }
     }
 
-    public void DrawAnim(Gfx gfx, string animName, int frame, Transform trans, DrawPriorityEnum priority, object? caller, int loopLimit = -1)
+    public void DrawAnim(Gfx gfx, string animName, int frame, WmsTransform trans, DrawPriorityEnum priority, object? caller, int loopLimit = -1)
     {
         BoneSprite[] bones = BuildAnim(gfx, animName, frame, trans, loopLimit);
         foreach (BoneSprite bone in bones)
@@ -158,7 +158,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
 
     public Texture2D? AnimToTexture(Gfx gfx, string animName, int frame, bool withDebug = false)
     {
-        (double, double, double, double)? bounds = CalculateAnimBounds(gfx, animName, frame, Transform.IDENTITY);
+        (double, double, double, double)? bounds = CalculateAnimBounds(gfx, animName, frame, WmsTransform.IDENTITY);
         if (bounds is null)
             return null;
         if (bounds == (0, 0, 0, 0))
@@ -175,24 +175,24 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         RenderRectCache[(gfx, animName)] = rect;
         Rl.BeginTextureMode(rect.RenderTexture);
         Rl.ClearBackground(RlColor.Blank);
-        canvas.DrawAnim(gfx, animName, frame, Transform.CreateTranslate(-rect.Rect.XMin, -rect.Rect.YMin), DrawPriorityEnum.BACKGROUND, null);
+        canvas.DrawAnim(gfx, animName, frame, WmsTransform.CreateTranslate(-rect.Rect.XMin, -rect.Rect.YMin), DrawPriorityEnum.BACKGROUND, null);
         if (withDebug)
         {
-            canvas.DrawRect(rect.Rect.XMin, rect.Rect.YMin, rect.Rect.Width, rect.Rect.Height, false, Color.FromHex(0x568917FF), Transform.CreateTranslate(-rect.Rect.XMin, -rect.Rect.YMin), DrawPriorityEnum.MIDGROUND, null);
-            canvas.DrawRect(x, y, w, h, false, Color.FromHex(0x1758FFFF), Transform.CreateTranslate(-rect.Rect.XMin, -rect.Rect.YMin), DrawPriorityEnum.FOREGROUND, null);
+            canvas.DrawRect(rect.Rect.XMin, rect.Rect.YMin, rect.Rect.Width, rect.Rect.Height, false, WmsColor.FromHex(0x568917FF), WmsTransform.CreateTranslate(-rect.Rect.XMin, -rect.Rect.YMin), DrawPriorityEnum.MIDGROUND, null);
+            canvas.DrawRect(x, y, w, h, false, WmsColor.FromHex(0x1758FFFF), WmsTransform.CreateTranslate(-rect.Rect.XMin, -rect.Rect.YMin), DrawPriorityEnum.FOREGROUND, null);
         }
         canvas.FinalizeDraw();
         Rl.EndTextureMode();
         return rect.RenderTexture.Texture;
     }
 
-    private (double x, double y, double w, double h)? CalculateAnimBounds(Gfx gfx, string animName, int frame, Transform trans, int loopLimit = -1)
+    private (double x, double y, double w, double h)? CalculateAnimBounds(Gfx gfx, string animName, int frame, WmsTransform trans, int loopLimit = -1)
     {
         BoneSprite[] bones = BuildAnim(gfx, animName, frame, trans, loopLimit);
         double xMin = double.MaxValue, xMax = double.MinValue, yMin = double.MaxValue, yMax = double.MinValue;
         foreach (BoneSprite bone in bones)
         {
-            Transform t = bone.Transform;
+            WmsTransform t = bone.Transform;
             Texture2DWrapper txt = bone.Texture;
             (double, double)[] points = [t * (0, 0), t * (txt.Width, 0), t * (0, txt.Height), t * (txt.Width, txt.Height)];
             foreach ((double x, double y) in points)
@@ -223,9 +223,9 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
 
 
     #region building
-    private BoneSprite[] BuildAnim(Gfx gfx, string animName, int frame, Transform trans, int loopLimit = -1)
+    private BoneSprite[] BuildAnim(Gfx gfx, string animName, int frame, WmsTransform trans, int loopLimit = -1)
     {
-        trans *= Transform.CreateScale(gfx.AnimScale, gfx.AnimScale);
+        trans *= WmsTransform.CreateScale(gfx.AnimScale, gfx.AnimScale);
         // TODO: check how the game does this
         // swf animation
         if (gfx.AnimFile.StartsWith("SFX_"))
@@ -261,7 +261,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
                 if (!swf.SymbolClass.TryGetValue(instance.SpriteName, out ushort spriteId))
                     continue;
                 AnmBone bone = instance.Bone;
-                Transform boneTrans = new(bone.ScaleX, bone.RotateSkew1, bone.RotateSkew0, bone.ScaleY, bone.X, bone.Y);
+                WmsTransform boneTrans = new(bone.ScaleX, bone.RotateSkew1, bone.RotateSkew0, bone.ScaleY, bone.X, bone.Y);
                 result.AddRange(BuildSwfSprite(instance.FilePath, spriteId, bone.Frame - 1, gfx.AnimScale, gfx.Tint, bone.Opacity, trans * boneTrans));
             }
             return [.. result];
@@ -464,7 +464,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         return null;
     }
 
-    private BoneSprite[] BuildSwfSprite(string filePath, ushort spriteId, int frame, double animScale, uint tint, double opacity, Transform trans, int loopLimit = -1)
+    private BoneSprite[] BuildSwfSprite(string filePath, ushort spriteId, int frame, double animScale, uint tint, double opacity, WmsTransform trans, int loopLimit = -1)
     {
         SwfFileData? file = loader.LoadSwf(filePath);
         if (file is null) return [];
@@ -493,14 +493,14 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         return [.. result];
     }
 
-    private BoneSprite[] BuildSwfShape(string filePath, ushort shapeId, double animScale, uint tint, double opacity, Transform trans)
+    private BoneSprite[] BuildSwfShape(string filePath, ushort shapeId, double animScale, uint tint, double opacity, WmsTransform trans)
     {
         Texture2DWrapper? texture = loader.LoadShapeFromSwf(filePath, shapeId, animScale);
         if (texture is null) return [];
         return [new()
         {
             Texture = texture,
-            Transform = trans * Transform.CreateTranslate(texture.XOff, texture.YOff),
+            Transform = trans * WmsTransform.CreateTranslate(texture.XOff, texture.YOff),
             Tint = tint,
             Opacity = opacity,
         }];

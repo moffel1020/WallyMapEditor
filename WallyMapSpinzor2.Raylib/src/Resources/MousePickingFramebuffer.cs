@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using WallyMapSpinzor2;
 using Raylib_cs;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class MousePickingFramebuffer : IDisposable
 {
@@ -102,7 +103,7 @@ public class MousePickingFramebuffer : IDisposable
         Rl.ClearBackground(RlColor.Black);
         canvas.CameraMatrix = Rl.GetCameraMatrix2D(cam);
 
-        mapData.DrawOn(canvas, Transform.IDENTITY, config, new RenderContext(), state);
+        mapData.DrawOn(canvas, WmsTransform.IDENTITY, config, new RenderContext(), state);
 
         _drawables.Clear();
         while (canvas.DrawingQueue.Count > 0)

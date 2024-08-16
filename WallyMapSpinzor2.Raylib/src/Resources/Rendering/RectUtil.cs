@@ -1,6 +1,6 @@
 using System;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public readonly record struct RectUtil(double XMin, double YMin, double XMax, double YMax)
 {

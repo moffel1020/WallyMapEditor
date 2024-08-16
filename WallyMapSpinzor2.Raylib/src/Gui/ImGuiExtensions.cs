@@ -5,8 +5,9 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using ImGuiNET;
 using Raylib_cs;
+using WallyMapSpinzor2;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public static class ImGuiExt
 {
@@ -68,19 +69,19 @@ public static class ImGuiExt
         return v;
     }
 
-    public static Color ColorPicker3(string label, Color col)
+    public static WmsColor ColorPicker3(string label, WmsColor col)
     {
         Vector3 imCol = new((float)col.R / 255, (float)col.G / 255, (float)col.B / 255);
         ImGui.ColorEdit3(label, ref imCol, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaBar);
-        Color a = new((byte)(imCol.X * 255), (byte)(imCol.Y * 255), (byte)(imCol.Z * 255), 255);
+        WmsColor a = new((byte)(imCol.X * 255), (byte)(imCol.Y * 255), (byte)(imCol.Z * 255), 255);
         return a;
     }
 
-    public static Color ColorPicker4(string label, Color col)
+    public static WmsColor ColorPicker4(string label, WmsColor col)
     {
         Vector4 imCol = new((float)col.R / 255, (float)col.G / 255, (float)col.B / 255, (float)col.A / 255);
         ImGui.ColorEdit4(label, ref imCol, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaBar);
-        Color a = new((byte)(imCol.X * 255), (byte)(imCol.Y * 255), (byte)(imCol.Z * 255), (byte)(imCol.W * 255));
+        WmsColor a = new((byte)(imCol.X * 255), (byte)(imCol.Y * 255), (byte)(imCol.Z * 255), (byte)(imCol.W * 255));
         return a;
     }
 

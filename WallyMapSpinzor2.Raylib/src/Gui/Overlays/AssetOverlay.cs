@@ -1,6 +1,7 @@
 using System;
+using WallyMapSpinzor2;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class AssetOverlay(AbstractAsset asset) : IOverlay
 {
@@ -35,8 +36,8 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
 
         TopLeft.Radius = TopRight.Radius = BotLeft.Radius = BotRight.Radius = data.OverlayConfig.RadiusAssetCorner;
 
-        Transform trans = FullTransform(asset, data.Context);
-        Transform inv = Transform.CreateInverse(trans);
+        WmsTransform trans = FullTransform(asset, data.Context);
+        WmsTransform inv = Transform.CreateInverse(trans);
 
         (TopLeft.X, TopLeft.Y) = (trans.TranslateX, trans.TranslateY);
         (TopRight.X, TopRight.Y) = trans * (asset.W!.Value, 0);

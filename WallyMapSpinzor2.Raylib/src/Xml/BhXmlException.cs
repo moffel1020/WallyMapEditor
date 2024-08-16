@@ -1,6 +1,6 @@
 using System;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 [Serializable]
 public class BhXmlException : Exception

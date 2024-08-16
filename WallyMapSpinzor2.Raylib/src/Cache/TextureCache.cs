@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class TextureCache : UploadCache<string, RlImage, Texture2DWrapper>
 {

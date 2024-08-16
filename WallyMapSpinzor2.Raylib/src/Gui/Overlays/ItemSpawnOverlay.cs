@@ -1,4 +1,6 @@
-namespace WallyMapSpinzor2.Raylib;
+using WallyMapSpinzor2;
+
+namespace WallyMapEditor;
 
 public class ItemSpawnOverlay(AbstractItemSpawn item) : IOverlay
 {

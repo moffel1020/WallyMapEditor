@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class ViewportBounds
 {

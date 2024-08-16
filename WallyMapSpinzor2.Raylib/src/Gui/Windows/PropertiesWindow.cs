@@ -1,7 +1,8 @@
+using WallyMapSpinzor2;
 using ImGuiNET;
 using Raylib_cs;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public partial class PropertiesWindow
 {

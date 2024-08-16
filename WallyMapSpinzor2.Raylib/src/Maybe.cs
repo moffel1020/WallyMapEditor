@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 // simple optional type
 public readonly struct Maybe<T>

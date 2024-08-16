@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using SwfLib.Tags;
 using SwfLib.Tags.DisplayListTags;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class SwfSprite
 {

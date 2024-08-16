@@ -1,6 +1,7 @@
 using System.Xml.Linq;
+using WallyMapSpinzor2;
 
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class OverlayConfig : ISerializable, IDeserializable
 {

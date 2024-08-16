@@ -1,4 +1,4 @@
-namespace WallyMapSpinzor2.Raylib;
+namespace WallyMapEditor;
 
 public class ResizableDragBox(double x, double y, double w, double h)
 {
