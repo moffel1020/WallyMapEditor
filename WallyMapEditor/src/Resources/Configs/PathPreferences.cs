@@ -7,7 +7,7 @@ namespace WallyMapEditor;
 
 public class PathPreferences : IDeserializable, ISerializable
 {
-    public const string APPDATA_DIR_NAME = "WallyMapSpinzor2.Raylib";
+    public const string APPDATA_DIR_NAME = "WallyMapEditor";
     public const string FILE_NAME = "PathPreferences.xml";
 
     private string? _brawlhallaPath;
