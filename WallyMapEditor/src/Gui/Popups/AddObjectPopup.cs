@@ -2,7 +2,6 @@ using System.Numerics;
 using WallyMapSpinzor2;
 using ImGuiNET;
 
-
 namespace WallyMapEditor;
 
 public static class AddObjectPopup

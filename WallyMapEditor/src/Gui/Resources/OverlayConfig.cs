@@ -98,7 +98,7 @@ public class OverlayConfig : ISerializable, IDeserializable
         UsingColorCollisionPoint = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorCollisionPoint))) ?? @default.UsingColorCollisionPoint;
         ColorCollisionAnchor = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorCollisionAnchor))) ?? @default.ColorCollisionAnchor;
         UsingColorCollisionAnchor = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorCollisionAnchor))) ?? @default.UsingColorCollisionAnchor;
-        ColorCollisionSnapPoint = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorCollisionSnapPoint ))) ?? @default.ColorCollisionSnapPoint ;
+        ColorCollisionSnapPoint = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorCollisionSnapPoint))) ?? @default.ColorCollisionSnapPoint;
         ColorItemSpawnBox = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorItemSpawnBox))) ?? @default.ColorItemSpawnBox;
         UsingColorItemSpawnBox = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorItemSpawnBox))) ?? @default.UsingColorItemSpawnBox;
         ColorRespawnBox = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorRespawnBox))) ?? @default.ColorRespawnBox;

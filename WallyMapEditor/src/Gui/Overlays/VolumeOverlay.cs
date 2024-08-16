@@ -1,5 +1,6 @@
-namespace WallyMapEditor;
 using WallyMapSpinzor2;
+
+namespace WallyMapEditor;
 
 public class VolumeOverlay(AbstractVolume volume) : IOverlay
 {
