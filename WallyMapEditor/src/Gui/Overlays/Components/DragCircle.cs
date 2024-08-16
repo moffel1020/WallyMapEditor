@@ -24,7 +24,7 @@ public class DragCircle(double x, double y)
     private Vector2 Coords => new((float)X, (float)Y);
     private (double, double) _mouseDragOffset;
 
-    // Remove unused parameter 'data' if it is not part of a shipped public API [WallyMapSpinzor2.Raylib]
+    // Remove unused parameter 'data' if it is not part of a shipped public API [WallyMapEditor]
 #pragma warning disable IDE0060
     public void Draw(OverlayData data)
 #pragma warning restore IDE0060

@@ -23,7 +23,7 @@ partial class PropertiesWindow
         return propChanged;
     }
 
-    // Remove unused parameter 'cmd' if it is not part of a shipped public API [WallyMapSpinzor2.Raylib]
+    // Remove unused parameter 'cmd' if it is not part of a shipped public API [WallyMapEditor]
 #pragma warning disable IDE0060
     public static bool ShowGfxProps(Gfx g, CommandHistory cmd, PropertiesWindowData data)
 #pragma warning restore IDE0060

@@ -57,7 +57,7 @@ public class DragBox(double x, double y, double w, double h)
         if (Dragging) Middle = (worldPos.X + _mouseDragOffset.Item1, worldPos.Y + _mouseDragOffset.Item2);
     }
 
-    // Remove unused parameter 'data' if it is not part of a shipped public API [WallyMapSpinzor2.Raylib]
+    // Remove unused parameter 'data' if it is not part of a shipped public API [WallyMapEditor]
 #pragma warning disable IDE0060
     public void Draw(OverlayData data)
 #pragma warning restore IDE0060
