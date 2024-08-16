@@ -96,18 +96,17 @@ public class MousePickingFramebuffer : IDisposable
         MatchSize(viewport);
 
         Rl.BeginTextureMode(_framebuffer);
-        Rl.BeginShaderMode(Shader);
         Rl.BeginMode2D(cam);
         Rlgl.DisableColorBlend();
 
         Rl.ClearBackground(RlColor.Black);
         canvas.CameraMatrix = Rl.GetCameraMatrix2D(cam);
-
         mapData.DrawOn(canvas, WmsTransform.IDENTITY, config, new RenderContext(), state);
 
         _drawables.Clear();
         while (canvas.DrawingQueue.Count > 0)
         {
+            Rl.BeginShaderMode(Shader);
             (object? obj, Action drawAction) = canvas.DrawingQueue.PopMin();
             if (obj is not null) _drawables.Add(obj);
             float id = obj is not null ? _drawables.Count : 0;
@@ -115,7 +114,7 @@ public class MousePickingFramebuffer : IDisposable
             // raylib doesnt expose the integer type for framebuffer drawing so float will do 
             Rl.SetShaderValue(Shader, Rl.GetShaderLocation(Shader, "id"), id, ShaderUniformDataType.Float);
             drawAction();
-            Rlgl.DrawRenderBatchActive(); // force drawcall so uniform value gets drawn
+            Rl.EndShaderMode();
         }
 
         Rlgl.EnableColorBlend();
