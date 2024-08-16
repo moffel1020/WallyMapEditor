@@ -19,6 +19,7 @@ _an exe will be provided in the future_
 ## Requirements
 
 - .NET 8 SDK
+- On Windows: latest Visual C++ Redistributable
 
 The program allows overriding any relevant brawlhalla file with a custom one, but for ease of use, **it is recommended to install Brawlhalla**.
 
