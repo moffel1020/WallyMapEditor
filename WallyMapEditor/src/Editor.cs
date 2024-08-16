@@ -15,7 +15,7 @@ namespace WallyMapEditor;
 
 public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault)
 {
-    public const string WINDOW_NAME = "WallyMapSpinzor2.Raylib";
+    public const string WINDOW_NAME = "WallyMapEditor";
     public const float ZOOM_INCREMENT = 0.15f;
     public const float MIN_ZOOM = 0.01f;
     public const float MAX_ZOOM = 5.0f;
