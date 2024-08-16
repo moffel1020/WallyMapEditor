@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BrawlhallaSwz", "Brawlhalla
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrawlhallaSwz", "BrawlhallaSwz\BrawlhallaSwz\BrawlhallaSwz.csproj", "{889ABDC9-4476-4A84-BF9E-4369D8C082C7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WallyMapSpinzor2", "WallyMapSpinzor2\WallyMapSpinzor2.csproj", "{91E314F1-D73E-452A-9573-45B26815E894}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,6 +48,10 @@ Global
 		{889ABDC9-4476-4A84-BF9E-4369D8C082C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{889ABDC9-4476-4A84-BF9E-4369D8C082C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{889ABDC9-4476-4A84-BF9E-4369D8C082C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91E314F1-D73E-452A-9573-45B26815E894}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91E314F1-D73E-452A-9573-45B26815E894}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91E314F1-D73E-452A-9573-45B26815E894}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91E314F1-D73E-452A-9573-45B26815E894}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{21EC4578-50C3-445B-A11E-35C783EDCA9D} = {8247E676-8E2C-475A-820B-278D85FBD121}
