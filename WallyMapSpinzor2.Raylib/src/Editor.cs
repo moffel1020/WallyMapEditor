@@ -299,10 +299,10 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             using FileStream bonesFile = new(btPath, FileMode.Open, FileAccess.Read);
             BoneNames = [.. BhXmlParser.Load(bonesFile).Elements("Bone").Select(e => e.Value)];
         }
-        PowerNames = ptPath is not null ? Wms2RlUtils.ParsePowerTypes(File.ReadAllText(ptPath)) : null;
-        LevelDesc ld = Wms2RlUtils.DeserializeFromPath<LevelDesc>(ldPath, bhstyle: true);
-        LevelTypes lt = ltPath is null ? new() { Levels = [] } : Wms2RlUtils.DeserializeFromPath<LevelTypes>(ltPath, bhstyle: true);
-        LevelSetTypes lst = lstPath is null ? new() { Playlists = [] } : Wms2RlUtils.DeserializeFromPath<LevelSetTypes>(lstPath, bhstyle: true);
+        PowerNames = ptPath is not null ? WmeUtils.ParsePowerTypes(File.ReadAllText(ptPath)) : null;
+        LevelDesc ld = WmeUtils.DeserializeFromPath<LevelDesc>(ldPath, bhstyle: true);
+        LevelTypes lt = ltPath is null ? new() { Levels = [] } : WmeUtils.DeserializeFromPath<LevelTypes>(ltPath, bhstyle: true);
+        LevelSetTypes lst = lstPath is null ? new() { Playlists = [] } : WmeUtils.DeserializeFromPath<LevelSetTypes>(lstPath, bhstyle: true);
 
         // scuffed xml parse error handling
         if (ld.CameraBounds is null) throw new System.Xml.XmlException("LevelDesc xml did not contain essential elements");

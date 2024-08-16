@@ -53,7 +53,7 @@ public class GizmoSlider(double x, double y)
         Vector2 rotOrigin = new(0, (float)LineWidth / 2);
         Vector2 mousePos = data.Viewport.ScreenToWorld(Rl.GetMousePosition(), data.Cam);
 
-        Hovered = Wms2RlUtils.CheckCollisionPointRotatedRec(mousePos, rect, Rotation * Math.PI / 180, rotOrigin);
+        Hovered = WmeUtils.CheckCollisionPointRotatedRec(mousePos, rect, Rotation * Math.PI / 180, rotOrigin);
         Value = currentValue;
 
         if (!allowDragging)

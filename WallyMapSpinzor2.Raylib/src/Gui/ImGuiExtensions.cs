@@ -409,7 +409,7 @@ public static class ImGuiExt
             changed |= edit(i);
             if (WithDisabledButton(!allowRemove, $"Remove##{value.GetHashCode()}"))
             {
-                T[] result = Wms2RlUtils.RemoveAt(values, i);
+                T[] result = WmeUtils.RemoveAt(values, i);
                 commands.Add((new PropChangeCommand<T[]>(changeCommand, values, result), false));
                 changed = true;
             }
@@ -418,14 +418,14 @@ public static class ImGuiExt
                 ImGui.SameLine();
                 if (WithDisabledButton(i == 0, $"Move up##{value.GetHashCode()}"))
                 {
-                    T[] result = Wms2RlUtils.MoveUp(values, i);
+                    T[] result = WmeUtils.MoveUp(values, i);
                     commands.Add((new PropChangeCommand<T[]>(changeCommand, values, result), false));
                     changed = true;
                 }
                 ImGui.SameLine();
                 if (WithDisabledButton(i == values.Length - 1, $"Move down##{value.GetHashCode()}"))
                 {
-                    T[] result = Wms2RlUtils.MoveDown(values, i);
+                    T[] result = WmeUtils.MoveDown(values, i);
                     commands.Add((new PropChangeCommand<T[]>(changeCommand, values, result), false));
                     changed = true;
                 }

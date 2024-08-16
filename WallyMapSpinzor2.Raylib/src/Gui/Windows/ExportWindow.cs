@@ -169,7 +169,7 @@ public class ExportWindow(PathPreferences prefs)
                 foreach (string path in backedUpFiles)
                 {
                     if (File.Exists(path)) File.Delete(path);
-                    File.Move(Wms2RlUtils.CreateBackupPath(path, backupNum), path);
+                    File.Move(WmeUtils.CreateBackupPath(path, backupNum), path);
                 }
 
                 RefreshBackupList(prefs.BrawlhallaPath);
@@ -186,7 +186,7 @@ public class ExportWindow(PathPreferences prefs)
                 int backupNum = _backupNums[_selectedBackupIndex];
                 foreach (string path in backedUpFiles)
                 {
-                    string backupPath = Wms2RlUtils.CreateBackupPath(path, backupNum);
+                    string backupPath = WmeUtils.CreateBackupPath(path, backupNum);
                     if (File.Exists(backupPath)) File.Delete(backupPath);
                 }
 
@@ -205,7 +205,7 @@ public class ExportWindow(PathPreferences prefs)
         if (_descPreview is not null)
             ImGui.InputTextMultiline("leveldesc##preview", ref _descPreview, uint.MaxValue, new Vector2(-1, ImGui.GetTextLineHeight() * PREVIEW_SIZE));
         else if (ImGui.Button("Generate preview"))
-            _descPreview = Wms2RlUtils.SerializeToString(ld, bhstyle: true);
+            _descPreview = WmeUtils.SerializeToString(ld, bhstyle: true);
 
         if (ImGui.Button("Export"))
         {
@@ -215,7 +215,7 @@ public class ExportWindow(PathPreferences prefs)
                 DialogResult result = Dialog.FileSave("xml", Path.GetDirectoryName(prefs.LevelDescPath));
                 if (result.IsOk)
                 {
-                    Wms2RlUtils.SerializeToPath(ld, result.Path, bhstyle: true);
+                    WmeUtils.SerializeToPath(ld, result.Path, bhstyle: true);
                     prefs.LevelDescPath = result.Path;
                     _exportError = null;
                 }
@@ -232,7 +232,7 @@ public class ExportWindow(PathPreferences prefs)
         if (_typePreview is not null)
             ImGui.InputTextMultiline("leveltype##preview", ref _typePreview, uint.MaxValue, new Vector2(-1, ImGui.GetTextLineHeight() * PREVIEW_SIZE));
         else if (ImGui.Button("Generate preview"))
-            _typePreview = Wms2RlUtils.SerializeToString(l.Type, bhstyle: true);
+            _typePreview = WmeUtils.SerializeToString(l.Type, bhstyle: true);
 
         ImGui.Checkbox("Add to LevelTypes.xml", ref _addToLt);
         if (_addToLt)
@@ -258,13 +258,13 @@ public class ExportWindow(PathPreferences prefs)
                     try
                     {
                         _exportStatus = "exporting...";
-                        LevelTypes lts = Wms2RlUtils.DeserializeFromPath<LevelTypes>(prefs.LevelTypesPath!, bhstyle: true);
+                        LevelTypes lts = WmeUtils.DeserializeFromPath<LevelTypes>(prefs.LevelTypesPath!, bhstyle: true);
                         if (lts.Levels.Length == 0) throw new Exception($"Could not read LevelTypes.xml from given path {prefs.LevelTypesPath}");
                         lts.AddOrUpdateLevelType(l.Type);
                         DialogResult result = Dialog.FileSave("xml", Path.GetDirectoryName(prefs.LevelTypesPath));
                         if (result.IsOk)
                         {
-                            Wms2RlUtils.SerializeToPath(lts, result.Path, bhstyle: true);
+                            WmeUtils.SerializeToPath(lts, result.Path, bhstyle: true);
                             _exportError = null;
                         }
                         _exportStatus = null;
@@ -287,7 +287,7 @@ public class ExportWindow(PathPreferences prefs)
                 if (result.IsOk)
                 {
                     _exportStatus = "exporting...";
-                    Wms2RlUtils.SerializeToPath(l.Type, result.Path, bhstyle: true);
+                    WmeUtils.SerializeToPath(l.Type, result.Path, bhstyle: true);
                     prefs.LevelTypePath = result.Path;
                     _exportError = null;
                     _exportStatus = null;
@@ -324,31 +324,31 @@ public class ExportWindow(PathPreferences prefs)
 
         if (ImGuiExt.WithDisabledButton(string.IsNullOrEmpty(prefs.LevelSetTypesPath), "Export##lst"))
         {
-            LevelSetTypes levelSetTypes = Wms2RlUtils.DeserializeFromPath<LevelSetTypes>(prefs.LevelSetTypesPath!, bhstyle: true);
+            LevelSetTypes levelSetTypes = WmeUtils.DeserializeFromPath<LevelSetTypes>(prefs.LevelSetTypesPath!, bhstyle: true);
             UpdatePlaylists(levelSetTypes, l);
 
             Task.Run(() =>
             {
                 DialogResult result = Dialog.FileSave("xml", Path.GetDirectoryName(prefs.LevelSetTypesPath));
                 if (result.IsOk)
-                    Wms2RlUtils.SerializeToPath(levelSetTypes, result.Path, bhstyle: true);
+                    WmeUtils.SerializeToPath(levelSetTypes, result.Path, bhstyle: true);
             });
         }
     }
 
     public void ExportToGameSwzFiles(Level l, bool backup)
     {
-        if (!Wms2RlUtils.IsValidBrawlPath(prefs.BrawlhallaPath))
+        if (!WmeUtils.IsValidBrawlPath(prefs.BrawlhallaPath))
             throw new InvalidDataException("Selected brawlhalla path is invalid");
         _exportStatus = "finding swz key...";
-        if (Wms2RlUtils.GetDoABCDefineTag(Path.Combine(prefs.BrawlhallaPath!, "BrawlhallaAir.swf")) is not DoABCDefineTag abcTag)
+        if (WmeUtils.GetDoABCDefineTag(Path.Combine(prefs.BrawlhallaPath!, "BrawlhallaAir.swf")) is not DoABCDefineTag abcTag)
             throw new InvalidDataException("Could not find decryption key");
         AbcFile abcFile = AbcFile.Read(new MemoryStream(abcTag.ABCData));
 
-        uint key = Wms2RlUtils.FindDecryptionKey(abcFile) ?? throw new InvalidDataException("Could not find decryption key");
+        uint key = WmeUtils.FindDecryptionKey(abcFile) ?? throw new InvalidDataException("Could not find decryption key");
         prefs.DecryptionKey = key.ToString();
         _exportStatus = "found!";
-        string ldData = Wms2RlUtils.SerializeToString(l.Desc, minify: true, bhstyle: true);
+        string ldData = WmeUtils.SerializeToString(l.Desc, minify: true, bhstyle: true);
 
         string dynamicPath = Path.Combine(prefs.BrawlhallaPath!, "Dynamic.swz");
         string initPath = Path.Combine(prefs.BrawlhallaPath!, "Init.swz");
@@ -357,36 +357,36 @@ public class ExportWindow(PathPreferences prefs)
         if (backup)
         {
             _exportStatus = "creating backup...";
-            Wms2RlUtils.CreateBackupOfFile(dynamicPath);
-            Wms2RlUtils.CreateBackupOfFile(initPath);
-            Wms2RlUtils.CreateBackupOfFile(gamePath);
+            WmeUtils.CreateBackupOfFile(dynamicPath);
+            WmeUtils.CreateBackupOfFile(initPath);
+            WmeUtils.CreateBackupOfFile(gamePath);
         }
 
         _exportStatus = "reading swz...";
 
         Dictionary<string, string> dynamicFiles = [];
-        foreach (string content in Wms2RlUtils.GetFilesInSwz(dynamicPath, key))
+        foreach (string content in WmeUtils.GetFilesInSwz(dynamicPath, key))
             dynamicFiles.Add(SwzUtils.GetFileName(content), content);
         dynamicFiles[SwzUtils.GetFileName(ldData)] = ldData;
 
         Dictionary<string, string> initFiles = [];
-        foreach (string content in Wms2RlUtils.GetFilesInSwz(initPath, key))
+        foreach (string content in WmeUtils.GetFilesInSwz(initPath, key))
             initFiles.Add(SwzUtils.GetFileName(content), content);
-        LevelTypes lts = Wms2RlUtils.DeserializeFromString<LevelTypes>(initFiles["LevelTypes.xml"], bhstyle: true);
+        LevelTypes lts = WmeUtils.DeserializeFromString<LevelTypes>(initFiles["LevelTypes.xml"], bhstyle: true);
         lts.AddOrUpdateLevelType(l.Type ?? throw new ArgumentNullException("l.Type"));
-        initFiles["LevelTypes.xml"] = Wms2RlUtils.SerializeToString(lts, minify: true, bhstyle: true);
+        initFiles["LevelTypes.xml"] = WmeUtils.SerializeToString(lts, minify: true, bhstyle: true);
 
         Dictionary<string, string> gameFiles = [];
-        foreach (string content in Wms2RlUtils.GetFilesInSwz(gamePath, key))
+        foreach (string content in WmeUtils.GetFilesInSwz(gamePath, key))
             gameFiles.Add(SwzUtils.GetFileName(content), content);
-        LevelSetTypes lst = Wms2RlUtils.DeserializeFromString<LevelSetTypes>(gameFiles["LevelSetTypes.xml"], bhstyle: true);
+        LevelSetTypes lst = WmeUtils.DeserializeFromString<LevelSetTypes>(gameFiles["LevelSetTypes.xml"], bhstyle: true);
         UpdatePlaylists(lst, l);
-        gameFiles["LevelSetTypes.xml"] = Wms2RlUtils.SerializeToString(lst, minify: true, bhstyle: true);
+        gameFiles["LevelSetTypes.xml"] = WmeUtils.SerializeToString(lst, minify: true, bhstyle: true);
 
         _exportStatus = "creating new swz...";
-        Wms2RlUtils.SerializeSwzFilesToPath(dynamicPath, dynamicFiles.Values, key);
-        Wms2RlUtils.SerializeSwzFilesToPath(initPath, initFiles.Values, key);
-        Wms2RlUtils.SerializeSwzFilesToPath(gamePath, gameFiles.Values, key);
+        WmeUtils.SerializeSwzFilesToPath(dynamicPath, dynamicFiles.Values, key);
+        WmeUtils.SerializeSwzFilesToPath(initPath, initFiles.Values, key);
+        WmeUtils.SerializeSwzFilesToPath(gamePath, gameFiles.Values, key);
 
         RefreshBackupList(prefs.BrawlhallaPath!);
     }
@@ -394,9 +394,9 @@ public class ExportWindow(PathPreferences prefs)
     private static int[] FindBackups(string dir)
     {
         string[] requiredFiles(int num) => [
-            Wms2RlUtils.CreateBackupPath(Path.Combine(dir, "Dynamic.swz"), num),
-            Wms2RlUtils.CreateBackupPath(Path.Combine(dir, "Init.swz"), num),
-            Wms2RlUtils.CreateBackupPath(Path.Combine(dir, "Game.swz"), num),
+            WmeUtils.CreateBackupPath(Path.Combine(dir, "Dynamic.swz"), num),
+            WmeUtils.CreateBackupPath(Path.Combine(dir, "Init.swz"), num),
+            WmeUtils.CreateBackupPath(Path.Combine(dir, "Game.swz"), num),
         ];
 
         int[] validBackupNumbers = Directory.EnumerateFiles(dir)

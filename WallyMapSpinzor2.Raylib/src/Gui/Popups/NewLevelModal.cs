@@ -51,7 +51,7 @@ public static class NewLevelModal
             Task.Run(() =>
             {
                 DialogResult result = Dialog.FolderPicker(prefs.BrawlhallaPath);
-                if (result.IsOk && Wms2RlUtils.IsValidBrawlPath(result.Path))
+                if (result.IsOk && WmeUtils.IsValidBrawlPath(result.Path))
                     prefs.BrawlhallaPath = result.Path;
             });
         }

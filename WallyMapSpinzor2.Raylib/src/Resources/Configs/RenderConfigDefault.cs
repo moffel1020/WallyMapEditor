@@ -27,7 +27,7 @@ public class RenderConfigDefault : IDeserializable, ISerializable
             Directory.CreateDirectory(dir);
             if (File.Exists(FilePath))
             {
-                return Wms2RlUtils.DeserializeFromPath<RenderConfigDefault>(FilePath);
+                return WmeUtils.DeserializeFromPath<RenderConfigDefault>(FilePath);
             }
         }
 
@@ -36,7 +36,7 @@ public class RenderConfigDefault : IDeserializable, ISerializable
 
     public void Save()
     {
-        Wms2RlUtils.SerializeToPath(this, FilePath);
+        WmeUtils.SerializeToPath(this, FilePath);
     }
 
     public void Deserialize(XElement e)
@@ -58,7 +58,7 @@ public class RenderConfigDefault : IDeserializable, ISerializable
             else
                 try
                 {
-                    ConfigDefault = Wms2RlUtils.DeserializeFromPath<RenderConfigDefault>(defaultConfig).ConfigDefault;
+                    ConfigDefault = WmeUtils.DeserializeFromPath<RenderConfigDefault>(defaultConfig).ConfigDefault;
                 }
                 catch
                 {

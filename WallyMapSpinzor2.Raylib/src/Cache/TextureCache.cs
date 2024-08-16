@@ -7,7 +7,7 @@ public class TextureCache : UploadCache<string, RlImage, Texture2DWrapper>
     protected override RlImage LoadIntermediate(string path)
     {
         path = Path.GetFullPath(path);
-        RlImage image = Wms2RlUtils.LoadRlImage(path);
+        RlImage image = WmeUtils.LoadRlImage(path);
         Rl.ImageAlphaPremultiply(ref image);
         return image;
     }

@@ -93,7 +93,7 @@ public class MapOverviewWindow
                         {
                             string path = dialogResult.Path;
                             string newThumnailPNGFile = Path.GetRelativePath(thumbnailPath, path).Replace("\\", "/");
-                            if (!Wms2RlUtils.IsInDirectory(pathPrefs.BrawlhallaPath, path))
+                            if (!WmeUtils.IsInDirectory(pathPrefs.BrawlhallaPath, path))
                             {
                                 _thumbnailSelectError = "Thumbnail file has to be inside the brawlhalla directory";
                             }
@@ -284,7 +284,7 @@ public class MapOverviewWindow
                 {
                     if (selection.Object == o) selection.Object = null;
 
-                    T[] result = Wms2RlUtils.RemoveAt(values, i);
+                    T[] result = WmeUtils.RemoveAt(values, i);
                     cmd.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
                     cmd.SetAllowMerge(false);
                     _propChanged |= true;
@@ -297,7 +297,7 @@ public class MapOverviewWindow
                 // couldn't get unicode char to work
                 if (ImGui.Button($"^##{o.GetHashCode()}"))
                 {
-                    T[] result = Wms2RlUtils.MoveUp(values, i);
+                    T[] result = WmeUtils.MoveUp(values, i);
                     cmd.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
                     cmd.SetAllowMerge(false);
                     _propChanged |= true;
@@ -305,7 +305,7 @@ public class MapOverviewWindow
                 ImGui.SameLine();
                 if (ImGui.Button($"v##{o.GetHashCode()}"))
                 {
-                    T[] result = Wms2RlUtils.MoveDown(values, i);
+                    T[] result = WmeUtils.MoveDown(values, i);
                     cmd.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
                     cmd.SetAllowMerge(false);
                     _propChanged |= true;

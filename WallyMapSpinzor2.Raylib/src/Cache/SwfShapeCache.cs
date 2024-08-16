@@ -46,7 +46,7 @@ public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCach
             ImageSharpShapeExporter exporter = new(image, RASTER_SCALE * offset, 1f * SWF_UNIT_DIVISOR / RASTER_SCALE);
             compiledShape.Export(exporter);
             image.Mutate(ctx => ctx.Resize(imageW, imageH));
-            img = Wms2RlUtils.ImgSharpImageToRlImage(image);
+            img = WmeUtils.ImgSharpImageToRlImage(image);
         }
         Rl.ImageAlphaPremultiply(ref img);
         return new ShapeData(img, offsetX, offsetY);

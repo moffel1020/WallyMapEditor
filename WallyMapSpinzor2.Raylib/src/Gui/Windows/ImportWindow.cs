@@ -141,7 +141,7 @@ public class ImportWindow(PathPreferences prefs)
                 _loadingStatus = "loading...";
                 try
                 {
-                    LevelDesc ld = Wms2RlUtils.DeserializeFromString<LevelDesc>(levelDescFiles[_pickedFileName!], bhstyle: true);
+                    LevelDesc ld = WmeUtils.DeserializeFromString<LevelDesc>(levelDescFiles[_pickedFileName!], bhstyle: true);
                     _loadingStatus = null;
                     _loadingError = null;
                     editor.LoadMapFromLevel(new Level(ld, _decryptedLt, _decryptedLst), _boneNames, _powerNames);
@@ -178,10 +178,10 @@ public class ImportWindow(PathPreferences prefs)
             {
                 try
                 {
-                    if (Wms2RlUtils.GetDoABCDefineTag(prefs.BrawlhallaAirPath) is DoABCDefineTag abcTag)
+                    if (WmeUtils.GetDoABCDefineTag(prefs.BrawlhallaAirPath) is DoABCDefineTag abcTag)
                     {
                         AbcFile abc = AbcFile.Read(new MemoryStream(abcTag.ABCData));
-                        uint? key = Wms2RlUtils.FindDecryptionKey(abc);
+                        uint? key = WmeUtils.FindDecryptionKey(abc);
                         if (key is not null)
                         {
                             prefs.DecryptionKey = key.ToString();
@@ -319,7 +319,7 @@ public class ImportWindow(PathPreferences prefs)
         uint key = uint.Parse(prefs.DecryptionKey!);
 
         levelDescFiles.Clear();
-        foreach (string file in Wms2RlUtils.GetFilesInSwz(dynamicPath, key))
+        foreach (string file in WmeUtils.GetFilesInSwz(dynamicPath, key))
         {
             string name = SwzUtils.GetFileName(file);
             if (!name.StartsWith("LevelDesc_"))
@@ -327,10 +327,10 @@ public class ImportWindow(PathPreferences prefs)
             levelDescFiles.Add(name["LevelDesc_".Length..], file);
         }
 
-        _decryptedLt = Wms2RlUtils.DeserializeSwzFromPath<LevelTypes>(initPath, "LevelTypes.xml", key, bhstyle: true);
-        _decryptedLst = Wms2RlUtils.DeserializeSwzFromPath<LevelSetTypes>(gamePath, "LevelSetTypes.xml", key, bhstyle: true);
-        string? boneTypesContent = Wms2RlUtils.GetFileInSwzFromPath(initPath, "BoneTypes.xml", key);
-        string? powerTypesContent = Wms2RlUtils.GetFileInSwzFromPath(gamePath, "powerTypes.csv", key);
+        _decryptedLt = WmeUtils.DeserializeSwzFromPath<LevelTypes>(initPath, "LevelTypes.xml", key, bhstyle: true);
+        _decryptedLst = WmeUtils.DeserializeSwzFromPath<LevelSetTypes>(gamePath, "LevelSetTypes.xml", key, bhstyle: true);
+        string? boneTypesContent = WmeUtils.GetFileInSwzFromPath(initPath, "BoneTypes.xml", key);
+        string? powerTypesContent = WmeUtils.GetFileInSwzFromPath(gamePath, "powerTypes.csv", key);
         if (boneTypesContent is null)
             _boneNames = null;
         else
@@ -339,6 +339,6 @@ public class ImportWindow(PathPreferences prefs)
         }
 
         if (powerTypesContent is not null)
-            _powerNames = Wms2RlUtils.ParsePowerTypes(powerTypesContent);
+            _powerNames = WmeUtils.ParsePowerTypes(powerTypesContent);
     }
 }

@@ -27,7 +27,7 @@ using nietras.SeparatedValues;
 
 namespace WallyMapSpinzor2.Raylib;
 
-public static class Wms2RlUtils
+public static class WmeUtils
 {
     public static readonly XmlWriterSettings StandardSaveSettings = new()
     {

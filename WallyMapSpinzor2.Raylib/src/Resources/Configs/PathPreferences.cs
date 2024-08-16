@@ -39,7 +39,7 @@ public class PathPreferences : IDeserializable, ISerializable
             Directory.CreateDirectory(dir);
             if (File.Exists(FilePath))
             {
-                return Wms2RlUtils.DeserializeFromPath<PathPreferences>(FilePath);
+                return WmeUtils.DeserializeFromPath<PathPreferences>(FilePath);
             }
         }
 
@@ -48,7 +48,7 @@ public class PathPreferences : IDeserializable, ISerializable
 
     public void Save()
     {
-        Wms2RlUtils.SerializeToPath(this, FilePath);
+        WmeUtils.SerializeToPath(this, FilePath);
     }
 
     public void Deserialize(XElement e)

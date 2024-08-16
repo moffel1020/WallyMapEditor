@@ -25,7 +25,7 @@ public class RenderConfigWindow
 
     private static void SaveConfig(RenderConfig config, string path)
     {
-        Wms2RlUtils.SerializeToPath(config, path);
+        WmeUtils.SerializeToPath(config, path);
     }
 
     public void Show(RenderConfig config, RenderConfigDefault configDefault, PathPreferences prefs)
