@@ -1,4 +1,4 @@
-# WallyMapSpinzor2.Raylib
+# WallyMapEditor
 
 A map editor for Brawlhalla, using raylib for rendering. **Currently under development.**
 
@@ -8,11 +8,11 @@ make sure you have _git_ installed.
 
 download the code:
 
-`git clone --recurse-submodules https://github.com/moffel1020/WallyMapSpinzor2.Raylib.git`
+`git clone --recurse-submodules https://github.com/moffel1020/WallyMapEditor.git`
 
-run the project (inside the WallyMapSpinzor2.Raylib folder created by git clone):
+run the project (inside the WallyMapEditor folder created by git clone):
 
-`dotnet run --project WallyMapSpinzor2.Raylib`
+`dotnet run --project WallyMapEditor`
 
 _an exe will be provided in the future_
 
