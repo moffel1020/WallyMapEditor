@@ -10,9 +10,9 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/WallyMapSpinzor2.Raylib/bin/Debug/net8.0/WallyMapSpinzor2.Raylib.dll",
+            "program": "${workspaceFolder}/WallyMapEditor/bin/Debug/net8.0/WallyMapEditor.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/WallyMapSpinzor2.Raylib",
+            "cwd": "${workspaceFolder}/WallyMapEditor",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
             "stopAtEntry": false

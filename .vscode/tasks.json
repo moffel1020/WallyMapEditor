@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/WallyMapSpinzor2.Raylib/WallyMapSpinzor2.Raylib.csproj",
+                "${workspaceFolder}/WallyMapEditor/WallyMapEditor.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/WallyMapSpinzor2.Raylib/WallyMapSpinzor2.Raylib.csproj",
+                "${workspaceFolder}/WallyMapEditor/WallyMapEditor.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
@@ -33,7 +33,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/WallyMapSpinzor2.Raylib/WallyMapSpinzor2.Raylib.csproj"
+                "${workspaceFolder}/WallyMapEditor/WallyMapEditor.csproj"
             ],
             "problemMatcher": "$msCompile"
         }
