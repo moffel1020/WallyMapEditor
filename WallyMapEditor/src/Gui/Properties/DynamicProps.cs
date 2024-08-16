@@ -10,14 +10,17 @@ public partial class PropertiesWindow
         where T : IDeserializable, ISerializable, IDrawable
     {
         bool propChanged = false;
-        if (data.Level?.Desc is null)
-            ImGui.Text("PlatID: " + ad.PlatID);
-        else
+
+        string[] validPlatIds = data.Level?.Desc.Assets.OfType<MovingPlatform>().Select(mp => mp.PlatID).ToArray() ?? [];
+        if (validPlatIds.Length > 0)
         {
-            string[] validPlatIds = data.Level.Desc.Assets.OfType<MovingPlatform>().Select(mp => mp.PlatID).ToArray();
             propChanged |= ImGuiExt.GenericStringComboHistory("PlatID", ad.PlatID, val => ad.PlatID = val, val => val, val => val, validPlatIds, cmd);
             if (ImGui.Button("Select MovingPlatform"))
-                data.Selection.Object = data.Level.Desc.Assets.OfType<MovingPlatform>().Where(mp => mp.PlatID == ad.PlatID).Single();
+                data.Selection.Object = data.Level!.Desc.Assets.OfType<MovingPlatform>().Where(mp => mp.PlatID == ad.PlatID).Single();
+        }
+        else
+        {
+            ImGui.Text("PlatID: " + ad.PlatID);
         }
 
         propChanged |= ImGuiExt.DragDoubleHistory("X", ad.X, val => ad.X = val, cmd);
