@@ -19,8 +19,11 @@ public class ItemSpawnOverlay(AbstractItemSpawn item) : IOverlay
         ResizableBox.CircleRadius = data.OverlayConfig.RadiusItemSpawnCorner;
 
         (double offsetX, double offsetY) = (0, 0);
-        if (item.Parent is not null && data.Context.PlatIDDynamicOffset.TryGetValue(item.Parent.PlatID, out (double, double) dynOffset))
-            (offsetX, offsetY) = (item.Parent.X + dynOffset.Item1, item.Parent.Y + dynOffset.Item2);
+        if (item.Parent is not null)
+        {
+            (double dynOffsetX, double dynOffsetY) = item.Parent.GetOffset(data.Context);
+            (offsetX, offsetY) = (dynOffsetX + item.Parent.X, dynOffsetY + item.Parent.Y);
+        }
 
         ResizableBox.Update(data, item.X + offsetX, item.Y + offsetY, item.W, item.H);
         (double x, double y, double w, double h) = ResizableBox.Bounds;

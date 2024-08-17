@@ -13,8 +13,11 @@ public class RespawnOverlay(Respawn res) : IOverlay
     public bool Update(OverlayData data, CommandHistory cmd)
     {
         (double offsetX, double offsetY) = (0, 0);
-        if (res.Parent is not null && data.Context.PlatIDDynamicOffset.TryGetValue(res.Parent.PlatID, out (double, double) dynOffset))
-            (offsetX, offsetY) = (res.Parent.X + dynOffset.Item1, res.Parent.Y + dynOffset.Item2);
+        if (res.Parent is not null)
+        {
+            (double dynOffsetX, double dynOffsetY) = res.Parent.GetOffset(data.Context);
+            (offsetX, offsetY) = (dynOffsetX + res.Parent.X, dynOffsetY + res.Parent.Y);
+        }
 
         Box.W = data.RenderConfig.RadiusRespawn * 2 + data.OverlayConfig.SizeOffsetRespawnBox;
         Box.H = data.RenderConfig.RadiusRespawn * 2 + data.OverlayConfig.SizeOffsetRespawnBox;

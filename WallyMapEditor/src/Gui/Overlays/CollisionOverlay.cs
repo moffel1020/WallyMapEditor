@@ -31,10 +31,10 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
 
         (double offsetX, double offsetY) = (0, 0);
         (double dynOffsetX, double dynOffsetY) = (0, 0);
-        if (col.Parent is not null && data.Context.PlatIDDynamicOffset.TryGetValue(col.Parent.PlatID, out (double, double) dynOffset))
+        if (col.Parent is not null)
         {
-            (offsetX, offsetY) = (col.Parent.X + dynOffset.Item1, col.Parent.Y + dynOffset.Item2);
-            (dynOffsetX, dynOffsetY) = dynOffset;
+            (dynOffsetX, dynOffsetY) = col.Parent.GetOffset(data.Context);
+            (offsetX, offsetY) = (dynOffsetX + col.Parent.X, dynOffsetY + col.Parent.Y);
         }
 
         (Circle1.X, Circle1.Y) = (col.X1 + offsetX, col.Y1 + offsetY);

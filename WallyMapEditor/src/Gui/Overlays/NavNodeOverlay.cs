@@ -15,8 +15,11 @@ public class NavNodeOverlay(NavNode node) : IOverlay
     public bool Update(OverlayData data, CommandHistory cmd)
     {
         (double offsetX, double offsetY) = (0, 0);
-        if (node.Parent is not null && data.Context.PlatIDDynamicOffset.TryGetValue(node.Parent.PlatID, out (double, double) dynOffset))
-            (offsetX, offsetY) = (node.Parent.X + dynOffset.Item1, node.Parent.Y + dynOffset.Item2);
+        if (node.Parent is not null)
+        {
+            (double dynOffsetX, double dynOffsetY) = node.Parent.GetOffset(data.Context);
+            (offsetX, offsetY) = (node.Parent.X + dynOffsetX, node.Parent.Y + dynOffsetY);
+        }
 
         Box.W = data.RenderConfig.RadiusNavNode * 2 + data.OverlayConfig.SizeOffsetNavNodeBox;
         Box.H = data.RenderConfig.RadiusNavNode * 2 + data.OverlayConfig.SizeOffsetNavNodeBox;
