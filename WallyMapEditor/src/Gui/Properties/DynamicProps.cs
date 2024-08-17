@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using WallyMapSpinzor2;
 using ImGuiNET;
@@ -11,17 +12,34 @@ public partial class PropertiesWindow
     {
         bool propChanged = false;
 
-        string[] validPlatIds = data.Level?.Desc.Assets.OfType<MovingPlatform>().Select(mp => mp.PlatID).ToArray() ?? [];
-        if (validPlatIds.Length > 0)
+        string[] knownPlatIds = data.Level?.Desc.Assets.OfType<MovingPlatform>().Select(mp => mp.PlatID).ToArray() ?? [];
+        if (data.Level is not null && knownPlatIds.Contains(ad.PlatID))
         {
-            propChanged |= ImGuiExt.GenericStringComboHistory("PlatID", ad.PlatID, val => ad.PlatID = val, val => val, val => val, validPlatIds, cmd);
-            if (ImGui.Button("Select MovingPlatform"))
-                data.Selection.Object = data.Level!.Desc.Assets.OfType<MovingPlatform>().Where(mp => mp.PlatID == ad.PlatID).Single();
+            ImGui.Text("Animated by MovingPlatform");
+            ImGui.SameLine();
+            if (ImGui.Button($"({ad.PlatID})"))
+                data.Selection.Object = data.Level.Desc.Assets.OfType<MovingPlatform>().Last(mp => mp.PlatID == ad.PlatID);
         }
-        else
+
+        propChanged |= ImGuiExt.InputTextHistory("##platid", ad.PlatID, val => ad.PlatID = val, cmd);
+        if (knownPlatIds.Length > 0)
         {
-            ImGui.Text("PlatID: " + ad.PlatID);
+            ImGui.SameLine();
+            if (ImGui.BeginCombo("##platidselect", ad.PlatID, ImGuiComboFlags.NoPreview | ImGuiComboFlags.PopupAlignLeft))
+            {
+                foreach (string id in knownPlatIds)
+                {
+                    if (ImGui.Selectable(id, id == ad.PlatID))
+                    {
+                        cmd.Add(new PropChangeCommand<string>(val => ad.PlatID = val, ad.PlatID, id));
+                        cmd.SetAllowMerge(false);
+                    }
+                }
+                ImGui.EndCombo();
+            }
         }
+        ImGui.SameLine();
+        ImGui.Text("PlatID");
 
         propChanged |= ImGuiExt.DragDoubleHistory("X", ad.X, val => ad.X = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory("Y", ad.Y, val => ad.Y = val, cmd);
