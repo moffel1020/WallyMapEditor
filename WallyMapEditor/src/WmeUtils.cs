@@ -148,7 +148,6 @@ public static class WmeUtils
         where T : ISerializable
     {
         XElement e = serializable.SerializeToXElement();
-        using FileStream toFile = new(toPath, FileMode.Create, FileAccess.Write);
         if (bhstyle)
         {
             SerializeToPath(serializable, toPath, minify, bhstyle: false);
@@ -160,6 +159,7 @@ public static class WmeUtils
         }
         else
         {
+            using FileStream toFile = new(toPath, FileMode.Create, FileAccess.Write);
             using XmlWriter writer = XmlWriter.Create(toFile, minify ? MinifiedSaveSettings : StandardSaveSettings);
             e.Save(writer);
         }
