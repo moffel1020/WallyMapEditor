@@ -364,8 +364,8 @@ public class ImportWindow(PathPreferences prefs)
     private void ShowFileImportTab(Editor editor)
     {
         ImGui.PushTextWrapPos();
-        ImGui.Text("Import from LevelDesc xml file, LevelTypes.xml, and LevelSetTypes.xml");
-        ImGui.Text("If LevelTypes.xml is not selected or it does not contain the level a default LevelType will be generated");
+        ImGui.Text("Import from individual xml and csv files");
+        ImGui.Text("When importing from the game these files are loaded from the swz's. You can override them with your own xml or csv files.");
         ImGui.PopTextWrapPos();
 
         ImGui.Spacing();
