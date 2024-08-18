@@ -8,7 +8,7 @@ public partial class PropertiesWindow
     public static bool ShowMovingPlatformProps(MovingPlatform mp, CommandHistory cmd, PropertiesWindowData data)
     {
         bool propChanged = false;
-        ImGui.Text("PlatID: " + mp.PlatID);
+        propChanged |= ImGuiExt.InputTextHistory("PlatID", mp.PlatID, val => mp.PlatID = val, cmd, 32);
         propChanged |= ImGuiExt.DragDoubleHistory("X##mp", mp.X, val => mp.X = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory("Y##mp", mp.Y, val => mp.Y = val, cmd);
         if (ImGui.CollapsingHeader("Animation"))

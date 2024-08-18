@@ -27,7 +27,7 @@ public static class AddObjectPopup
 
         if (ImGui.BeginMenu("Collision")) { AddDynamicCollisionMenuHistory(NewPos, l, selection, cmd); ImGui.EndMenu(); }
         if (ImGui.BeginMenu("ItemSpawn")) { AddDynamicItemSpawnMenuHistory(NewPos, l, selection, cmd); ImGui.EndMenu(); }
-        if (ImGui.BeginMenu("Respawn")) { AddDynamicRespawnMenuHistory(NewPos, l, selection, cmd); ImGui.EndMenu(); } 
+        if (ImGui.BeginMenu("Respawn")) { AddDynamicRespawnMenuHistory(NewPos, l, selection, cmd); ImGui.EndMenu(); }
         if (ImGui.BeginMenu("Platform")) { AddMovingPlatformMenuHistory(NewPos, l, selection, cmd); ImGui.EndMenu(); }
 
         ImGui.EndPopup();
@@ -114,20 +114,17 @@ public static class AddObjectPopup
             selection, cmd);
 
     public static void AddDynamicRespawnMenuHistory(Vector2 pos, Level l, SelectionContext selection, CommandHistory cmd) =>
-        AddObjectWithDynamicMenuHistory<Respawn, DynamicRespawn>(pos, "DynamicRespawn", position =>
-        {
-            if (ImGui.MenuItem("Respawn")) return PropertiesWindow.DefaultRespawn(position);
-            else return new();
-        },
-        newVal => cmd.Add(new PropChangeCommand<Respawn[]>(val => l.Desc.Respawns = val, l.Desc.Respawns, [.. l.Desc.Respawns, newVal])),
-        newVal => cmd.Add(new PropChangeCommand<DynamicRespawn[]>(val => l.Desc.DynamicRespawns = val, l.Desc.DynamicRespawns, [.. l.Desc.DynamicRespawns, newVal])),
-        selection, cmd);
+        AddObjectWithDynamicMenuHistory<Respawn, DynamicRespawn>(pos, "DynamicRespawn",
+            position => ImGui.MenuItem("Respawn") ? PropertiesWindow.DefaultRespawn(position) : Maybe<Respawn>.None,
+            newVal => cmd.Add(new PropChangeCommand<Respawn[]>(val => l.Desc.Respawns = val, l.Desc.Respawns, [.. l.Desc.Respawns, newVal])),
+            newVal => cmd.Add(new PropChangeCommand<DynamicRespawn[]>(val => l.Desc.DynamicRespawns = val, l.Desc.DynamicRespawns, [.. l.Desc.DynamicRespawns, newVal])),
+            selection, cmd);
 
     public static void AddDynamicCollisionMenuHistory(Vector2 pos, Level l, SelectionContext selection, CommandHistory cmd) =>
         AddObjectWithDynamicMenuHistory<AbstractCollision, DynamicCollision>(pos, "DynamicCollision", AddCollisionMenu,
-        newVal => cmd.Add(new PropChangeCommand<AbstractCollision[]>(val => l.Desc.Collisions = val, l.Desc.Collisions, [.. l.Desc.Collisions, newVal])),
-        newVal => cmd.Add(new PropChangeCommand<DynamicCollision[]>(val => l.Desc.DynamicCollisions = val, l.Desc.DynamicCollisions, [.. l.Desc.DynamicCollisions, newVal])),
-        selection, cmd);
+            newVal => cmd.Add(new PropChangeCommand<AbstractCollision[]>(val => l.Desc.Collisions = val, l.Desc.Collisions, [.. l.Desc.Collisions, newVal])),
+            newVal => cmd.Add(new PropChangeCommand<DynamicCollision[]>(val => l.Desc.DynamicCollisions = val, l.Desc.DynamicCollisions, [.. l.Desc.DynamicCollisions, newVal])),
+            selection, cmd);
 
     public static void AddMovingPlatformMenuHistory(Vector2 pos, Level l, SelectionContext selection, CommandHistory cmd)
     {
@@ -135,9 +132,14 @@ public static class AddObjectPopup
         if (ImGui.MenuItem("MovingPlatform"))
         {
             maybeAsset = new MovingPlatform()
-            { 
-                PlatID = "0", X = pos.X, Y = pos.Y, Assets = [], ScaleX = 1, ScaleY = 1,
-                Animation = new() { NumFrames = 1, KeyFrames = [new KeyFrame() { X = 0, Y = 0, FrameNum = 1}] } 
+            {
+                PlatID = "0",
+                X = pos.X,
+                Y = pos.Y,
+                Assets = [],
+                ScaleX = 1,
+                ScaleY = 1,
+                Animation = new() { NumFrames = 1, KeyFrames = [new KeyFrame() { X = 0, Y = 0, FrameNum = 1 }] }
             };
         }
 
