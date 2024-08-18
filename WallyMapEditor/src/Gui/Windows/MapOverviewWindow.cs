@@ -193,22 +193,14 @@ public class MapOverviewWindow
 
         ImGui.Separator();
 
-        void addButton<T>(string id, T[] values, Func<Maybe<T>> menu, Action<T[]> change)
+        static void addButton(string id, Action menu)
         {
             if (ImGui.Button($"+##{id}"))
                 ImGui.OpenPopup($"AddObject_{id}");
 
             if (ImGui.BeginPopup($"AddObject_{id}"))
             {
-                Maybe<T> result = menu();
-                if (result.TryGetValue(out T? val))
-                {
-                    cmd.Add(new PropChangeCommand<T[]>(change, values, [.. values, val]));
-                    cmd.SetAllowMerge(false);
-                    _propChanged = true;
-                    selection.Object = val;
-                    ImGui.CloseCurrentPopup();
-                }
+                menu();
                 ImGui.EndPopup();
             }
         }
@@ -225,28 +217,28 @@ public class MapOverviewWindow
             ShowSelectableList(l.Desc.AnimatedBackgrounds, selection, val => l.Desc.AnimatedBackgrounds = val, cmd, movable: true);
             ShowSelectableList(l.Desc.LevelAnimations, selection, val => l.Desc.LevelAnimations = val, cmd, movable: true);
         },
-        () => addButton("asset", l.Desc.Assets, () => AddObjectPopup.AddAssetMenu(new(0, 0)), val => l.Desc.Assets = val));
+        () => addButton("asset", () => AddObjectPopup.AddMovingPlatformMenuHistory(new(0, 0), l, selection, cmd)));
 
         ImGuiExt.HeaderWithWidget("Collisions##overview", () =>
         {
             ShowSelectableList(l.Desc.Collisions, selection, val => l.Desc.Collisions = val, cmd);
             ShowSelectableList(l.Desc.DynamicCollisions, selection, val => l.Desc.DynamicCollisions = val, cmd);
         },
-        () => addButton("collision", l.Desc.Collisions, () => AddObjectPopup.AddCollisionMenu(new(0, 0)), val => l.Desc.Collisions = val));
+        () => addButton("collision", () => AddObjectPopup.AddDynamicCollisionMenuHistory(new(0, 0), l, selection, cmd)));
 
         ImGuiExt.HeaderWithWidget("Respawns##overview", () =>
         {
             ShowSelectableList(l.Desc.Respawns, selection, val => l.Desc.Respawns = val, cmd);
             ShowSelectableList(l.Desc.DynamicRespawns, selection, val => l.Desc.DynamicRespawns = val, cmd);
         },
-        () => addButton("respawn", l.Desc.Respawns, () => PropertiesWindow.DefaultRespawn(new(0, 0)), val => l.Desc.Respawns = val));
+        () => addButton("respawn", () => AddObjectPopup.AddDynamicRespawnMenuHistory(new(0, 0), l, selection, cmd)));
 
         ImGuiExt.HeaderWithWidget("Item Spawns##overview", () =>
         {
             ShowSelectableList(l.Desc.ItemSpawns, selection, val => l.Desc.ItemSpawns = val, cmd);
             ShowSelectableList(l.Desc.DynamicItemSpawns, selection, val => l.Desc.DynamicItemSpawns = val, cmd);
         },
-        () => addButton("itemspawn", l.Desc.ItemSpawns, () => AddObjectPopup.AddItemSpawnMenu(new(0, 0)), val => l.Desc.ItemSpawns = val));
+        () => addButton("itemspawn", () => AddObjectPopup.AddDynamicItemSpawnMenuHistory(new(0, 0), l, selection, cmd)));
 
         if (ImGui.CollapsingHeader("Volumes##overview"))
         {

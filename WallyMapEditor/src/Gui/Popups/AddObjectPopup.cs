@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using WallyMapSpinzor2;
 using ImGuiNET;
@@ -23,49 +24,11 @@ public static class AddObjectPopup
         if (!ImGui.BeginPopup(NAME)) return;
 
         ImGui.SeparatorText("Add new object");
-        if (ImGui.BeginMenu("Collision"))
-        {
-            Maybe<AbstractCollision> maybeAc = AddCollisionMenu(NewPos);
-            if (maybeAc.TryGetValue(out AbstractCollision? ac))
-            {
-                cmd.Add(new PropChangeCommand<AbstractCollision[]>(val => l.Desc.Collisions = val, l.Desc.Collisions, [.. l.Desc.Collisions, ac]));
-                cmd.SetAllowMerge(false);
-                selection.Object = ac;
-            }
 
-            ImGui.EndMenu();
-        }
-        if (ImGui.BeginMenu("ItemSpawn"))
-        {
-            Maybe<AbstractItemSpawn> maybeItem = AddItemSpawnMenu(NewPos);
-            if (maybeItem.TryGetValue(out AbstractItemSpawn? item))
-            {
-                cmd.Add(new PropChangeCommand<AbstractItemSpawn[]>(val => l.Desc.ItemSpawns = val, l.Desc.ItemSpawns, [.. l.Desc.ItemSpawns, item]));
-                cmd.SetAllowMerge(false);
-                selection.Object = item;
-            }
-
-            ImGui.EndMenu();
-        }
-        if (ImGui.MenuItem("Respawn"))
-        {
-            Respawn res = PropertiesWindow.DefaultRespawn(NewPos);
-            cmd.Add(new PropChangeCommand<Respawn[]>(val => l.Desc.Respawns = val, l.Desc.Respawns, [.. l.Desc.Respawns, res]));
-            cmd.SetAllowMerge(false);
-            selection.Object = res;
-            ImGui.CloseCurrentPopup();
-        }
-        if (ImGui.BeginMenu("Platform"))
-        {
-            Maybe<AbstractAsset> maybeAsset = AddAssetMenu(NewPos);
-            if (maybeAsset.TryGetValue(out AbstractAsset? asset))
-            {
-                cmd.Add(new PropChangeCommand<AbstractAsset[]>(val => l.Desc.Assets = val, l.Desc.Assets, [.. l.Desc.Assets, asset]));
-                cmd.SetAllowMerge(false);
-                selection.Object = asset;
-            }
-            ImGui.EndMenu();
-        }
+        if (ImGui.BeginMenu("Collision")) { AddDynamicCollisionMenuHistory(NewPos, l, selection, cmd); ImGui.EndMenu(); }
+        if (ImGui.BeginMenu("ItemSpawn")) { AddDynamicItemSpawnMenuHistory(NewPos, l, selection, cmd); ImGui.EndMenu(); }
+        if (ImGui.BeginMenu("Respawn")) { AddDynamicRespawnMenuHistory(NewPos, l, selection, cmd); ImGui.EndMenu(); } 
+        if (ImGui.BeginMenu("Platform")) { AddMovingPlatformMenuHistory(NewPos, l, selection, cmd); ImGui.EndMenu(); }
 
         ImGui.EndPopup();
     }
@@ -122,5 +85,67 @@ public static class AddObjectPopup
         if (ImGui.MenuItem("Platform with AssetName")) result = PropertiesWindow.DefaultPlatformWithAssetName(pos);
         if (ImGui.MenuItem("Platform without AssetName")) result = PropertiesWindow.DefaultPlatformWithoutAssetName(pos);
         return result;
+    }
+
+    private static void AddObjectWithDynamicMenuHistory<N, D>(Vector2 pos, string dynName, Func<Vector2, Maybe<N>> normalMenu, Action<N> normalCmdAdd, Action<D> dynamicCmdAdd, SelectionContext selection, CommandHistory cmd)
+        where D : AbstractDynamic<N>, new()
+        where N : ISerializable, IDeserializable, IDrawable
+    {
+        Maybe<N> maybeItem = normalMenu(pos);
+        if (maybeItem.TryGetValue(out N? item))
+        {
+            normalCmdAdd(item);
+            cmd.SetAllowMerge(false);
+            selection.Object = item;
+        }
+        if (ImGui.MenuItem(dynName))
+        {
+            D dynamic = new() { X = pos.X, Y = pos.Y, Children = [], PlatID = "0" };
+            dynamicCmdAdd(dynamic);
+            cmd.SetAllowMerge(false);
+            selection.Object = dynamic;
+        }
+    }
+
+    public static void AddDynamicItemSpawnMenuHistory(Vector2 pos, Level l, SelectionContext selection, CommandHistory cmd) =>
+        AddObjectWithDynamicMenuHistory<AbstractItemSpawn, DynamicItemSpawn>(pos, "DynamicItemSpawn", AddItemSpawnMenu,
+            newVal => cmd.Add(new PropChangeCommand<AbstractItemSpawn[]>(val => l.Desc.ItemSpawns = val, l.Desc.ItemSpawns, [.. l.Desc.ItemSpawns, newVal])),
+            newVal => cmd.Add(new PropChangeCommand<DynamicItemSpawn[]>(val => l.Desc.DynamicItemSpawns = val, l.Desc.DynamicItemSpawns, [.. l.Desc.DynamicItemSpawns, newVal])),
+            selection, cmd);
+
+    public static void AddDynamicRespawnMenuHistory(Vector2 pos, Level l, SelectionContext selection, CommandHistory cmd) =>
+        AddObjectWithDynamicMenuHistory<Respawn, DynamicRespawn>(pos, "DynamicRespawn", position =>
+        {
+            if (ImGui.MenuItem("Respawn")) return PropertiesWindow.DefaultRespawn(position);
+            else return new();
+        },
+        newVal => cmd.Add(new PropChangeCommand<Respawn[]>(val => l.Desc.Respawns = val, l.Desc.Respawns, [.. l.Desc.Respawns, newVal])),
+        newVal => cmd.Add(new PropChangeCommand<DynamicRespawn[]>(val => l.Desc.DynamicRespawns = val, l.Desc.DynamicRespawns, [.. l.Desc.DynamicRespawns, newVal])),
+        selection, cmd);
+
+    public static void AddDynamicCollisionMenuHistory(Vector2 pos, Level l, SelectionContext selection, CommandHistory cmd) =>
+        AddObjectWithDynamicMenuHistory<AbstractCollision, DynamicCollision>(pos, "DynamicCollision", AddCollisionMenu,
+        newVal => cmd.Add(new PropChangeCommand<AbstractCollision[]>(val => l.Desc.Collisions = val, l.Desc.Collisions, [.. l.Desc.Collisions, newVal])),
+        newVal => cmd.Add(new PropChangeCommand<DynamicCollision[]>(val => l.Desc.DynamicCollisions = val, l.Desc.DynamicCollisions, [.. l.Desc.DynamicCollisions, newVal])),
+        selection, cmd);
+
+    public static void AddMovingPlatformMenuHistory(Vector2 pos, Level l, SelectionContext selection, CommandHistory cmd)
+    {
+        Maybe<AbstractAsset> maybeAsset = AddAssetMenu(pos, allowAsset: false);
+        if (ImGui.MenuItem("MovingPlatform"))
+        {
+            maybeAsset = new MovingPlatform()
+            { 
+                PlatID = "0", X = pos.X, Y = pos.Y, Assets = [], ScaleX = 1, ScaleY = 1,
+                Animation = new() { NumFrames = 1, KeyFrames = [new KeyFrame() { X = 0, Y = 0, FrameNum = 1}] } 
+            };
+        }
+
+        if (maybeAsset.TryGetValue(out AbstractAsset? asset))
+        {
+            cmd.Add(new PropChangeCommand<AbstractAsset[]>(val => l.Desc.Assets = val, l.Desc.Assets, [.. l.Desc.Assets, asset]));
+            cmd.SetAllowMerge(false);
+            selection.Object = asset;
+        }
     }
 }
