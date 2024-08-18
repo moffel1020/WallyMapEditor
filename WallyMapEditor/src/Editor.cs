@@ -1,7 +1,6 @@
 using System;
 using System.Numerics;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 using WallyMapSpinzor2;
@@ -23,10 +22,11 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
     public const int INITIAL_SCREEN_WIDTH = 800;
     public const int INITIAL_SCREEN_HEIGHT = 480;
 
-    public IDrawable? MapData { get; set; }
     PathPreferences PathPrefs { get; } = pathPrefs;
     RenderConfigDefault ConfigDefault { get; } = configDefault;
-    public string[]? BoneNames { get; set; }
+
+    public IDrawable? MapData { get; set; }
+    public BoneTypes? BoneTypes { get; set; }
     public string[]? PowerNames { get; set; }
 
     public RaylibCanvas? Canvas { get; set; }
@@ -103,14 +103,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
         _renderConfig.Deserialize(ConfigDefault.SerializeToXElement());
 
-        if (PathPrefs.LevelDescPath is not null && PathPrefs.BoneTypesPath is not null)
-        {
-            LoadMapFromPaths(PathPrefs.LevelDescPath, PathPrefs.LevelTypePath, PathPrefs.LevelSetTypesPath, PathPrefs.BoneTypesPath, PathPrefs.PowerTypesPath);
-        }
-        else
-        {
-            ImportDialog.Open = true;
-        }
+        ImportDialog.Open = true;
 
         Rl.SetConfigFlags(ConfigFlags.VSyncHint);
         Rl.SetConfigFlags(ConfigFlags.ResizableWindow);
@@ -138,7 +131,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         Rl.ClearBackground(RlColor.Black);
         if (PathPrefs.BrawlhallaPath is not null)
         {
-            Loader ??= new(PathPrefs.BrawlhallaPath, BoneNames!);
+            Loader ??= new(PathPrefs.BrawlhallaPath, BoneTypes!);
             Canvas ??= new(Loader);
             Canvas.CameraMatrix = Rl.GetCameraMatrix2D(_cam);
 
@@ -230,10 +223,9 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             if (ImGui.MenuItem("Center Camera", "R")) ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
             if (ImGui.MenuItem("History", null, HistoryPanel.Open)) HistoryPanel.Open = !HistoryPanel.Open;
             if (ImGui.MenuItem("Clear Cache")) Canvas?.ClearTextureCache();
-            if (PathPrefs.LevelDescPath is not null && (BoneNames is not null || PathPrefs.BoneTypesPath is not null) &&
-                ImGui.MenuItem("Reload Map", "Ctrl+R"))
+            if (ImportDialog.CanReImport() && ImGui.MenuItem("Reload Map", "Ctrl+R"))
             {
-                LoadMapFromPaths(PathPrefs.LevelDescPath, PathPrefs.LevelTypePath, PathPrefs.LevelSetTypesPath, PathPrefs.BoneTypesPath, PathPrefs.PowerTypesPath);
+                ImportDialog.ReImport(this);
             }
             ImGui.EndMenu();
         }
@@ -279,7 +271,6 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             if (Rl.IsKeyPressed(KeyboardKey.Z)) CommandHistory.Undo();
             if (Rl.IsKeyPressed(KeyboardKey.Y)) CommandHistory.Redo();
             if (Rl.IsKeyPressed(KeyboardKey.D)) Selection.Object = null;
-            // if (Rl.IsKeyPressed(KeyboardKey.R)) LoadMap();
         }
 
         if (!wantCaptureKeyboard)
@@ -292,53 +283,15 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             ExportWorldImage();
     }
 
-    public void LoadMapFromPaths(string ldPath, string? ltPath, string? lstPath, string? btPath, string? ptPath)
+    public void LoadMapFromLevel(Level l, BoneTypes boneTypes, string[]? powerNames)
     {
-        if (btPath is null && BoneNames is null)
-            throw new Exception("Trying to load a map without a BoneTypes.xml file, and without a bone name list already loaded");
-        if (btPath is not null)
-        {
-            using FileStream bonesFile = new(btPath, FileMode.Open, FileAccess.Read);
-            BoneNames = [.. BhXmlParser.Load(bonesFile).Elements("Bone").Select(e => e.Value)];
-        }
-        PowerNames = ptPath is not null ? WmeUtils.ParsePowerTypes(File.ReadAllText(ptPath)) : null;
-        LevelDesc ld = WmeUtils.DeserializeFromPath<LevelDesc>(ldPath, bhstyle: true);
-        LevelTypes lt = ltPath is null ? new() { Levels = [] } : WmeUtils.DeserializeFromPath<LevelTypes>(ltPath, bhstyle: true);
-        LevelSetTypes lst = lstPath is null ? new() { Playlists = [] } : WmeUtils.DeserializeFromPath<LevelSetTypes>(lstPath, bhstyle: true);
-
-        // scuffed xml parse error handling
-        if (ld.CameraBounds is null) throw new System.Xml.XmlException("LevelDesc xml did not contain essential elements");
-
-        Selection.Object = null;
-        CommandHistory.Clear();
-        if (Canvas is not null)
-        {
-            Canvas.Loader.BoneNames = BoneNames!;
-            Canvas.ClearTextureCache();
-        }
-
-        Level l = new(ld, lt, lst);
-        if (l.Type is null)
-        {
-            l.Type = DefaultLevelType;
-            l.Type.LevelName = ld.LevelName;
-        }
-        MapData = l;
-        // it's fine if there are no playlists here, they will be selected when exporting
-
-        ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
-        _state.Reset();
-    }
-
-    public void LoadMapFromLevel(Level l, string[] boneNames, string[]? powerNames)
-    {
-        BoneNames = boneNames;
+        BoneTypes = boneTypes;
         PowerNames = powerNames;
         Selection.Object = null;
         CommandHistory.Clear();
         if (Canvas is not null)
         {
-            Canvas.Loader.BoneNames = boneNames;
+            Canvas.Loader.BoneTypes = boneTypes;
             Canvas.ClearTextureCache();
         }
 

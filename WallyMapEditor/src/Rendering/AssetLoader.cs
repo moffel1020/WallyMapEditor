@@ -8,7 +8,7 @@ namespace WallyMapEditor;
 public class AssetLoader
 {
     private readonly string brawlPath;
-    public string[] BoneNames { get; set; }
+    public BoneTypes BoneTypes { get; set; }
 
     public TextureCache TextureCache { get; } = new();
     public SwfFileCache SwfFileCache { get; } = new();
@@ -16,10 +16,10 @@ public class AssetLoader
     public SwfSpriteCache SwfSpriteCache { get; } = new();
     public ConcurrentDictionary<string, AnmClass> AnmClasses { get; set; } = [];
 
-    public AssetLoader(string brawlPath, string[] boneNames)
+    public AssetLoader(string brawlPath, BoneTypes boneTypes)
     {
         this.brawlPath = brawlPath;
-        BoneNames = boneNames;
+        BoneTypes = boneTypes;
         LoadAnmInThread("MapArtAnims");
         LoadAnmInThread("ATLA_MapArtAnims");
         LoadAnmInThread("GameModes");
