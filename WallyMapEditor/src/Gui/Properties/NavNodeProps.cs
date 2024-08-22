@@ -28,9 +28,9 @@ public partial class PropertiesWindow
 
             if (int.TryParse(newIDText, out int newID))
             {
-                if (!NavIDExists(newID, data.Level))
+                if (!NavIDExists(newID, data.Level.Desc))
                 {
-                    cmd.Add(new PropChangeCommand<int>(val => RenameNavID(n, val, data.Level), n.NavID, newID));
+                    cmd.Add(new PropChangeCommand<int>(val => RenameNavID(n, val, data.Level.Desc), n.NavID, newID));
                     cmd.SetAllowMerge(false);
                 }
             }
@@ -40,7 +40,46 @@ public partial class PropertiesWindow
             NavTypeToString, ParseNavTypeString,
             [.. Enum.GetValues<NavNodeTypeEnum>().Where(t => t != NavNodeTypeEnum.D)], cmd);
 
-        ImGui.TextWrapped("Path: " + string.Join(", ", n.Path.Select(nn => nn.Item1)));
+        ImGui.Separator();
+        ImGui.Text("Path:");
+
+        const int BUTTONS_PER_LINE = 8;
+        Action? remove = null;
+        for (int i = 0; i < n.Path.Length; i++)
+        {
+            if (ImGui.Button(n.Path[i].Item1.ToString() + "##navpath"))
+            {
+                int index = i;
+                remove = () =>
+                {
+                    (int, NavNodeTypeEnum)[] result = WmeUtils.RemoveAt(n.Path, index);
+                    cmd.Add(new PropChangeCommand<(int, NavNodeTypeEnum)[]>(val => n.Path = val, n.Path, result));
+                    cmd.SetAllowMerge(false);
+                    propChanged = true;
+                };
+            }
+            if (i % BUTTONS_PER_LINE != BUTTONS_PER_LINE - 1 && i != n.Path.Length - 1) ImGui.SameLine();
+        }
+        if (remove is not null) remove();
+
+        if (data.Level is not null)
+        {
+            ImGui.SetNextItemWidth(110);
+            if (ImGui.BeginCombo("##addnavpath", "Add id to path", ImGuiComboFlags.NoArrowButton))
+            {
+                foreach (NavNode node in EnumerateNavNodes(data.Level.Desc).Where(nav => !n.Path.Select(p => p.Item1).Contains(nav.NavID)).OrderBy(n => n.NavID))
+                {
+                    if (ImGui.Selectable($"{node.NavID}##pathselect"))
+                    {
+                        cmd.Add(new PropChangeCommand<(int, NavNodeTypeEnum)[]>(val => n.Path = val, n.Path, [..n.Path, (node.NavID, node.Type)]));
+                        cmd.SetAllowMerge(false);
+                    }
+                }
+                ImGui.EndCombo();
+            }
+        }
+        ImGui.Separator();
+
         propChanged |= ImGuiExt.DragDoubleHistory("X", n.X, val => n.X = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory("Y", n.Y, val => n.Y = val, cmd);
         return propChanged;
@@ -58,14 +97,14 @@ public partial class PropertiesWindow
         _ => Enum.Parse<NavNodeTypeEnum>(s),
     };
 
-    private static bool RenameNavID(NavNode toRename, int newID, Level l)
+    private static bool RenameNavID(NavNode toRename, int newID, LevelDesc ld)
     {
-        if (NavIDExists(newID, l)) return false;
+        if (NavIDExists(newID, ld)) return false;
 
         int oldID = toRename.NavID;
         toRename.NavID = newID;
 
-        foreach (NavNode node in GetAllNavNodes(l))
+        foreach (NavNode node in EnumerateNavNodes(ld))
         {
             for (int i = 0; i < node.Path.Length; i++)
             {
@@ -78,14 +117,14 @@ public partial class PropertiesWindow
         return true;
     }
 
-    private static IEnumerable<NavNode> GetAllNavNodes(Level l)
+    private static IEnumerable<NavNode> EnumerateNavNodes(LevelDesc ld)
     {
-        foreach (NavNode node in l.Desc.NavNodes)
+        foreach (NavNode node in ld.NavNodes)
         {
             yield return node;
         }
 
-        foreach (DynamicNavNode dynamic in l.Desc.DynamicNavNodes)
+        foreach (DynamicNavNode dynamic in ld.DynamicNavNodes)
         {
             foreach (NavNode node in dynamic.Children)
             {
@@ -94,6 +133,6 @@ public partial class PropertiesWindow
         }
     }
 
-    private static bool NavIDExists(int id, Level l) =>
-        GetAllNavNodes(l).Any(n => n.NavID == id);
+    private static bool NavIDExists(int id, LevelDesc ld) =>
+        EnumerateNavNodes(ld).Any(n => n.NavID == id);
 }
