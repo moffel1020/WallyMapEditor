@@ -18,10 +18,13 @@ public class CommandHistory
         Commands.Push(cmd);
     }
 
-    public void Undo()
+    public void Undo(SelectionContext selection)
     {
         if (Commands.TryPop(out ICommand? prev))
         {
+            if (prev is IDeselectCommand d && d.ShouldDeselect(selection))
+                selection.Object = null;
+
             prev.Undo();
             Undone.Push(prev);
         }
