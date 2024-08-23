@@ -245,11 +245,12 @@ public class MapOverviewWindow
             ShowSelectableList(l.Desc.Volumes, selection, val => l.Desc.Volumes = val, cmd);
         }
 
-        if (ImGui.CollapsingHeader("NavNodes##overview"))
+        ImGuiExt.HeaderWithWidget("NavNodes##overview", () =>
         {
             ShowSelectableList(l.Desc.NavNodes, selection, val => l.Desc.NavNodes = val, cmd);
             ShowSelectableList(l.Desc.DynamicNavNodes, selection, val => l.Desc.DynamicNavNodes = val, cmd);
-        }
+        },
+        () => addButton("navnode", () => AddObjectPopup.AddDynamicNavNodeMenuHistory(new(0, 0), l, selection, cmd)));
 
         if (ImGui.CollapsingHeader("Sounds##overview"))
         {

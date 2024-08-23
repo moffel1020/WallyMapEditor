@@ -3,6 +3,7 @@ using System.Linq;
 using WallyMapSpinzor2;
 using ImGuiNET;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace WallyMapEditor;
 
@@ -135,4 +136,13 @@ public partial class PropertiesWindow
 
     private static bool NavIDExists(int id, LevelDesc ld) =>
         EnumerateNavNodes(ld).Any(n => n.NavID == id);
+
+    public static NavNode DefaultNavNode(Vector2 pos, LevelDesc desc) => new() 
+    { 
+        X = pos.X,
+        Y = pos.Y,
+        NavID = EnumerateNavNodes(desc).Select(n => n.NavID).OrderByDescending(id => id).FirstOrDefault() + 1,
+        Path = [],
+        Type = NavNodeTypeEnum.A
+    };
 }

@@ -25,10 +25,11 @@ public static class AddObjectPopup
 
         ImGui.SeparatorText("Add new object");
 
-        if (ImGui.BeginMenu("Collision")) { AddDynamicCollisionMenuHistory(NewPos, l, selection, cmd); ImGui.EndMenu(); }
-        if (ImGui.BeginMenu("ItemSpawn")) { AddDynamicItemSpawnMenuHistory(NewPos, l, selection, cmd); ImGui.EndMenu(); }
-        if (ImGui.BeginMenu("Respawn")) { AddDynamicRespawnMenuHistory(NewPos, l, selection, cmd); ImGui.EndMenu(); }
-        if (ImGui.BeginMenu("Platform")) { AddMovingPlatformMenuHistory(NewPos, l, selection, cmd); ImGui.EndMenu(); }
+        if (ImGui.BeginMenu("Collisions")) { AddDynamicCollisionMenuHistory(NewPos, l, selection, cmd); ImGui.EndMenu(); }
+        if (ImGui.BeginMenu("ItemSpawns")) { AddDynamicItemSpawnMenuHistory(NewPos, l, selection, cmd); ImGui.EndMenu(); }
+        if (ImGui.BeginMenu("Respawns")) { AddDynamicRespawnMenuHistory(NewPos, l, selection, cmd); ImGui.EndMenu(); }
+        if (ImGui.BeginMenu("Platforms")) { AddMovingPlatformMenuHistory(NewPos, l, selection, cmd); ImGui.EndMenu(); }
+        if (ImGui.BeginMenu("NavNodes")) { AddDynamicNavNodeMenuHistory(NewPos, l, selection, cmd); ImGui.EndMenu(); }
 
         ImGui.EndPopup();
     }
@@ -124,6 +125,13 @@ public static class AddObjectPopup
         AddObjectWithDynamicMenuHistory<AbstractCollision, DynamicCollision>(pos, "DynamicCollision", AddCollisionMenu,
             newVal => cmd.Add(new PropChangeCommand<AbstractCollision[]>(val => l.Desc.Collisions = val, l.Desc.Collisions, [.. l.Desc.Collisions, newVal])),
             newVal => cmd.Add(new PropChangeCommand<DynamicCollision[]>(val => l.Desc.DynamicCollisions = val, l.Desc.DynamicCollisions, [.. l.Desc.DynamicCollisions, newVal])),
+            selection, cmd);
+
+    public static void AddDynamicNavNodeMenuHistory(Vector2 pos, Level l, SelectionContext selection, CommandHistory cmd) =>
+        AddObjectWithDynamicMenuHistory<NavNode, DynamicNavNode>(pos, "DynamicNavNode",
+            position => ImGui.MenuItem("NavNode") ? PropertiesWindow.DefaultNavNode(position, l.Desc) : Maybe<NavNode>.None,
+            newVal => cmd.Add(new PropChangeCommand<NavNode[]>(val => l.Desc.NavNodes = val, l.Desc.NavNodes, [.. l.Desc.NavNodes, newVal])),
+            newVal => cmd.Add(new PropChangeCommand<DynamicNavNode[]>(val => l.Desc.DynamicNavNodes = val, l.Desc.DynamicNavNodes, [.. l.Desc.DynamicNavNodes, newVal])),
             selection, cmd);
 
     public static void AddMovingPlatformMenuHistory(Vector2 pos, Level l, SelectionContext selection, CommandHistory cmd)
