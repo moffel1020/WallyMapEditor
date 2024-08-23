@@ -271,6 +271,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             if (Rl.IsKeyPressed(KeyboardKey.Z)) CommandHistory.Undo();
             if (Rl.IsKeyPressed(KeyboardKey.Y)) CommandHistory.Redo();
             if (Rl.IsKeyPressed(KeyboardKey.D)) Selection.Object = null;
+            if (ImportDialog.CanReImport() && Rl.IsKeyPressed(KeyboardKey.R)) ImportDialog.ReImport(this);
         }
 
         if (!wantCaptureKeyboard)
