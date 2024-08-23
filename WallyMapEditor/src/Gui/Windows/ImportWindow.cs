@@ -3,7 +3,6 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
 
 using WallyMapSpinzor2;
 using BrawlhallaSwz;
@@ -20,23 +19,37 @@ public class ImportWindow(PathPreferences prefs)
 {
     public const int MAX_KEY_LENGTH = 9;
 
-    private string? savedLdPath = prefs.LevelDescPath;
-    private string? savedLtPath = prefs.LevelTypePath;
-    private string? savedLstPath = prefs.LevelSetTypesPath;
-    private string? savedBtPath = prefs.BoneTypesPath;
-    private string? savedPtPath = prefs.PowerTypesPath;
+    private string? _savedLdPath = prefs.LevelDescPath;
+    private string? _savedLtPath = prefs.LevelTypePath;
+    private string? _savedLstPath = prefs.LevelSetTypesPath;
+    private string? _savedBtPath = prefs.BoneTypesPath;
+    private string? _savedPtPath = prefs.PowerTypesPath;
 
     private readonly Dictionary<string, string> levelDescFiles = [];
     private string _levelDescFileFilter = "";
-    private string? _pickedFileName;
-    private LevelTypes? _decryptedLt;
-    private LevelSetTypes? _decryptedLst;
-    private string[]? _boneNames;
-    private string[]? _powerNames;
 
+    private struct LoadedFile<T>
+    {
+        public T? FromPath;
+        public T? Decrypted;
+
+        public readonly T? Final => FromPath ?? Decrypted;
+    }
+
+    private LevelDesc? _levelDesc = null;
+    private bool? _levelDescFromSwz = null;
+    private bool? _levelDescFromPath = null;
+
+    private LoadedFile<LevelTypes> _levelTypes = new();
+    private LoadedFile<LevelSetTypes> _levelSetTypes = new();
+    private LoadedFile<BoneTypes> _boneTypes = new();
+    private LoadedFile<string[]> _powerNames = new();
+
+    private string? _pickedFileName;
     private string? _loadingError;
     private string? _loadingStatus;
 
+    private bool _decrypted = false;
     private bool _decrypting = false;
     private bool _keySearching = false;
 
@@ -49,15 +62,16 @@ public class ImportWindow(PathPreferences prefs)
         ImGui.Begin("Import", ref _open, ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoCollapse);
 
         ImGui.BeginTabBar("importTabBar", ImGuiTabBarFlags.None);
+
         if (ImGui.BeginTabItem("Brawlhalla"))
         {
             ShowGameImportTab(editor);
             ImGui.EndTabItem();
         }
 
-        if (ImGui.BeginTabItem("xml"))
+        if (ImGui.BeginTabItem("Files"))
         {
-            ShowXmlImportTab(editor);
+            ShowFileImportTab(editor);
             ImGui.EndTabItem();
         }
 
@@ -76,6 +90,7 @@ public class ImportWindow(PathPreferences prefs)
         }
 
         ImGui.EndTabBar();
+
         ImGui.End();
     }
 
@@ -95,8 +110,9 @@ public class ImportWindow(PathPreferences prefs)
         ImGui.Text($"Path: {prefs.BrawlhallaPath}");
 
         prefs.DecryptionKey = ImGuiExt.InputText("Decryption key", prefs.DecryptionKey ?? "", MAX_KEY_LENGTH, ImGuiInputTextFlags.CharsDecimal);
-        if (prefs.DecryptionKey.Length > 0 && _decryptedLt is null && ImGuiExt.WithDisabledButton(_decrypting, "Decrypt"))
+        if (prefs.DecryptionKey.Length > 0 && ImGuiExt.WithDisabledButton(_decrypting, "Decrypt"))
         {
+            _decrypted = false;
             _decrypting = true;
             _loadingStatus = "decrypting...";
             Task.Run(() =>
@@ -104,6 +120,7 @@ public class ImportWindow(PathPreferences prefs)
                 try
                 {
                     DecryptSwzFiles(prefs.BrawlhallaPath!);
+                    _decrypted = true;
                     _loadingStatus = null;
                     _loadingError = null;
                 }
@@ -121,37 +138,24 @@ public class ImportWindow(PathPreferences prefs)
             });
         }
 
-        if (levelDescFiles.Count > 0 && _decryptedLt is not null && _decryptedLst is not null && _boneNames is not null)
+        if (_decrypted && levelDescFiles.Count > 0)
         {
             _levelDescFileFilter = ImGuiExt.InputText("Filter map names", _levelDescFileFilter);
             string[] levelDescs = levelDescFiles.Keys
                 .Where(s => s.Contains(_levelDescFileFilter, StringComparison.InvariantCultureIgnoreCase))
                 .ToArray();
             int pickedItem = Array.FindIndex(levelDescs, s => s == _pickedFileName);
-            if (ImGui.ListBox("Pick level file", ref pickedItem, levelDescs, levelDescs.Length, 12))
+            if (ImGui.ListBox("Pick level file from swz", ref pickedItem, levelDescs, levelDescs.Length, 12))
             {
                 _pickedFileName = levelDescs[pickedItem];
             }
 
-            if (ImGuiExt.WithDisabledButton(_pickedFileName is null, "Import"))
+            if (ImGuiExt.WithDisabledButton(_pickedFileName is null, "Select"))
             {
-                //TODO: figure out how to make this async
-                //the main problem is ContinueWith doesn't run in main thread
-                _loadingStatus = "loading...";
-                try
-                {
-                    LevelDesc ld = WmeUtils.DeserializeFromString<LevelDesc>(levelDescFiles[_pickedFileName!], bhstyle: true);
-                    _loadingStatus = null;
-                    _loadingError = null;
-                    editor.LoadMapFromLevel(new Level(ld, _decryptedLt, _decryptedLst), _boneNames, _powerNames);
-                }
-                catch (Exception e)
-                {
-                    Rl.TraceLog(TraceLogLevel.Error, e.Message);
-                    Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
-                    _loadingStatus = null;
-                    _loadingError = $"Failed to load map file. {e.Message}";
-                }
+                _levelDesc = WmeUtils.DeserializeFromString<LevelDesc>(levelDescFiles[_pickedFileName!], bhstyle: true);
+                _levelDescFromSwz = true;
+                _levelDescFromPath = false;
+                DoLoad(editor);
             }
         }
 
@@ -210,104 +214,239 @@ public class ImportWindow(PathPreferences prefs)
         }
     }
 
-    private void ShowXmlImportTab(Editor editor)
+    private void ShowFileImportSection(
+        string sectionName, string fileExt,
+        bool hasFromPath, Action removeFromPath,
+        bool hasDecrypted, Action removeDecrypted,
+        string? path, Action<string> loadFromPath,
+        bool optional = false
+    )
+    {
+        if (hasFromPath)
+        {
+            if (ImGui.Button($"x##{sectionName}_frompath")) removeFromPath();
+            ImGui.SameLine();
+            ImGui.Text($"{sectionName} is loaded from a file");
+        }
+        else if (hasDecrypted)
+        {
+            if (ImGui.Button($"x##{sectionName}_swz")) removeDecrypted();
+            ImGui.SameLine();
+            ImGui.Text($"{sectionName} is loaded from swz");
+        }
+        else
+            ImGui.Text(optional ? $"{sectionName} is optional" : $"{sectionName} needs to be loaded");
+
+        if (path is not null)
+        {
+            if (ImGui.Button($"import from saved path##{sectionName}"))
+            {
+                _loadingStatus = "loading...";
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        loadFromPath(path);
+                        _loadingStatus = null;
+                        _loadingError = null;
+                    }
+                    catch (Exception e)
+                    {
+                        _loadingStatus = null;
+                        _loadingError = $"filed to load file. {e.Message}";
+                        Rl.TraceLog(TraceLogLevel.Error, e.Message);
+                        Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
+                    }
+                });
+            }
+            ImGui.SameLine();
+            ImGui.Text(path);
+        }
+        if (ImGui.Button($"select file##{sectionName}"))
+        {
+            Task.Run(() =>
+            {
+                DialogResult result = Dialog.FileOpen(fileExt, Path.GetDirectoryName(path));
+                if (result.IsOk)
+                {
+                    _loadingStatus = "loading...";
+                    try
+                    {
+                        loadFromPath(result.Path);
+                        _loadingStatus = null;
+                        _loadingError = null;
+                    }
+                    catch (Exception e)
+                    {
+                        _loadingStatus = null;
+                        _loadingError = $"filed to load file. {e.Message}";
+                        Rl.TraceLog(TraceLogLevel.Error, e.Message);
+                        Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
+                    }
+                }
+            });
+        }
+    }
+
+    private void ShowLevelDescImportSection()
+    {
+        ShowFileImportSection(
+            "LevelDesc", "xml",
+            _levelDescFromPath == true, () => { _levelDescFromPath = _levelDescFromSwz = null; _levelDesc = null; },
+            _levelDescFromSwz == true, () => { _levelDescFromPath = _levelDescFromSwz = null; _levelDesc = null; },
+            _savedLdPath, path =>
+            {
+                _savedLdPath = path;
+                _levelDesc = WmeUtils.DeserializeFromPath<LevelDesc>(path, bhstyle: true);
+                _levelDescFromSwz = false;
+                _levelDescFromPath = true;
+            }
+        );
+    }
+
+    private void ShowLevelTypesImportSection()
+    {
+        ShowFileImportSection(
+            "LevelTypes", "xml",
+            _levelTypes.FromPath is not null, () => _levelTypes.FromPath = null,
+            _levelTypes.Decrypted is not null, () => _levelTypes.Decrypted = null,
+            _savedLtPath, path =>
+            {
+                _savedLtPath = path;
+                _levelTypes.FromPath = WmeUtils.DeserializeFromPath<LevelTypes>(path, bhstyle: true);
+            }
+        );
+    }
+
+    private void ShowLevelSetTypesImportSection()
+    {
+        ShowFileImportSection(
+            "LevelSetTypes", "xml",
+            _levelSetTypes.FromPath is not null, () => _levelSetTypes.FromPath = null,
+            _levelSetTypes.Decrypted is not null, () => _levelSetTypes.Decrypted = null,
+            _savedLstPath, path =>
+            {
+                _savedLstPath = path;
+                _levelSetTypes.FromPath = WmeUtils.DeserializeFromPath<LevelSetTypes>(path, bhstyle: true);
+            }
+        );
+    }
+
+    private void ShowBoneTypesImportSection()
+    {
+        ShowFileImportSection(
+            "BoneTypes", "xml",
+            _boneTypes.FromPath is not null, () => _boneTypes.FromPath = null,
+            _boneTypes.Decrypted is not null, () => _boneTypes.Decrypted = null,
+            _savedBtPath, path =>
+            {
+                _savedBtPath = path;
+                _boneTypes.FromPath = WmeUtils.DeserializeFromPath<BoneTypes>(path, bhstyle: true);
+            }
+        );
+    }
+
+    private void ShowPowerNamesImportSection()
+    {
+        ShowFileImportSection(
+            "PowerNames", "csv",
+            _powerNames.FromPath is not null, () => _powerNames.FromPath = null,
+            _powerNames.Decrypted is not null, () => _powerNames.Decrypted = null,
+            _savedPtPath, path =>
+            {
+                _savedPtPath = path;
+                _powerNames.FromPath = WmeUtils.ParsePowerTypesFromPath(path);
+            },
+            optional: true
+        );
+    }
+
+    private void ShowFileImportTab(Editor editor)
     {
         ImGui.PushTextWrapPos();
-        ImGui.Text("Import from LevelDesc xml file, LevelTypes.xml, and LevelSetTypes.xml");
-        ImGui.Text("If LevelTypes.xml is not selected or it does not contain the level a default LevelType will be generated");
+        ImGui.Text("Import from individual xml and csv files");
+        ImGui.Text("When importing from the game these files are loaded from the swz's. You can override them with your own xml or csv files.");
         ImGui.PopTextWrapPos();
+
+        ImGui.Spacing();
+        ImGui.SeparatorText("Load map");
+        LoadButton(editor);
+        ImGui.Spacing();
+
         ImGui.SeparatorText("Select files");
-
-        if (ImGui.Button("LevelDesc"))
-        {
-            Task.Run(() =>
-            {
-                DialogResult result = Dialog.FileOpen("xml", Path.GetDirectoryName(savedLdPath));
-                if (result.IsOk)
-                    savedLdPath = result.Path;
-            });
-        }
-        ImGui.SameLine();
-        ImGui.Text(savedLdPath ?? "None");
-
-        if (ImGui.Button("BoneTypes.xml"))
-        {
-            Task.Run(() =>
-            {
-                DialogResult result = Dialog.FileOpen("xml", Path.GetDirectoryName(savedBtPath));
-                if (result.IsOk)
-                    savedBtPath = result.Path;
-            });
-        }
-        ImGui.SameLine();
-        ImGui.Text(savedBtPath ?? "None");
-
-        if (ImGui.Button("powerTypes.csv (optional)"))
-        {
-            Task.Run(() =>
-            {
-                DialogResult result = Dialog.FileOpen("csv", Path.GetDirectoryName(savedPtPath));
-                if (result.IsOk)
-                    savedPtPath = result.Path;
-            });
-        }
-        ImGui.SameLine();
-        if (savedPtPath is not null && ImGui.Button("x##pt")) savedPtPath = null;
-        ImGui.SameLine();
-        ImGui.Text(savedPtPath ?? "None");
-
-        if (ImGui.Button("LevelTypes.xml (optional)"))
-        {
-            Task.Run(() =>
-            {
-                DialogResult result = Dialog.FileOpen("xml", Path.GetDirectoryName(savedLtPath));
-                if (result.IsOk)
-                    savedLtPath = result.Path;
-            });
-        }
-        ImGui.SameLine();
-        if (savedLtPath is not null && ImGui.Button("x##lt")) savedLtPath = null;
-        ImGui.SameLine();
-        ImGui.Text(savedLtPath ?? "None");
-
-        if (ImGui.Button("LevelSetTypes.xml (optional)"))
-        {
-            Task.Run(() =>
-            {
-                DialogResult result = Dialog.FileOpen("xml", Path.GetDirectoryName(savedLstPath));
-                if (result.IsOk)
-                    savedLstPath = result.Path;
-            });
-        }
-        ImGui.SameLine();
-        if (savedLstPath is not null && ImGui.Button("x##lst")) savedLstPath = null;
-        ImGui.SameLine();
-        ImGui.Text(savedLstPath ?? "None");
-
+        ShowLevelDescImportSection();
         ImGui.Separator();
-        if (savedLdPath is not null && (editor.BoneNames is not null || savedBtPath is not null) && ImGui.Button("Import"))
+        ShowLevelTypesImportSection();
+        ImGui.Separator();
+        ShowLevelSetTypesImportSection();
+        ImGui.Separator();
+        ShowBoneTypesImportSection();
+        ImGui.Separator();
+        ShowPowerNamesImportSection();
+    }
+
+    private void LoadButton(Editor editor)
+    {
+        if (ImGuiExt.WithDisabledButton(
+            _levelDesc is null || _levelTypes.Final is null || _levelSetTypes.Final is null || _boneTypes.Final is null,
+            "Load map"
+        ))
         {
-            _loadingStatus = "loading...";
-            try
-            {
-                editor.LoadMapFromPaths(savedLdPath, savedLtPath, savedLstPath, savedBtPath, savedPtPath);
-                _open = false;
-                _loadingStatus = null;
-                _loadingError = null;
-                prefs.LevelDescPath = savedLdPath;
-                prefs.LevelTypePath = savedLtPath;
-                prefs.LevelSetTypesPath = savedLstPath;
-                prefs.BoneTypesPath = savedBtPath;
-                prefs.PowerTypesPath = savedPtPath;
-            }
-            catch (Exception e)
-            {
-                Rl.TraceLog(TraceLogLevel.Error, e.Message);
-                Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
-                _loadingStatus = null;
-                _loadingError = $"Could not load xml file. {e.Message}";
-            }
+            DoLoad(editor);
         }
+    }
+
+    private void DoLoad(Editor editor)
+    {
+        if (_levelDesc is null || _levelTypes.Final is null || _levelSetTypes.Final is null || _boneTypes.Final is null)
+            return;
+
+        _loadingStatus = "loading...";
+        try
+        {
+            // scuffed xml parse error handling
+            if (_levelDesc.CameraBounds is null) throw new System.Xml.XmlException("LevelDesc xml did not contain essential elements");
+
+            _loadingStatus = null;
+            _loadingError = null;
+            editor.LoadMapFromLevel(new Level(_levelDesc, _levelTypes.Final, _levelSetTypes.Final), _boneTypes.Final, _powerNames.Final);
+        }
+        catch (Exception e)
+        {
+            Rl.TraceLog(TraceLogLevel.Error, e.Message);
+            Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
+            _loadingStatus = null;
+            _loadingError = $"Failed to load map file. {e.Message}";
+        }
+    }
+
+    private void ImportFromPaths()
+    {
+        if (_levelDesc is not null && _levelDescFromPath == true && _savedLdPath is not null)
+        {
+            _levelDesc = WmeUtils.DeserializeFromPath<LevelDesc>(_savedLdPath, bhstyle: true);
+            _levelDescFromPath = true;
+            _levelDescFromSwz = false;
+        }
+
+        if (_levelTypes.FromPath is not null && _savedLtPath is not null)
+            _levelTypes.FromPath = WmeUtils.DeserializeFromPath<LevelTypes>(_savedLtPath, bhstyle: true);
+        if (_levelSetTypes.FromPath is not null && _savedLstPath is not null)
+            _levelSetTypes.FromPath = WmeUtils.DeserializeFromPath<LevelSetTypes>(_savedLstPath, bhstyle: true);
+        if (_boneTypes.FromPath is not null && _savedBtPath is not null)
+            _boneTypes.FromPath = WmeUtils.DeserializeFromPath<BoneTypes>(_savedBtPath, bhstyle: true);
+        if (_powerNames.FromPath is not null && _savedPtPath is not null)
+            _powerNames.FromPath = WmeUtils.ParsePowerTypesFromPath(_savedPtPath);
+    }
+
+    public bool CanReImport() => _levelDesc is not null && _levelTypes.Final is not null && _levelSetTypes.Final is not null && _boneTypes.Final is not null;
+
+    public void ReImport(Editor editor)
+    {
+        if (_levelDesc is null || _levelTypes.Final is null || _levelSetTypes.Final is null || _boneTypes.Final is null)
+            return;
+        ImportFromPaths();
+        DoLoad(editor);
     }
 
     private void DecryptSwzFiles(string folder)
@@ -326,18 +465,13 @@ public class ImportWindow(PathPreferences prefs)
             levelDescFiles.Add(name["LevelDesc_".Length..], file);
         }
 
-        _decryptedLt = WmeUtils.DeserializeSwzFromPath<LevelTypes>(initPath, "LevelTypes.xml", key, bhstyle: true);
-        _decryptedLst = WmeUtils.DeserializeSwzFromPath<LevelSetTypes>(gamePath, "LevelSetTypes.xml", key, bhstyle: true);
-        string? boneTypesContent = WmeUtils.GetFileInSwzFromPath(initPath, "BoneTypes.xml", key);
-        string? powerTypesContent = WmeUtils.GetFileInSwzFromPath(gamePath, "powerTypes.csv", key);
-        if (boneTypesContent is null)
-            _boneNames = null;
-        else
-        {
-            _boneNames = [.. XElement.Parse(boneTypesContent).Elements("Bone").Select(e => e.Value)];
-        }
+        _levelTypes.Decrypted = WmeUtils.DeserializeSwzFromPath<LevelTypes>(initPath, "LevelTypes.xml", key, bhstyle: true);
+        _levelSetTypes.Decrypted = WmeUtils.DeserializeSwzFromPath<LevelSetTypes>(gamePath, "LevelSetTypes.xml", key, bhstyle: true);
+        _boneTypes.Decrypted = WmeUtils.DeserializeSwzFromPath<BoneTypes>(initPath, "BoneTypes.xml", key, bhstyle: true);
 
-        if (powerTypesContent is not null)
-            _powerNames = WmeUtils.ParsePowerTypes(powerTypesContent);
+        string? powerTypesContent = WmeUtils.GetFileInSwzFromPath(gamePath, "powerTypes.csv", key);
+        _powerNames.Decrypted = powerTypesContent is null
+            ? null
+            : WmeUtils.ParsePowerTypesFromString(powerTypesContent);
     }
 }

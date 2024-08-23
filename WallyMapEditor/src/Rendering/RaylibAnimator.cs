@@ -276,7 +276,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         string handBoneName = "";
         foreach (AnmBone bone in bones)
         {
-            string boneName = loader.BoneNames[bone.Id - 1]; // bone id is 1 indexed
+            string boneName = loader.BoneTypes.Bones[bone.Id - 1]; // bone id is 1 indexed
             (int, bool)? boneType;
             if (BoneDatabase.BoneTypeDict.TryGetValue(boneName, out (int, bool) boneType_))
                 boneType = boneType_;

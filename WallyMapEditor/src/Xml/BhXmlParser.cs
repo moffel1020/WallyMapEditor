@@ -2,6 +2,7 @@ using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 using WallyMapSpinzor2;
@@ -81,6 +82,9 @@ public static class BhXmlParser
         DoParse(str, strict, 0, doc);
         return doc;
     }
+
+    // added as a util
+    public static XElement ParseElement(string str, bool strict = false) => Parse(str, strict).Elements().First();
 
     private static int DoParse(string str, bool strict, int p = 0, XNode? parent = null)
     {

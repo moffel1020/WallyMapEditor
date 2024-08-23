@@ -148,10 +148,9 @@ public static class WmeUtils
         where T : ISerializable
     {
         XElement e = serializable.SerializeToXElement();
-        using FileStream toFile = new(toPath, FileMode.Create, FileAccess.Write);
         if (bhstyle)
         {
-            SerializeToPath<T>(serializable, toPath, minify, bhstyle: false);
+            SerializeToPath(serializable, toPath, minify, bhstyle: false);
             /*
             string str = BhXmlPrinter.Print(e, !minify);
             using StreamWriter writer = new(toFile);
@@ -160,6 +159,7 @@ public static class WmeUtils
         }
         else
         {
+            using FileStream toFile = new(toPath, FileMode.Create, FileAccess.Write);
             using XmlWriter writer = XmlWriter.Create(toFile, minify ? MinifiedSaveSettings : StandardSaveSettings);
             e.Save(writer);
         }
@@ -171,7 +171,7 @@ public static class WmeUtils
         XElement e = serializable.SerializeToXElement();
         if (bhstyle)
         {
-            return SerializeToString<T>(serializable, minify, bhstyle: false);
+            return SerializeToString(serializable, minify, bhstyle: false);
             // return BhXmlPrinter.Print(e, !minify);
         }
         else
@@ -189,8 +189,7 @@ public static class WmeUtils
     {
         if (bhstyle)
         {
-            XElement element = BhXmlParser.Parse(xmldata).Elements().First();
-            return element.DeserializeTo<T>();
+            return BhXmlParser.ParseElement(xmldata).DeserializeTo<T>();
         }
         else
         {
@@ -395,7 +394,9 @@ public static class WmeUtils
     public static RlColor HexToRlColor(uint hex) => new((byte)(hex >> 24), (byte)(hex >> 16), (byte)(hex >> 8), (byte)hex);
     public static RlColor? ParseRlColorOrNull(string? s) => s is null ? null : HexToRlColor(Convert.ToUInt32(s, 16));
 
-    public static string[]? ParsePowerTypes(string str)
+    public static string[]? ParsePowerTypesFromPath(string path) => ParsePowerTypesFromString(File.ReadAllText(path));
+
+    public static string[]? ParsePowerTypesFromString(string str)
     {
         int lineEnd = str.IndexOf('\n');
         str = str[(lineEnd + 1)..];

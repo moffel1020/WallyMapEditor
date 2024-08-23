@@ -67,7 +67,7 @@ public static class NewLevelModal
             lt.DisplayName = _newDisplayName;
             Level level = new(ld, lt, _addToPlaylists ? [.. Editor.DefaultPlaylists] : []);
             // FIXME: cba to load bonenames properly here. might become problematic if we ever allow the user to add animations
-            editor.LoadMapFromLevel(level, editor.BoneNames ?? [], editor.PowerNames);
+            editor.LoadMapFromLevel(level, editor.BoneTypes ?? new BoneTypes(), editor.PowerNames);
 
             string dir = Path.Combine(prefs.BrawlhallaPath!, "mapArt", _newLevelName);
             Directory.CreateDirectory(dir);
