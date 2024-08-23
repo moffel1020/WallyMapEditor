@@ -404,6 +404,9 @@ public class ImportWindow(PathPreferences prefs)
         _loadingStatus = "loading...";
         try
         {
+            // scuffed xml parse error handling
+            if (_levelDesc.CameraBounds is null) throw new System.Xml.XmlException("LevelDesc xml did not contain essential elements");
+
             _loadingStatus = null;
             _loadingError = null;
             editor.LoadMapFromLevel(new Level(_levelDesc, _levelTypes.Final, _levelSetTypes.Final), _boneTypes.Final, _powerNames.Final);
@@ -443,7 +446,7 @@ public class ImportWindow(PathPreferences prefs)
         if (_levelDesc is null || _levelTypes.Final is null || _levelSetTypes.Final is null || _boneTypes.Final is null)
             return;
         ImportFromPaths();
-        editor.LoadMapFromLevel(new Level(_levelDesc, _levelTypes.Final, _levelSetTypes.Final), _boneTypes.Final, _powerNames.Final);
+        DoLoad(editor);
     }
 
     private void DecryptSwzFiles(string folder)
