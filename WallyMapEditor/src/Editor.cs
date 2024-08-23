@@ -170,7 +170,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             Selection.Object = null;
 
         if (HistoryPanel.Open)
-            HistoryPanel.Show(CommandHistory);
+            HistoryPanel.Show(CommandHistory, Selection);
         if (PlaylistEditPanel.Open && MapData is Level lv)
             PlaylistEditPanel.Show(lv, PathPrefs);
 
@@ -204,7 +204,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
         }
         if (ImGui.BeginMenu("Edit"))
         {
-            if (ImGui.MenuItem("Undo", "Ctrl+Z")) CommandHistory.Undo();
+            if (ImGui.MenuItem("Undo", "Ctrl+Z")) CommandHistory.Undo(Selection);
             if (ImGui.MenuItem("Redo", "Ctrl+Y")) CommandHistory.Redo();
             if (ImGui.MenuItem("Deselect", "Ctrl+D")) Selection.Object = null;
             ImGui.EndMenu();
@@ -268,7 +268,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
 
         if (!wantCaptureKeyboard && Rl.IsKeyDown(KeyboardKey.LeftControl))
         {
-            if (Rl.IsKeyPressed(KeyboardKey.Z)) CommandHistory.Undo();
+            if (Rl.IsKeyPressed(KeyboardKey.Z)) CommandHistory.Undo(Selection);
             if (Rl.IsKeyPressed(KeyboardKey.Y)) CommandHistory.Redo();
             if (Rl.IsKeyPressed(KeyboardKey.D)) Selection.Object = null;
             if (ImportDialog.CanReImport() && Rl.IsKeyPressed(KeyboardKey.R)) ImportDialog.ReImport(this);

@@ -8,11 +8,11 @@ public static class HistoryPanel
     private static bool _open = false;
     public static bool Open { get => _open; set => _open = value; }
 
-    public static void Show(CommandHistory history)
+    public static void Show(CommandHistory history, SelectionContext selection)
     {
         ImGui.Begin("History", ref _open, ImGuiWindowFlags.NoDocking);
 
-        if (ImGui.Button("Undo##history")) history.Undo();
+        if (ImGui.Button("Undo##history")) history.Undo(selection);
         ImGui.SameLine();
         if (ImGui.Button("Redo##history")) history.Redo();
         ImGui.SameLine();
