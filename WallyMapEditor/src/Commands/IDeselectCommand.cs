@@ -2,5 +2,6 @@ namespace WallyMapEditor;
 
 public interface IDeselectCommand : ICommand
 {
-    public bool ShouldDeselect(SelectionContext selection);
+    public bool DeselectOnUndo(SelectionContext selection);
+    public bool DeselectOnExecute(SelectionContext selection);
 }

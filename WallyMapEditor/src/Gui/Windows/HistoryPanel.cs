@@ -12,7 +12,7 @@ public static class HistoryPanel
     {
         ImGui.Begin("History", ref _open, ImGuiWindowFlags.NoDocking);
 
-        if (ImGui.Button("Undo##history")) history.Undo(selection);
+        if (ImGui.Button("Undo##history")) history.Undo();
         ImGui.SameLine();
         if (ImGui.Button("Redo##history")) history.Redo();
         ImGui.SameLine();
