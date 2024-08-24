@@ -110,28 +110,28 @@ public static class AddObjectPopup
 
     public static void AddDynamicItemSpawnMenuHistory(Vector2 pos, Level l, SelectionContext selection, CommandHistory cmd) =>
         AddObjectWithDynamicMenuHistory<AbstractItemSpawn, DynamicItemSpawn>(pos, "DynamicItemSpawn", AddItemSpawnMenu,
-            newVal => cmd.Add(new PropChangeCommand<AbstractItemSpawn[]>(val => l.Desc.ItemSpawns = val, l.Desc.ItemSpawns, [.. l.Desc.ItemSpawns, newVal])),
-            newVal => cmd.Add(new PropChangeCommand<DynamicItemSpawn[]>(val => l.Desc.DynamicItemSpawns = val, l.Desc.DynamicItemSpawns, [.. l.Desc.DynamicItemSpawns, newVal])),
+            newVal => cmd.Add(new ArrayAddCommand<AbstractItemSpawn>(val => l.Desc.ItemSpawns = val, l.Desc.ItemSpawns, newVal)),
+            newVal => cmd.Add(new ArrayAddCommand<DynamicItemSpawn>(val => l.Desc.DynamicItemSpawns = val, l.Desc.DynamicItemSpawns, newVal)),
             selection, cmd);
 
     public static void AddDynamicRespawnMenuHistory(Vector2 pos, Level l, SelectionContext selection, CommandHistory cmd) =>
         AddObjectWithDynamicMenuHistory<Respawn, DynamicRespawn>(pos, "DynamicRespawn",
             position => ImGui.MenuItem("Respawn") ? PropertiesWindow.DefaultRespawn(position) : Maybe<Respawn>.None,
-            newVal => cmd.Add(new PropChangeCommand<Respawn[]>(val => l.Desc.Respawns = val, l.Desc.Respawns, [.. l.Desc.Respawns, newVal])),
-            newVal => cmd.Add(new PropChangeCommand<DynamicRespawn[]>(val => l.Desc.DynamicRespawns = val, l.Desc.DynamicRespawns, [.. l.Desc.DynamicRespawns, newVal])),
+            newVal => cmd.Add(new ArrayAddCommand<Respawn>(val => l.Desc.Respawns = val, l.Desc.Respawns, newVal)),
+            newVal => cmd.Add(new ArrayAddCommand<DynamicRespawn>(val => l.Desc.DynamicRespawns = val, l.Desc.DynamicRespawns, newVal)),
             selection, cmd);
 
     public static void AddDynamicCollisionMenuHistory(Vector2 pos, Level l, SelectionContext selection, CommandHistory cmd) =>
         AddObjectWithDynamicMenuHistory<AbstractCollision, DynamicCollision>(pos, "DynamicCollision", AddCollisionMenu,
-            newVal => cmd.Add(new PropChangeCommand<AbstractCollision[]>(val => l.Desc.Collisions = val, l.Desc.Collisions, [.. l.Desc.Collisions, newVal])),
-            newVal => cmd.Add(new PropChangeCommand<DynamicCollision[]>(val => l.Desc.DynamicCollisions = val, l.Desc.DynamicCollisions, [.. l.Desc.DynamicCollisions, newVal])),
+            newVal => cmd.Add(new ArrayAddCommand<AbstractCollision>(val => l.Desc.Collisions = val, l.Desc.Collisions, newVal)),
+            newVal => cmd.Add(new ArrayAddCommand<DynamicCollision>(val => l.Desc.DynamicCollisions = val, l.Desc.DynamicCollisions, newVal)),
             selection, cmd);
 
     public static void AddDynamicNavNodeMenuHistory(Vector2 pos, Level l, SelectionContext selection, CommandHistory cmd) =>
         AddObjectWithDynamicMenuHistory<NavNode, DynamicNavNode>(pos, "DynamicNavNode",
             position => ImGui.MenuItem("NavNode") ? PropertiesWindow.DefaultNavNode(position, l.Desc) : Maybe<NavNode>.None,
-            newVal => cmd.Add(new PropChangeCommand<NavNode[]>(val => l.Desc.NavNodes = val, l.Desc.NavNodes, [.. l.Desc.NavNodes, newVal])),
-            newVal => cmd.Add(new PropChangeCommand<DynamicNavNode[]>(val => l.Desc.DynamicNavNodes = val, l.Desc.DynamicNavNodes, [.. l.Desc.DynamicNavNodes, newVal])),
+            newVal => cmd.Add(new ArrayAddCommand<NavNode>(val => l.Desc.NavNodes = val, l.Desc.NavNodes, newVal)),
+            newVal => cmd.Add(new ArrayAddCommand<DynamicNavNode>(val => l.Desc.DynamicNavNodes = val, l.Desc.DynamicNavNodes, newVal)),
             selection, cmd);
 
     public static void AddMovingPlatformMenuHistory(Vector2 pos, Level l, SelectionContext selection, CommandHistory cmd)
@@ -153,7 +153,7 @@ public static class AddObjectPopup
 
         if (maybeAsset.TryGetValue(out AbstractAsset? asset))
         {
-            cmd.Add(new PropChangeCommand<AbstractAsset[]>(val => l.Desc.Assets = val, l.Desc.Assets, [.. l.Desc.Assets, asset]));
+            cmd.Add(new ArrayAddCommand<AbstractAsset>(val => l.Desc.Assets = val, l.Desc.Assets, asset));
             cmd.SetAllowMerge(false);
             selection.Object = asset;
         }

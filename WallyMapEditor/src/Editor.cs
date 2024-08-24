@@ -12,7 +12,7 @@ using NativeFileDialogSharp;
 
 namespace WallyMapEditor;
 
-public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault)
+public class Editor
 {
     public const string WINDOW_NAME = "WallyMapEditor";
     public const float ZOOM_INCREMENT = 0.15f;
@@ -22,8 +22,8 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
     public const int INITIAL_SCREEN_WIDTH = 800;
     public const int INITIAL_SCREEN_HEIGHT = 480;
 
-    PathPreferences PathPrefs { get; } = pathPrefs;
-    RenderConfigDefault ConfigDefault { get; } = configDefault;
+    PathPreferences PathPrefs { get; }
+    RenderConfigDefault ConfigDefault { get; }
 
     public IDrawable? MapData { get; set; }
     public BoneTypes? BoneTypes { get; set; }
@@ -38,12 +38,12 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
     public RenderConfigWindow RenderConfigWindow { get; set; } = new();
     public MapOverviewWindow MapOverviewWindow { get; set; } = new();
     public PropertiesWindow PropertiesWindow { get; set; } = new();
-    public ExportWindow ExportDialog { get; set; } = new(pathPrefs);
-    public ImportWindow ImportDialog { get; set; } = new(pathPrefs);
+    public ExportWindow ExportDialog { get; set; }
+    public ImportWindow ImportDialog { get; set; }
 
     public OverlayManager OverlayManager { get; set; } = new();
-    public CommandHistory CommandHistory { get; set; } = new();
     public SelectionContext Selection { get; set; } = new();
+    public CommandHistory CommandHistory { get; set; }
 
     private readonly RenderConfig _renderConfig = RenderConfig.Default;
     private readonly OverlayConfig _overlayConfig = OverlayConfig.Default;
@@ -53,6 +53,10 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
     public MousePickingFramebuffer PickingFramebuffer { get; set; } = new();
 
     private bool _showMainMenuBar = true;
+
+    public Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault) =>
+        (PathPrefs, ConfigDefault, CommandHistory, ExportDialog, ImportDialog) =
+            (pathPrefs, configDefault, new(Selection), new(pathPrefs), new(pathPrefs));
 
     private OverlayData OverlayData => new()
     {
@@ -170,7 +174,7 @@ public class Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault
             Selection.Object = null;
 
         if (HistoryPanel.Open)
-            HistoryPanel.Show(CommandHistory);
+            HistoryPanel.Show(CommandHistory, Selection);
         if (PlaylistEditPanel.Open && MapData is Level lv)
             PlaylistEditPanel.Show(lv, PathPrefs);
 
