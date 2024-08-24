@@ -275,10 +275,8 @@ public class MapOverviewWindow
             {
                 if (ImGui.Button($"x##{o.GetHashCode()}"))
                 {
-                    if (selection.Object == o) selection.Object = null;
-
                     T[] result = WmeUtils.RemoveAt(values, i);
-                    cmd.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
+                    cmd.Add(new ArrayRemoveCommand<T>(changeCommand, result, values[i]));
                     cmd.SetAllowMerge(false);
                     _propChanged |= true;
                 }

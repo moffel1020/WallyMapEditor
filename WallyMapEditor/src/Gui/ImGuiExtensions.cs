@@ -411,7 +411,7 @@ public static class ImGuiExt
             if (WithDisabledButton(!allowRemove, $"Remove##{value.GetHashCode()}"))
             {
                 T[] result = WmeUtils.RemoveAt(values, i);
-                commands.Add((new PropChangeCommand<T[]>(changeCommand, values, result), false));
+                commands.Add((new ArrayRemoveCommand<T>(changeCommand, result, value), false));
                 changed = true;
             }
             if (allowMove)
@@ -441,7 +441,7 @@ public static class ImGuiExt
             changed = true;
         }
 
-        foreach ((PropChangeCommand<T[]> command, bool mergeable) in commands)
+        foreach ((ICommand command, bool mergeable) in commands)
         {
             cmd.Add(command);
             cmd.SetAllowMerge(mergeable);
