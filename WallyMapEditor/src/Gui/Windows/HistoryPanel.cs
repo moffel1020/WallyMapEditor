@@ -8,7 +8,10 @@ public static class HistoryPanel
     private static bool _open = false;
     public static bool Open { get => _open; set => _open = value; }
 
+    // Remove unused parameter 'selection' if it is not part of a shipped public API [WallyMapEditor]
+#pragma warning disable IDE0060
     public static void Show(CommandHistory history, SelectionContext selection)
+#pragma warning restore IDE0060
     {
         ImGui.Begin("History", ref _open, ImGuiWindowFlags.NoDocking);
 
