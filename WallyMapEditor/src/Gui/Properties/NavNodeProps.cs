@@ -72,7 +72,7 @@ public partial class PropertiesWindow
                 {
                     if (ImGui.Selectable($"{node.NavID}##pathselect"))
                     {
-                        cmd.Add(new PropChangeCommand<(int, NavNodeTypeEnum)[]>(val => n.Path = val, n.Path, [..n.Path, (node.NavID, node.Type)]));
+                        cmd.Add(new PropChangeCommand<(int, NavNodeTypeEnum)[]>(val => n.Path = val, n.Path, [.. n.Path, (node.NavID, node.Type)]));
                         cmd.SetAllowMerge(false);
                     }
                 }
@@ -137,8 +137,8 @@ public partial class PropertiesWindow
     private static bool NavIDExists(int id, LevelDesc ld) =>
         EnumerateNavNodes(ld).Any(n => n.NavID == id);
 
-    public static NavNode DefaultNavNode(Vector2 pos, LevelDesc desc) => new() 
-    { 
+    public static NavNode DefaultNavNode(Vector2 pos, LevelDesc desc) => new()
+    {
         X = pos.X,
         Y = pos.Y,
         NavID = EnumerateNavNodes(desc).Select(n => n.NavID).OrderByDescending(id => id).FirstOrDefault() + 1,

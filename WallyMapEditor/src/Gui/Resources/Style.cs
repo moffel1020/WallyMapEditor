@@ -1,11 +1,19 @@
+using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using ImGuiNET;
+using rlImGui_cs;
 
 namespace WallyMapEditor;
 
 public static class Style
 {
+    public static ImFontPtr Font { get; set; }
+
     public static void Apply()
     {
+        Font = LoadEmbeddedFont("WallyMapEditor.res.fonts.Roboto-Regular.ttf");
+
         // stolen from https://github.com/ocornut/imgui/issues/707#issuecomment-917151020
         ImGuiStylePtr style = ImGui.GetStyle();
         style.WindowPadding = new(8.00f, 8.00f);
@@ -20,16 +28,16 @@ public static class Style
         style.WindowBorderSize = 1;
         style.ChildBorderSize = 1;
         style.PopupBorderSize = 1;
-        style.FrameBorderSize = 1;
+        style.FrameBorderSize = 0;
         style.TabBorderSize = 1;
         style.WindowRounding = 7;
-        style.ChildRounding = 4;
-        style.FrameRounding = 3;
-        style.PopupRounding = 4;
-        style.ScrollbarRounding = 9;
-        style.GrabRounding = 3;
+        style.ChildRounding = 7;
+        style.FrameRounding = 7;
+        style.PopupRounding = 7;
+        style.ScrollbarRounding = 7;
+        style.GrabRounding = 7;
+        style.TabRounding = 7;
         style.LogSliderDeadzone = 4;
-        style.TabRounding = 4;
 
         style.Colors[(int)ImGuiCol.Text] = new(1.00f, 1.00f, 1.00f, 1.00f);
         style.Colors[(int)ImGuiCol.TextDisabled] = new(0.50f, 0.50f, 0.50f, 1.00f);
@@ -78,15 +86,32 @@ public static class Style
         style.Colors[(int)ImGuiCol.TextSelectedBg] = new(0.20f, 0.22f, 0.23f, 1.00f);
         style.Colors[(int)ImGuiCol.DragDropTarget] = new(0.33f, 0.67f, 0.86f, 1.00f);
 
-        //style.Colors[(int)ImGuiCol.TableRowBgAlt] = new Vector4(1.00f, 1.00f, 1.00f, 0.06f);
-        //style.Colors[(int)ImGuiCol.DockingEmptyBg] = new Vector4(1.00f, 0.00f, 0.00f, 1.00f);
-        //style.Colors[(int)ImGuiCol.PlotLines] = new Vector4(1.00f, 0.00f, 0.00f, 1.00f);
-        //style.Colors[(int)ImGuiCol.PlotLinesHovered] = new Vector4(1.00f, 0.00f, 0.00f, 1.00f);
-        //style.Colors[(int)ImGuiCol.PlotHistogram] = new Vector4(1.00f, 0.00f, 0.00f, 1.00f);
-        //style.Colors[(int)ImGuiCol.PlotHistogramHovered] = new Vector4(1.00f, 0.00f, 0.00f, 1.00f);
-        //style.Colors[(int)ImGuiCol.NavHighlight] = new Vector4(1.00f, 0.00f, 0.00f, 1.00f);
-        //style.Colors[(int)ImGuiCol.NavWindowingHighlight] = new Vector4(1.00f, 0.00f, 0.00f, 0.70f);
-        //style.Colors[(int)ImGuiCol.NavWindowingDimBg] = new Vector4(1.00f, 0.00f, 0.00f, 0.20f);
-        //style.Colors[(int)ImGuiCol.ModalWindowDimBg] = new Vector4(1.00f, 0.00f, 0.00f, 0.35f);
+        // style.Colors[(int)ImGuiCol.TableRowBgAlt] = new Vector4(1.00f, 1.00f, 1.00f, 0.06f);
+        // style.Colors[(int)ImGuiCol.DockingEmptyBg] = new Vector4(1.00f, 0.00f, 0.00f, 1.00f);
+        // style.Colors[(int)ImGuiCol.PlotLines] = new Vector4(1.00f, 0.00f, 0.00f, 1.00f);
+        // style.Colors[(int)ImGuiCol.PlotLinesHovered] = new Vector4(1.00f, 0.00f, 0.00f, 1.00f);
+        // style.Colors[(int)ImGuiCol.PlotHistogram] = new Vector4(1.00f, 0.00f, 0.00f, 1.00f);
+        // style.Colors[(int)ImGuiCol.PlotHistogramHovered] = new Vector4(1.00f, 0.00f, 0.00f, 1.00f);
+        // style.Colors[(int)ImGuiCol.NavHighlight] = new Vector4(1.00f, 0.00f, 0.00f, 1.00f);
+        // style.Colors[(int)ImGuiCol.NavWindowingHighlight] = new Vector4(1.00f, 0.00f, 0.00f, 0.70f);
+        // style.Colors[(int)ImGuiCol.NavWindowingDimBg] = new Vector4(1.00f, 0.00f, 0.00f, 0.20f);
+        // style.Colors[(int)ImGuiCol.ModalWindowDimBg] = new Vector4(1.00f, 0.00f, 0.00f, 0.35f);
+    }
+
+    private static ImFontPtr LoadEmbeddedFont(string resourceName)
+    {
+        using Stream? stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
+        if (stream is null) return null;
+
+        using MemoryStream ms = new();
+        stream.CopyTo(ms);
+        byte[] bytes = ms.ToArray();
+
+        nint fontDataPtr = GCHandle.Alloc(bytes, GCHandleType.Pinned).AddrOfPinnedObject();
+
+        ImGuiIOPtr io = ImGui.GetIO();
+        ImFontPtr font = io.Fonts.AddFontFromMemoryTTF(fontDataPtr, bytes.Length, 16);
+        rlImGui.ReloadFonts();
+        return font;
     }
 }

@@ -21,6 +21,10 @@
     <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>full</TrimMode>
   </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include=".\res\fonts\Roboto-Regular.ttf" />
+  </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\WallyMapSpinzor2\WallyMapSpinzor2.csproj" />

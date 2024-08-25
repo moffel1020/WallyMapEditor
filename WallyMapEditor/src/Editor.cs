@@ -126,6 +126,7 @@ public class Editor
         Rl.ClearBackground(RlColor.Black);
         Rlgl.SetLineWidth(Math.Max(LINE_WIDTH * _cam.Zoom, 1));
         rlImGui.Begin();
+        ImGui.PushFont(Style.Font);
 
         Gui();
 
@@ -149,6 +150,7 @@ public class Editor
         Rl.EndMode2D();
         Rl.EndTextureMode();
 
+        ImGui.PopFont();
         rlImGui.End();
         Rl.EndDrawing();
     }
