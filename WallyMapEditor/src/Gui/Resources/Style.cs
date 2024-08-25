@@ -108,9 +108,7 @@ public static class Style
         byte[] bytes = ms.ToArray();
 
         nint fontDataPtr = GCHandle.Alloc(bytes, GCHandleType.Pinned).AddrOfPinnedObject();
-
-        ImGuiIOPtr io = ImGui.GetIO();
-        ImFontPtr font = io.Fonts.AddFontFromMemoryTTF(fontDataPtr, bytes.Length, 16);
+        ImFontPtr font = ImGui.GetIO().Fonts.AddFontFromMemoryTTF(fontDataPtr, bytes.Length, 16);
         rlImGui.ReloadFonts();
         return font;
     }

@@ -25,7 +25,7 @@ public class Editor
     PathPreferences PathPrefs { get; }
     RenderConfigDefault ConfigDefault { get; }
 
-    public IDrawable? MapData { get; set; }
+    public Level? Level { get; set; }
     public BoneTypes? BoneTypes { get; set; }
     public string[]? PowerNames { get; set; }
 
@@ -65,7 +65,7 @@ public class Editor
         Context = _context,
         RenderConfig = _renderConfig,
         OverlayConfig = _overlayConfig,
-        Level = MapData as Level,
+        Level = Level,
     };
 
     private PropertiesWindowData PropertiesWindowData => new()
@@ -73,7 +73,7 @@ public class Editor
         Time = Time,
         Canvas = Canvas,
         Loader = Loader,
-        Level = MapData as Level,
+        Level = Level,
         PathPrefs = PathPrefs,
         Selection = Selection,
         PowerNames = PowerNames,
@@ -141,7 +141,7 @@ public class Editor
             Canvas.CameraMatrix = Rl.GetCameraMatrix2D(_cam);
 
             _context = new();
-            MapData?.DrawOn(Canvas, WmsTransform.IDENTITY, _renderConfig, _context, _state);
+            Level?.DrawOn(Canvas, WmsTransform.IDENTITY, _renderConfig, _context, _state);
             Canvas.FinalizeDraw();
         }
 
@@ -165,8 +165,8 @@ public class Editor
             ViewportWindow.Show();
         if (RenderConfigWindow.Open)
             RenderConfigWindow.Show(_renderConfig, ConfigDefault, PathPrefs);
-        if (MapOverviewWindow.Open && MapData is Level l)
-            MapOverviewWindow.Show(l, CommandHistory, PathPrefs, Loader, Selection);
+        if (MapOverviewWindow.Open && Level is not null)
+            MapOverviewWindow.Show(Level, CommandHistory, PathPrefs, Loader, Selection);
 
         if (Selection.Object is not null)
             PropertiesWindow.Open = true;
@@ -177,11 +177,11 @@ public class Editor
 
         if (HistoryPanel.Open)
             HistoryPanel.Show(CommandHistory, Selection);
-        if (PlaylistEditPanel.Open && MapData is Level lv)
-            PlaylistEditPanel.Show(lv, PathPrefs);
+        if (PlaylistEditPanel.Open && Level is not null)
+            PlaylistEditPanel.Show(Level, PathPrefs);
 
         if (ExportDialog.Open)
-            ExportDialog.Show(MapData);
+            ExportDialog.Show(Level);
         if (ImportDialog.Open)
             ImportDialog.Show(this);
 
@@ -191,8 +191,8 @@ public class Editor
             AddObjectPopup.NewPos = ViewportWindow.ScreenToWorld(Rl.GetMousePosition(), _cam);
         }
 
-        if (MapData is Level level)
-            AddObjectPopup.Update(level, CommandHistory, Selection);
+        if (Level is not null)
+            AddObjectPopup.Update(Level, CommandHistory, Selection);
 
         NewLevelModal.Update(this, PathPrefs);
     }
@@ -270,7 +270,7 @@ public class Editor
         usingOverlay |= OverlayManager.IsUsing;
 
         if (ViewportWindow.Hovered && !usingOverlay && Rl.IsMouseButtonReleased(MouseButton.Left))
-            Selection.Object = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, MapData, _cam, _renderConfig, _state);
+            Selection.Object = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, Level, _cam, _renderConfig, _state);
 
         if (!wantCaptureKeyboard && Rl.IsKeyDown(KeyboardKey.LeftControl))
         {
@@ -302,7 +302,7 @@ public class Editor
             Canvas.ClearTextureCache();
         }
 
-        MapData = l;
+        Level = l;
         ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
         _state.Reset();
     }
@@ -380,13 +380,7 @@ public class Editor
     private void ResetCam(int surfaceW, int surfaceH)
     {
         _cam.Zoom = 1.0f;
-        CameraBounds? bounds = MapData switch
-        {
-            LevelDesc ld => ld.CameraBounds,
-            Level l => l.Desc.CameraBounds,
-            _ => null
-        };
-
+        CameraBounds? bounds = Level?.Desc.CameraBounds;
         if (bounds is null) return;
 
         double scale = Math.Min(surfaceW / bounds.W, surfaceH / bounds.H);
@@ -397,24 +391,23 @@ public class Editor
 
     public void ExportWorldImage()
     {
-        if (MapData is Level l && Canvas is not null)
+        if (Level is null || Canvas is null) return;
+
+        Image image = GetWorldRect((float)Level.Desc.CameraBounds.X, (float)Level.Desc.CameraBounds.Y, (int)Level.Desc.CameraBounds.W, (int)Level.Desc.CameraBounds.H);
+        Task.Run(() =>
         {
-            Image image = GetWorldRect((float)l.Desc.CameraBounds.X, (float)l.Desc.CameraBounds.Y, (int)l.Desc.CameraBounds.W, (int)l.Desc.CameraBounds.H);
-            Task.Run(() =>
+            string extension = "png";
+            Rl.ImageFlipVertical(ref image);
+            DialogResult dialogResult = Dialog.FileSave(extension);
+            if (dialogResult.IsOk)
             {
-                string extension = "png";
-                Rl.ImageFlipVertical(ref image);
-                DialogResult dialogResult = Dialog.FileSave(extension);
-                if (dialogResult.IsOk)
-                {
-                    string path = dialogResult.Path;
-                    if (!Path.HasExtension(path) || Path.GetExtension(path) != extension)
-                        path = Path.ChangeExtension(path, extension);
-                    Rl.ExportImage(image, path);
-                }
-                Rl.UnloadImage(image);
-            });
-        }
+                string path = dialogResult.Path;
+                if (!Path.HasExtension(path) || Path.GetExtension(path) != extension)
+                    path = Path.ChangeExtension(path, extension);
+                Rl.ExportImage(image, path);
+            }
+            Rl.UnloadImage(image);
+        });
     }
 
     public Image GetWorldRect(float x, float y, int w, int h)
@@ -428,7 +421,7 @@ public class Editor
         Rl.ClearBackground(RlColor.Blank);
         Rl.BeginMode2D(camera);
         Canvas.CameraMatrix = Rl.GetCameraMatrix2D(camera);
-        MapData?.DrawOn(Canvas, WmsTransform.IDENTITY, _renderConfig, new RenderContext(), _state);
+        Level?.DrawOn(Canvas, WmsTransform.IDENTITY, _renderConfig, new RenderContext(), _state);
         Canvas.FinalizeDraw();
         Rl.EndMode2D();
         Rl.EndTextureMode();

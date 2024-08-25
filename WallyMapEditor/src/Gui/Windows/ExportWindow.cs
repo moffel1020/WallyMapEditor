@@ -36,11 +36,11 @@ public class ExportWindow(PathPreferences prefs)
     private int _selectedBackupIndex;
     private bool _refreshListOnOpen = true;
 
-    public void Show(IDrawable? mapData)
+    public void Show(Level? level)
     {
         ImGui.SetNextWindowSizeConstraints(new(425, 425), new(int.MaxValue));
         ImGui.Begin("Export", ref _open, ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoCollapse);
-        if (mapData is null)
+        if (level is null)
         {
             ImGui.Text("No map data open");
             return;
@@ -49,32 +49,25 @@ public class ExportWindow(PathPreferences prefs)
         ImGui.BeginTabBar("exportTabBar", ImGuiTabBarFlags.None);
         if (ImGui.BeginTabItem("Game"))
         {
-            if (mapData is Level level) ShowGameExportTab(level);
+            ShowGameExportTab(level);
             ImGui.EndTabItem();
         }
 
         if (ImGui.BeginTabItem("LevelDesc"))
         {
-            if (mapData is Level level)
-                ShowLevelDescExportTab(level.Desc);
-            else if (mapData is LevelDesc desc)
-                ShowLevelDescExportTab(desc);
-
+            ShowLevelDescExportTab(level.Desc);
             ImGui.EndTabItem();
         }
 
-        if (mapData is Level l)
+        if (ImGui.BeginTabItem("LevelType"))
         {
-            if (ImGui.BeginTabItem("LevelType"))
-            {
-                ShowLevelTypeExportTab(l);
-                ImGui.EndTabItem();
-            }
-            if (ImGui.BeginTabItem("LevelSetTypes"))
-            {
-                ShowPlaylistsExportTab(l);
-                ImGui.EndTabItem();
-            }
+            ShowLevelTypeExportTab(level);
+            ImGui.EndTabItem();
+        }
+        if (ImGui.BeginTabItem("LevelSetTypes"))
+        {
+            ShowPlaylistsExportTab(level);
+            ImGui.EndTabItem();
         }
 
         ImGui.EndTabBar();
@@ -171,7 +164,6 @@ public class ExportWindow(PathPreferences prefs)
 
                 RefreshBackupList(prefs.BrawlhallaPath);
             }
-
 
             ImGui.SameLine();
             if (ImGui.Button("Refresh"))
