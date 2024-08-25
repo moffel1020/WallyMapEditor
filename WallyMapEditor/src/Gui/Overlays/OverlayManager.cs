@@ -36,10 +36,10 @@ public class OverlayManager
         AbstractAsset a when a.AssetName is not null => new AssetOverlay(a),
         AbstractAsset a => new ParentAssetOverlay(a),
         NavNode n => new NavNodeOverlay(n),
-        DynamicCollision dc => new AbstracyDynamicOverlay<AbstractCollision>(dc),
-        DynamicItemSpawn dis => new AbstracyDynamicOverlay<AbstractItemSpawn>(dis),
-        DynamicRespawn dr => new AbstracyDynamicOverlay<Respawn>(dr),
-        DynamicNavNode dn => new AbstracyDynamicOverlay<NavNode>(dn),
+        DynamicCollision dc => new AbstractDynamicOverlay<AbstractCollision>(dc),
+        DynamicItemSpawn dis => new AbstractDynamicOverlay<AbstractItemSpawn>(dis),
+        DynamicRespawn dr => new AbstractDynamicOverlay<Respawn>(dr),
+        DynamicNavNode dn => new AbstractDynamicOverlay<NavNode>(dn),
         _ => null
     };
 }
