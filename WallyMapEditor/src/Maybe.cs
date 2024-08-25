@@ -81,6 +81,9 @@ public readonly struct Maybe<T>
             ifNone();
     }
 
+    public Maybe<T> NoneIf(Predicate<T> predicate) => _hasValue && !predicate(_value) ? _value : Maybe<T>.None;
+    public Maybe<T> SomeIf(Predicate<T> predicate) => _hasValue && predicate(_value) ? _value : Maybe<T>.None;
+
     public static Maybe<T> Some(T value) => new(value);
     public static Maybe<T> None => new();
     public static implicit operator Maybe<T>(T value) => new(value);

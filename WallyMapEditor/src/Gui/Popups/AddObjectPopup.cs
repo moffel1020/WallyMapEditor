@@ -34,36 +34,36 @@ public static class AddObjectPopup
         ImGui.EndPopup();
     }
 
-    public static Maybe<AbstractCollision> AddCollisionMenu(Vector2 pos)
+    public static Maybe<AbstractCollision> AddCollisionMenu(Vector2 start, Vector2 end)
     {
         Maybe<AbstractCollision> result = new();
         if (ImGui.BeginMenu("Normal Collision"))
         {
-            if (ImGui.MenuItem(nameof(HardCollision))) result = PropertiesWindow.DefaultCollision<HardCollision>(pos);
-            if (ImGui.MenuItem(nameof(SoftCollision))) result = PropertiesWindow.DefaultCollision<SoftCollision>(pos);
-            if (ImGui.MenuItem(nameof(NoSlideCollision))) result = PropertiesWindow.DefaultCollision<NoSlideCollision>(pos);
+            if (ImGui.MenuItem(nameof(HardCollision))) result = PropertiesWindow.DefaultCollision<HardCollision>(start, end);
+            if (ImGui.MenuItem(nameof(SoftCollision))) result = PropertiesWindow.DefaultCollision<SoftCollision>(start, end);
+            if (ImGui.MenuItem(nameof(NoSlideCollision))) result = PropertiesWindow.DefaultCollision<NoSlideCollision>(start, end);
             ImGui.EndMenu();
         }
         if (ImGui.BeginMenu("Bouncy Collision"))
         {
-            if (ImGui.MenuItem(nameof(BouncyHardCollision))) result = PropertiesWindow.DefaultCollision<BouncyHardCollision>(pos);
-            if (ImGui.MenuItem(nameof(BouncySoftCollision))) result = PropertiesWindow.DefaultCollision<BouncySoftCollision>(pos);
-            if (ImGui.MenuItem(nameof(BouncyNoSlideCollision))) result = PropertiesWindow.DefaultCollision<BouncyNoSlideCollision>(pos);
+            if (ImGui.MenuItem(nameof(BouncyHardCollision))) result = PropertiesWindow.DefaultCollision<BouncyHardCollision>(start, end);
+            if (ImGui.MenuItem(nameof(BouncySoftCollision))) result = PropertiesWindow.DefaultCollision<BouncySoftCollision>(start, end);
+            if (ImGui.MenuItem(nameof(BouncyNoSlideCollision))) result = PropertiesWindow.DefaultCollision<BouncyNoSlideCollision>(start, end);
             ImGui.EndMenu();
         }
         if (ImGui.BeginMenu("Special Collision"))
         {
-            if (ImGui.MenuItem(nameof(StickyCollision))) result = PropertiesWindow.DefaultCollision<StickyCollision>(pos);
-            if (ImGui.MenuItem(nameof(ItemIgnoreCollision))) result = PropertiesWindow.DefaultCollision<ItemIgnoreCollision>(pos);
-            if (ImGui.MenuItem(nameof(TriggerCollision))) result = PropertiesWindow.DefaultCollision<TriggerCollision>(pos);
+            if (ImGui.MenuItem(nameof(StickyCollision))) result = PropertiesWindow.DefaultCollision<StickyCollision>(start, end);
+            if (ImGui.MenuItem(nameof(ItemIgnoreCollision))) result = PropertiesWindow.DefaultCollision<ItemIgnoreCollision>(start, end);
+            if (ImGui.MenuItem(nameof(TriggerCollision))) result = PropertiesWindow.DefaultCollision<TriggerCollision>(start, end);
             ImGui.EndMenu();
         }
         if (ImGui.BeginMenu("Gamemode collision"))
         {
-            if (ImGui.MenuItem(nameof(GameModeHardCollision))) result = PropertiesWindow.DefaultCollision<GameModeHardCollision>(pos);
-            if (ImGui.MenuItem(nameof(PressurePlateCollision))) result = PropertiesWindow.DefaultCollision<PressurePlateCollision>(pos);
-            if (ImGui.MenuItem(nameof(SoftPressurePlateCollision))) result = PropertiesWindow.DefaultCollision<SoftPressurePlateCollision>(pos);
-            if (ImGui.MenuItem(nameof(LavaCollision))) result = PropertiesWindow.DefaultCollision<LavaCollision>(pos);
+            if (ImGui.MenuItem(nameof(GameModeHardCollision))) result = PropertiesWindow.DefaultCollision<GameModeHardCollision>(start, end);
+            if (ImGui.MenuItem(nameof(PressurePlateCollision))) result = PropertiesWindow.DefaultCollision<PressurePlateCollision>(start, end);
+            if (ImGui.MenuItem(nameof(SoftPressurePlateCollision))) result = PropertiesWindow.DefaultCollision<SoftPressurePlateCollision>(start, end);
+            if (ImGui.MenuItem(nameof(LavaCollision))) result = PropertiesWindow.DefaultCollision<LavaCollision>(start, end);
             ImGui.EndMenu();
         }
         return result;
@@ -121,8 +121,10 @@ public static class AddObjectPopup
             newVal => cmd.Add(new ArrayAddCommand<DynamicRespawn>(val => l.Desc.DynamicRespawns = val, l.Desc.DynamicRespawns, newVal)),
             selection, cmd);
 
+    private static Maybe<AbstractCollision> AddCollisionMenu_(Vector2 pos) => AddCollisionMenu(pos, pos with { X = pos.X + 100 });
+
     public static void AddDynamicCollisionMenuHistory(Vector2 pos, Level l, SelectionContext selection, CommandHistory cmd) =>
-        AddObjectWithDynamicMenuHistory<AbstractCollision, DynamicCollision>(pos, "DynamicCollision", AddCollisionMenu,
+        AddObjectWithDynamicMenuHistory<AbstractCollision, DynamicCollision>(pos, "DynamicCollision", AddCollisionMenu_,
             newVal => cmd.Add(new ArrayAddCommand<AbstractCollision>(val => l.Desc.Collisions = val, l.Desc.Collisions, newVal)),
             newVal => cmd.Add(new ArrayAddCommand<DynamicCollision>(val => l.Desc.DynamicCollisions = val, l.Desc.DynamicCollisions, newVal)),
             selection, cmd);

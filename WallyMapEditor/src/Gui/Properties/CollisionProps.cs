@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Numerics;
 using WallyMapSpinzor2;
+using Raylib_cs;
 using ImGuiNET;
 
 namespace WallyMapEditor;
@@ -26,6 +27,8 @@ public partial class PropertiesWindow
         }
 
         bool propChanged = false;
+
+        propChanged |= CollisionChangeType(ac, cmd, data);
         propChanged |= ImGuiExt.DragDoubleHistory($"X1##props{ac.GetHashCode()}", ac.X1, val => ac.X1 = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory($"Y1##props{ac.GetHashCode()}", ac.Y1, val => ac.Y1 = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory($"X2##props{ac.GetHashCode()}", ac.X2, val => ac.X2 = val, cmd);
@@ -141,9 +144,9 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
-    public static C DefaultCollision<C>(Vector2 pos) where C : AbstractCollision, new()
+    public static C DefaultCollision<C>(Vector2 start, Vector2 end) where C : AbstractCollision, new()
     {
-        C col = new() { X1 = pos.X, X2 = pos.X + 100, Y1 = pos.Y, Y2 = pos.Y };
+        C col = new() { X1 = start.X, X2 = end.X, Y1 = start.Y, Y2 = end.Y };
         if (col is AbstractPressurePlateCollision pcol)
         {
             pcol.AssetName = "a__AnimationPressurePlate";
@@ -159,6 +162,85 @@ public partial class PropertiesWindow
             lcol.LavaPower = "LavaBurn";
         }
         return col;
+    }
+
+    private static bool CollisionChangeType(AbstractCollision ac, CommandHistory cmd, PropertiesWindowData data)
+    {
+        if (data.Level is null)
+            return false;
+
+        Maybe<AbstractCollision> newCol = ShowChangeTypeMenu(ac);
+        if (!newCol.TryGetValue(out AbstractCollision? col))
+            return false;
+
+        AbstractCollision[] list = ac.Parent?.Children ?? data.Level.Desc.Collisions;
+        int indexInList = Array.FindIndex(list, c => c == ac);
+
+        if (indexInList == -1)
+        {
+            Rl.TraceLog(TraceLogLevel.Error, "Attempt to change type of orphaned collision");
+            return false;
+        }
+
+        cmd.Add(new SelectPropChangeCommand<AbstractCollision>((val) => list[indexInList] = val, ac, col));
+        cmd.SetAllowMerge(false);
+        return true;
+    }
+
+    private static Maybe<AbstractCollision> ShowChangeTypeMenu(AbstractCollision og)
+    {
+        Maybe<AbstractCollision> result = new();
+        if (ImGui.Button("Change type"))
+            ImGui.OpenPopup("ChangeType##col");
+
+        if (ImGui.BeginPopup("ChangeType##col"))
+        {
+            Vector2 start = new((float)og.X1, (float)og.Y1);
+            Vector2 end = new((float)og.X2, (float)og.Y2);
+            result = AddObjectPopup.AddCollisionMenu(start, end);
+
+            // avoid changing type to the same one
+            result = result.NoneIf(col => col.GetType() == og.GetType());
+
+            result.DoIfSome(col =>
+            {
+                col.Parent = og.Parent;
+                col.TauntEvent = og.TauntEvent;
+                col.Team = og.Team;
+                col.AnchorX = og.AnchorX;
+                col.AnchorY = og.AnchorY;
+                col.NormalX = og.NormalX;
+                col.NormalY = og.NormalY;
+                col.X1 = og.X1;
+                col.X2 = og.X2;
+                col.Y1 = og.Y1;
+                col.Y2 = og.Y2;
+                col.Flag = og.Flag;
+                col.ColorFlag = og.ColorFlag;
+
+                if (col is LavaCollision lcol && og is LavaCollision log)
+                {
+                    lcol.LavaPower = log.LavaPower;
+                }
+
+                if (col is AbstractPressurePlateCollision pcol && og is AbstractPressurePlateCollision pog)
+                {
+                    pcol.AnimOffsetX = pog.AnimOffsetX;
+                    pcol.AnimOffsetY = pog.AnimOffsetY;
+                    pcol.AnimRotation = pog.AnimRotation;
+                    pcol.AssetName = pog.AssetName;
+                    pcol.Cooldown = pog.Cooldown;
+                    pcol.FaceLeft = pog.FaceLeft;
+                    pcol.FireOffsetX = [.. pog.FireOffsetX];
+                    pcol.FireOffsetY = [.. pog.FireOffsetY];
+                    pcol.PlatID = pog.PlatID;
+                    pcol.TrapPowers = [.. pog.TrapPowers];
+                }
+            });
+
+            ImGui.EndPopup();
+        }
+        return result;
     }
 
     private const string POWER_POPUP_NAME = "PowerEdit";
