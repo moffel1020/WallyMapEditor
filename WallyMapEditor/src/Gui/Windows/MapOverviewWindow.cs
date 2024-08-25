@@ -175,14 +175,14 @@ public class MapOverviewWindow
 
             if (crateColA != l.Type.CrateColorA)
             {
+                cmd.Add(new PropChangeCommand<CrateColor?>(val => l.Type.CrateColorA = val, l.Type.CrateColorA, crateColA));
                 _propChanged = true;
-                cmd.Add(new CrateColorChange(l.Type, crateColA, false));
             }
 
             if (crateColB != l.Type.CrateColorB)
             {
+                cmd.Add(new PropChangeCommand<CrateColor?>(val => l.Type.CrateColorB = val, l.Type.CrateColorB, crateColB));
                 _propChanged = true;
-                cmd.Add(new CrateColorChange(l.Type, crateColB, true));
             }
         }
 
@@ -213,8 +213,11 @@ public class MapOverviewWindow
                 selection.Object = ts;
             }
             ShowSelectableList(l.Desc.Assets, selection, val => l.Desc.Assets = val, cmd, movable: true);
+            if (l.Desc.LevelAnims.Length > 0) ImGui.Separator();
             ShowSelectableList(l.Desc.LevelAnims, selection, val => l.Desc.LevelAnims = val, cmd, movable: true);
+            if (l.Desc.AnimatedBackgrounds.Length > 0) ImGui.Separator();
             ShowSelectableList(l.Desc.AnimatedBackgrounds, selection, val => l.Desc.AnimatedBackgrounds = val, cmd, movable: true);
+            if (l.Desc.LevelAnimations.Length > 0) ImGui.Separator();
             ShowSelectableList(l.Desc.LevelAnimations, selection, val => l.Desc.LevelAnimations = val, cmd, movable: true);
         },
         () => addButton("asset", () => AddObjectPopup.AddMovingPlatformMenuHistory(new(0, 0), l, selection, cmd)));
