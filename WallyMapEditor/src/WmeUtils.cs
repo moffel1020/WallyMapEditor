@@ -375,8 +375,7 @@ public static class WmeUtils
         if (rotation != 0)
         {
             Vector2 center = new(rec.X, rec.Y);
-            float sin = (float)Math.Sin(-rotation);
-            float cos = (float)Math.Cos(-rotation);
+            (float sin, float cos) = ((float, float))Math.SinCos(-rotation);
             Vector2 temp;
 
             point -= center;

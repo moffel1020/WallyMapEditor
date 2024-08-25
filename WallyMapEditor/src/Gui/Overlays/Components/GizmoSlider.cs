@@ -33,9 +33,10 @@ public class GizmoSlider(double x, double y)
         Rectangle rect = new((float)X, (float)Y, (float)(Length * Value), (float)LineWidth);
         if (rect.Width < 0)
         {
+            (float sin, float cos) = ((float, float))Math.SinCos(Rotation * Math.PI / 180);
             rect = new(
-                rect.X + rect.Width * (float)Math.Cos(Rotation * Math.PI / 180),
-                rect.Y + rect.Width * (float)Math.Sin(Rotation * Math.PI / 180),
+                rect.X + rect.Width * cos,
+                rect.Y + rect.Width * sin,
                 -rect.Width, rect.Height
             );
         }
@@ -70,7 +71,8 @@ public class GizmoSlider(double x, double y)
 
         if (allowDragging && Hovered && Rl.IsMouseButtonPressed(MouseButton.Left))
         {
-            Vector2 gizmoVec = new((float)Math.Cos(Rotation * Math.PI / 180), (float)Math.Sin(Rotation * Math.PI / 180));
+            (float sin, float cos) = ((float, float))Math.SinCos(Rotation * Math.PI / 180);
+            Vector2 gizmoVec = new(cos, sin);
             Vector2 proj = Vector2.Dot(mousePos - new Vector2((float)X, (float)Y), gizmoVec) / Vector2.Dot(gizmoVec, gizmoVec) * gizmoVec;
             int side = gizmoVec.X * proj.X < 0 || gizmoVec.Y * proj.Y < 0 ? -1 : 1;
 
@@ -80,7 +82,8 @@ public class GizmoSlider(double x, double y)
 
         if (Dragging && _lastMouseOffset is not null)
         {
-            Vector2 gizmoVec = new((float)Math.Cos(Rotation * Math.PI / 180), (float)Math.Sin(Rotation * Math.PI / 180));
+            (float sin, float cos) = ((float, float))Math.SinCos(Rotation * Math.PI / 180);
+            Vector2 gizmoVec = new(cos, sin);
             Vector2 oldPos = (float)_lastMouseOffset.Value * gizmoVec;
 
             Vector2 proj = Vector2.Dot(mousePos - new Vector2((float)X, (float)Y), gizmoVec) / Vector2.Dot(gizmoVec, gizmoVec) * gizmoVec; // orthogonal projection onto gizmo line
