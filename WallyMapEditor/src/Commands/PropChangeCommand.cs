@@ -5,7 +5,7 @@ namespace WallyMapEditor;
 public class PropChangeCommand<T>(Action<T> changeAction, T oldVal, T newVal) : ICommand
 {
     protected Action<T> Action { get; init; } = changeAction;
-    protected T OldVal { get; set; } = oldVal;
+    protected T OldVal { get; init; } = oldVal;
     protected T NewVal { get; set; } = newVal;
 
     public void Execute() => Action(NewVal);
