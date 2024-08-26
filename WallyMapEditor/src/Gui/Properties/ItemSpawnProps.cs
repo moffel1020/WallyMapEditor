@@ -1,6 +1,8 @@
 using System.Numerics;
 using WallyMapSpinzor2;
 using ImGuiNET;
+using System;
+using Raylib_cs;
 
 namespace WallyMapEditor;
 
@@ -15,14 +17,62 @@ public partial class PropertiesWindow
             if (ImGui.Button($"PlatID {i.Parent.PlatID}")) data.Selection.Object = i.Parent;
             ImGui.Separator();
         }
-        // TODO: make it possible to change type similar to how it's done in CollisionProps
 
         bool propChanged = false;
+
+        if (data.Level is not null) propChanged |= ObjectChangeType(i, cmd, ShowChangeItemTypeMenu, i.Parent?.Children ?? data.Level.Desc.ItemSpawns);
         propChanged |= ImGuiExt.DragDoubleHistory($"X##props{i.GetHashCode()}", i.X, val => i.X = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory($"Y##props{i.GetHashCode()}", i.Y, val => i.Y = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory($"W##props{i.GetHashCode()}", i.W, val => i.W = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory($"H##props{i.GetHashCode()}", i.H, val => i.H = val, cmd);
         return propChanged;
+    }
+
+    private static bool ObjectChangeType<T>(T obj, CommandHistory cmd, Func<T, Maybe<T>> menu, T[] objectList)
+        where T : class
+    {
+        Maybe<T> maybeNew = menu(obj);
+        if (!maybeNew.TryGetValue(out T? newObj))
+            return false;
+
+        T[] list = objectList;
+        int indexInList = Array.FindIndex(list, o => o == obj);
+
+        if (indexInList == -1)
+        {
+            Rl.TraceLog(TraceLogLevel.Error, $"Attempt to change type of orphaned {typeof(T).Name}");
+            return false;
+        }
+
+        cmd.Add(new SelectPropChangeCommand<T>(val => list[indexInList] = val, obj, newObj));
+        cmd.SetAllowMerge(false);
+        return true;
+    }
+
+    private static Maybe<AbstractItemSpawn> ShowChangeItemTypeMenu(AbstractItemSpawn og)
+    {
+        Maybe<AbstractItemSpawn> result = new();
+        if (ImGui.Button("Change Type"))
+            ImGui.OpenPopup("ChangeType##item");
+
+        if (ImGui.BeginPopup("ChangeType##item"))
+        {
+            Vector2 pos = new((float)og.X, (float)og.Y);
+            result = AddObjectPopup.AddItemSpawnMenu(pos).NoneIf(i => i.GetType() == og.GetType());
+
+            result.DoIfSome(item =>
+            {
+                item.Parent = og.Parent;
+                item.H = og.H;
+                item.W = og.W;
+                item.X = og.X;
+                item.Y = og.Y;
+            });
+
+            ImGui.EndPopup();
+        }
+
+        return result;
     }
 
     public static T DefaultItemSpawn<T>(Vector2 pos) where T : AbstractItemSpawn, new()
