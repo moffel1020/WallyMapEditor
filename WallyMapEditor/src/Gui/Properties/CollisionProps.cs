@@ -182,7 +182,7 @@ public partial class PropertiesWindow
             return false;
         }
 
-        cmd.Add(new SelectPropChangeCommand<AbstractCollision>((val) => list[indexInList] = val, ac, col));
+        cmd.Add(new SelectPropChangeCommand<AbstractCollision>(val => list[indexInList] = val, ac, col));
         cmd.SetAllowMerge(false);
         return true;
     }
@@ -217,11 +217,6 @@ public partial class PropertiesWindow
                 col.Y2 = og.Y2;
                 col.Flag = og.Flag;
                 col.ColorFlag = og.ColorFlag;
-
-                if (col is LavaCollision lcol && og is LavaCollision log)
-                {
-                    lcol.LavaPower = log.LavaPower;
-                }
 
                 if (col is AbstractPressurePlateCollision pcol && og is AbstractPressurePlateCollision pog)
                 {
