@@ -15,8 +15,8 @@ public class CommandHistory(SelectionContext selection)
         if (Commands.TryPeek(out ICommand? prev) && prev.AllowMerge && prev.Merge(cmd))
             return;
 
-        if (cmd is IDeselectCommand d && d.DeselectOnExecute(selection))
-            selection.Object = null;
+        if (cmd is ISelectCommand d)
+            d.ModifyOnExecute(selection);
 
         Commands.Push(cmd);
     }
@@ -25,8 +25,8 @@ public class CommandHistory(SelectionContext selection)
     {
         if (Commands.TryPop(out ICommand? prev))
         {
-            if (prev is IDeselectCommand d && d.DeselectOnUndo(selection))
-                selection.Object = null;
+            if (prev is ISelectCommand d)
+                d.ModifyOnUndo(selection);
 
             prev.Undo();
             Undone.Push(prev);
@@ -37,8 +37,8 @@ public class CommandHistory(SelectionContext selection)
     {
         if (Undone.TryPop(out ICommand? cmd))
         {
-            if (cmd is IDeselectCommand d && d.DeselectOnExecute(selection))
-                selection.Object = null;
+            if (cmd is ISelectCommand d)
+                d.ModifyOnExecute(selection);
 
             cmd.Execute();
             Commands.Push(cmd);

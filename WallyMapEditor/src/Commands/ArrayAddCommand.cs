@@ -3,8 +3,13 @@ using System;
 namespace WallyMapEditor;
 
 public class ArrayAddCommand<T>(Action<T[]> arrayChange, T[] array, T toAdd)
-    : PropChangeCommand<T[]>(arrayChange, array, [.. array, toAdd]), IDeselectCommand where T : notnull
+    : PropChangeCommand<T[]>(arrayChange, array, [.. array, toAdd]), ISelectCommand where T : notnull
 {
-    public bool DeselectOnUndo(SelectionContext selection) => selection.Object == (object)toAdd || selection.IsChildOf(toAdd);
-    public bool DeselectOnExecute(SelectionContext selection) => false;
+    public void ModifyOnUndo(SelectionContext selection)
+    {
+        if (selection.Object == (object)toAdd || selection.IsChildOf(toAdd))
+            selection.Object = null;
+    }
+
+    public void ModifyOnExecute(SelectionContext selection) { }
 }

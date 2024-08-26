@@ -26,7 +26,6 @@ public partial class PropertiesWindow
         ImGui.End();
     }
 
-    // TODO: for collision and itemspawns, add the ability to change their types
     private static bool ShowProperties(object o, CommandHistory cmd, PropertiesWindowData data) => o switch
     {
         Respawn r => ShowRespawnProps(r, cmd, data),

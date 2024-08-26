@@ -4,18 +4,18 @@ namespace WallyMapEditor;
 
 public class PropChangeCommand<T>(Action<T> changeAction, T oldVal, T newVal) : ICommand
 {
-    private readonly Action<T> _action = changeAction;
-    private readonly T _oldVal = oldVal;
-    private T _newVal = newVal;
+    protected Action<T> Action { get; init; } = changeAction;
+    protected T OldVal { get; init; } = oldVal;
+    protected T NewVal { get; set; } = newVal;
 
-    public void Execute() => _action(_newVal);
-    public void Undo() => _action(_oldVal);
+    public void Execute() => Action(NewVal);
+    public void Undo() => Action(OldVal);
 
     public bool Merge(ICommand cmd)
     {
         if (cmd is PropChangeCommand<T> other)
         {
-            _newVal = other._newVal;
+            NewVal = other.NewVal;
             return true;
         }
 

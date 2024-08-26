@@ -86,7 +86,7 @@ public partial class PropertiesWindow
 
         if (ImGui.BeginPopup("AddChild##dynamic"))
         {
-            result = AddObjectPopup.AddCollisionMenu(new(0, 0));
+            result = AddObjectPopup.AddCollisionMenu(new(0, 0), new(100, 0));
             result.DoIfSome(col => col.Parent = parent);
             ImGui.EndPopup();
         }
