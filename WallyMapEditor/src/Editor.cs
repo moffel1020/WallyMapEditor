@@ -176,7 +176,7 @@ public class Editor
             Selection.Object = null;
 
         if (HistoryPanel.Open)
-            HistoryPanel.Show(CommandHistory, Selection);
+            HistoryPanel.Show(CommandHistory);
         if (PlaylistEditPanel.Open && Level is not null)
             PlaylistEditPanel.Show(Level, PathPrefs);
 
