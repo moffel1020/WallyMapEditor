@@ -1,6 +1,7 @@
 using WallyMapSpinzor2;
 using ImGuiNET;
 using Raylib_cs;
+using System;
 
 namespace WallyMapEditor;
 
@@ -24,6 +25,27 @@ public partial class PropertiesWindow
         _propChanged |= ShowProperties(o, cmd, data);
 
         ImGui.End();
+    }
+
+    private static bool ObjectChangeType<T>(T obj, CommandHistory cmd, Func<T, Maybe<T>> menu, T[] objectList)
+        where T : class
+    {
+        Maybe<T> maybeNew = menu(obj);
+        if (!maybeNew.TryGetValue(out T? newObj))
+            return false;
+
+        T[] list = objectList;
+        int indexInList = Array.FindIndex(list, o => o == obj);
+
+        if (indexInList == -1)
+        {
+            Rl.TraceLog(TraceLogLevel.Error, $"Attempt to change type of orphaned {typeof(T).Name}");
+            return false;
+        }
+
+        cmd.Add(new SelectPropChangeCommand<T>(val => list[indexInList] = val, obj, newObj));
+        cmd.SetAllowMerge(false);
+        return true;
     }
 
     private static bool ShowProperties(object o, CommandHistory cmd, PropertiesWindowData data) => o switch

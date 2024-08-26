@@ -1,8 +1,6 @@
 using System.Numerics;
 using WallyMapSpinzor2;
 using ImGuiNET;
-using System;
-using Raylib_cs;
 
 namespace WallyMapEditor;
 
@@ -26,27 +24,6 @@ public partial class PropertiesWindow
         propChanged |= ImGuiExt.DragDoubleHistory($"W##props{i.GetHashCode()}", i.W, val => i.W = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory($"H##props{i.GetHashCode()}", i.H, val => i.H = val, cmd);
         return propChanged;
-    }
-
-    private static bool ObjectChangeType<T>(T obj, CommandHistory cmd, Func<T, Maybe<T>> menu, T[] objectList)
-        where T : class
-    {
-        Maybe<T> maybeNew = menu(obj);
-        if (!maybeNew.TryGetValue(out T? newObj))
-            return false;
-
-        T[] list = objectList;
-        int indexInList = Array.FindIndex(list, o => o == obj);
-
-        if (indexInList == -1)
-        {
-            Rl.TraceLog(TraceLogLevel.Error, $"Attempt to change type of orphaned {typeof(T).Name}");
-            return false;
-        }
-
-        cmd.Add(new SelectPropChangeCommand<T>(val => list[indexInList] = val, obj, newObj));
-        cmd.SetAllowMerge(false);
-        return true;
     }
 
     private static Maybe<AbstractItemSpawn> ShowChangeItemTypeMenu(AbstractItemSpawn og)
