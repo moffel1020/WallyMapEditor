@@ -15,6 +15,7 @@ public partial class PropertiesWindow
             if (ImGui.Button($"PlatID {i.Parent.PlatID}")) data.Selection.Object = i.Parent;
             ImGui.Separator();
         }
+        // TODO: make it possible to change type similar to how it's done in CollisionProps
 
         bool propChanged = false;
         propChanged |= ImGuiExt.DragDoubleHistory($"X##props{i.GetHashCode()}", i.X, val => i.X = val, cmd);
