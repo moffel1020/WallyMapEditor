@@ -39,7 +39,8 @@ public partial class PropertiesWindow
             T[] list = getArray();
             int index = Array.FindIndex(list, e => e == obj); // execute
             if (index == -1) index = Array.FindIndex(list, e => e == newObj); // undo
-            list[index] = val;
+            if (index == -1) Rl.TraceLog(TraceLogLevel.Error, $"Attempt to change type of orphaned {typeof(T).Name}");
+            else list[index] = val;
         }, obj, newObj));
 
         cmd.SetAllowMerge(false);
