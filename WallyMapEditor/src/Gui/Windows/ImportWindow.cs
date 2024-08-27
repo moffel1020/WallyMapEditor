@@ -22,6 +22,7 @@ public class ImportWindow(PathPreferences prefs)
     private string? _savedLdPath = prefs.LevelDescPath;
     private string? _savedLtPath = prefs.LevelTypePath;
     private string? _savedLstPath = prefs.LevelSetTypesPath;
+    private string? _savedLPath = prefs.LevelPath;
     private string? _savedBtPath = prefs.BoneTypesPath;
     private string? _savedPtPath = prefs.PowerTypesPath;
 
@@ -40,8 +41,13 @@ public class ImportWindow(PathPreferences prefs)
     private bool? _levelDescFromSwz = null;
     private bool? _levelDescFromPath = null;
 
+    private Level? _level = null;
+    private bool _selectedLevelFile = false;
+    private bool _mapLoadedFromLevel = false;
+
     private LoadedFile<LevelTypes> _levelTypes = new();
     private LoadedFile<LevelSetTypes> _levelSetTypes = new();
+
     private LoadedFile<BoneTypes> _boneTypes = new();
     private LoadedFile<string[]> _powerNames = new();
 
@@ -66,6 +72,12 @@ public class ImportWindow(PathPreferences prefs)
         if (ImGui.BeginTabItem("Brawlhalla"))
         {
             ShowGameImportTab(editor);
+            ImGui.EndTabItem();
+        }
+
+        if (ImGui.BeginTabItem("quick load"))
+        {
+            ShowLevelImportTab(editor);
             ImGui.EndTabItem();
         }
 
@@ -211,6 +223,48 @@ public class ImportWindow(PathPreferences prefs)
                     _keySearching = false;
                 }
             });
+        }
+    }
+
+    private void ShowLevelImportTab(Editor editor)
+    {
+        ImGui.PushTextWrapPos();
+        ImGui.Text("Load maps saved with the quick export option.");
+        ImGui.Text("There are mandatory files that are not included in this format. So you will need to load them too");
+        ImGui.PopTextWrapPos();
+        LevelLoadButton(editor);
+
+        if (ImGui.Button("Select file"))
+        {
+            Task.Run(() =>
+            {
+                DialogResult result = Dialog.FileOpen("xml", Path.GetDirectoryName(_savedLPath));
+                if (result.IsOk)
+                {
+                    _loadingStatus = "loading...";
+                    try
+                    {
+                        _selectedLevelFile = true;
+                        _savedLPath = result.Path;
+                        _level = WmeUtils.DeserializeFromPath<Level>(result.Path, bhstyle: true);
+                        _loadingStatus = null;
+                        _loadingError = null;
+                    }
+                    catch (Exception e)
+                    {
+                        _loadingStatus = null;
+                        _loadingError = $"filed to load file. {e.Message}";
+                        Rl.TraceLog(TraceLogLevel.Error, e.Message);
+                        Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
+                    }
+                }
+            });
+        }
+
+        if (_selectedLevelFile)
+        {
+            ImGui.SameLine();
+            ImGui.Text(_savedLPath ?? "");
         }
     }
 
@@ -396,6 +450,17 @@ public class ImportWindow(PathPreferences prefs)
         }
     }
 
+    private void LevelLoadButton(Editor editor)
+    {
+        if (ImGuiExt.WithDisabledButton(
+            _level is null || _boneTypes.Final is null,
+            "Load map"
+        ))
+        {
+            DoLoadFromLevel(editor);
+        }
+    }
+
     private void DoLoad(Editor editor)
     {
         if (_levelDesc is null || _levelTypes.Final is null || _levelSetTypes.Final is null || _boneTypes.Final is null)
@@ -409,7 +474,32 @@ public class ImportWindow(PathPreferences prefs)
 
             _loadingStatus = null;
             _loadingError = null;
+            _mapLoadedFromLevel = false;
             editor.LoadMapFromLevel(new Level(_levelDesc, _levelTypes.Final, _levelSetTypes.Final), _boneTypes.Final, _powerNames.Final);
+        }
+        catch (Exception e)
+        {
+            Rl.TraceLog(TraceLogLevel.Error, e.Message);
+            Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
+            _loadingStatus = null;
+            _loadingError = $"Failed to load map file. {e.Message}";
+        }
+    }
+
+    private void DoLoadFromLevel(Editor editor)
+    {
+        if (_level is null || _boneTypes.Final is null)
+            return;
+
+        _loadingStatus = "loading...";
+        try
+        {
+            // scuffed xml parse error handling
+            if (_level.Desc is null) throw new System.Xml.XmlException("Level xml did not contain essential elements");
+            _loadingStatus = null;
+            _loadingError = null;
+            _mapLoadedFromLevel = true;
+            editor.LoadMapFromLevel(_level, _boneTypes.Final, _powerNames.Final);
         }
         catch (Exception e)
         {
@@ -439,14 +529,42 @@ public class ImportWindow(PathPreferences prefs)
             _powerNames.FromPath = WmeUtils.ParsePowerTypesFromPath(_savedPtPath);
     }
 
-    public bool CanReImport() => _levelDesc is not null && _levelTypes.Final is not null && _levelSetTypes.Final is not null && _boneTypes.Final is not null;
+    private void ImportLevelFromPath()
+    {
+        if (_level is not null && _savedLPath is not null)
+            _level = WmeUtils.DeserializeFromPath<Level>(_savedLPath, bhstyle: true);
+    }
+
+    public bool CanReImport() =>
+    (
+        _level is not null ||
+        (
+            _levelDesc is not null &&
+            _levelTypes.Final is not null &&
+            _levelSetTypes.Final is not null
+        )
+    ) &&
+    _boneTypes.Final is not null;
 
     public void ReImport(Editor editor)
     {
-        if (_levelDesc is null || _levelTypes.Final is null || _levelSetTypes.Final is null || _boneTypes.Final is null)
+        if (_boneTypes.Final is null)
             return;
-        ImportFromPaths();
-        DoLoad(editor);
+
+        if (_mapLoadedFromLevel)
+        {
+            if (_level is null)
+                return;
+            ImportLevelFromPath();
+            DoLoadFromLevel(editor);
+        }
+        else
+        {
+            if (_levelDesc is null || _levelTypes.Final is null || _levelSetTypes.Final is null)
+                return;
+            ImportFromPaths();
+            DoLoad(editor);
+        }
     }
 
     private void DecryptSwzFiles(string folder)

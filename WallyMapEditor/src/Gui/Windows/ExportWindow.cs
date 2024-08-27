@@ -53,6 +53,12 @@ public class ExportWindow(PathPreferences prefs)
             ImGui.EndTabItem();
         }
 
+        if (ImGui.BeginTabItem("quick export"))
+        {
+            ShowLevelExportTab(level);
+            ImGui.EndTabItem();
+        }
+
         if (ImGui.BeginTabItem("LevelDesc"))
         {
             ShowLevelDescExportTab(level.Desc);
@@ -182,6 +188,29 @@ public class ExportWindow(PathPreferences prefs)
                 RefreshBackupList(prefs.BrawlhallaPath!);
             }
 
+        }
+    }
+
+    public void ShowLevelExportTab(Level l)
+    {
+        if (l is null) return;
+
+        ImGui.Text("Export the LevelDesc, LevelType, and list of level sets in one file");
+        ImGui.Text("This is not a standard brawlhalla file. It's just a convenient format.");
+
+        if (ImGui.Button("Export"))
+        {
+            Task.Run(() =>
+            {
+                _exportStatus = "exporting...";
+                DialogResult result = Dialog.FileSave("xml", Path.GetDirectoryName(prefs.LevelDescPath));
+                if (result.IsOk)
+                {
+                    WmeUtils.SerializeToPath(l, result.Path, bhstyle: true);
+                    _exportError = null;
+                }
+                _exportStatus = null;
+            });
         }
     }
 
