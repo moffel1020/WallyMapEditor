@@ -193,15 +193,9 @@ public class ImportWindow(PathPreferences prefs)
             {
                 try
                 {
-                    if (WmeUtils.GetDoABCDefineTag(prefs.BrawlhallaAirPath) is DoABCDefineTag abcTag)
+                    if (WmeUtils.FindDecryptionKeyFromPath(prefs.BrawlhallaAirPath) is uint key)
                     {
-                        AbcFile abc = AbcFile.Read(new MemoryStream(abcTag.ABCData));
-                        uint? key = WmeUtils.FindDecryptionKey(abc);
-                        if (key is not null)
-                        {
-                            prefs.DecryptionKey = key.ToString();
-                        }
-
+                        prefs.DecryptionKey = key.ToString();
                         _loadingStatus = null;
                         _loadingError = null;
                     }

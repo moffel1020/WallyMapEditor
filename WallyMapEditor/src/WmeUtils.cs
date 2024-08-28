@@ -275,6 +275,11 @@ public static class WmeUtils
         return null;
     }
 
+    public static uint? FindDecryptionKeyFromPath(string bhairPath) => 
+        GetDoABCDefineTag(bhairPath) is DoABCDefineTag tag
+            ? FindDecryptionKey(AbcFile.Read(new MemoryStream(tag.ABCData)))
+            : null;
+
     public static bool IsValidBrawlPath(string? path)
     {
         if (path is null) return false;
