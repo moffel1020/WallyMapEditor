@@ -53,7 +53,7 @@ public class ExportWindow(PathPreferences prefs)
             ImGui.EndTabItem();
         }
 
-        if (ImGui.BeginTabItem("quick export"))
+        if (ImGui.BeginTabItem("Quick export"))
         {
             ShowLevelExportTab(level);
             ImGui.EndTabItem();

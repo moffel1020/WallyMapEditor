@@ -70,7 +70,7 @@ public class ImportWindow(PathPreferences prefs)
             ImGui.EndTabItem();
         }
 
-        if (ImGui.BeginTabItem("quick load"))
+        if (ImGui.BeginTabItem("Quick load"))
         {
             ShowLevelImportTab(editor);
             ImGui.EndTabItem();
@@ -122,7 +122,7 @@ public class ImportWindow(PathPreferences prefs)
                     catch (Exception e)
                     {
                         _loadingStatus = null;
-                        _loadingError = $"filed to load file. {e.Message}";
+                        _loadingError = $"failed to load file. {e.Message}";
                         Rl.TraceLog(TraceLogLevel.Error, e.Message);
                         Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
                     }
@@ -213,7 +213,7 @@ public class ImportWindow(PathPreferences prefs)
                     catch (Exception e)
                     {
                         _loadingStatus = null;
-                        _loadingError = $"filed to load file. {e.Message}";
+                        _loadingError = $"failed to load file. {e.Message}";
                         Rl.TraceLog(TraceLogLevel.Error, e.Message);
                         Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
                     }
@@ -222,7 +222,7 @@ public class ImportWindow(PathPreferences prefs)
             ImGui.SameLine();
             ImGui.Text(path);
         }
-        if (ImGui.Button($"select file##{sectionName}"))
+        if (ImGui.Button($"Select file##{sectionName}"))
         {
             Task.Run(() =>
             {
@@ -239,7 +239,7 @@ public class ImportWindow(PathPreferences prefs)
                     catch (Exception e)
                     {
                         _loadingStatus = null;
-                        _loadingError = $"filed to load file. {e.Message}";
+                        _loadingError = $"failed to load file. {e.Message}";
                         Rl.TraceLog(TraceLogLevel.Error, e.Message);
                         Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
                     }
