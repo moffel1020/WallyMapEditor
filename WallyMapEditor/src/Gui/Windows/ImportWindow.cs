@@ -6,12 +6,10 @@ using System.Linq;
 
 using WallyMapSpinzor2;
 using BrawlhallaSwz;
-using AbcDisassembler;
 
 using Raylib_cs;
 using ImGuiNET;
 using NativeFileDialogSharp;
-using SwfLib.Tags.ActionsTags;
 
 namespace WallyMapEditor;
 
@@ -52,12 +50,9 @@ public class ImportWindow(PathPreferences prefs)
     private LoadedFile<string[]> _powerNames = new();
 
     private string? _pickedFileName;
+
     private string? _loadingError;
     private string? _loadingStatus;
-
-    private bool _decrypted = false;
-    private bool _decrypting = false;
-    private bool _keySearching = false;
 
     private bool _open;
     public bool Open { get => _open; set => _open = value; }
@@ -69,21 +64,15 @@ public class ImportWindow(PathPreferences prefs)
 
         ImGui.BeginTabBar("importTabBar", ImGuiTabBarFlags.None);
 
-        if (ImGui.BeginTabItem("Brawlhalla"))
+        if (ImGui.BeginTabItem("Files"))
         {
-            ShowGameImportTab(editor);
+            ShowFileImportTab(editor);
             ImGui.EndTabItem();
         }
 
         if (ImGui.BeginTabItem("quick load"))
         {
             ShowLevelImportTab(editor);
-            ImGui.EndTabItem();
-        }
-
-        if (ImGui.BeginTabItem("Files"))
-        {
-            ShowFileImportTab(editor);
             ImGui.EndTabItem();
         }
 
@@ -104,120 +93,6 @@ public class ImportWindow(PathPreferences prefs)
         ImGui.EndTabBar();
 
         ImGui.End();
-    }
-
-    private void ShowGameImportTab(Editor editor)
-    {
-        ImGui.Text("Import from game swz files");
-        ImGui.Separator();
-        if (ImGui.Button("Select Brawlhalla Path"))
-        {
-            Task.Run(() =>
-            {
-                DialogResult result = Dialog.FolderPicker(prefs.BrawlhallaPath);
-                if (result.IsOk)
-                    prefs.BrawlhallaPath = result.Path;
-            });
-        }
-        ImGui.Text($"Path: {prefs.BrawlhallaPath}");
-
-        prefs.DecryptionKey = ImGuiExt.InputText("Decryption key", prefs.DecryptionKey ?? "", MAX_KEY_LENGTH, ImGuiInputTextFlags.CharsDecimal);
-        if (prefs.DecryptionKey.Length > 0 && ImGuiExt.WithDisabledButton(_decrypting, "Decrypt"))
-        {
-            _decrypted = false;
-            _decrypting = true;
-            _loadingStatus = "decrypting...";
-            Task.Run(() =>
-            {
-                try
-                {
-                    DecryptSwzFiles(prefs.BrawlhallaPath!);
-                    _decrypted = true;
-                    _loadingStatus = null;
-                    _loadingError = null;
-                }
-                catch (Exception e)
-                {
-                    Rl.TraceLog(TraceLogLevel.Error, e.Message);
-                    Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
-                    _loadingStatus = null;
-                    _loadingError = $"Could not decrypt swz files. {e.Message}";
-                }
-                finally
-                {
-                    _decrypting = false;
-                }
-            });
-        }
-
-        if (_decrypted && levelDescFiles.Count > 0)
-        {
-            _levelDescFileFilter = ImGuiExt.InputText("Filter map names", _levelDescFileFilter);
-            string[] levelDescs = levelDescFiles.Keys
-                .Where(s => s.Contains(_levelDescFileFilter, StringComparison.InvariantCultureIgnoreCase))
-                .ToArray();
-            int pickedItem = Array.FindIndex(levelDescs, s => s == _pickedFileName);
-            if (ImGui.ListBox("Pick level file from swz", ref pickedItem, levelDescs, levelDescs.Length, 12))
-            {
-                _pickedFileName = levelDescs[pickedItem];
-            }
-
-            if (ImGuiExt.WithDisabledButton(_pickedFileName is null, "Select"))
-            {
-                _levelDesc = WmeUtils.DeserializeFromString<LevelDesc>(levelDescFiles[_pickedFileName!], bhstyle: true);
-                _levelDescFromSwz = true;
-                _levelDescFromPath = false;
-                DoLoad(editor);
-            }
-        }
-
-        ImGui.Separator();
-        if (ImGui.Button("Select BrawlhallaAir.swf"))
-        {
-            Task.Run(() =>
-            {
-                DialogResult result = Dialog.FileOpen("swf", prefs.BrawlhallaPath);
-                if (result.IsOk)
-                {
-                    prefs.BrawlhallaAirPath = result.Path;
-                }
-            });
-        }
-        ImGui.Text($"{prefs.BrawlhallaAirPath}");
-
-        if (prefs.BrawlhallaAirPath is not null && ImGuiExt.WithDisabledButton(_keySearching, "Find decryption key"))
-        {
-            _keySearching = true;
-            _loadingStatus = "searching...";
-            Task.Run(() =>
-            {
-                try
-                {
-                    if (WmeUtils.FindDecryptionKeyFromPath(prefs.BrawlhallaAirPath) is uint key)
-                    {
-                        prefs.DecryptionKey = key.ToString();
-                        _loadingStatus = null;
-                        _loadingError = null;
-                    }
-                    else
-                    {
-                        _loadingStatus = null;
-                        _loadingError = "Could not find decryption key.";
-                    }
-                }
-                catch (Exception e)
-                {
-                    Rl.TraceLog(TraceLogLevel.Error, e.Message);
-                    Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
-                    _loadingStatus = null;
-                    _loadingError = "Could not find decryption key. " + e.Message;
-                }
-                finally
-                {
-                    _keySearching = false;
-                }
-            });
-        }
     }
 
     private void ShowLevelImportTab(Editor editor)
@@ -259,6 +134,43 @@ public class ImportWindow(PathPreferences prefs)
         {
             ImGui.SameLine();
             ImGui.Text(_savedLPath ?? "");
+        }
+    }
+
+    private void ShowSwzDecryptSection()
+    {
+        if (ImGui.Button($"Select Brawlhalla Path"))
+        {
+            Task.Run(() =>
+            {
+                DialogResult result = Dialog.FolderPicker(prefs.BrawlhallaPath);
+                if (result.IsOk && WmeUtils.IsValidBrawlPath(result.Path))
+                    prefs.BrawlhallaPath = result.Path;
+            });
+        }
+        ImGui.Text($"Path: {prefs.BrawlhallaPath}");
+        if (!string.IsNullOrWhiteSpace(prefs.BrawlhallaPath))
+        {
+            if (ImGui.Button("Decrypt"))
+            {
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        _loadingStatus = "finding key...";
+                        uint key = WmeUtils.FindDecryptionKeyFromPath(Path.Combine(prefs.BrawlhallaPath, "BrawlhallaAir.swf")) ?? throw new Exception("could not find decryption key");
+                        _loadingStatus = "decrypting...";
+                        DecryptSwzFiles(prefs.BrawlhallaPath, key);
+                        prefs.DecryptionKey = key.ToString();
+                        _loadingStatus = null;
+                        _loadingError = null;
+                    }
+                    catch (Exception e)
+                    {
+                        _loadingError = e.Message;
+                    }
+                });
+            }
         }
     }
 
@@ -336,7 +248,7 @@ public class ImportWindow(PathPreferences prefs)
         }
     }
 
-    private void ShowLevelDescImportSection()
+    private void ShowLevelDescImportSection(Editor editor)
     {
         ShowFileImportSection(
             "LevelDesc", "xml",
@@ -350,6 +262,32 @@ public class ImportWindow(PathPreferences prefs)
                 _levelDescFromPath = true;
             }
         );
+        ImGui.SameLine();
+        ImGui.Text("or");
+        ImGui.SameLine();
+        if (ImGui.Button("Pick from game")) ImGui.OpenPopup("PickFromGame");
+        if (ImGui.BeginPopup("PickFromGame") && levelDescFiles.Count > 0)
+        {
+            _levelDescFileFilter = ImGuiExt.InputText("Filter map names", _levelDescFileFilter);
+            string[] levelDescs = levelDescFiles.Keys
+                .Where(s => s.Contains(_levelDescFileFilter, StringComparison.InvariantCultureIgnoreCase))
+                .ToArray();
+
+            int pickedItem = Array.FindIndex(levelDescs, s => s == _pickedFileName);
+            if (ImGui.ListBox("Pick level file from swz", ref pickedItem, levelDescs, levelDescs.Length, 12))
+            {
+                _pickedFileName = levelDescs[pickedItem];
+            }
+
+            if (ImGuiExt.WithDisabledButton(_pickedFileName is null, "Load map"))
+            {
+                _levelDesc = WmeUtils.DeserializeFromString<LevelDesc>(levelDescFiles[_pickedFileName!], bhstyle: true);
+                _levelDescFromSwz = true;
+                _levelDescFromPath = false;
+                DoLoad(editor);
+            }
+            ImGui.EndPopup();
+        }
     }
 
     private void ShowLevelTypesImportSection()
@@ -411,26 +349,38 @@ public class ImportWindow(PathPreferences prefs)
 
     private void ShowFileImportTab(Editor editor)
     {
-        ImGui.PushTextWrapPos();
-        ImGui.Text("Import from individual xml and csv files");
-        ImGui.Text("When importing from the game these files are loaded from the swz's. You can override them with your own xml or csv files.");
-        ImGui.PopTextWrapPos();
+        ImGui.Text("Import from game or individual files");
+        ImGui.SameLine();
+        ImGui.TextDisabled("(?)");
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip("When importing from the game these files are loaded from the swz's.\nYou can override them with your own xml or csv files.");
 
-        ImGui.Spacing();
-        ImGui.SeparatorText("Load map");
-        LoadButton(editor);
-        ImGui.Spacing();
+        if (_levelTypes.Final is null || _levelSetTypes.Final is null || _boneTypes.Final is null)
+        {
+            ImGui.SeparatorText("Load from game"); 
+            ShowSwzDecryptSection();
+        }
+        else
+        {
+            ImGui.Separator();
+            ShowLevelDescImportSection(editor);
+            ImGui.Spacing();
+            ImGui.SeparatorText("Load map");
+            LoadButton(editor);
+            ImGui.Spacing();
+        }
 
-        ImGui.SeparatorText("Select files");
-        ShowLevelDescImportSection();
         ImGui.Separator();
-        ShowLevelTypesImportSection();
-        ImGui.Separator();
-        ShowLevelSetTypesImportSection();
-        ImGui.Separator();
-        ShowBoneTypesImportSection();
-        ImGui.Separator();
-        ShowPowerNamesImportSection();
+        if (ImGui.CollapsingHeader("Override individual files"))
+        {
+            ShowLevelTypesImportSection();
+            ImGui.Separator();
+            ShowLevelSetTypesImportSection();
+            ImGui.Separator();
+            ShowBoneTypesImportSection();
+            ImGui.Separator();
+            ShowPowerNamesImportSection();
+        }
     }
 
     private void LoadButton(Editor editor)
@@ -561,12 +511,11 @@ public class ImportWindow(PathPreferences prefs)
         }
     }
 
-    private void DecryptSwzFiles(string folder)
+    private void DecryptSwzFiles(string folder, uint key)
     {
         string gamePath = Path.Combine(folder, "Game.swz");
         string dynamicPath = Path.Combine(folder, "Dynamic.swz");
         string initPath = Path.Combine(folder, "Init.swz");
-        uint key = uint.Parse(prefs.DecryptionKey!);
 
         levelDescFiles.Clear();
         foreach (string file in WmeUtils.GetFilesInSwz(dynamicPath, key))
