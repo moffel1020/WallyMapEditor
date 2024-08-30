@@ -305,6 +305,7 @@ public class Editor
             Canvas.ClearTextureCache();
         }
 
+        l.Type ??= DefaultLevelType;
         Level = l;
         ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
         _state.Reset();
