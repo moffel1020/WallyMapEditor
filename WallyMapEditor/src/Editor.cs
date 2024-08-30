@@ -179,6 +179,8 @@ public class Editor
             HistoryPanel.Show(CommandHistory);
         if (PlaylistEditPanel.Open && Level is not null)
             PlaylistEditPanel.Show(Level, PathPrefs);
+        if (KeyFinderPanel.Open)
+            KeyFinderPanel.Show(PathPrefs);
 
         if (ExportDialog.Open)
             ExportDialog.Show(Level);
@@ -233,6 +235,7 @@ public class Editor
             {
                 ImportDialog.ReImport(this);
             }
+            if (ImGui.MenuItem("Find swz key")) KeyFinderPanel.Open = !KeyFinderPanel.Open;
             ImGui.EndMenu();
         }
 
