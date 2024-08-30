@@ -1,5 +1,4 @@
 using System.Numerics;
-using WallyMapSpinzor2;
 using Raylib_cs;
 
 namespace WallyMapEditor;
