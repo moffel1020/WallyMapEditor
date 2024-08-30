@@ -137,10 +137,10 @@ public partial class PropertiesWindow
     private static bool NavIDExists(int id, LevelDesc ld) =>
         EnumerateNavNodes(ld).Any(n => n.NavID == id);
 
-    public static NavNode DefaultNavNode(Vector2 pos, LevelDesc desc) => new()
+    public static NavNode DefaultNavNode(double posX, double posY, LevelDesc desc) => new()
     {
-        X = pos.X,
-        Y = pos.Y,
+        X = posX,
+        Y = posY,
         NavID = EnumerateNavNodes(desc).Select(n => n.NavID).OrderByDescending(id => id).FirstOrDefault() + 1,
         Path = [],
         Type = NavNodeTypeEnum.A

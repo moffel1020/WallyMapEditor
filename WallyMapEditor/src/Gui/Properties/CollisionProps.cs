@@ -143,9 +143,9 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
-    public static C DefaultCollision<C>(Vector2 start, Vector2 end) where C : AbstractCollision, new()
+    public static C DefaultCollision<C>(double startX, double startY, double endX, double endY) where C : AbstractCollision, new()
     {
-        C col = new() { X1 = start.X, X2 = end.X, Y1 = start.Y, Y2 = end.Y };
+        C col = new() { X1 = startX, X2 = endX, Y1 = startY, Y2 = endY };
         if (col is AbstractPressurePlateCollision pcol)
         {
             pcol.AssetName = "a__AnimationPressurePlate";
@@ -171,9 +171,7 @@ public partial class PropertiesWindow
 
         if (ImGui.BeginPopup("ChangeType##col"))
         {
-            Vector2 start = new((float)og.X1, (float)og.Y1);
-            Vector2 end = new((float)og.X2, (float)og.Y2);
-            result = AddObjectPopup.AddCollisionMenu(start, end);
+            result = AddObjectPopup.AddCollisionMenu(og.X1, og.Y1, og.X2, og.Y2);
 
             // avoid changing type to the same one
             result = result.NoneIf(col => col.GetType() == og.GetType());

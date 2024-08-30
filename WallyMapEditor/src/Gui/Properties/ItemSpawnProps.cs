@@ -34,8 +34,7 @@ public partial class PropertiesWindow
 
         if (ImGui.BeginPopup("ChangeType##item"))
         {
-            Vector2 pos = new((float)og.X, (float)og.Y);
-            result = AddObjectPopup.AddItemSpawnMenu(pos).NoneIf(i => i.GetType() == og.GetType());
+            result = AddObjectPopup.AddItemSpawnMenu(og.X, og.Y).NoneIf(i => i.GetType() == og.GetType());
 
             result.DoIfSome(item =>
             {
@@ -52,12 +51,12 @@ public partial class PropertiesWindow
         return result;
     }
 
-    public static T DefaultItemSpawn<T>(Vector2 pos) where T : AbstractItemSpawn, new()
+    public static T DefaultItemSpawn<T>(double posX, double posY) where T : AbstractItemSpawn, new()
     {
         T spawn = new()
         {
-            X = pos.X,
-            Y = pos.Y
+            X = posX,
+            Y = posY
         };
         (spawn.W, spawn.H) = (spawn.DefaultW, spawn.DefaultH);
         if (spawn is ItemSpawn)

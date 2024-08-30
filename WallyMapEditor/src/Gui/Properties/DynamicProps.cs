@@ -86,7 +86,7 @@ public partial class PropertiesWindow
 
         if (ImGui.BeginPopup("AddChild##dynamic"))
         {
-            result = AddObjectPopup.AddCollisionMenu(new(0, 0), new(100, 0));
+            result = AddObjectPopup.AddCollisionMenu(0, 0, 100, 0);
             result.DoIfSome(col => col.Parent = parent);
             ImGui.EndPopup();
         }
@@ -101,7 +101,7 @@ public partial class PropertiesWindow
 
         if (ImGui.BeginPopup("AddChild##dynamic"))
         {
-            result = AddObjectPopup.AddItemSpawnMenu(new(0, 0));
+            result = AddObjectPopup.AddItemSpawnMenu(0, 0);
             result.DoIfSome(col => col.Parent = parent);
             ImGui.EndPopup();
         }
@@ -113,7 +113,7 @@ public partial class PropertiesWindow
         Maybe<Respawn> result = new();
         if (ImGui.Button("Add new respawn"))
         {
-            result = DefaultRespawn(new(0, 0));
+            result = DefaultRespawn(0, 0);
             result.Value.Parent = parent;
         }
         return result;
@@ -124,7 +124,7 @@ public partial class PropertiesWindow
         Maybe<NavNode> result = new();
         if (ImGui.Button("Add new navnode"))
         {
-            result = DefaultNavNode(new(0, 0), desc);
+            result = DefaultNavNode(0, 0, desc);
             result.Value.Parent = parent;
         }
         return result;
