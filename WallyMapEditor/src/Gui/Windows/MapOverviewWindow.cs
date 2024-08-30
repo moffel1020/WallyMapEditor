@@ -279,7 +279,7 @@ public class MapOverviewWindow
                 if (ImGui.Button($"x##{o.GetHashCode()}"))
                 {
                     T[] result = WmeUtils.RemoveAt(values, i);
-                    cmd.Add(new ArrayRemoveCommand<T>(changeCommand, result, values[i]));
+                    cmd.Add(new ArrayRemoveCommand<T>(changeCommand, values, result, values[i]));
                     cmd.SetAllowMerge(false);
                     _propChanged |= true;
                 }
