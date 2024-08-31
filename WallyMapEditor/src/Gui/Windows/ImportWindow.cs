@@ -40,7 +40,6 @@ public class ImportWindow(PathPreferences prefs)
     private bool? _levelDescFromPath = null;
 
     private Level? _level = null;
-    private bool _selectedLevelFile = false;
     private bool _mapLoadedFromLevel = false;
 
     private LoadedFile<LevelTypes> _levelTypes = new();
@@ -75,12 +74,6 @@ public class ImportWindow(PathPreferences prefs)
         if (ImGui.BeginTabItem("Files"))
         {
             ShowFileImportTab(loader);
-            ImGui.EndTabItem();
-        }
-
-        if (ImGui.BeginTabItem("Quick load"))
-        {
-            ShowLevelImportTab(loader);
             ImGui.EndTabItem();
         }
 
@@ -168,48 +161,6 @@ public class ImportWindow(PathPreferences prefs)
                 _levelDescFromPath = false;
                 DoLoad(loader);
             }
-        }
-    }
-
-    private void ShowLevelImportTab(LevelLoader loader)
-    {
-        ImGui.PushTextWrapPos();
-        ImGui.Text("Load maps saved with the quick export option.");
-        ImGui.Text("There are mandatory files that are not included in this format. So you will need to load them too");
-        ImGui.PopTextWrapPos();
-        LevelLoadButton(loader);
-
-        if (ImGui.Button("Select file"))
-        {
-            Task.Run(() =>
-            {
-                DialogResult result = Dialog.FileOpen("xml", Path.GetDirectoryName(_savedLPath));
-                if (result.IsOk)
-                {
-                    _loadingStatus = "loading...";
-                    try
-                    {
-                        _selectedLevelFile = true;
-                        _savedLPath = result.Path;
-                        _level = WmeUtils.DeserializeFromPath<Level>(result.Path, bhstyle: true);
-                        _loadingStatus = null;
-                        _loadingError = null;
-                    }
-                    catch (Exception e)
-                    {
-                        _loadingStatus = null;
-                        _loadingError = $"failed to load file. {e.Message}";
-                        Rl.TraceLog(TraceLogLevel.Error, e.Message);
-                        Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
-                    }
-                }
-            });
-        }
-
-        if (_selectedLevelFile)
-        {
-            ImGui.SameLine();
-            ImGui.Text(_savedLPath ?? "");
         }
     }
 
@@ -393,17 +344,6 @@ public class ImportWindow(PathPreferences prefs)
         ))
         {
             DoLoad(loader);
-        }
-    }
-
-    private void LevelLoadButton(LevelLoader loader)
-    {
-        if (ImGuiExt.WithDisabledButton(
-            _level is null || _boneTypes.Final is null,
-            "Load map"
-        ))
-        {
-            DoLoadFromLevel(loader);
         }
     }
 

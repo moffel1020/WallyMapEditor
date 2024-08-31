@@ -204,18 +204,26 @@ public class Editor
 
         if (ImGui.BeginMenu("File"))
         {
-            bool disabled = LevelLoader.BoneTypes is null;
+            bool btIsNull = LevelLoader.BoneTypes is null;
             ImGui.BeginGroup();
-            ImGuiExt.WithDisabled(disabled, () =>
+            ImGuiExt.WithDisabled(btIsNull, () =>
             {
                 if (ImGui.MenuItem("New")) NewLevelModal.Open();
+                ImGui.Separator();
+                if (ImGui.MenuItem("Open")) OpenLevelFile();
             });
             ImGui.EndGroup();
-            if (disabled && ImGui.IsItemHovered())
+            if (btIsNull && ImGui.IsItemHovered())
                 ImGui.SetTooltip("Required files need to be imported first.\nPress 'Load game files' in the import menu or load the individual files manually.");
 
-            if (ImGui.MenuItem("Export")) ExportDialog = new(PathPrefs) { Open = true };
+            ImGuiExt.WithDisabled(Level is null, () =>
+            {
+                if (ImGui.MenuItem("Save")) SaveLevelFile();
+                ImGui.Separator();
+            });
+
             if (ImGui.MenuItem("Import")) ImportDialog = new(PathPrefs) { Open = true };
+            if (ImGui.MenuItem("Export")) ExportDialog = new(PathPrefs) { Open = true };
             ImGui.EndMenu();
         }
         if (ImGui.BeginMenu("Edit"))
@@ -249,6 +257,7 @@ public class Editor
 
         ImGui.EndMainMenuBar();
     }
+
 
     private void Update()
     {
@@ -358,6 +367,45 @@ public class Editor
     }
 
     public void ResetRenderState() => _state.Reset();
+
+    private void OpenLevelFile()
+    {
+        Task.Run(() =>
+        {
+            DialogResult result = Dialog.FileOpen("xml", Path.GetDirectoryName(PathPrefs.LevelPath));
+            if (result.IsOk)
+            {
+                try
+                {
+                    LevelLoader.LoadMapFromLevelFile(result.Path);
+                    PathPrefs.LevelPath = result.Path;
+                }
+                catch (Exception e)
+                {
+                    Rl.TraceLog(TraceLogLevel.Error, e.Message);
+                }
+            }
+        });
+    }
+
+    private void SaveLevelFile()
+    {
+        if (PathPrefs.LevelPath is not null)
+        {
+            WmeUtils.SerializeToPath(Level!, PathPrefs.LevelPath);
+            return;
+        }
+
+        Task.Run(() => 
+        {
+            DialogResult result = Dialog.FileSave("xml", Path.GetDirectoryName(PathPrefs.LevelPath));
+            if (result.IsOk)
+            {
+                PathPrefs.LevelPath = result.Path;
+                WmeUtils.SerializeToPath(Level!, PathPrefs.LevelPath);
+            }
+        });
+    }
 
     ~Editor()
     {

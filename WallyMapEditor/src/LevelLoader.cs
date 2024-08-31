@@ -22,6 +22,16 @@ public class LevelLoader(Editor editor)
         ResetEditorState();
     }
 
+    public void LoadMapFromLevelFile(string path)
+    {
+        if (BoneTypes is null) throw new InvalidOperationException("Could not load map from level. BoneTypes has not been imported.");
+
+        Level l = WmeUtils.DeserializeFromPath<Level>(path);;
+        if (l.Type is null) throw new System.Xml.XmlException("Level file did not contain essential elements");
+
+        LoadMapFromLevel(l, BoneTypes, PowerNames);
+    }
+
     public void LoadMapFromData(LevelDesc ld, LevelTypes lt, LevelSetTypes lst, BoneTypes bt, string[]? powerNames)
     {
         _editor.Level = new(ld, lt, lst);
