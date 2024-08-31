@@ -131,6 +131,7 @@ public class ImportWindow(PathPreferences prefs)
                     WmeUtils.FindDecryptionKeyFromPath(Path.Combine(prefs.BrawlhallaPath!, "BrawlhallaAir.swf"));
                     _loadingStatus = "decrypting...";
                     DecryptSwzFiles(prefs.BrawlhallaPath!);
+                    (loader.BoneTypes, loader.PowerNames) = (_boneTypes.Final!, _powerNames.Final!);
                     _decrypted = true;
                     _loadingError = null;
                 }
@@ -330,7 +331,7 @@ public class ImportWindow(PathPreferences prefs)
         );
     }
 
-    private void ShowBoneTypesImportSection()
+    private void ShowBoneTypesImportSection(LevelLoader loader)
     {
         ShowFileImportSection(
             "BoneTypes", "xml",
@@ -339,12 +340,12 @@ public class ImportWindow(PathPreferences prefs)
             _savedBtPath, path =>
             {
                 _savedBtPath = path;
-                _boneTypes.FromPath = WmeUtils.DeserializeFromPath<BoneTypes>(path, bhstyle: true);
+                loader.BoneTypes = _boneTypes.FromPath = WmeUtils.DeserializeFromPath<BoneTypes>(path, bhstyle: true);
             }
         );
     }
 
-    private void ShowPowerNamesImportSection()
+    private void ShowPowerNamesImportSection(LevelLoader loader)
     {
         ShowFileImportSection(
             "PowerNames", "csv",
@@ -354,6 +355,7 @@ public class ImportWindow(PathPreferences prefs)
             {
                 _savedPtPath = path;
                 _powerNames.FromPath = WmeUtils.ParsePowerTypesFromPath(path);
+                loader.PowerNames = _powerNames.FromPath;
             },
             optional: true
         );
@@ -378,9 +380,9 @@ public class ImportWindow(PathPreferences prefs)
         ImGui.Separator();
         ShowLevelSetTypesImportSection();
         ImGui.Separator();
-        ShowBoneTypesImportSection();
+        ShowBoneTypesImportSection(loader);
         ImGui.Separator();
-        ShowPowerNamesImportSection();
+        ShowPowerNamesImportSection(loader);
     }
 
     private void LoadButton(LevelLoader loader)

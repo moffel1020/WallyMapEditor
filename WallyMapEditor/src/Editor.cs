@@ -204,7 +204,16 @@ public class Editor
 
         if (ImGui.BeginMenu("File"))
         {
-            if (ImGui.MenuItem("New")) NewLevelModal.Open();
+            bool disabled = LevelLoader.BoneTypes is null;
+            ImGui.BeginGroup();
+            ImGuiExt.WithDisabled(disabled, () =>
+            {
+                if (ImGui.MenuItem("New")) NewLevelModal.Open();
+            });
+            ImGui.EndGroup();
+            if (disabled && ImGui.IsItemHovered())
+                ImGui.SetTooltip("Required files need to be imported first.\nPress 'Load game files' in the import menu or load the individual files manually.");
+
             if (ImGui.MenuItem("Export")) ExportDialog = new(PathPrefs) { Open = true };
             if (ImGui.MenuItem("Import")) ImportDialog = new(PathPrefs) { Open = true };
             ImGui.EndMenu();

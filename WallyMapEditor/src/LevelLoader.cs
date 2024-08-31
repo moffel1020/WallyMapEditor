@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using WallyMapSpinzor2;
 
@@ -7,30 +8,31 @@ public class LevelLoader(Editor editor)
 {
     private readonly Editor _editor = editor;
 
-    public LevelTypes? LoadedLt { get; set; }
-    public LevelSetTypes? LoadedLst { get; set; }
     public BoneTypes? BoneTypes { get; set; }
     public string[]? PowerNames { get; set; }
-    public bool LoadedRequiredFiles => LoadedLt is not null && LoadedLst is not null && BoneTypes is not null;
 
     public void LoadMapFromLevel(Level l, BoneTypes boneTypes, string[]? powerNames)
     {
+        if (BoneTypes is null) throw new InvalidOperationException("Could not load map from level. BoneTypes has not been imported.");
+
         l.Type ??= DefaultLevelType;
         _editor.Level = l;
 
         SetEditorData(boneTypes, powerNames);
-        ClearEditorState();
+        ResetEditorState();
     }
 
     public void LoadMapFromData(LevelDesc ld, LevelTypes lt, LevelSetTypes lst, BoneTypes bt, string[]? powerNames)
     {
         _editor.Level = new(ld, lt, lst);
         SetEditorData(bt, powerNames);
-        ClearEditorState();
+        ResetEditorState();
     }
 
     public void LoadDefaultMap(string levelName, string displayName, bool addDefaultPlaylists=true)
     {
+        if (BoneTypes is null) throw new InvalidOperationException("Could not load default map. BoneTypes has not been imported.");
+
         LevelDesc ld = DefaultLevelDesc;
         LevelType lt = DefaultLevelType;
         ld.LevelName = ld.AssetDir = lt.LevelName = levelName;
@@ -38,8 +40,7 @@ public class LevelLoader(Editor editor)
         HashSet<string> playlists = [.. (addDefaultPlaylists ? DefaultPlaylists : [])];
 
         Level level = new(ld, lt, playlists);
-        // FIXME: cba to load bonenames properly here. might become problematic if we ever allow the user to add animations
-        LoadMapFromLevel(level, BoneTypes ?? new(), PowerNames);
+        LoadMapFromLevel(level, BoneTypes, PowerNames);
     }
 
     private void SetEditorData(BoneTypes boneTypes, string[]? powerNames)
@@ -48,7 +49,7 @@ public class LevelLoader(Editor editor)
         if (_editor.Canvas is not null) _editor.Canvas.Loader.BoneTypes = boneTypes;
     }
 
-    private void ClearEditorState()
+    private void ResetEditorState()
     {
         _editor.Selection.Object = null;
         _editor.CommandHistory.Clear();
