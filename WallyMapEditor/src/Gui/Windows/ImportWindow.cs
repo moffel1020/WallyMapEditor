@@ -6,12 +6,10 @@ using System.Linq;
 
 using WallyMapSpinzor2;
 using BrawlhallaSwz;
-using AbcDisassembler;
 
 using Raylib_cs;
 using ImGuiNET;
 using NativeFileDialogSharp;
-using SwfLib.Tags.ActionsTags;
 
 namespace WallyMapEditor;
 
@@ -57,14 +55,13 @@ public class ImportWindow(PathPreferences prefs)
 
     private bool _decrypted = false;
     private bool _decrypting = false;
-    private bool _keySearching = false;
 
     private bool _open;
     public bool Open { get => _open; set => _open = value; }
 
     public void Show(Editor editor)
     {
-        ImGui.SetNextWindowSizeConstraints(new(500, 410), new(int.MaxValue));
+        ImGui.SetNextWindowSizeConstraints(new(500, 490), new(int.MaxValue));
         ImGui.Begin("Import", ref _open, ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoCollapse);
 
         ImGui.BeginTabBar("importTabBar", ImGuiTabBarFlags.None);
@@ -75,15 +72,15 @@ public class ImportWindow(PathPreferences prefs)
             ImGui.EndTabItem();
         }
 
-        if (ImGui.BeginTabItem("Quick load"))
-        {
-            ShowLevelImportTab(editor);
-            ImGui.EndTabItem();
-        }
-
         if (ImGui.BeginTabItem("Files"))
         {
             ShowFileImportTab(editor);
+            ImGui.EndTabItem();
+        }
+
+        if (ImGui.BeginTabItem("Quick load"))
+        {
+            ShowLevelImportTab(editor);
             ImGui.EndTabItem();
         }
 
@@ -121,30 +118,31 @@ public class ImportWindow(PathPreferences prefs)
         }
         ImGui.Text($"Path: {prefs.BrawlhallaPath}");
 
-        prefs.DecryptionKey = ImGuiExt.InputText("Decryption key", prefs.DecryptionKey ?? "", MAX_KEY_LENGTH, ImGuiInputTextFlags.CharsDecimal);
-        if (prefs.DecryptionKey.Length > 0 && ImGuiExt.WithDisabledButton(_decrypting, "Decrypt"))
+        if (WmeUtils.IsValidBrawlPath(prefs.BrawlhallaPath) && ImGuiExt.WithDisabledButton(_decrypting, "Load game files"))
         {
             _decrypted = false;
             _decrypting = true;
-            _loadingStatus = "decrypting...";
+            _loadingStatus = "loading...";
             Task.Run(() =>
             {
                 try
                 {
+                    _loadingStatus = "searching key...";
+                    WmeUtils.FindDecryptionKeyFromPath(Path.Combine(prefs.BrawlhallaPath!, "BrawlhallaAir.swf"));
+                    _loadingStatus = "decrypting...";
                     DecryptSwzFiles(prefs.BrawlhallaPath!);
                     _decrypted = true;
-                    _loadingStatus = null;
                     _loadingError = null;
                 }
                 catch (Exception e)
                 {
                     Rl.TraceLog(TraceLogLevel.Error, e.Message);
                     Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
-                    _loadingStatus = null;
                     _loadingError = $"Could not decrypt swz files. {e.Message}";
                 }
                 finally
                 {
+                    _loadingStatus = null;
                     _decrypting = false;
                 }
             });
@@ -162,61 +160,13 @@ public class ImportWindow(PathPreferences prefs)
                 _pickedFileName = levelDescs[pickedItem];
             }
 
-            if (ImGuiExt.WithDisabledButton(_pickedFileName is null, "Select"))
+            if (ImGuiExt.WithDisabledButton(_pickedFileName is null, "Import LevelDesc"))
             {
                 _levelDesc = WmeUtils.DeserializeFromString<LevelDesc>(levelDescFiles[_pickedFileName!], bhstyle: true);
                 _levelDescFromSwz = true;
                 _levelDescFromPath = false;
                 DoLoad(editor);
             }
-        }
-
-        ImGui.Separator();
-        if (ImGui.Button("Select BrawlhallaAir.swf"))
-        {
-            Task.Run(() =>
-            {
-                DialogResult result = Dialog.FileOpen("swf", prefs.BrawlhallaPath);
-                if (result.IsOk)
-                {
-                    prefs.BrawlhallaAirPath = result.Path;
-                }
-            });
-        }
-        ImGui.Text($"{prefs.BrawlhallaAirPath}");
-
-        if (prefs.BrawlhallaAirPath is not null && ImGuiExt.WithDisabledButton(_keySearching, "Find decryption key"))
-        {
-            _keySearching = true;
-            _loadingStatus = "searching...";
-            Task.Run(() =>
-            {
-                try
-                {
-                    if (WmeUtils.FindDecryptionKeyFromPath(prefs.BrawlhallaAirPath) is uint key)
-                    {
-                        prefs.DecryptionKey = key.ToString();
-                        _loadingStatus = null;
-                        _loadingError = null;
-                    }
-                    else
-                    {
-                        _loadingStatus = null;
-                        _loadingError = "Could not find decryption key.";
-                    }
-                }
-                catch (Exception e)
-                {
-                    Rl.TraceLog(TraceLogLevel.Error, e.Message);
-                    Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
-                    _loadingStatus = null;
-                    _loadingError = "Could not find decryption key. " + e.Message;
-                }
-                finally
-                {
-                    _keySearching = false;
-                }
-            });
         }
     }
 
