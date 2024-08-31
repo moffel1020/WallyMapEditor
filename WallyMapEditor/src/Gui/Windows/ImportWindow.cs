@@ -59,7 +59,7 @@ public class ImportWindow(PathPreferences prefs)
     private bool _open;
     public bool Open { get => _open; set => _open = value; }
 
-    public void Show(Editor editor)
+    public void Show(LevelLoader loader)
     {
         ImGui.SetNextWindowSizeConstraints(new(500, 490), new(int.MaxValue));
         ImGui.Begin("Import", ref _open, ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoCollapse);
@@ -68,19 +68,19 @@ public class ImportWindow(PathPreferences prefs)
 
         if (ImGui.BeginTabItem("Brawlhalla"))
         {
-            ShowGameImportTab(editor);
+            ShowGameImportTab(loader);
             ImGui.EndTabItem();
         }
 
         if (ImGui.BeginTabItem("Files"))
         {
-            ShowFileImportTab(editor);
+            ShowFileImportTab(loader);
             ImGui.EndTabItem();
         }
 
         if (ImGui.BeginTabItem("Quick load"))
         {
-            ShowLevelImportTab(editor);
+            ShowLevelImportTab(loader);
             ImGui.EndTabItem();
         }
 
@@ -103,7 +103,7 @@ public class ImportWindow(PathPreferences prefs)
         ImGui.End();
     }
 
-    private void ShowGameImportTab(Editor editor)
+    private void ShowGameImportTab(LevelLoader loader)
     {
         ImGui.Text("Import from game swz files");
         ImGui.Separator();
@@ -165,18 +165,18 @@ public class ImportWindow(PathPreferences prefs)
                 _levelDesc = WmeUtils.DeserializeFromString<LevelDesc>(levelDescFiles[_pickedFileName!], bhstyle: true);
                 _levelDescFromSwz = true;
                 _levelDescFromPath = false;
-                DoLoad(editor);
+                DoLoad(loader);
             }
         }
     }
 
-    private void ShowLevelImportTab(Editor editor)
+    private void ShowLevelImportTab(LevelLoader loader)
     {
         ImGui.PushTextWrapPos();
         ImGui.Text("Load maps saved with the quick export option.");
         ImGui.Text("There are mandatory files that are not included in this format. So you will need to load them too");
         ImGui.PopTextWrapPos();
-        LevelLoadButton(editor);
+        LevelLoadButton(loader);
 
         if (ImGui.Button("Select file"))
         {
@@ -359,7 +359,7 @@ public class ImportWindow(PathPreferences prefs)
         );
     }
 
-    private void ShowFileImportTab(Editor editor)
+    private void ShowFileImportTab(LevelLoader loader)
     {
         ImGui.PushTextWrapPos();
         ImGui.Text("Import from individual xml and csv files");
@@ -368,7 +368,7 @@ public class ImportWindow(PathPreferences prefs)
 
         ImGui.Spacing();
         ImGui.SeparatorText("Load map");
-        LoadButton(editor);
+        LoadButton(loader);
         ImGui.Spacing();
 
         ImGui.SeparatorText("Select files");
@@ -383,29 +383,29 @@ public class ImportWindow(PathPreferences prefs)
         ShowPowerNamesImportSection();
     }
 
-    private void LoadButton(Editor editor)
+    private void LoadButton(LevelLoader loader)
     {
         if (ImGuiExt.WithDisabledButton(
             _levelDesc is null || _levelTypes.Final is null || _levelSetTypes.Final is null || _boneTypes.Final is null,
             "Load map"
         ))
         {
-            DoLoad(editor);
+            DoLoad(loader);
         }
     }
 
-    private void LevelLoadButton(Editor editor)
+    private void LevelLoadButton(LevelLoader loader)
     {
         if (ImGuiExt.WithDisabledButton(
             _level is null || _boneTypes.Final is null,
             "Load map"
         ))
         {
-            DoLoadFromLevel(editor);
+            DoLoadFromLevel(loader);
         }
     }
 
-    private void DoLoad(Editor editor)
+    private void DoLoad(LevelLoader loader)
     {
         if (_levelDesc is null || _levelTypes.Final is null || _levelSetTypes.Final is null || _boneTypes.Final is null)
             return;
@@ -419,7 +419,7 @@ public class ImportWindow(PathPreferences prefs)
             _loadingStatus = null;
             _loadingError = null;
             _mapLoadedFromLevel = false;
-            editor.LoadMapFromLevel(new Level(_levelDesc, _levelTypes.Final, _levelSetTypes.Final), _boneTypes.Final, _powerNames.Final);
+            loader.LoadMapFromData(_levelDesc, _levelTypes.Final, _levelSetTypes.Final, _boneTypes.Final, _powerNames.Final);
         }
         catch (Exception e)
         {
@@ -430,7 +430,7 @@ public class ImportWindow(PathPreferences prefs)
         }
     }
 
-    private void DoLoadFromLevel(Editor editor)
+    private void DoLoadFromLevel(LevelLoader loader)
     {
         if (_level is null || _boneTypes.Final is null)
             return;
@@ -443,7 +443,7 @@ public class ImportWindow(PathPreferences prefs)
             _loadingStatus = null;
             _loadingError = null;
             _mapLoadedFromLevel = true;
-            editor.LoadMapFromLevel(_level, _boneTypes.Final, _powerNames.Final);
+            loader.LoadMapFromLevel(_level, _boneTypes.Final, _powerNames.Final);
         }
         catch (Exception e)
         {
@@ -490,7 +490,7 @@ public class ImportWindow(PathPreferences prefs)
     ) &&
     _boneTypes.Final is not null;
 
-    public void ReImport(Editor editor)
+    public void ReImport(LevelLoader loader)
     {
         if (_boneTypes.Final is null)
             return;
@@ -500,14 +500,14 @@ public class ImportWindow(PathPreferences prefs)
             if (_level is null)
                 return;
             ImportLevelFromPath();
-            DoLoadFromLevel(editor);
+            DoLoadFromLevel(loader);
         }
         else
         {
             if (_levelDesc is null || _levelTypes.Final is null || _levelSetTypes.Final is null)
                 return;
             ImportFromPaths();
-            DoLoad(editor);
+            DoLoad(loader);
         }
     }
 

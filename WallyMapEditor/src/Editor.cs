@@ -26,11 +26,10 @@ public class Editor
     RenderConfigDefault ConfigDefault { get; }
 
     public Level? Level { get; set; }
-    public BoneTypes? BoneTypes { get; set; }
-    public string[]? PowerNames { get; set; }
+    public LevelLoader LevelLoader { get; set; }
 
     public RaylibCanvas? Canvas { get; set; }
-    public AssetLoader? Loader { get; set; }
+    public AssetLoader? AssetLoader { get; set; }
     private Camera2D _cam = new();
     public TimeSpan Time { get; set; } = TimeSpan.FromSeconds(0);
 
@@ -55,8 +54,8 @@ public class Editor
     private bool _showMainMenuBar = true;
 
     public Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault) =>
-        (PathPrefs, ConfigDefault, CommandHistory, ExportDialog, ImportDialog) =
-            (pathPrefs, configDefault, new(Selection), new(pathPrefs), new(pathPrefs));
+        (PathPrefs, ConfigDefault, CommandHistory, ExportDialog, ImportDialog, LevelLoader) =
+            (pathPrefs, configDefault, new(Selection), new(pathPrefs), new(pathPrefs), new(this));
 
     private OverlayData OverlayData => new()
     {
@@ -72,11 +71,11 @@ public class Editor
     {
         Time = Time,
         Canvas = Canvas,
-        Loader = Loader,
+        Loader = AssetLoader,
         Level = Level,
         PathPrefs = PathPrefs,
         Selection = Selection,
-        PowerNames = PowerNames,
+        PowerNames = LevelLoader.PowerNames,
     };
 
     public void Run()
@@ -136,8 +135,8 @@ public class Editor
         Rl.ClearBackground(RlColor.Black);
         if (PathPrefs.BrawlhallaPath is not null)
         {
-            Loader ??= new(PathPrefs.BrawlhallaPath, BoneTypes!);
-            Canvas ??= new(Loader);
+            AssetLoader ??= new(PathPrefs.BrawlhallaPath, LevelLoader.BoneTypes!);
+            Canvas ??= new(AssetLoader);
             Canvas.CameraMatrix = Rl.GetCameraMatrix2D(_cam);
 
             _context = new();
@@ -166,7 +165,7 @@ public class Editor
         if (RenderConfigWindow.Open)
             RenderConfigWindow.Show(_renderConfig, ConfigDefault, PathPrefs);
         if (MapOverviewWindow.Open && Level is not null)
-            MapOverviewWindow.Show(Level, CommandHistory, PathPrefs, Loader, Selection);
+            MapOverviewWindow.Show(Level, CommandHistory, PathPrefs, AssetLoader, Selection);
 
         if (Selection.Object is not null)
             PropertiesWindow.Open = true;
@@ -185,7 +184,7 @@ public class Editor
         if (ExportDialog.Open)
             ExportDialog.Show(Level);
         if (ImportDialog.Open)
-            ImportDialog.Show(this);
+            ImportDialog.Show(LevelLoader);
 
         if (ViewportWindow.Hovered && (Rl.IsKeyPressed(KeyboardKey.Space) || Rl.IsMouseButtonPressed(MouseButton.Middle)))
         {
@@ -196,7 +195,7 @@ public class Editor
         if (Level is not null)
             AddObjectPopup.Update(Level, CommandHistory, Selection);
 
-        NewLevelModal.Update(this, PathPrefs);
+        NewLevelModal.Update(LevelLoader, PathPrefs);
     }
 
     private void ShowMainMenuBar()
@@ -233,7 +232,7 @@ public class Editor
             if (ImGui.MenuItem("Clear Cache")) Canvas?.ClearTextureCache();
             if (ImportDialog.CanReImport() && ImGui.MenuItem("Reload Map", "Ctrl+R"))
             {
-                ImportDialog.ReImport(this);
+                ImportDialog.ReImport(LevelLoader);
             }
             if (ImGui.MenuItem("Find swz key")) KeyFinderPanel.Open = !KeyFinderPanel.Open;
             ImGui.EndMenu();
@@ -280,7 +279,7 @@ public class Editor
             if (Rl.IsKeyPressed(KeyboardKey.Z)) CommandHistory.Undo();
             if (Rl.IsKeyPressed(KeyboardKey.Y)) CommandHistory.Redo();
             if (Rl.IsKeyPressed(KeyboardKey.D)) Selection.Object = null;
-            if (ImportDialog.CanReImport() && Rl.IsKeyPressed(KeyboardKey.R)) ImportDialog.ReImport(this);
+            if (ImportDialog.CanReImport() && Rl.IsKeyPressed(KeyboardKey.R)) ImportDialog.ReImport(LevelLoader);
         }
 
         if (!wantCaptureKeyboard)
@@ -293,95 +292,10 @@ public class Editor
             ExportWorldImage();
     }
 
-    public void LoadMapFromLevel(Level l, BoneTypes boneTypes, string[]? powerNames)
-    {
-        BoneTypes = boneTypes;
-        PowerNames = powerNames;
-        Selection.Object = null;
-        CommandHistory.Clear();
-        if (Canvas is not null)
-        {
-            Canvas.Loader.BoneTypes = boneTypes;
-            Canvas.ClearTextureCache();
-        }
-
-        l.Type ??= DefaultLevelType;
-        Level = l;
-        ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
-        _state.Reset();
-    }
-
-    public static LevelDesc DefaultLevelDesc => new()
-    {
-        AssetDir = "UnknownLevel",
-        LevelName = "UnknownLevel",
-        SlowMult = 1,
-        CameraBounds = new()
-        {
-            X = 0,
-            Y = 0,
-            W = 5000,
-            H = 3000
-        },
-        SpawnBotBounds = new()
-        {
-            X = 1500,
-            Y = 1000,
-            W = 2000,
-            H = 1000,
-        },
-        Backgrounds = [new() { AssetName = "BG_Brawlhaven.jpg", W = 2048, H = 1151 }],
-        LevelSounds = [],
-        Assets = [],
-        LevelAnims = [],
-        LevelAnimations = [],
-        Volumes = [],
-        Collisions = [],
-        DynamicCollisions = [],
-        Respawns = [],
-        DynamicRespawns = [],
-        ItemSpawns = [],
-        DynamicItemSpawns = [],
-        NavNodes = [
-            new NavNode() { X = 2000, Y = 3000, NavID = 1, Type = NavNodeTypeEnum.G, Path = [(2, NavNodeTypeEnum.G)] },
-            new NavNode() { X = 3000, Y = 3000, NavID = 2, Type = NavNodeTypeEnum.G, Path = [(1, NavNodeTypeEnum.G)] },
-        ],
-        DynamicNavNodes = [],
-        WaveDatas = [],
-        AnimatedBackgrounds = [],
-    };
-
-    public static LevelType DefaultLevelType => new()
-    {
-        LevelName = "UnknownLevel",
-        DisplayName = "Unkown Level",
-        AssetName = "a_Level_Unknown",
-        FileName = "Level_Wacky.swf",
-        DevOnly = false,
-        TestLevel = false,
-        LevelID = 0,
-        CrateColorA = new(120, 120, 120),
-        CrateColorB = new(120, 120, 120),
-        LeftKill = 500,
-        RightKill = 500,
-        TopKill = 500,
-        BottomKill = 500,
-        BGMusic = "Level09Theme", // certified banger
-        ThumbnailPNGFile = "wally.jpg"
-    };
-
-    public static readonly string[] DefaultPlaylists = [
-        "StandardAll",
-        "StandardFFA",
-        "Standard1v1",
-        "Standard2v2",
-        "Standard3v3",
-    ];
-
     public Vector2 ScreenToWorld(Vector2 screenPos) =>
         Rl.GetScreenToWorld2D(screenPos - ViewportWindow.Bounds.P1, _cam);
 
-    private void ResetCam(int surfaceW, int surfaceH)
+    public void ResetCam(int surfaceW, int surfaceH)
     {
         _cam.Zoom = 1.0f;
         CameraBounds? bounds = Level?.Desc.CameraBounds;
@@ -433,6 +347,8 @@ public class Editor
         Rl.UnloadRenderTexture(renderTexture);
         return image;
     }
+
+    public void ResetRenderState() => _state.Reset();
 
     ~Editor()
     {

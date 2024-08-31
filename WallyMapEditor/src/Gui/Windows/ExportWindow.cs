@@ -117,7 +117,7 @@ public class ExportWindow(PathPreferences prefs)
         {
             ImGui.Separator();
             ImGui.TextWrapped("Warning: this level is not in any playlists so it will not be playable in game. Consider adding playlists here:");
-            if (ImGui.Button("Add default playlists")) l.Playlists = [.. Editor.DefaultPlaylists];
+            if (ImGui.Button("Add default playlists")) l.Playlists = [.. LevelLoader.DefaultPlaylists];
             ImGui.Text("or");
             if (ImGui.Button("Edit playlists manually")) PlaylistEditPanel.Open = true;
             ImGui.Separator();
