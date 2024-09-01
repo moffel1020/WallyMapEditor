@@ -247,17 +247,17 @@ public class Editor
             if (ImGui.MenuItem("Center Camera", "R")) ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
             if (ImGui.MenuItem("History", null, HistoryPanel.Open)) HistoryPanel.Open = !HistoryPanel.Open;
             if (ImGui.MenuItem("Clear Cache")) Canvas?.ClearTextureCache();
-            if (ImportDialog.CanReImport() && ImGui.MenuItem("Reload Map", "Ctrl+R"))
+            ImGuiExt.WithDisabled(!LevelLoader.CanReImport, () =>
             {
-                ImportDialog.ReImport(LevelLoader);
-            }
+                if (ImGui.MenuItem("Reload Map", "Ctrl+R"))
+                    LevelLoader.ReImport();
+            });
             if (ImGui.MenuItem("Find swz key")) KeyFinderPanel.Open = !KeyFinderPanel.Open;
             ImGui.EndMenu();
         }
 
         ImGui.EndMainMenuBar();
     }
-
 
     private void Update()
     {
@@ -297,7 +297,7 @@ public class Editor
             if (Rl.IsKeyPressed(KeyboardKey.Z)) CommandHistory.Undo();
             if (Rl.IsKeyPressed(KeyboardKey.Y)) CommandHistory.Redo();
             if (Rl.IsKeyPressed(KeyboardKey.D)) Selection.Object = null;
-            if (ImportDialog.CanReImport() && Rl.IsKeyPressed(KeyboardKey.R)) ImportDialog.ReImport(LevelLoader);
+            if (LevelLoader.CanReImport && Rl.IsKeyPressed(KeyboardKey.R)) LevelLoader.ReImport();
         }
 
         if (!wantCaptureKeyboard)
@@ -377,7 +377,7 @@ public class Editor
             {
                 try
                 {
-                    LevelLoader.LoadMapFromLevelFile(result.Path);
+                    LevelLoader.LoadMap(new LevelPathLoad(result.Path));
                     PathPrefs.LevelPath = result.Path;
                 }
                 catch (Exception e)

@@ -11,32 +11,26 @@ public class LevelLoader(Editor editor)
     public BoneTypes? BoneTypes { get; set; }
     public string[]? PowerNames { get; set; }
 
-    public void LoadMapFromLevel(Level l, BoneTypes boneTypes, string[]? powerNames)
-    {
-        if (BoneTypes is null) throw new InvalidOperationException("Could not load map from level. BoneTypes has not been imported.");
+    private ILoadMethod? _lastLoadMethod = null;
 
-        l.Type ??= DefaultLevelType;
+    public bool CanReImport => _lastLoadMethod is not null;
+
+    public void ReImport()
+    {
+        if (_lastLoadMethod is not null) LoadMap(_lastLoadMethod);
+    }
+
+    public void LoadMap(ILoadMethod loadMethod)
+    {
+        (Level l, BoneTypes? bt, string[]? pn) = loadMethod.Load();
+        if (BoneTypes is null && bt is null) throw new InvalidOperationException("Could not load map. BoneTypes has not been imported.");
+
         _editor.Level = l;
 
-        SetEditorData(boneTypes, powerNames);
+        if (bt is not null) SetEditorData(bt, pn);
         ResetEditorState();
-    }
 
-    public void LoadMapFromLevelFile(string path)
-    {
-        if (BoneTypes is null) throw new InvalidOperationException("Could not load map from level. BoneTypes has not been imported.");
-
-        Level l = WmeUtils.DeserializeFromPath<Level>(path);;
-        if (l.Type is null) throw new System.Xml.XmlException("Level file did not contain essential elements");
-
-        LoadMapFromLevel(l, BoneTypes, PowerNames);
-    }
-
-    public void LoadMapFromData(LevelDesc ld, LevelTypes lt, LevelSetTypes lst, BoneTypes bt, string[]? powerNames)
-    {
-        _editor.Level = new(ld, lt, lst);
-        SetEditorData(bt, powerNames);
-        ResetEditorState();
+        _lastLoadMethod = loadMethod;
     }
 
     public void LoadDefaultMap(string levelName, string displayName, bool addDefaultPlaylists=true)
@@ -49,8 +43,11 @@ public class LevelLoader(Editor editor)
         lt.DisplayName = displayName;
         HashSet<string> playlists = [.. (addDefaultPlaylists ? DefaultPlaylists : [])];
 
-        Level level = new(ld, lt, playlists);
-        LoadMapFromLevel(level, BoneTypes, PowerNames);
+        _editor.Level = new(ld, lt, playlists);
+        SetEditorData(BoneTypes, PowerNames);
+        ResetEditorState();
+
+        _lastLoadMethod = null; // loaded default map can't be reimported, it's not on disk
     }
 
     private void SetEditorData(BoneTypes boneTypes, string[]? powerNames)
