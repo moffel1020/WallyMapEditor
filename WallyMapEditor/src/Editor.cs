@@ -249,8 +249,17 @@ public class Editor
             if (ImGui.MenuItem("Clear Cache")) Canvas?.ClearTextureCache();
             ImGuiExt.WithDisabled(!LevelLoader.CanReImport, () =>
             {
-                if (ImGui.MenuItem("Reload Map", "Ctrl+R"))
-                    LevelLoader.ReImport();
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        LevelLoader.ReImport();
+                    }
+                    catch (Exception e)
+                    {
+                        Rl.TraceLog(TraceLogLevel.Error, e.Message);
+                    }
+                });
             });
             if (ImGui.MenuItem("Find swz key")) KeyFinderPanel.Open = !KeyFinderPanel.Open;
             ImGui.EndMenu();
@@ -297,7 +306,20 @@ public class Editor
             if (Rl.IsKeyPressed(KeyboardKey.Z)) CommandHistory.Undo();
             if (Rl.IsKeyPressed(KeyboardKey.Y)) CommandHistory.Redo();
             if (Rl.IsKeyPressed(KeyboardKey.D)) Selection.Object = null;
-            if (LevelLoader.CanReImport && Rl.IsKeyPressed(KeyboardKey.R)) LevelLoader.ReImport();
+            if (LevelLoader.CanReImport && Rl.IsKeyPressed(KeyboardKey.R))
+            {
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        LevelLoader.ReImport();
+                    }
+                    catch (Exception e)
+                    {
+                        Rl.TraceLog(TraceLogLevel.Error, e.Message);
+                    }
+                });
+            }
         }
 
         if (!wantCaptureKeyboard)
