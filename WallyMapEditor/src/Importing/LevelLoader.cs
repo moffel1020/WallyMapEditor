@@ -42,7 +42,7 @@ public class LevelLoader(Editor editor)
         _lastLoadMethod = loadMethod;
     }
 
-    public void LoadDefaultMap(string levelName, string displayName, bool addDefaultPlaylists=true)
+    public void LoadDefaultMap(string levelName, string displayName, bool addDefaultPlaylists = true)
     {
         if (BoneTypes is null) throw new InvalidOperationException("Could not load default map. BoneTypes has not been imported.");
 

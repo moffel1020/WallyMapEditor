@@ -231,10 +231,11 @@ public class ImportWindow(PathPreferences prefs)
         {
             ILoadMethod loadMethod = new OverridableGameLoad
             (
-                brawlPath: prefs.BrawlhallaPath!, 
+                brawlPath: prefs.BrawlhallaPath!,
                 swzLevelName: _savedLdPath is null ? _swzDescName : null,
                 descPath: _savedLdPath,
                 typesPath: _savedLtPath,
+                setTypesPath: _savedLstPath,
                 bonesPath: _savedBtPath,
                 powersPath: _savedPtPath
             );
@@ -290,13 +291,13 @@ public class ImportWindow(PathPreferences prefs)
 
         loader.BoneTypes = _savedBtPath is null
             ? WmeUtils.DeserializeSwzFromPath<BoneTypes>(initPath, "BoneTypes.xml", key, bhstyle: true) ?? throw new FileLoadException("Could not load BoneTypes from swz")
-            : WmeUtils.DeserializeFromPath<BoneTypes>(_savedBtPath, bhstyle: true); 
+            : WmeUtils.DeserializeFromPath<BoneTypes>(_savedBtPath, bhstyle: true);
 
         string? powerTypesContent = WmeUtils.GetFileInSwzFromPath(gamePath, "powerTypes.csv", key);
         loader.PowerNames = powerTypesContent is null
             ? null
             : WmeUtils.ParsePowerTypesFromString(powerTypesContent);
-        
+
         _loadingStatus = null;
     }
 

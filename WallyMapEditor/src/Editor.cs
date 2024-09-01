@@ -396,7 +396,7 @@ public class Editor
             return;
         }
 
-        Task.Run(() => 
+        Task.Run(() =>
         {
             DialogResult result = Dialog.FileSave("xml", Path.GetDirectoryName(PathPrefs.LevelPath));
             if (result.IsOk)

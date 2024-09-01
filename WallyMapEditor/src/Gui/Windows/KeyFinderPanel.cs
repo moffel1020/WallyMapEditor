@@ -27,7 +27,7 @@ public static class KeyFinderPanel
 
         ImGui.Text($"Path: {prefs.BrawlhallaAirPath}");
 
-        if (!string.IsNullOrWhiteSpace(prefs.BrawlhallaAirPath) &&  ImGui.Button("Find"))
+        if (!string.IsNullOrWhiteSpace(prefs.BrawlhallaAirPath) && ImGui.Button("Find"))
             Task.Run(() => _foundKey = WmeUtils.FindDecryptionKeyFromPath(prefs.BrawlhallaAirPath)?.ToString());
 
         if (_foundKey is not null)
