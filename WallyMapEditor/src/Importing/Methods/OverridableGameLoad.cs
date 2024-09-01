@@ -14,7 +14,7 @@ public class OverridableGameLoad : ILoadMethod
     public string? BonesOverride { get; init; }
     public string? PowersOverride { get; init; }
 
-    public OverridableGameLoad(string brawlPath, string? swzLevelName, string? descPath=null, string? typesPath=null, string? bonesPath = null, string? powersPath = null)
+    public OverridableGameLoad(string brawlPath, string? swzLevelName, string? descPath = null, string? typesPath = null, string? bonesPath = null, string? powersPath = null)
     {
         if (descPath is null && swzLevelName is null) 
             throw new ArgumentException("Could not create OverridableGameLoad. swzLevelName or descPath has to be set"); 

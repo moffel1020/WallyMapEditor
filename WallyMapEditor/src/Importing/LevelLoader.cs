@@ -8,8 +8,17 @@ public class LevelLoader(Editor editor)
 {
     private readonly Editor _editor = editor;
 
-    public BoneTypes? BoneTypes { get; set; }
     public string[]? PowerNames { get; set; }
+    private BoneTypes? _boneTypes;
+    public BoneTypes? BoneTypes
+    {
+        get => _boneTypes;
+        set
+        {
+            _boneTypes = value;
+            if (_editor.Canvas is not null && value is not null) _editor.Canvas.Loader.BoneTypes = value;
+        }
+    }
 
     private ILoadMethod? _lastLoadMethod = null;
 
@@ -27,7 +36,7 @@ public class LevelLoader(Editor editor)
 
         _editor.Level = l;
 
-        if (bt is not null) SetEditorData(bt, pn);
+        if (bt is not null) (BoneTypes, PowerNames) = (bt, pn);
         ResetEditorState();
 
         _lastLoadMethod = loadMethod;
@@ -44,16 +53,9 @@ public class LevelLoader(Editor editor)
         HashSet<string> playlists = [.. (addDefaultPlaylists ? DefaultPlaylists : [])];
 
         _editor.Level = new(ld, lt, playlists);
-        SetEditorData(BoneTypes, PowerNames);
         ResetEditorState();
 
         _lastLoadMethod = null; // loaded default map can't be reimported, it's not on disk
-    }
-
-    private void SetEditorData(BoneTypes boneTypes, string[]? powerNames)
-    {
-        (BoneTypes, PowerNames) = (boneTypes, powerNames);
-        if (_editor.Canvas is not null) _editor.Canvas.Loader.BoneTypes = boneTypes;
     }
 
     private void ResetEditorState()

@@ -203,8 +203,9 @@ public class ImportWindow(PathPreferences prefs)
         ImGui.Text($"Path: {prefs.BrawlhallaPath}");
 
         ImGui.Spacing();
-        ImGui.SeparatorText("Load map");
+        ImGui.SeparatorText("Load");
         LoadButton(loader);
+        RequiredFilesLoadButton(loader);
         ImGui.Spacing();
 
         ImGui.SeparatorText("Select files");
@@ -255,6 +256,48 @@ public class ImportWindow(PathPreferences prefs)
                 }
             });
         }
+    }
+
+    private void RequiredFilesLoadButton(LevelLoader loader)
+    {
+        if (ImGuiExt.WithDisabledButton(prefs.BrawlhallaPath is null, "Load required files only"))
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    _loadingError = null;
+                    LoadRequiredFilesOnly(loader, prefs.BrawlhallaPath!);
+                }
+                catch (Exception e)
+                {
+                    _loadingError = e.Message;
+                }
+            });
+        }
+    }
+
+    private void LoadRequiredFilesOnly(LevelLoader loader, string brawlPath)
+    {
+        _loadingStatus = "loading...";
+
+        string initPath = Path.Combine(brawlPath, "Init.swz");
+        string gamePath = Path.Combine(brawlPath, "Game.swz");
+
+        uint key = _savedBtPath is null || _savedPtPath is null
+            ? WmeUtils.FindDecryptionKeyFromPath(Path.Combine(brawlPath, "BrawlhallaAir.swf")) ?? throw new Exception("Could not find decryption key")
+            : 0;
+
+        loader.BoneTypes = _savedBtPath is null
+            ? WmeUtils.DeserializeSwzFromPath<BoneTypes>(initPath, "BoneTypes.xml", key, bhstyle: true) ?? throw new FileLoadException("Could not load BoneTypes from swz")
+            : WmeUtils.DeserializeFromPath<BoneTypes>(_savedBtPath, bhstyle: true); 
+
+        string? powerTypesContent = WmeUtils.GetFileInSwzFromPath(gamePath, "powerTypes.csv", key);
+        loader.PowerNames = powerTypesContent is null
+            ? null
+            : WmeUtils.ParsePowerTypesFromString(powerTypesContent);
+        
+        _loadingStatus = null;
     }
 
     private static string[] FindLevelDescNames(string brawlPath)
