@@ -22,6 +22,7 @@ public class ImportWindow(PathPreferences prefs)
     private string _keyInput = prefs.DecryptionKey ?? "";
 
     private bool _searchingDescNames = false;
+    private bool _shouldCloseDescPopup = false;
     private string[] levelDescNames = [];
     private string _levelDescFileFilter = "";
 
@@ -105,10 +106,19 @@ public class ImportWindow(PathPreferences prefs)
         ImGui.Text("or");
         ImGui.SameLine();
         if (ImGui.Button("Pick from game"))
+        {
+            _shouldCloseDescPopup = false;
             ImGui.OpenPopup("SelectGameLd");
+        }
 
         if (ImGui.BeginPopup("SelectGameLd"))
         {
+            if (_shouldCloseDescPopup) // can't close in thread so have to do this
+            {
+                _shouldCloseDescPopup = false;
+                ImGui.CloseCurrentPopup();
+            }
+
             if (!_searchingDescNames && prefs.BrawlhallaPath is not null && levelDescNames.Length == 0)
             {
                 _searchingDescNames = true;
@@ -116,13 +126,17 @@ public class ImportWindow(PathPreferences prefs)
                 {
                     try
                     {
+                        _loadingError = null;
                         uint key = uint.Parse(_keyInput);
                         levelDescNames = FindLevelDescNames(prefs.BrawlhallaPath, key);
                         prefs.DecryptionKey = _keyInput;
+                        _searchingDescNames = false;
                     }
                     catch (Exception e)
                     {
                         _loadingError = e.Message;
+                        _searchingDescNames = false;
+                        _shouldCloseDescPopup = true;
                     }
                 });
             }
@@ -208,8 +222,26 @@ public class ImportWindow(PathPreferences prefs)
         ImGui.Separator();
 
         ImGui.InputText("Decryption key", ref _keyInput, 9, ImGuiInputTextFlags.CharsDecimal);
-        if (prefs.BrawlhallaPath is not null && ImGui.Button("Find key")) 
-            Task.Run(() => _keyInput = WmeUtils.FindDecryptionKeyFromPath(Path.Combine(prefs.BrawlhallaPath, "BrawlhallaAir.swf"))?.ToString() ?? "");
+        if (prefs.BrawlhallaPath is not null && ImGui.Button("Find key"))
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    _loadingError = null;
+                    _loadingStatus = "searching key...";
+                    _keyInput = WmeUtils.FindDecryptionKeyFromPath(Path.Combine(prefs.BrawlhallaPath, "BrawlhallaAir.swf"))?.ToString() ?? "";
+                }
+                catch (Exception e)
+                {
+                    _loadingError = e.Message;
+                }
+                finally
+                {
+                    _loadingStatus = null;
+                }
+            });
+        }
 
         ImGui.Spacing();
         ImGui.SeparatorText("Select files");
