@@ -34,7 +34,7 @@ public class OverridableGameLoad : ILoadMethod
 
     public LoadedData Load()
     {
-        uint key = DescOverride is null && TypesOverride is null && BonesOverride is null && PowersOverride is null
+        uint key = DescOverride is null && TypesOverride is null && SetTypesOverride is null && BonesOverride is null && PowersOverride is null
             ? WmeUtils.FindDecryptionKeyFromPath(Path.Combine(BrawlPath, "BrawlhallaAir.swf")) ?? throw new Exception("Could not find swz decryption key")
             : 0; // key searching not needed if all files have a specified path
 
