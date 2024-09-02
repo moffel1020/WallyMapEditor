@@ -91,8 +91,8 @@ public class LevelLoader(Editor editor)
         ItemSpawns = [],
         DynamicItemSpawns = [],
         NavNodes = [
-            new NavNode() { X = 2000, Y = 3000, NavID = 1, Type = NavNodeTypeEnum.G, Path = [(2, NavNodeTypeEnum.G)] },
-            new NavNode() { X = 3000, Y = 3000, NavID = 2, Type = NavNodeTypeEnum.G, Path = [(1, NavNodeTypeEnum.G)] },
+            new NavNode() { X = 2000, Y = 1500, NavID = 1, Type = NavNodeTypeEnum.G, Path = [(2, NavNodeTypeEnum.G)] },
+            new NavNode() { X = 3000, Y = 1500, NavID = 2, Type = NavNodeTypeEnum.G, Path = [(1, NavNodeTypeEnum.G)] },
         ],
         DynamicNavNodes = [],
         WaveDatas = [],

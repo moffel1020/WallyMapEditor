@@ -230,7 +230,7 @@ public class Editor
             ImGui.Separator();
             if (ImGuiExt.WithDisabledMenuItem(!EnableReloadMapButton, "Reload map", "Ctrl+Shift+R")) ReloadMap();
             ImGui.Separator();
-            if (ImGuiExt.WithDisabledMenuItem(!EnableCloseMapButton, "Close")) CloseCurrentLevel();
+            if (ImGuiExt.WithDisabledMenuItem(!EnableCloseMapButton, "Close", "Ctrl+Shift+W")) CloseCurrentLevel();
             ImGui.EndMenu();
         }
         if (ImGui.BeginMenu("Edit"))
