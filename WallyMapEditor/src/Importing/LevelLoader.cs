@@ -20,13 +20,13 @@ public class LevelLoader(Editor editor)
         }
     }
 
-    private ILoadMethod? _lastLoadMethod = null;
+    public ILoadMethod? ReloadMethod { get; set; }
 
-    public bool CanReImport => _lastLoadMethod is not null;
+    public bool CanReImport => ReloadMethod is not null;
 
     public void ReImport()
     {
-        if (_lastLoadMethod is not null) LoadMap(_lastLoadMethod);
+        if (ReloadMethod is not null) LoadMap(ReloadMethod);
     }
 
     public void LoadMap(ILoadMethod loadMethod)
@@ -39,7 +39,7 @@ public class LevelLoader(Editor editor)
         if (bt is not null) (BoneTypes, PowerNames) = (bt, pn);
         ResetEditorState();
 
-        _lastLoadMethod = loadMethod;
+        ReloadMethod = loadMethod;
     }
 
     public void LoadDefaultMap(string levelName, string displayName, bool addDefaultPlaylists = true)
@@ -55,7 +55,7 @@ public class LevelLoader(Editor editor)
         _editor.Level = new(ld, lt, playlists);
         ResetEditorState();
 
-        _lastLoadMethod = null; // loaded default map can't be reimported, it's not on disk
+        ReloadMethod = null; // loaded default map can't be reimported, it's not on disk
     }
 
     private void ResetEditorState()

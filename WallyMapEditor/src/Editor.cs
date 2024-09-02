@@ -52,6 +52,7 @@ public class Editor
     public MousePickingFramebuffer PickingFramebuffer { get; set; } = new();
 
     private bool _showMainMenuBar = true;
+    private string? _levelSavePath = null;
 
     public Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault) =>
         (PathPrefs, ConfigDefault, CommandHistory, ExportDialog, ImportDialog, LevelLoader) =
@@ -404,7 +405,7 @@ public class Editor
                 try
                 {
                     LevelLoader.LoadMap(new LevelPathLoad(result.Path));
-                    PathPrefs.LevelPath = result.Path;
+                    _levelSavePath = PathPrefs.LevelPath = result.Path;
                 }
                 catch (Exception e)
                 {
@@ -416,9 +417,9 @@ public class Editor
 
     private void SaveLevelFile()
     {
-        if (PathPrefs.LevelPath is not null)
+        if (_levelSavePath is not null)
         {
-            WmeUtils.SerializeToPath(Level!, PathPrefs.LevelPath);
+            WmeUtils.SerializeToPath(Level!, _levelSavePath);
             return;
         }
 
@@ -427,8 +428,9 @@ public class Editor
             DialogResult result = Dialog.FileSave("xml", Path.GetDirectoryName(PathPrefs.LevelPath));
             if (result.IsOk)
             {
-                PathPrefs.LevelPath = result.Path;
-                WmeUtils.SerializeToPath(Level!, PathPrefs.LevelPath);
+                WmeUtils.SerializeToPath(Level!, result.Path);
+                _levelSavePath = PathPrefs.LevelPath = result.Path;
+                LevelLoader.ReloadMethod = new LevelPathLoad(_levelSavePath);
             }
         });
     }
