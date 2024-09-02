@@ -41,7 +41,7 @@ public class ImportWindow(PathPreferences prefs)
         if (_loadingStatus is not null)
         {
             ImGui.PushTextWrapPos();
-            ImGui.Text(_loadingStatus);
+            ImGui.Text("[Status]: " + _loadingStatus);
             ImGui.PopTextWrapPos();
         }
 
@@ -258,7 +258,13 @@ public class ImportWindow(PathPreferences prefs)
                     _loadingStatus = "loading...";
                     _loadingError = null;
                     loader.LoadMap(loadMethod);
+
                     prefs.DecryptionKey = _keyInput;
+                    prefs.LevelDescPath = _savedLdPath ?? prefs.LevelDescPath;
+                    prefs.LevelTypesPath = _savedLtPath ?? prefs.LevelTypesPath;
+                    prefs.LevelSetTypesPath = _savedLstPath ?? prefs.LevelSetTypesPath;
+                    prefs.BoneTypesPath = _savedBtPath ?? prefs.BoneTypesPath;
+                    prefs.PowerTypesPath = _savedPtPath ?? prefs.PowerTypesPath;
                 }
                 catch (Exception e)
                 {
