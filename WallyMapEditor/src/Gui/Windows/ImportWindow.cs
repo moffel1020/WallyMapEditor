@@ -229,20 +229,20 @@ public class ImportWindow(PathPreferences prefs)
     {
         if (ImGuiExt.WithDisabledButton(!WmeUtils.IsValidBrawlPath(prefs.BrawlhallaPath) || (_savedLdPath is null && _swzDescName is null), "Load map"))
         {
-            ILoadMethod loadMethod = new OverridableGameLoad
-            (
-                brawlPath: prefs.BrawlhallaPath!,
-                swzLevelName: _savedLdPath is null ? _swzDescName : null,
-                descPath: _savedLdPath,
-                typesPath: _savedLtPath,
-                setTypesPath: _savedLstPath,
-                bonesPath: _savedBtPath,
-                powersPath: _savedPtPath
-            );
             Task.Run(() =>
             {
                 try
                 {
+                    ILoadMethod loadMethod = new OverridableGameLoad
+                    (
+                        brawlPath: prefs.BrawlhallaPath!,
+                        swzLevelName: _savedLdPath is null ? _swzDescName : null,
+                        descPath: _savedLdPath,
+                        typesPath: _savedLtPath,
+                        setTypesPath: _savedLstPath,
+                        bonesPath: _savedBtPath,
+                        powersPath: _savedPtPath
+                    );
                     _loadingStatus = "loading...";
                     _loadingError = null;
                     loader.LoadMap(loadMethod);
@@ -267,6 +267,7 @@ public class ImportWindow(PathPreferences prefs)
             {
                 try
                 {
+                    _loadingStatus = "loading...";
                     _loadingError = null;
                     LoadRequiredFilesOnly(loader, prefs.BrawlhallaPath!);
                 }
@@ -274,14 +275,16 @@ public class ImportWindow(PathPreferences prefs)
                 {
                     _loadingError = e.Message;
                 }
+                finally
+                {
+                    _loadingStatus = null;
+                }
             });
         }
     }
 
     private void LoadRequiredFilesOnly(LevelLoader loader, string brawlPath)
     {
-        _loadingStatus = "loading...";
-
         string initPath = Path.Combine(brawlPath, "Init.swz");
         string gamePath = Path.Combine(brawlPath, "Game.swz");
 
@@ -298,7 +301,6 @@ public class ImportWindow(PathPreferences prefs)
             ? null
             : WmeUtils.ParsePowerTypesFromString(powerTypesContent);
 
-        _loadingStatus = null;
     }
 
     private static string[] FindLevelDescNames(string brawlPath)

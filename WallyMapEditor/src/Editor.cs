@@ -199,6 +199,11 @@ public class Editor
         NewLevelModal.Update(LevelLoader, PathPrefs);
     }
 
+    private bool EnableNewAndOpenMapButtons => LevelLoader.BoneTypes is not null;
+    private bool EnableSaveButton => Level is not null;
+    private bool EnableReloadMapButton => LevelLoader.CanReImport;
+    private bool EnableCloseMapButton => Level is not null;
+
     private void ShowMainMenuBar()
     {
         ImGui.BeginMainMenuBar();
@@ -207,28 +212,28 @@ public class Editor
         {
             bool btIsNull = LevelLoader.BoneTypes is null;
             ImGui.BeginGroup();
-            ImGuiExt.WithDisabled(btIsNull, () =>
+            ImGuiExt.WithDisabled(!EnableNewAndOpenMapButtons, () =>
             {
-                if (ImGui.MenuItem("New")) NewLevelModal.Open();
+                if (ImGui.MenuItem("New", "Ctrl+N")) NewLevelModal.Open();
                 ImGui.Separator();
-                if (ImGui.MenuItem("Open")) OpenLevelFile();
+                if (ImGui.MenuItem("Open", "Ctrl+O")) OpenLevelFile();
             });
             ImGui.EndGroup();
             if (btIsNull && ImGui.IsItemHovered())
-                ImGui.SetTooltip("Required files need to be imported first.\nPress 'Load game files' in the import menu or load the individual files manually.");
+                ImGui.SetTooltip("Required files need to be imported first.\nPress \"Load required files only\" in the import menu or override the individual files manually.");
 
-            ImGuiExt.WithDisabled(Level is null, () =>
+            ImGuiExt.WithDisabled(!EnableSaveButton, () =>
             {
-                if (ImGui.MenuItem("Save")) SaveLevelFile();
+                if (ImGui.MenuItem("Save", "Ctrl+S")) SaveLevelFile();
                 ImGui.Separator();
             });
 
-            if (ImGui.MenuItem("Import")) ImportDialog = new(PathPrefs) { Open = true };
-            if (ImGui.MenuItem("Export")) ExportDialog = new(PathPrefs) { Open = true };
+            if (ImGui.MenuItem("Import", "Ctrl+Shift+I")) ImportDialog = new(PathPrefs) { Open = true };
+            if (ImGui.MenuItem("Export", "Ctrl+Shift+E")) ExportDialog = new(PathPrefs) { Open = true };
             ImGui.Separator();
-            ImGuiExt.WithDisabled(!LevelLoader.CanReImport, () =>
+            ImGuiExt.WithDisabled(!EnableReloadMapButton, () =>
             {
-                if (ImGui.MenuItem("Reload map"))
+                if (ImGui.MenuItem("Reload map", "Ctrl+Shift+R"))
                 {
                     Task.Run(() =>
                     {
@@ -242,6 +247,11 @@ public class Editor
                         }
                     });
                 }
+            });
+            ImGui.Separator();
+            ImGuiExt.WithDisabled(!EnableCloseMapButton, () =>
+            {
+                if (ImGui.MenuItem("Close", "Ctrl+Shift+W")) Level = null;
             });
             ImGui.EndMenu();
         }
@@ -311,19 +321,32 @@ public class Editor
             if (Rl.IsKeyPressed(KeyboardKey.Z)) CommandHistory.Undo();
             if (Rl.IsKeyPressed(KeyboardKey.Y)) CommandHistory.Redo();
             if (Rl.IsKeyPressed(KeyboardKey.D)) Selection.Object = null;
-            if (LevelLoader.CanReImport && Rl.IsKeyPressed(KeyboardKey.R))
+            if (EnableNewAndOpenMapButtons)
             {
-                Task.Run(() =>
+                if  (Rl.IsKeyPressed(KeyboardKey.N)) NewLevelModal.Open();
+                if  (Rl.IsKeyPressed(KeyboardKey.O)) OpenLevelFile();
+            }
+            if (EnableSaveButton && Rl.IsKeyPressed(KeyboardKey.S)) SaveLevelFile();
+
+            if (Rl.IsKeyDown(KeyboardKey.LeftShift) || Rl.IsKeyDown(KeyboardKey.RightShift))
+            {
+                if (Rl.IsKeyPressed(KeyboardKey.I)) ImportDialog = new(PathPrefs) { Open = true };
+                if (Rl.IsKeyPressed(KeyboardKey.E)) ExportDialog = new(PathPrefs) { Open = true };
+                if (EnableCloseMapButton && Rl.IsKeyPressed(KeyboardKey.W)) Level = null;
+                if (EnableReloadMapButton && Rl.IsKeyPressed(KeyboardKey.R))
                 {
-                    try
+                    Task.Run(() =>
                     {
-                        LevelLoader.ReImport();
-                    }
-                    catch (Exception e)
-                    {
-                        Rl.TraceLog(TraceLogLevel.Error, e.Message);
-                    }
-                });
+                        try
+                        {
+                            LevelLoader.ReImport();
+                        }
+                        catch (Exception e)
+                        {
+                            Rl.TraceLog(TraceLogLevel.Error, e.Message);
+                        }
+                    });
+                }
             }
         }
 
