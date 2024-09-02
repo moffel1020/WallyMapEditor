@@ -228,25 +228,9 @@ public class Editor
             if (ImGui.MenuItem("Import", "Ctrl+Shift+I")) ImportDialog = new(PathPrefs) { Open = true };
             if (ImGui.MenuItem("Export", "Ctrl+Shift+E")) ExportDialog = new(PathPrefs) { Open = true };
             ImGui.Separator();
-            if (ImGuiExt.WithDisabledMenuItem(!EnableReloadMapButton, "Reload map", "Ctrl+Shift+R"))
-            {
-                Task.Run(() =>
-                {
-                    try
-                    {
-                        LevelLoader.ReImport();
-                    }
-                    catch (Exception e)
-                    {
-                        Rl.TraceLog(TraceLogLevel.Error, e.Message);
-                    }
-                });
-            }
+            if (ImGuiExt.WithDisabledMenuItem(!EnableReloadMapButton, "Reload map", "Ctrl+Shift+R")) ReloadMap();
             ImGui.Separator();
-            ImGuiExt.WithDisabled(!EnableCloseMapButton, () =>
-            {
-                if (ImGui.MenuItem("Close", "Ctrl+Shift+W")) CloseCurrentLevel();
-            });
+            if (ImGuiExt.WithDisabledMenuItem(!EnableCloseMapButton, "Close")) CloseCurrentLevel();
             ImGui.EndMenu();
         }
         if (ImGui.BeginMenu("Edit"))
@@ -328,20 +312,7 @@ public class Editor
                 if (Rl.IsKeyPressed(KeyboardKey.E)) ExportDialog = new(PathPrefs) { Open = true };
                 if (EnableSaveButton && Rl.IsKeyPressed(KeyboardKey.S)) SaveLevelFileToPath();
                 if (EnableCloseMapButton && Rl.IsKeyPressed(KeyboardKey.W)) CloseCurrentLevel();
-                if (EnableReloadMapButton && Rl.IsKeyPressed(KeyboardKey.R))
-                {
-                    Task.Run(() =>
-                    {
-                        try
-                        {
-                            LevelLoader.ReImport();
-                        }
-                        catch (Exception e)
-                        {
-                            Rl.TraceLog(TraceLogLevel.Error, e.Message);
-                        }
-                    });
-                }
+                if (EnableReloadMapButton && Rl.IsKeyPressed(KeyboardKey.R)) ReloadMap();
             }
         }
 
@@ -468,6 +439,23 @@ public class Editor
         Level = null;
         TitleBar.OpenLevelFile = null;
         ResetState();
+    }
+
+    private void ReloadMap()
+    {
+        Task.Run(() =>
+        {
+            try
+            {
+                LevelLoader.ReImport();
+                if (LevelLoader.ReloadMethod is LevelPathLoad lpLoad)
+                    TitleBar.OpenLevelFile = lpLoad.Path;
+            }
+            catch (Exception e)
+            {
+                Rl.TraceLog(TraceLogLevel.Error, e.Message);
+            }
+        });
     }
 
     public void ResetState()
