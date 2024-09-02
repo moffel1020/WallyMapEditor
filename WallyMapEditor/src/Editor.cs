@@ -223,6 +223,7 @@ public class Editor
                 ImGui.SetTooltip("Required files need to be imported first.\nPress \"Load required files only\" in the import menu or override the individual files manually.");
 
             if (ImGuiExt.WithDisabledMenuItem(!EnableSaveButton, "Save", "Ctrl+S")) SaveLevelFile();
+            if (ImGuiExt.WithDisabledMenuItem(!EnableSaveButton, "Save As...", "Ctrl+Shift+S")) SaveLevelFileToPath();
             ImGui.Separator();
             if (ImGui.MenuItem("Import", "Ctrl+Shift+I")) ImportDialog = new(PathPrefs) { Open = true };
             if (ImGui.MenuItem("Export", "Ctrl+Shift+E")) ExportDialog = new(PathPrefs) { Open = true };
@@ -325,6 +326,7 @@ public class Editor
             {
                 if (Rl.IsKeyPressed(KeyboardKey.I)) ImportDialog = new(PathPrefs) { Open = true };
                 if (Rl.IsKeyPressed(KeyboardKey.E)) ExportDialog = new(PathPrefs) { Open = true };
+                if (EnableSaveButton && Rl.IsKeyPressed(KeyboardKey.S)) SaveLevelFileToPath();
                 if (EnableCloseMapButton && Rl.IsKeyPressed(KeyboardKey.W)) CloseCurrentLevel();
                 if (EnableReloadMapButton && Rl.IsKeyPressed(KeyboardKey.R))
                 {
@@ -443,6 +445,11 @@ public class Editor
             return;
         }
 
+        SaveLevelFileToPath();
+    }
+
+    private void SaveLevelFileToPath()
+    {
         Task.Run(() =>
         {
             DialogResult result = Dialog.FileSave("xml", Path.GetDirectoryName(PathPrefs.LevelPath));
