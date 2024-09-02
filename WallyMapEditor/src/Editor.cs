@@ -224,6 +224,24 @@ public class Editor
 
             if (ImGui.MenuItem("Import")) ImportDialog = new(PathPrefs) { Open = true };
             if (ImGui.MenuItem("Export")) ExportDialog = new(PathPrefs) { Open = true };
+            ImGui.Separator();
+            ImGuiExt.WithDisabled(!LevelLoader.CanReImport, () =>
+            {
+                if (ImGui.MenuItem("Reload map"))
+                {
+                    Task.Run(() =>
+                    {
+                        try
+                        {
+                            LevelLoader.ReImport();
+                        }
+                        catch (Exception e)
+                        {
+                            Rl.TraceLog(TraceLogLevel.Error, e.Message);
+                        }
+                    });
+                }
+            });
             ImGui.EndMenu();
         }
         if (ImGui.BeginMenu("Edit"))
@@ -247,20 +265,6 @@ public class Editor
             if (ImGui.MenuItem("Center Camera", "R")) ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
             if (ImGui.MenuItem("History", null, HistoryPanel.Open)) HistoryPanel.Open = !HistoryPanel.Open;
             if (ImGui.MenuItem("Clear Cache")) Canvas?.ClearTextureCache();
-            ImGuiExt.WithDisabled(!LevelLoader.CanReImport, () =>
-            {
-                Task.Run(() =>
-                {
-                    try
-                    {
-                        LevelLoader.ReImport();
-                    }
-                    catch (Exception e)
-                    {
-                        Rl.TraceLog(TraceLogLevel.Error, e.Message);
-                    }
-                });
-            });
             if (ImGui.MenuItem("Find swz key")) KeyFinderPanel.Open = !KeyFinderPanel.Open;
             ImGui.EndMenu();
         }
