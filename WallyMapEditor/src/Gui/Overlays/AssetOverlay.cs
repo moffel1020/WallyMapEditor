@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
@@ -129,10 +130,7 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
 
     private static Transform GetMovingPlatformTransform(MovingPlatform m, RenderContext context)
     {
-        if (context.PlatIDMovingPlatformOffset.TryGetValue(m.PlatID, out (double, double) offset))
-            return Transform.CreateTranslate(offset.Item1, offset.Item2);
-
-        return Transform.IDENTITY;
+        return context.PlatIDMovingPlatformTransform.GetValueOrDefault(m.PlatID, Transform.IDENTITY);
     }
 
     private void TransfromDragCircles(Transform trans)

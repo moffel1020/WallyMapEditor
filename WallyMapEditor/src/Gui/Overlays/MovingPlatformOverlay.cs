@@ -41,9 +41,9 @@ public class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
             dragging |= kfo.Update(data, cmd);
         }
 
-        if (!data.Context.PlatIDMovingPlatformOffset.TryGetValue(plat.PlatID, out (double, double) platOffset))
+        if (!data.Context.PlatIDMovingPlatformTransform.TryGetValue(plat.PlatID, out Transform platTransform))
             throw new Exception($"Attempt to update overlay for moving platform with PlatID {plat.PlatID}, but moving platform offset dictionary did not contain that PlatID");
-        (double offsetX, double offsetY) = platOffset;
+        (double offsetX, double offsetY) = platTransform * (0, 0);
         (Position.X, Position.Y) = (offsetX, offsetY);
         Position.Update(data, !dragging);
 
