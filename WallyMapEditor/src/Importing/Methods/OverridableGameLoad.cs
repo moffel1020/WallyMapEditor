@@ -7,7 +7,7 @@ namespace WallyMapEditor;
 public class OverridableGameLoad : ILoadMethod
 {
     public string BrawlPath { get; init; }
-
+    public uint DecryptionKey { get; init; }
     public string? SwzLevelName { get; init; }
     public string? DescOverride { get; init; }
     public string? TypesOverride { get; init; }
@@ -15,7 +15,7 @@ public class OverridableGameLoad : ILoadMethod
     public string? BonesOverride { get; init; }
     public string? PowersOverride { get; init; }
 
-    public OverridableGameLoad(string brawlPath, string? swzLevelName, string? descPath = null, string? typesPath = null, string? setTypesPath = null, string? bonesPath = null, string? powersPath = null)
+    public OverridableGameLoad(string brawlPath, string? swzLevelName, uint key, string? descPath = null, string? typesPath = null, string? setTypesPath = null, string? bonesPath = null, string? powersPath = null)
     {
         if (descPath is null && swzLevelName is null)
             throw new ArgumentException("Could not create OverridableGameLoad. swzLevelName or descPath has to be set");
@@ -26,6 +26,7 @@ public class OverridableGameLoad : ILoadMethod
         BrawlPath = brawlPath;
         SwzLevelName = swzLevelName;
         DescOverride = descPath;
+        DecryptionKey = key;
         TypesOverride = typesPath;
         SetTypesOverride = setTypesPath;
         BonesOverride = bonesPath;
@@ -34,19 +35,15 @@ public class OverridableGameLoad : ILoadMethod
 
     public LoadedData Load()
     {
-        uint key = DescOverride is not null && TypesOverride is not null && SetTypesOverride is not null && BonesOverride is not null && PowersOverride is not null
-            ? 0 // key searching not needed if all files have a specified path
-            : WmeUtils.FindDecryptionKeyFromPath(Path.Combine(BrawlPath, "BrawlhallaAir.swf")) ?? throw new Exception("Could not find swz decryption key");
-
         string dynamicPath = Path.Combine(BrawlPath, "Dynamic.swz");
         string gamePath = Path.Combine(BrawlPath, "Game.swz");
         string initPath = Path.Combine(BrawlPath, "Init.swz");
 
-        LevelDesc ld = LoadFile<LevelDesc>(DescOverride, dynamicPath, "LevelDesc_" + SwzLevelName, key) ?? throw new FileLoadException("Could not load LevelDesc from swz or path");
-        LevelTypes lt = LoadFile<LevelTypes>(TypesOverride, initPath, "LevelTypes.xml", key) ?? throw new FileLoadException("Could not load LevelTypes from swz or path");
-        LevelSetTypes lst = LoadFile<LevelSetTypes>(SetTypesOverride, gamePath, "LevelSetTypes.xml", key) ?? throw new FileLoadException("Could not load LevelSetTypes from swz or path");
-        BoneTypes bt = LoadFile<BoneTypes>(BonesOverride, initPath, "BoneTypes.xml", key) ?? throw new FileLoadException("Could not load BoneTypes from swz or path");
-        string? powerTypesContent = WmeUtils.GetFileInSwzFromPath(gamePath, "powerTypes.csv", key);
+        LevelDesc ld = LoadFile<LevelDesc>(DescOverride, dynamicPath, "LevelDesc_" + SwzLevelName, DecryptionKey) ?? throw new FileLoadException("Could not load LevelDesc from swz or path");
+        LevelTypes lt = LoadFile<LevelTypes>(TypesOverride, initPath, "LevelTypes.xml", DecryptionKey) ?? throw new FileLoadException("Could not load LevelTypes from swz or path");
+        LevelSetTypes lst = LoadFile<LevelSetTypes>(SetTypesOverride, gamePath, "LevelSetTypes.xml", DecryptionKey) ?? throw new FileLoadException("Could not load LevelSetTypes from swz or path");
+        BoneTypes bt = LoadFile<BoneTypes>(BonesOverride, initPath, "BoneTypes.xml", DecryptionKey) ?? throw new FileLoadException("Could not load BoneTypes from swz or path");
+        string? powerTypesContent = WmeUtils.GetFileInSwzFromPath(gamePath, "powerTypes.csv", DecryptionKey);
         string[]? pt = powerTypesContent is null ? null
             : WmeUtils.ParsePowerTypesFromString(powerTypesContent);
 

@@ -19,6 +19,7 @@ public class ImportWindow(PathPreferences prefs)
     private string? _savedLstPath;
     private string? _savedBtPath;
     private string? _savedPtPath;
+    private string _keyInput = prefs.DecryptionKey ?? "";
 
     private bool _searchingDescNames = false;
     private string[] levelDescNames = [];
@@ -100,8 +101,9 @@ public class ImportWindow(PathPreferences prefs)
             prefs.LevelDescPath,
             canLoadFromSwz: false
         );
-
+        ImGui.SameLine();
         ImGui.Text("or");
+        ImGui.SameLine();
         if (ImGui.Button("Pick from game"))
             ImGui.OpenPopup("SelectGameLd");
 
@@ -114,7 +116,9 @@ public class ImportWindow(PathPreferences prefs)
                 {
                     try
                     {
-                        levelDescNames = FindLevelDescNames(prefs.BrawlhallaPath);
+                        uint key = uint.Parse(_keyInput);
+                        levelDescNames = FindLevelDescNames(prefs.BrawlhallaPath, key);
+                        prefs.DecryptionKey = _keyInput;
                     }
                     catch (Exception e)
                     {
@@ -201,15 +205,21 @@ public class ImportWindow(PathPreferences prefs)
             });
         }
         ImGui.Text($"Path: {prefs.BrawlhallaPath}");
+        ImGui.Separator();
+
+        ImGui.InputText("Decryption key", ref _keyInput, 9, ImGuiInputTextFlags.CharsDecimal);
+        if (prefs.BrawlhallaPath is not null && ImGui.Button("Find key")) 
+            Task.Run(() => _keyInput = WmeUtils.FindDecryptionKeyFromPath(Path.Combine(prefs.BrawlhallaPath, "BrawlhallaAir.swf"))?.ToString() ?? "");
 
         ImGui.Spacing();
+        ImGui.SeparatorText("Select files");
+        ShowLevelDescImportSection();
+        ImGui.Spacing();
+
         ImGui.SeparatorText("Load");
         LoadButton(loader);
         RequiredFilesLoadButton(loader);
         ImGui.Spacing();
-
-        ImGui.SeparatorText("Select files");
-        ShowLevelDescImportSection();
 
         ImGui.Separator();
         if (ImGui.CollapsingHeader("Override paths"))
@@ -227,7 +237,8 @@ public class ImportWindow(PathPreferences prefs)
 
     private void LoadButton(LevelLoader loader)
     {
-        if (ImGuiExt.WithDisabledButton(!WmeUtils.IsValidBrawlPath(prefs.BrawlhallaPath) || (_savedLdPath is null && _swzDescName is null), "Load map"))
+        if (ImGuiExt.WithDisabledButton(!uint.TryParse(_keyInput, out uint decryptionKey) 
+            && !WmeUtils.IsValidBrawlPath(prefs.BrawlhallaPath) || (_savedLdPath is null && _swzDescName is null), "Load map"))
         {
             Task.Run(() =>
             {
@@ -237,6 +248,7 @@ public class ImportWindow(PathPreferences prefs)
                     (
                         brawlPath: prefs.BrawlhallaPath!,
                         swzLevelName: _savedLdPath is null ? _swzDescName : null,
+                        key: decryptionKey, 
                         descPath: _savedLdPath,
                         typesPath: _savedLtPath,
                         setTypesPath: _savedLstPath,
@@ -246,6 +258,7 @@ public class ImportWindow(PathPreferences prefs)
                     _loadingStatus = "loading...";
                     _loadingError = null;
                     loader.LoadMap(loadMethod);
+                    prefs.DecryptionKey = _keyInput;
                 }
                 catch (Exception e)
                 {
@@ -303,9 +316,8 @@ public class ImportWindow(PathPreferences prefs)
 
     }
 
-    private static string[] FindLevelDescNames(string brawlPath)
+    private static string[] FindLevelDescNames(string brawlPath, uint key)
     {
-        uint key = WmeUtils.FindDecryptionKeyFromPath(Path.Combine(brawlPath, "BrawlhallaAir.swf")) ?? throw new Exception("Could not find decryption key");
         string dynamicPath = Path.Combine(brawlPath, "Dynamic.swz");
 
         return WmeUtils.GetFilesInSwz(dynamicPath, key)
