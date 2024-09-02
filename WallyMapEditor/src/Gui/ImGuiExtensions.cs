@@ -162,6 +162,11 @@ public static class ImGuiExt
         return WithDisabled(disabled, () => ImGui.Button(label));
     }
 
+    public static bool WithDisabledMenuItem(bool disabled, string label, string? hotkey = null) =>
+        hotkey is null
+            ? WithDisabled(disabled, () => ImGui.MenuItem(label))
+            : WithDisabled(disabled, () => ImGui.MenuItem(label, hotkey));
+
     public static bool DragDoubleHistory(string label, double value, Action<double> changeCommand, CommandHistory cmd, float speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
     {
         double oldVal = value;

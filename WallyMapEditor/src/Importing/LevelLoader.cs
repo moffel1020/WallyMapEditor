@@ -34,12 +34,12 @@ public class LevelLoader(Editor editor)
         (Level l, BoneTypes? bt, string[]? pn) = loadMethod.Load();
         if (BoneTypes is null && bt is null) throw new InvalidOperationException("Could not load map. BoneTypes has not been imported.");
 
-        _editor.Level = l;
-
+        _editor.CloseCurrentLevel();
         if (bt is not null) (BoneTypes, PowerNames) = (bt, pn);
-        ResetEditorState();
-
         ReloadMethod = loadMethod;
+
+        _editor.Level = l;
+        _editor.ResetCam();
     }
 
     public void LoadDefaultMap(string levelName, string displayName, bool addDefaultPlaylists = true)
@@ -52,20 +52,11 @@ public class LevelLoader(Editor editor)
         lt.DisplayName = displayName;
         HashSet<string> playlists = [.. (addDefaultPlaylists ? DefaultPlaylists : [])];
 
-        _editor.Level = new(ld, lt, playlists);
-        ResetEditorState();
-
+        _editor.CloseCurrentLevel();
         ReloadMethod = null; // loaded default map can't be reimported, it's not on disk
-    }
 
-    private void ResetEditorState()
-    {
-        _editor.Selection.Object = null;
-        _editor.CommandHistory.Clear();
-        _editor.Canvas?.ClearTextureCache();
-        _editor.CommandHistory.Clear();
-        _editor.ResetRenderState();
-        _editor.ResetCam((int)_editor.ViewportWindow.Bounds.Width, (int)_editor.ViewportWindow.Bounds.Height);
+        _editor.Level = new(ld, lt, playlists);
+        _editor.ResetCam();
     }
 
     public static LevelDesc DefaultLevelDesc => new()

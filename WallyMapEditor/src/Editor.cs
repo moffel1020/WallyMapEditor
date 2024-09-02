@@ -14,13 +14,14 @@ namespace WallyMapEditor;
 
 public class Editor
 {
-    public const string WINDOW_NAME = "WallyMapEditor";
     public const float ZOOM_INCREMENT = 0.15f;
     public const float MIN_ZOOM = 0.01f;
     public const float MAX_ZOOM = 5.0f;
     public const float LINE_WIDTH = 5; // width at Camera zoom = 1
     public const int INITIAL_SCREEN_WIDTH = 800;
     public const int INITIAL_SCREEN_HEIGHT = 480;
+
+    public WindowTitleBar TitleBar { get; set; } = new();
 
     PathPreferences PathPrefs { get; }
     RenderConfigDefault ConfigDefault { get; }
@@ -52,7 +53,6 @@ public class Editor
     public MousePickingFramebuffer PickingFramebuffer { get; set; } = new();
 
     private bool _showMainMenuBar = true;
-    private string? _levelSavePath = null;
 
     public Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault) =>
         (PathPrefs, ConfigDefault, CommandHistory, ExportDialog, ImportDialog, LevelLoader) =
@@ -111,7 +111,7 @@ public class Editor
 
         Rl.SetConfigFlags(ConfigFlags.VSyncHint);
         Rl.SetConfigFlags(ConfigFlags.ResizableWindow);
-        Rl.InitWindow(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT, WINDOW_NAME);
+        Rl.InitWindow(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT, WindowTitleBar.WINDOW_NAME);
         Rl.SetExitKey(KeyboardKey.Null);
         rlImGui.Setup(true, true);
         Style.Apply();
@@ -222,36 +222,29 @@ public class Editor
             if (btIsNull && ImGui.IsItemHovered())
                 ImGui.SetTooltip("Required files need to be imported first.\nPress \"Load required files only\" in the import menu or override the individual files manually.");
 
-            ImGuiExt.WithDisabled(!EnableSaveButton, () =>
-            {
-                if (ImGui.MenuItem("Save", "Ctrl+S")) SaveLevelFile();
-                ImGui.Separator();
-            });
-
+            if (ImGuiExt.WithDisabledMenuItem(!EnableSaveButton, "Save", "Ctrl+S")) SaveLevelFile();
+            ImGui.Separator();
             if (ImGui.MenuItem("Import", "Ctrl+Shift+I")) ImportDialog = new(PathPrefs) { Open = true };
             if (ImGui.MenuItem("Export", "Ctrl+Shift+E")) ExportDialog = new(PathPrefs) { Open = true };
             ImGui.Separator();
-            ImGuiExt.WithDisabled(!EnableReloadMapButton, () =>
+            if (ImGuiExt.WithDisabledMenuItem(!EnableReloadMapButton, "Reload map", "Ctrl+Shift+R"))
             {
-                if (ImGui.MenuItem("Reload map", "Ctrl+Shift+R"))
+                Task.Run(() =>
                 {
-                    Task.Run(() =>
+                    try
                     {
-                        try
-                        {
-                            LevelLoader.ReImport();
-                        }
-                        catch (Exception e)
-                        {
-                            Rl.TraceLog(TraceLogLevel.Error, e.Message);
-                        }
-                    });
-                }
-            });
+                        LevelLoader.ReImport();
+                    }
+                    catch (Exception e)
+                    {
+                        Rl.TraceLog(TraceLogLevel.Error, e.Message);
+                    }
+                });
+            }
             ImGui.Separator();
             ImGuiExt.WithDisabled(!EnableCloseMapButton, () =>
             {
-                if (ImGui.MenuItem("Close", "Ctrl+Shift+W")) Level = null;
+                if (ImGui.MenuItem("Close", "Ctrl+Shift+W")) CloseCurrentLevel();
             });
             ImGui.EndMenu();
         }
@@ -323,8 +316,8 @@ public class Editor
             if (Rl.IsKeyPressed(KeyboardKey.D)) Selection.Object = null;
             if (EnableNewAndOpenMapButtons)
             {
-                if  (Rl.IsKeyPressed(KeyboardKey.N)) NewLevelModal.Open();
-                if  (Rl.IsKeyPressed(KeyboardKey.O)) OpenLevelFile();
+                if (Rl.IsKeyPressed(KeyboardKey.N)) NewLevelModal.Open();
+                if (Rl.IsKeyPressed(KeyboardKey.O)) OpenLevelFile();
             }
             if (EnableSaveButton && Rl.IsKeyPressed(KeyboardKey.S)) SaveLevelFile();
 
@@ -332,7 +325,7 @@ public class Editor
             {
                 if (Rl.IsKeyPressed(KeyboardKey.I)) ImportDialog = new(PathPrefs) { Open = true };
                 if (Rl.IsKeyPressed(KeyboardKey.E)) ExportDialog = new(PathPrefs) { Open = true };
-                if (EnableCloseMapButton && Rl.IsKeyPressed(KeyboardKey.W)) Level = null;
+                if (EnableCloseMapButton && Rl.IsKeyPressed(KeyboardKey.W)) CloseCurrentLevel();
                 if (EnableReloadMapButton && Rl.IsKeyPressed(KeyboardKey.R))
                 {
                     Task.Run(() =>
@@ -362,6 +355,8 @@ public class Editor
 
     public Vector2 ScreenToWorld(Vector2 screenPos) =>
         Rl.GetScreenToWorld2D(screenPos - ViewportWindow.Bounds.P1, _cam);
+
+    public void ResetCam() => ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
 
     public void ResetCam(int surfaceW, int surfaceH)
     {
@@ -428,7 +423,8 @@ public class Editor
                 try
                 {
                     LevelLoader.LoadMap(new LevelPathLoad(result.Path));
-                    _levelSavePath = PathPrefs.LevelPath = result.Path;
+                    PathPrefs.LevelPath = result.Path;
+                    TitleBar.OpenLevelFile = result.Path;
                 }
                 catch (Exception e)
                 {
@@ -440,9 +436,10 @@ public class Editor
 
     private void SaveLevelFile()
     {
-        if (_levelSavePath is not null)
+        if (LevelLoader.ReloadMethod is LevelPathLoad lpLoad)
         {
-            WmeUtils.SerializeToPath(Level!, _levelSavePath);
+            WmeUtils.SerializeToPath(Level!, lpLoad.Path);
+            TitleBar.OpenLevelFile = lpLoad.Path;
             return;
         }
 
@@ -452,10 +449,27 @@ public class Editor
             if (result.IsOk)
             {
                 WmeUtils.SerializeToPath(Level!, result.Path);
-                _levelSavePath = PathPrefs.LevelPath = result.Path;
-                LevelLoader.ReloadMethod = new LevelPathLoad(_levelSavePath);
+                PathPrefs.LevelPath = result.Path;
+                LevelLoader.ReloadMethod = new LevelPathLoad(result.Path);
+                TitleBar.OpenLevelFile = result.Path;
             }
         });
+    }
+
+    public void CloseCurrentLevel()
+    {
+        Level = null;
+        TitleBar.OpenLevelFile = null;
+        ResetState();
+    }
+
+    public void ResetState()
+    {
+        Selection.Object = null;
+        CommandHistory.Clear();
+        Canvas?.ClearTextureCache();
+        CommandHistory.Clear();
+        ResetRenderState();
     }
 
     ~Editor()
