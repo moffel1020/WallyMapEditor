@@ -64,12 +64,12 @@ public partial class PropertiesWindow
 
         if (data.Level is not null)
         {
-            ImGui.SetNextItemWidth(110);
+            ImGui.SetNextItemWidth(95);
             if (ImGui.BeginCombo("##addnavpath", "Add id to path", ImGuiComboFlags.NoArrowButton))
             {
                 foreach (NavNode node in EnumerateNavNodes(data.Level.Desc).Where(nav => !n.Path.Select(p => p.Item1).Contains(nav.NavID)).OrderBy(n => n.NavID))
                 {
-                    if (ImGui.Selectable($"{node.NavID}##pathselect"))
+                    if (node.NavID != n.NavID && ImGui.Selectable($"{node.NavID}##pathselect"))
                     {
                         cmd.Add(new PropChangeCommand<(int, NavNodeTypeEnum)[]>(val => n.Path = val, n.Path, [.. n.Path, (node.NavID, node.Type)]));
                         cmd.SetAllowMerge(false);
