@@ -1,6 +1,5 @@
 using System.IO;
 using System.Threading.Tasks;
-using WallyMapSpinzor2;
 using ImGuiNET;
 using NativeFileDialogSharp;
 
@@ -18,7 +17,7 @@ public static class NewLevelModal
     private static string _newDisplayName = "";
     private static bool _addToPlaylists = true;
 
-    public static void Update(Editor editor, PathPreferences prefs)
+    public static void Update(LevelLoader loader, PathPreferences prefs)
     {
         if (_shouldOpen)
         {
@@ -61,14 +60,7 @@ public static class NewLevelModal
 
         if (ImGuiExt.WithDisabledButton(string.IsNullOrWhiteSpace(_newDisplayName) || string.IsNullOrWhiteSpace(_newLevelName) || string.IsNullOrWhiteSpace(prefs.BrawlhallaPath), "Create"))
         {
-            LevelDesc ld = Editor.DefaultLevelDesc;
-            LevelType lt = Editor.DefaultLevelType;
-            ld.AssetDir = ld.LevelName = lt.LevelName = _newLevelName;
-            lt.DisplayName = _newDisplayName;
-            Level level = new(ld, lt, _addToPlaylists ? [.. Editor.DefaultPlaylists] : []);
-            // FIXME: cba to load bonenames properly here. might become problematic if we ever allow the user to add animations
-            editor.LoadMapFromLevel(level, editor.BoneTypes ?? new BoneTypes(), editor.PowerNames);
-
+            loader.LoadDefaultMap(_newLevelName, _newDisplayName, _addToPlaylists);
             string dir = Path.Combine(prefs.BrawlhallaPath!, "mapArt", _newLevelName);
             Directory.CreateDirectory(dir);
 

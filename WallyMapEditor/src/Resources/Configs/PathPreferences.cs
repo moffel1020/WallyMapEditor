@@ -18,6 +18,7 @@ public class PathPreferences : IDeserializable, ISerializable
     public string? LevelTypePath { get; set; }
     public string? LevelTypesPath { get; set; }
     public string? LevelSetTypesPath { get; set; }
+    public string? LevelPath { get; set; }
     public string? BoneTypesPath { get; set; }
     public string? PowerTypesPath { get; set; }
 
@@ -60,6 +61,7 @@ public class PathPreferences : IDeserializable, ISerializable
         LevelTypePath = e.GetElementValue(nameof(LevelTypePath));
         LevelTypesPath = e.GetElementValue(nameof(LevelTypesPath));
         LevelSetTypesPath = e.GetElementValue(nameof(LevelSetTypesPath));
+        LevelPath = e.GetElementValue(nameof(LevelPath));
         BoneTypesPath = e.GetElementValue(nameof(BoneTypesPath));
         PowerTypesPath = e.GetElementValue(nameof(PowerTypesPath));
         DecryptionKey = e.GetElementValue(nameof(DecryptionKey));
@@ -74,6 +76,7 @@ public class PathPreferences : IDeserializable, ISerializable
         e.AddIfNotNull(nameof(LevelTypePath), LevelTypePath);
         e.AddIfNotNull(nameof(LevelTypesPath), LevelTypesPath);
         e.AddIfNotNull(nameof(LevelSetTypesPath), LevelSetTypesPath);
+        e.AddIfNotNull(nameof(LevelPath), LevelPath);
         e.AddIfNotNull(nameof(BoneTypesPath), BoneTypesPath);
         e.AddIfNotNull(nameof(PowerTypesPath), PowerTypesPath);
         e.AddIfNotNull(nameof(DecryptionKey), DecryptionKey);
@@ -106,6 +109,8 @@ public class PathPreferences : IDeserializable, ISerializable
             LevelTypesPath = levelTypes;
         if (args.TryGetArg("--levelSetTypes", out string? levelSetTypes))
             LevelSetTypesPath = levelSetTypes;
+        if (args.TryGetArg("--level", out string? level))
+            LevelPath = level;
         if (args.TryGetArg("--boneTypes", out string? boneTypes))
             BoneTypesPath = boneTypes;
         if (args.TryGetArg("--powerTypes", out string? powerTypes))

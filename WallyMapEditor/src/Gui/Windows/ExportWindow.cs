@@ -111,7 +111,7 @@ public class ExportWindow(PathPreferences prefs)
         {
             ImGui.Separator();
             ImGui.TextWrapped("Warning: this level is not in any playlists so it will not be playable in game. Consider adding playlists here:");
-            if (ImGui.Button("Add default playlists")) l.Playlists = [.. Editor.DefaultPlaylists];
+            if (ImGui.Button("Add default playlists")) l.Playlists = [.. LevelLoader.DefaultPlaylists];
             ImGui.Text("or");
             if (ImGui.Button("Edit playlists manually")) PlaylistEditPanel.Open = true;
             ImGui.Separator();
@@ -330,11 +330,8 @@ public class ExportWindow(PathPreferences prefs)
         if (!WmeUtils.IsValidBrawlPath(prefs.BrawlhallaPath))
             throw new InvalidDataException("Selected brawlhalla path is invalid");
         _exportStatus = "finding swz key...";
-        if (WmeUtils.GetDoABCDefineTag(Path.Combine(prefs.BrawlhallaPath!, "BrawlhallaAir.swf")) is not DoABCDefineTag abcTag)
-            throw new InvalidDataException("Could not find decryption key");
-        AbcFile abcFile = AbcFile.Read(new MemoryStream(abcTag.ABCData));
 
-        uint key = WmeUtils.FindDecryptionKey(abcFile) ?? throw new InvalidDataException("Could not find decryption key");
+        uint key = WmeUtils.FindDecryptionKeyFromPath(prefs.BrawlhallaAirPath!) ?? throw new InvalidDataException("Could not find decryption key");
         prefs.DecryptionKey = key.ToString();
         _exportStatus = "found!";
         string ldData = WmeUtils.SerializeToString(l.Desc, minify: true, bhstyle: true);
