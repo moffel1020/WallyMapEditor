@@ -53,7 +53,7 @@ public class DragBox(double x, double y, double w, double h)
             Dragging = true;
         }
 
-        if (Dragging) Middle = (worldPos.X + _mouseDragOffset.Item1, worldPos.Y + _mouseDragOffset.Item2);
+        if (Dragging) Middle = (worldX + _mouseDragOffset.Item1, worldY + _mouseDragOffset.Item2);
     }
 
     // Remove unused parameter 'data' if it is not part of a shipped public API [WallyMapEditor]

@@ -32,7 +32,7 @@ public class ParentAssetOverlay(AbstractAsset asset) : IOverlay
         Transform parent = AssetOverlay.FullTransform(asset.Parent, data.Context);
         (Position.X, Position.Y) = (RotatePoint.X, RotatePoint.Y) = (parent.TranslateX + asset.X, parent.TranslateY + asset.Y);
         (ScaleGizmo.X, ScaleGizmo.Y) = (Position.X, Position.Y);
-        ScaleGizmo.Rotation = (float)asset.Rotation;
+        ScaleGizmo.Rotation = asset.Rotation;
 
         ScaleGizmo.Update(data, asset.ScaleX, asset.ScaleY, true);
         RotatePoint.Update(data, !ScaleGizmo.Dragging, asset.Rotation * Math.PI / 180);
