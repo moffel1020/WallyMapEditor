@@ -1,4 +1,3 @@
-using System.Numerics;
 using WallyMapSpinzor2;
 using ImGuiNET;
 
@@ -73,29 +72,29 @@ partial class PropertiesWindow
 
         if (ImGui.BeginPopup("AddChild##platform"))
         {
-            result = AddObjectPopup.AddAssetMenu(new(0, 0), true);
+            result = AddObjectPopup.AddAssetMenu(0, 0, true);
             result.DoIfSome(a => a.Parent = parent);
             ImGui.EndPopup();
         }
         return result;
     }
 
-    public static Platform DefaultPlatformWithAssetName(Vector2 pos) => new()
+    public static Platform DefaultPlatformWithAssetName(double posX, double posY) => new()
     {
         InstanceName = "Custom_Platform",
         AssetName = "../BattleHill/SK_Small_Plat.png",
-        X = pos.X,
-        Y = pos.Y,
+        X = posX,
+        Y = posY,
         W = 750,
         H = 175,
     };
 
-    public static Platform DefaultPlatformWithoutAssetName(Vector2 pos) => new()
+    public static Platform DefaultPlatformWithoutAssetName(double posX, double posY) => new()
     {
         InstanceName = "Custom_Platform",
         AssetChildren = [],
-        X = pos.X,
-        Y = pos.Y,
+        X = posX,
+        Y = posY,
         ScaleX = 1,
         ScaleY = 1,
     };

@@ -89,11 +89,11 @@ partial class PropertiesWindow
         return propChanged;
     }
 
-    public static Asset DefaultAsset(Vector2 pos) => new()
+    public static Asset DefaultAsset(double posX, double posY) => new()
     {
         AssetName = "../BattleHill/SK_Small_Plat.png",
-        X = pos.X,
-        Y = pos.Y,
+        X = posX,
+        Y = posY,
         W = 750,
         H = 175,
     };

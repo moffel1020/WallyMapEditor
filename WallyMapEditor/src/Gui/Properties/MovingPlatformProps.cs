@@ -45,7 +45,7 @@ public partial class PropertiesWindow
 
         if (ImGui.BeginPopup("AddChild##moving_platform"))
         {
-            result = AddObjectPopup.AddAssetMenu(new(0, 0));
+            result = AddObjectPopup.AddAssetMenu(0, 0);
             result.DoIfSome(a => a.Parent = parent);
             ImGui.EndPopup();
         }

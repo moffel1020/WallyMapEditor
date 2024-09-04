@@ -1,4 +1,3 @@
-using System.Numerics;
 using WallyMapSpinzor2;
 using ImGuiNET;
 
@@ -33,5 +32,5 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
-    public static Respawn DefaultRespawn(Vector2 pos) => new() { X = pos.X, Y = pos.Y };
+    public static Respawn DefaultRespawn(double posX, double posY) => new() { X = posX, Y = posY };
 }

@@ -1,5 +1,4 @@
 using System.Numerics;
-
 using Raylib_cs;
 using ImGuiNET;
 using rlImGui_cs;
