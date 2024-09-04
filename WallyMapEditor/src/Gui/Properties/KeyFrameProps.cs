@@ -14,8 +14,7 @@ public partial class PropertiesWindow
 
         propChanged |= ImGuiExt.DragDoubleHistory("X", k.X, val => k.X = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory("Y", k.Y, val => k.Y = val, cmd);
-        // not implemented in the renderer yet. also stored as radians for some reason.
-        //propChanged |= ImGuiExt.DragDoubleHistory("Rotation", k.Rotation, val => k.Rotation = BrawlhallaMath.SafeMod(val, 360.0), cmd, speed: 0.2f);
+        propChanged |= ImGuiExt.DragDoubleHistory("Rotation", k.Rotation, val => k.Rotation = val, cmd, speed: 0.1f);
 
         propChanged |= ImGuiExt.DragNullableDoubleHistory("CenterX", k.CenterX, 0, val => k.CenterX = val, cmd);
         propChanged |= ImGuiExt.DragNullableDoubleHistory("CenterY", k.CenterY, 0, val => k.CenterY = val, cmd);

@@ -27,23 +27,22 @@ public partial class PropertiesWindow
         ImGui.End();
     }
 
-    private static bool ObjectChangeType<T>(T obj, CommandHistory cmd, Func<T, Maybe<T>> menu, T[] objectList)
+    private static bool ObjectChangeType<T>(T obj, CommandHistory cmd, Func<T, Maybe<T>> menu, Func<T[]> getArray)
         where T : class
     {
         Maybe<T> maybeNew = menu(obj);
         if (!maybeNew.TryGetValue(out T? newObj))
             return false;
 
-        T[] list = objectList;
-        int indexInList = Array.FindIndex(list, o => o == obj);
-
-        if (indexInList == -1)
+        cmd.Add(new SelectPropChangeCommand<T>(val =>
         {
-            Rl.TraceLog(TraceLogLevel.Error, $"Attempt to change type of orphaned {typeof(T).Name}");
-            return false;
-        }
+            T[] list = getArray();
+            int index = Array.FindIndex(list, e => e == obj); // execute
+            if (index == -1) index = Array.FindIndex(list, e => e == newObj); // undo
+            if (index == -1) Rl.TraceLog(TraceLogLevel.Error, $"Attempt to change type of orphaned {typeof(T).Name}");
+            else list[index] = val;
+        }, obj, newObj));
 
-        cmd.Add(new SelectPropChangeCommand<T>(val => list[indexInList] = val, obj, newObj));
         cmd.SetAllowMerge(false);
         return true;
     }

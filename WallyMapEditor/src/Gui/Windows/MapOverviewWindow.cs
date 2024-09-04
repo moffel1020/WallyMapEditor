@@ -193,14 +193,14 @@ public class MapOverviewWindow
 
         ImGui.Separator();
 
-        static void addButton(string id, Action menu)
+        void addButton(string id, Action<Vector2> menu)
         {
             if (ImGui.Button($"+##{id}"))
                 ImGui.OpenPopup($"AddObject_{id}");
 
             if (ImGui.BeginPopup($"AddObject_{id}"))
             {
-                menu();
+                menu(new((float)(l.Desc.CameraBounds.X + l.Desc.CameraBounds.W / 2), (float)(l.Desc.CameraBounds.Y + l.Desc.CameraBounds.H / 2)));
                 ImGui.EndPopup();
             }
         }
@@ -220,40 +220,40 @@ public class MapOverviewWindow
             if (l.Desc.LevelAnimations.Length > 0) ImGui.Separator();
             ShowSelectableList(l.Desc.LevelAnimations, selection, val => l.Desc.LevelAnimations = val, cmd, movable: true);
         },
-        () => addButton("asset", () => AddObjectPopup.AddMovingPlatformMenuHistory(new(0, 0), l, selection, cmd)));
+        () => addButton("asset", pos => AddObjectPopup.AddMovingPlatformMenuHistory(pos, l, selection, cmd)));
 
         ImGuiExt.HeaderWithWidget("Collisions##overview", () =>
         {
             ShowSelectableList(l.Desc.Collisions, selection, val => l.Desc.Collisions = val, cmd);
             ShowSelectableList(l.Desc.DynamicCollisions, selection, val => l.Desc.DynamicCollisions = val, cmd);
         },
-        () => addButton("collision", () => AddObjectPopup.AddDynamicCollisionMenuHistory(new(0, 0), l, selection, cmd)));
+        () => addButton("collision", pos => AddObjectPopup.AddDynamicCollisionMenuHistory(pos, l, selection, cmd)));
 
         ImGuiExt.HeaderWithWidget("Respawns##overview", () =>
         {
             ShowSelectableList(l.Desc.Respawns, selection, val => l.Desc.Respawns = val, cmd);
             ShowSelectableList(l.Desc.DynamicRespawns, selection, val => l.Desc.DynamicRespawns = val, cmd);
         },
-        () => addButton("respawn", () => AddObjectPopup.AddDynamicRespawnMenuHistory(new(0, 0), l, selection, cmd)));
+        () => addButton("respawn", pos => AddObjectPopup.AddDynamicRespawnMenuHistory(pos, l, selection, cmd)));
 
         ImGuiExt.HeaderWithWidget("Item Spawns##overview", () =>
         {
             ShowSelectableList(l.Desc.ItemSpawns, selection, val => l.Desc.ItemSpawns = val, cmd);
             ShowSelectableList(l.Desc.DynamicItemSpawns, selection, val => l.Desc.DynamicItemSpawns = val, cmd);
         },
-        () => addButton("itemspawn", () => AddObjectPopup.AddDynamicItemSpawnMenuHistory(new(0, 0), l, selection, cmd)));
-
-        if (ImGui.CollapsingHeader("Volumes##overview"))
-        {
-            ShowSelectableList(l.Desc.Volumes, selection, val => l.Desc.Volumes = val, cmd);
-        }
+        () => addButton("itemspawn", pos => AddObjectPopup.AddDynamicItemSpawnMenuHistory(pos, l, selection, cmd)));
 
         ImGuiExt.HeaderWithWidget("NavNodes##overview", () =>
         {
             ShowSelectableList(l.Desc.NavNodes, selection, val => l.Desc.NavNodes = val, cmd);
             ShowSelectableList(l.Desc.DynamicNavNodes, selection, val => l.Desc.DynamicNavNodes = val, cmd);
         },
-        () => addButton("navnode", () => AddObjectPopup.AddDynamicNavNodeMenuHistory(new(0, 0), l, selection, cmd)));
+        () => addButton("navnode", pos => AddObjectPopup.AddDynamicNavNodeMenuHistory(pos, l, selection, cmd)));
+
+        if (ImGui.CollapsingHeader("Volumes##overview"))
+        {
+            ShowSelectableList(l.Desc.Volumes, selection, val => l.Desc.Volumes = val, cmd);
+        }
 
         if (ImGui.CollapsingHeader("Sounds##overview"))
         {
@@ -279,7 +279,7 @@ public class MapOverviewWindow
                 if (ImGui.Button($"x##{o.GetHashCode()}"))
                 {
                     T[] result = WmeUtils.RemoveAt(values, i);
-                    cmd.Add(new ArrayRemoveCommand<T>(changeCommand, result, values[i]));
+                    cmd.Add(new ArrayRemoveCommand<T>(changeCommand, values, result, values[i]));
                     cmd.SetAllowMerge(false);
                     _propChanged |= true;
                 }

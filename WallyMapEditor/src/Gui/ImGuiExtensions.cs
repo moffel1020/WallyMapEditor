@@ -416,7 +416,7 @@ public static class ImGuiExt
             if (WithDisabledButton(!allowRemove, $"Remove##{value.GetHashCode()}"))
             {
                 T[] result = WmeUtils.RemoveAt(values, i);
-                commands.Add((new ArrayRemoveCommand<T>(changeCommand, result, value), false));
+                commands.Add((new ArrayRemoveCommand<T>(changeCommand, values, result, value), false));
                 changed = true;
             }
             if (allowMove)
