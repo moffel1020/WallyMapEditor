@@ -8,17 +8,27 @@ public class WindowTitleBar
     public string FullTitle
     {
         get => _fullTitle;
-        set
+        private set
         {
             _fullTitle = value;
             Rl.SetWindowTitle(value);
         }
     }
 
-    private string? _openLevelFile = null;
-    public string? OpenLevelFile
+    public string? OpenLevelFile { get; private set; }
+    public bool Unsaved { get; private set; }
+
+    public void SetTitle(string? openFile, bool unsaved)
     {
-        get => _openLevelFile;
-        set => (_openLevelFile, FullTitle) = (value, WINDOW_NAME + (value is null ? null : " - " + value));
+        if (openFile == OpenLevelFile && unsaved == Unsaved) return;
+
+        (OpenLevelFile, Unsaved) = (openFile, unsaved);
+
+        string title = WINDOW_NAME;
+        if (OpenLevelFile is not null) title += " - " + (unsaved ? "*" : "") + openFile;
+
+        FullTitle = title;
     }
+
+    public void Reset() => FullTitle = WINDOW_NAME;
 }

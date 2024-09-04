@@ -118,6 +118,12 @@ public class Editor
 
         ResetCam(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT);
         PickingFramebuffer.Load(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT);
+
+        CommandHistory.Changed += (_, _) =>
+        {
+            if (TitleBar.OpenLevelFile is not null)
+                TitleBar.SetTitle(TitleBar.OpenLevelFile, true);
+        };
     }
 
     private void Draw()
@@ -397,7 +403,7 @@ public class Editor
                 {
                     LevelLoader.LoadMap(new LevelPathLoad(result.Path));
                     PathPrefs.LevelPath = result.Path;
-                    TitleBar.OpenLevelFile = result.Path;
+                    TitleBar.SetTitle(result.Path, false);
                 }
                 catch (Exception e)
                 {
@@ -412,7 +418,7 @@ public class Editor
         if (LevelLoader.ReloadMethod is LevelPathLoad lpLoad)
         {
             WmeUtils.SerializeToPath(Level!, lpLoad.Path);
-            TitleBar.OpenLevelFile = lpLoad.Path;
+            TitleBar.SetTitle(lpLoad.Path, false);
             return;
         }
 
@@ -429,7 +435,7 @@ public class Editor
                 WmeUtils.SerializeToPath(Level!, result.Path);
                 PathPrefs.LevelPath = result.Path;
                 LevelLoader.ReloadMethod = new LevelPathLoad(result.Path);
-                TitleBar.OpenLevelFile = result.Path;
+                TitleBar.SetTitle(result.Path, false);
             }
         });
     }
@@ -437,7 +443,7 @@ public class Editor
     public void CloseCurrentLevel()
     {
         Level = null;
-        TitleBar.OpenLevelFile = null;
+        TitleBar.Reset();
         ResetState();
     }
 
@@ -449,7 +455,7 @@ public class Editor
             {
                 LevelLoader.ReImport();
                 if (LevelLoader.ReloadMethod is LevelPathLoad lpLoad)
-                    TitleBar.OpenLevelFile = lpLoad.Path;
+                    TitleBar.SetTitle(lpLoad.Path, false);
             }
             catch (Exception e)
             {

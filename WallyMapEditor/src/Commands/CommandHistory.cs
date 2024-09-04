@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace WallyMapEditor;
@@ -7,8 +8,12 @@ public class CommandHistory(SelectionContext selection)
     public Stack<ICommand> Commands { get; set; } = new();
     public Stack<ICommand> Undone { get; set; } = new();
 
+    public event EventHandler? Changed;
+
     public void Add(ICommand cmd)
     {
+        Changed?.Invoke(this, EventArgs.Empty);
+
         cmd.Execute();
         Undone.Clear();
 
@@ -23,6 +28,8 @@ public class CommandHistory(SelectionContext selection)
 
     public void Undo()
     {
+        Changed?.Invoke(this, EventArgs.Empty);
+
         if (Commands.TryPop(out ICommand? prev))
         {
             if (prev is ISelectCommand d)
@@ -35,6 +42,8 @@ public class CommandHistory(SelectionContext selection)
 
     public void Redo()
     {
+        Changed?.Invoke(this, EventArgs.Empty);
+
         if (Undone.TryPop(out ICommand? cmd))
         {
             if (cmd is ISelectCommand d)

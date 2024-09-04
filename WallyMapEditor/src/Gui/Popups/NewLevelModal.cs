@@ -1,6 +1,5 @@
 using System.IO;
 using System.Threading.Tasks;
-using WallyMapSpinzor2;
 using ImGuiNET;
 using NativeFileDialogSharp;
 
