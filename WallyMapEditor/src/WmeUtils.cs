@@ -419,4 +419,11 @@ public static class WmeUtils
         AbstractKeyFrame k => parent == k.Parent || IsObjectChildOf(k.Parent, parent),
         _ => false,
     };
+
+    public static string ForcePathExtension(string path, string extension)
+    {
+        if (!Path.HasExtension(path) || Path.GetExtension(path) != extension)
+            return Path.ChangeExtension(path, extension);
+        return path;
+    }
 }

@@ -362,8 +362,7 @@ public class Editor
             if (dialogResult.IsOk)
             {
                 string path = dialogResult.Path;
-                if (!Path.HasExtension(path) || Path.GetExtension(path) != extension)
-                    path = Path.ChangeExtension(path, extension);
+                path = WmeUtils.ForcePathExtension(path, extension);
                 Rl.ExportImage(image, path);
             }
             Rl.UnloadImage(image);
@@ -429,13 +428,16 @@ public class Editor
     {
         Task.Run(() =>
         {
-            DialogResult result = Dialog.FileSave("xml", Path.GetDirectoryName(PathPrefs.LevelPath));
+            string extension = "xml";
+            DialogResult result = Dialog.FileSave(extension, Path.GetDirectoryName(PathPrefs.LevelPath));
             if (result.IsOk)
             {
-                WmeUtils.SerializeToPath(Level!, result.Path);
-                PathPrefs.LevelPath = result.Path;
-                LevelLoader.ReloadMethod = new LevelPathLoad(result.Path);
-                TitleBar.SetTitle(result.Path, false);
+                string path = result.Path;
+                path = WmeUtils.ForcePathExtension(path, extension);
+                WmeUtils.SerializeToPath(Level!, path);
+                PathPrefs.LevelPath = path;
+                LevelLoader.ReloadMethod = new LevelPathLoad(path);
+                TitleBar.SetTitle(path, false);
             }
         });
     }
