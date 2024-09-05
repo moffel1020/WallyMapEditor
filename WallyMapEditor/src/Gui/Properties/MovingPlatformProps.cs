@@ -1,3 +1,5 @@
+using System.Data.Common;
+using System.Linq;
 using ImGuiNET;
 using WallyMapSpinzor2;
 
@@ -9,6 +11,15 @@ public partial class PropertiesWindow
     {
         bool propChanged = false;
         propChanged |= ImGuiExt.InputTextHistory("PlatID", mp.PlatID, val => mp.PlatID = val, cmd, 32);
+
+        ImGui.Separator();
+        if (data.Level is not null && ImGui.TreeNode("Connected dynamics"))
+        {
+            ShowConnectedDynamics(data.Level.Desc, mp, data.Selection);
+            ImGui.TreePop();
+        }
+        ImGui.Separator();
+
         propChanged |= ImGuiExt.DragDoubleHistory("X##mp", mp.X, val => mp.X = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory("Y##mp", mp.Y, val => mp.Y = val, cmd);
         if (ImGui.CollapsingHeader("Animation"))
@@ -35,6 +46,30 @@ public partial class PropertiesWindow
             }, cmd);
         }
         return propChanged;
+    }
+
+    private static void ShowConnectedDynamics(LevelDesc desc, MovingPlatform mp, SelectionContext selection)
+    {
+        foreach (DynamicCollision dc in desc.DynamicCollisions.Where(d => mp.PlatID == d.PlatID).SkipLast(1))
+        {
+            if (ImGui.Button($"Collision ({dc.X:0.###}, {dc.Y:0.###})##{dc.GetHashCode()}")) selection.Object = dc;
+            ImGui.SameLine();
+            ImGui.TextDisabled("(disabled)");
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Only one DynamicCollision can be animated by a movingplatform. idk ask bmg");
+        }
+
+        if (desc.DynamicCollisions.Where(d => mp.PlatID == d.PlatID).LastOrDefault() is DynamicCollision lastDc)
+            if (ImGui.Button($"Collision ({lastDc.X:0.###}, {lastDc.Y:0.###})##{lastDc.GetHashCode()}")) selection.Object = lastDc;
+
+        foreach (DynamicRespawn dr in desc.DynamicRespawns.Where(d => d.PlatID == mp.PlatID))
+            if (ImGui.Button($"Respawn ({dr.X:0.###}, {dr.Y:0.###})##{dr.GetHashCode()}")) selection.Object = dr;
+
+        foreach (DynamicItemSpawn di in desc.DynamicItemSpawns.Where(d => d.PlatID == mp.PlatID))
+            if (ImGui.Button($"ItemSpawn ({di.X:0.###}, {di.Y:0.###})##{di.GetHashCode()}")) selection.Object = di;
+
+        foreach (DynamicNavNode dn in desc.DynamicNavNodes.Where(d => d.PlatID == mp.PlatID))
+            if (ImGui.Button($"NavNode ({dn.X:0.###}, {dn.Y:0.###})##dynamicnavnode{dn.GetHashCode()}")) selection.Object = dn;
     }
 
     private static Maybe<AbstractAsset> CreateNewMovingPlatformChild(MovingPlatform parent)
