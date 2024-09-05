@@ -3,7 +3,7 @@ using System.IO;
 
 namespace WallyMapEditor.Mod;
 
-public class AddToFileInSwzObject
+public sealed class AddToFileInSwzObject
 {
     internal enum VersionEnum : byte
     {

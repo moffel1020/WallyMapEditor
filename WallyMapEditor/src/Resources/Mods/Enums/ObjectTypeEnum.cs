@@ -11,4 +11,5 @@ internal enum ObjectTypeEnum : byte
     LevelType = 7,
     LevelSetType = 8,
     LevelToPlaylistLink = 9,
+    END = 255,
 }

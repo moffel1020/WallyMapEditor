@@ -3,7 +3,7 @@ using System.IO;
 
 namespace WallyMapEditor.Mod;
 
-public class LevelToPlaylistLinkObject
+public sealed class LevelToPlaylistLinkObject
 {
     internal enum VersionEnum : byte
     {

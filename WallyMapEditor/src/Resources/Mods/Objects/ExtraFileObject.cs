@@ -3,7 +3,7 @@ using System.IO;
 
 namespace WallyMapEditor.Mod;
 
-public class ExtraFileObject
+public sealed class ExtraFileObject
 {
     internal enum VersionEnum : byte
     {

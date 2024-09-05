@@ -3,7 +3,7 @@ using System.IO;
 
 namespace WallyMapEditor.Mod;
 
-public class LevelTypeObject
+public sealed class LevelTypeObject
 {
     internal enum VersionEnum : byte
     {
