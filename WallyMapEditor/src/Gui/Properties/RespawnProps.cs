@@ -18,7 +18,8 @@ public partial class PropertiesWindow
 
         bool propChanged = false;
 
-        if (data.Level is not null) propChanged |= RemoveRespawnButton(r, data.Level.Desc, cmd);
+        if (data.Level is not null)
+            propChanged |= RemoveButton(r, data.Level.Desc, cmd, GetParentRespawnArray, SetParentRespawnArray);
         ImGui.Separator();
 
         propChanged |= ImGuiExt.DragDoubleHistory("X", r.X, val => r.X = val, cmd);
@@ -35,24 +36,6 @@ public partial class PropertiesWindow
         });
 
         return propChanged;
-    }
-
-    private static bool RemoveRespawnButton(Respawn r, LevelDesc desc, CommandHistory cmd)
-    {
-        if (!ImGui.Button($"Delete##{r.GetHashCode()}")) return false;
-
-        Respawn[] parentArray = GetParentRespawnArray(r, desc);
-        int idx = Array.FindIndex(parentArray, res => res == r);
-        if (idx == -1)
-        {
-            Rl.TraceLog(Raylib_cs.TraceLogLevel.Error, "Tried to remove orphaned respawn");
-            return false;
-        }
-
-        Respawn[] removed = WmeUtils.RemoveAt(parentArray, idx);
-        cmd.Add(new ArrayRemoveCommand<Respawn>(SetParentRespawnArray(r, desc), parentArray, removed, r));
-        cmd.SetAllowMerge(false);
-        return true;
     }
 
     private static Respawn[] GetParentRespawnArray(Respawn r, LevelDesc desc) =>
