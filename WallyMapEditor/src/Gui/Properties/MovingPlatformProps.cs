@@ -1,4 +1,3 @@
-using System.Data.Common;
 using System.Linq;
 using ImGuiNET;
 using WallyMapSpinzor2;
@@ -69,7 +68,7 @@ public partial class PropertiesWindow
             if (ImGui.Button($"ItemSpawn ({di.X:0.###}, {di.Y:0.###})##{di.GetHashCode()}")) selection.Object = di;
 
         foreach (DynamicNavNode dn in desc.DynamicNavNodes.Where(d => d.PlatID == mp.PlatID))
-            if (ImGui.Button($"NavNode ({dn.X:0.###}, {dn.Y:0.###})##dynamicnavnode{dn.GetHashCode()}")) selection.Object = dn;
+            if (ImGui.Button($"NavNode ({dn.X:0.###}, {dn.Y:0.###})##{dn.GetHashCode()}")) selection.Object = dn;
     }
 
     private static Maybe<AbstractAsset> CreateNewMovingPlatformChild(MovingPlatform parent)

@@ -6,13 +6,11 @@ using System.Collections.Generic;
 using System.Linq;
 
 using WallyMapSpinzor2;
-using AbcDisassembler;
 using BrawlhallaSwz;
 
 using ImGuiNET;
 using Raylib_cs;
 using NativeFileDialogSharp;
-using SwfLib.Tags.ActionsTags;
 
 namespace WallyMapEditor;
 
