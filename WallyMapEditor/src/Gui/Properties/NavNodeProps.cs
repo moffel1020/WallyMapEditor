@@ -22,11 +22,14 @@ public partial class PropertiesWindow
 
         if (data.Level is not null)
         {
+            bool removed = RemoveButton(n, data.Level.Desc, cmd, GetNavNodeParentArray, SetNavNodeParentArray);
+            ImGui.Separator();
+
             string newIDText = ImGuiExt.InputText("Change NavID", n.NavID.ToString(), flags: ImGuiInputTextFlags.CharsDecimal);
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("If the new ID already exists this NavID will not be renamed");
 
-            if (int.TryParse(newIDText, out int newID))
+            if (!removed && int.TryParse(newIDText, out int newID))
             {
                 if (!NavIDExists(newID, data.Level.Desc))
                 {
@@ -144,4 +147,12 @@ public partial class PropertiesWindow
         Path = [],
         Type = NavNodeTypeEnum.A
     };
+
+    private static NavNode[] GetNavNodeParentArray(NavNode n, LevelDesc desc) =>
+        n.Parent is null ? desc.NavNodes : n.Parent.Children;
+
+    private static Action<NavNode[]> SetNavNodeParentArray(NavNode n, LevelDesc desc) =>
+        n.Parent is null
+            ? val => desc.NavNodes = val
+            : val => n.Parent.Children = val;
 }

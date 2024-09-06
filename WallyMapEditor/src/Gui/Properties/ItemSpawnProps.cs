@@ -1,3 +1,4 @@
+using System;
 using WallyMapSpinzor2;
 using ImGuiNET;
 
@@ -14,6 +15,10 @@ public partial class PropertiesWindow
             if (ImGui.Button($"PlatID {i.Parent.PlatID}")) data.Selection.Object = i.Parent;
             ImGui.Separator();
         }
+
+        if (data.Level is not null)
+            RemoveButton(i, data.Level.Desc, cmd, GetItemSpawnParentArray, SetItemSpawnParentArray);
+        ImGui.Separator();
 
         bool propChanged = false;
 
@@ -49,6 +54,14 @@ public partial class PropertiesWindow
 
         return result;
     }
+
+    private static AbstractItemSpawn[] GetItemSpawnParentArray(AbstractItemSpawn i, LevelDesc desc) =>
+        i.Parent is null ? desc.ItemSpawns : i.Parent.Children;
+
+    private static Action<AbstractItemSpawn[]> SetItemSpawnParentArray(AbstractItemSpawn i, LevelDesc desc) =>
+        i.Parent is null
+            ? val => desc.ItemSpawns = val
+            : val => i.Parent.Children = val;
 
     public static T DefaultItemSpawn<T>(double posX, double posY) where T : AbstractItemSpawn, new()
     {

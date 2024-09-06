@@ -51,6 +51,7 @@ public partial class PropertiesWindow
             (int index) =>
             {
                 bool changed = false;
+                if (index >= ad.Children.Length) return false;
                 T child = ad.Children[index];
                 if (ImGui.TreeNode($"{child.GetType().Name} {MapOverviewWindow.GetExtraObjectInfo(child)}###dynamicChild{child.GetHashCode()}"))
                 {

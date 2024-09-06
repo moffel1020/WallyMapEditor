@@ -19,7 +19,7 @@ public partial class PropertiesWindow
         bool propChanged = false;
 
         if (data.Level is not null)
-            propChanged |= RemoveButton(r, data.Level.Desc, cmd, GetParentRespawnArray, SetParentRespawnArray);
+            RemoveButton(r, data.Level.Desc, cmd, GetRespawnParentArray, SetRespawnParentArray);
         ImGui.Separator();
 
         propChanged |= ImGuiExt.DragDoubleHistory("X", r.X, val => r.X = val, cmd);
@@ -38,10 +38,10 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
-    private static Respawn[] GetParentRespawnArray(Respawn r, LevelDesc desc) =>
+    private static Respawn[] GetRespawnParentArray(Respawn r, LevelDesc desc) =>
         r.Parent is null ? desc.Respawns : r.Parent.Children;
 
-    private static Action<Respawn[]> SetParentRespawnArray(Respawn r, LevelDesc desc) =>
+    private static Action<Respawn[]> SetRespawnParentArray(Respawn r, LevelDesc desc) =>
         r.Parent is null
             ? val => desc.Respawns = val
             : val => r.Parent.Children = val;

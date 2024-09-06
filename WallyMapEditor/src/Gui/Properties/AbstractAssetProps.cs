@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -23,6 +24,11 @@ partial class PropertiesWindow
         }
 
         bool propChanged = false;
+
+        if (data.Level is not null)
+            RemoveButton(a, data.Level.Desc, cmd, GetAbstractAssetParentArray, SetAbstractAssetParentArray);
+        ImGui.Separator();
+
         if (a.AssetName is not null)
         {
             ImGui.Text("AssetName: " + a.AssetName);
@@ -97,4 +103,24 @@ partial class PropertiesWindow
         W = 750,
         H = 175,
     };
+
+    private static AbstractAsset[] GetAbstractAssetParentArray(AbstractAsset a, LevelDesc desc) =>
+        a.Parent is null 
+            ? desc.Assets
+            : a.Parent switch
+            {
+                MovingPlatform mp => mp.Assets,
+                Platform p when p.AssetChildren is not null => p.AssetChildren,
+                _ => throw new Exception("could not get asset parent array")
+            };
+
+    private static Action<AbstractAsset[]> SetAbstractAssetParentArray(AbstractAsset a, LevelDesc desc) =>
+        a.Parent is null 
+            ? val => desc.Assets = val
+            : a.Parent switch
+            {
+                MovingPlatform mp => val => mp.Assets = val,
+                Platform p when p.AssetChildren is not null => val => p.AssetChildren = val,
+                _ => throw new Exception("Could not get asset parent array. Unimplemented parent type")
+            };
 }
