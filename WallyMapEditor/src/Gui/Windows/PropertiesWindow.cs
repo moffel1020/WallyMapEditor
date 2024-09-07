@@ -47,12 +47,10 @@ public partial class PropertiesWindow
         return true;
     }
 
-    private static bool RemoveButton<T>(T value, LevelDesc desc, CommandHistory cmd, Func<T, LevelDesc, T[]> getParentArray, Func<T, LevelDesc, Action<T[]>> setParentArray)
+    private static bool RemoveButton<T>(T value, CommandHistory cmd, T[] parentArray, Action<T[]> setParentArray)
         where T : class
     {
         if (!ImGui.Button($"Delete##{value.GetHashCode()}")) return false;
-
-        T[] parentArray = getParentArray(value, desc);
 
         int idx = Array.FindIndex(parentArray, val => val == value);
         if (idx == -1)
@@ -62,7 +60,7 @@ public partial class PropertiesWindow
         }
 
         T[] removed = WmeUtils.RemoveAt(parentArray, idx);
-        cmd.Add(new ArrayRemoveCommand<T>(setParentArray(value, desc), parentArray, removed, value));
+        cmd.Add(new ArrayRemoveCommand<T>(setParentArray, parentArray, removed, value));
         cmd.SetAllowMerge(false);
         return true;
     }

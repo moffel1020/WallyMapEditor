@@ -41,6 +41,10 @@ public partial class PropertiesWindow
         ImGui.SameLine();
         ImGui.Text("PlatID");
 
+        ImGui.Separator();
+        if (data.Level is not null) ShowDynamicRemoveButton(ad, data.Level.Desc, cmd);
+        ImGui.Separator();
+
         propChanged |= ImGuiExt.DragDoubleHistory("X", ad.X, val => ad.X = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory("Y", ad.Y, val => ad.Y = val, cmd);
 
@@ -130,4 +134,14 @@ public partial class PropertiesWindow
         }
         return result;
     }
+
+    private static bool ShowDynamicRemoveButton<T>(AbstractDynamic<T> ad, LevelDesc desc, CommandHistory cmd)
+        where T : IDrawable, IDeserializable, ISerializable => ad switch
+        {
+            DynamicCollision dc => RemoveButton(dc, cmd, desc.DynamicCollisions, val => desc.DynamicCollisions = val),
+            DynamicItemSpawn di => RemoveButton(di, cmd, desc.DynamicItemSpawns, val => desc.DynamicItemSpawns = val),
+            DynamicRespawn dr => RemoveButton(dr, cmd, desc.DynamicRespawns, val => desc.DynamicRespawns = val),
+            DynamicNavNode dn => RemoveButton(dn, cmd, desc.DynamicNavNodes, val => desc.DynamicNavNodes = val),
+            _ => throw new Exception("Could not show remove button for dynamics. Unimplemented dynamic type")
+        };
 }

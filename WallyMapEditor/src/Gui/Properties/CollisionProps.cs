@@ -27,7 +27,7 @@ public partial class PropertiesWindow
         bool propChanged = false;
 
         if (data.Level is not null)
-            RemoveButton(ac, data.Level.Desc, cmd, GetColParentArray, SetColParentArray);
+            RemoveButton(ac, cmd, GetColParentArray(ac, data.Level.Desc), SetColParentArray(ac, data.Level.Desc));
         ImGui.Separator();
 
         if (data.Level is not null) propChanged |= ObjectChangeType(ac, cmd, ShowChangeColTypeMenu, () => ac.Parent?.Children ?? data.Level.Desc.Collisions);

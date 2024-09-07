@@ -26,7 +26,7 @@ partial class PropertiesWindow
         bool propChanged = false;
 
         if (data.Level is not null)
-            RemoveButton(a, data.Level.Desc, cmd, GetAbstractAssetParentArray, SetAbstractAssetParentArray);
+            RemoveButton(a, cmd, GetAbstractAssetParentArray(a, data.Level.Desc), SetAbstractAssetParentArray(a, data.Level.Desc));
         ImGui.Separator();
 
         if (a.AssetName is not null)

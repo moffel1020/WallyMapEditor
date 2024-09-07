@@ -17,7 +17,7 @@ public partial class PropertiesWindow
         }
 
         if (data.Level is not null)
-            RemoveButton(i, data.Level.Desc, cmd, GetItemSpawnParentArray, SetItemSpawnParentArray);
+            RemoveButton(i, cmd, GetItemSpawnParentArray(i, data.Level.Desc), SetItemSpawnParentArray(i, data.Level.Desc));
         ImGui.Separator();
 
         bool propChanged = false;

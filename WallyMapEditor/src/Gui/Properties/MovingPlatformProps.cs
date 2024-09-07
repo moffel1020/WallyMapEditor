@@ -12,6 +12,10 @@ public partial class PropertiesWindow
         propChanged |= ImGuiExt.InputTextHistory("PlatID", mp.PlatID, val => mp.PlatID = val, cmd, 32);
 
         ImGui.Separator();
+        if (data.Level is not null)
+            RemoveButton(mp, cmd, data.Level.Desc.Assets, val => data.Level.Desc.Assets = val);
+        ImGui.Separator();
+
         if (data.Level is not null && ImGui.TreeNode("Connected dynamics"))
         {
             ShowConnectedDynamics(data.Level.Desc, mp, data.Selection);
