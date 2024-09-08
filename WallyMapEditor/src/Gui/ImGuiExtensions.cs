@@ -69,6 +69,13 @@ public static class ImGuiExt
         return v;
     }
 
+    public static string InputTextMultiline(string label, string value, Vector2 size, uint maxLength = 1024, ImGuiInputTextFlags flags = ImGuiInputTextFlags.None)
+    {
+        string v = value;
+        ImGui.InputTextMultiline(label, ref v , maxLength, size, flags);
+        return v;
+    }
+
     public static WmsColor ColorPicker3(string label, WmsColor col)
     {
         Vector3 imCol = new((float)col.R / 255, (float)col.G / 255, (float)col.B / 255);
