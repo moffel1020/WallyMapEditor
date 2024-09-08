@@ -35,10 +35,10 @@ public class ExportWindow(PathPreferences prefs)
     private int _selectedBackupIndex;
     private bool _refreshListOnOpen = true;
 
-    private Level? _lastLevel;
-    private readonly List<string> _assetFiles = [];
-    private readonly List<string> _backgroundFiles = [];
+    private readonly HashSet<string> _assetFiles = [];
+    private readonly HashSet<string> _backgroundFiles = [];
     private string? _thumbnailFile;
+    private Level? _lastLevel;
 
     public void Show(Level? level)
     {
@@ -554,16 +554,20 @@ public class ExportWindow(PathPreferences prefs)
 
         foreach (Background bg in l.Desc.Backgrounds)
         {
-            _backgroundFiles.Add(bg.AssetName);
-            if (bg.AnimatedAssetName is not null) _backgroundFiles.Add(bg.AnimatedAssetName);
+            _backgroundFiles.Add(NormalizePartialPath("Backgrounds", bg.AssetName));
+            if (bg.AnimatedAssetName is not null) _backgroundFiles.Add(NormalizePartialPath("Backgrounds", bg.AnimatedAssetName));
         }
 
         foreach (AbstractAsset a in l.Desc.Assets)
         {
-            foreach (string file in FindChildAssetNames(a))
-                _assetFiles.Add(file);
+            foreach (string path in FindChildAssetNames(a))
+                _assetFiles.Add(NormalizePartialPath(l.Desc.AssetDir, path));
         }
     }
+
+    // removes '../baseDir/' from file paths if they are inside baseDir to make sure they are truly unique
+    private static string NormalizePartialPath(string baseDir, string path) => 
+        Path.GetRelativePath(baseDir, Path.Combine(baseDir, path));
 
     private static IEnumerable<string> FindChildAssetNames(AbstractAsset a) => a switch
     {
