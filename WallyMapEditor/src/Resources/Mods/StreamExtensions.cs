@@ -36,7 +36,7 @@ internal static class StreamExtensions
         if (strBuf.Length > ushort.MaxValue)
             throw new ArgumentException("String is too long");
         stream.PutU16(buf, (ushort)strBuf.Length);
-        stream.Write(buf);
+        stream.Write(strBuf);
     }
 
     public static string GetLongStr(this Stream stream, Span<byte> buf)
@@ -46,11 +46,12 @@ internal static class StreamExtensions
         stream.ReadExactly(strBuf);
         return Encoding.UTF8.GetString(strBuf);
     }
+
     public static void PutLongStr(this Stream stream, Span<byte> buf, string value)
     {
         byte[] strBuf = Encoding.UTF8.GetBytes(value);
         stream.PutU32(buf, (uint)strBuf.Length);
-        stream.Write(buf);
+        stream.Write(strBuf);
     }
 
     public static byte GetU8(this Stream stream)
