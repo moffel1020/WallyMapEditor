@@ -63,8 +63,25 @@ public sealed class ModFileBuilder(ModHeaderObject header)
             throw new ArgumentException("invalid path");
         if (!WmeUtils.IsInDirectory(bhDir, path))
             throw new ArgumentException("path has to be in the brawlhalla directory");
+
+        string extension = Path.GetExtension(path);
+        FileTypeEnum fileType = extension switch
+        {
+            "png" => FileTypeEnum.PNG,
+            "jpg" => FileTypeEnum.JPG,
+            "anm" => FileTypeEnum.ANM,
+            "bin" => FileTypeEnum.BIN,
+            "bnk" => FileTypeEnum.BNK,
+            _ => throw new ArgumentException("given path has invalid extension"),
+        };
+
         byte[] content = File.ReadAllBytes(path);
-        string relativePath = Path.GetRelativePath(bhDir, path).Replace("\\", "/");
-        _extraFiles.Add(new() { FilePath = relativePath, FileContent = content });
+        string relativePath = Path.ChangeExtension(Path.GetRelativePath(bhDir, path).Replace("\\", "/"), null);
+        _extraFiles.Add(new()
+        {
+            FileType = fileType,
+            FilePath = relativePath,
+            FileContent = content
+        });
     }
 }
