@@ -35,9 +35,10 @@ public class ExportWindow(PathPreferences prefs)
     private int _selectedBackupIndex;
     private bool _refreshListOnOpen = true;
 
-    private readonly HashSet<string> _assetFiles = [];
-    private readonly HashSet<string> _backgroundFiles = [];
+    private readonly Dictionary<string, bool> _assetFiles = [];
+    private readonly Dictionary<string, bool> _backgroundFiles = [];
     private string? _thumbnailFile;
+    private bool _addThumbnailFile = true;
     private Level? _lastLevel;
 
     public void Show(Level? level)
@@ -219,7 +220,7 @@ public class ExportWindow(PathPreferences prefs)
         prefs.ModAuthor = ImGuiExt.InputText("Author", prefs.ModAuthor ?? "", 64);
         prefs.ModVersionInfo = ImGuiExt.InputText("Mod version", prefs.ModVersionInfo ?? "1.0", 16);
         prefs.ModDescription = ImGuiExt.InputTextMultiline("Description", prefs.ModDescription ?? "", new(0, ImGui.GetTextLineHeight() * 8), 1024);
-        prefs.GameVersionInfo = ImGuiExt.InputText("Game version", prefs.GameVersionInfo ?? "8.13", 8);
+        prefs.GameVersionInfo = ImGuiExt.InputText("Game version", prefs.GameVersionInfo ?? "", 8);
 
         ImGui.Separator();
 
@@ -229,19 +230,19 @@ public class ExportWindow(PathPreferences prefs)
             ImGui.BeginChild("files", new Vector2(0, ImGui.GetTextLineHeightWithSpacing() * 8), ImGuiChildFlags.ResizeY | ImGuiChildFlags.Border);
 
             if (_thumbnailFile is not null)
-                ImGuiExt.Checkbox("Thumbnail: " + _thumbnailFile, true);
+                _addThumbnailFile = ImGuiExt.Checkbox("Thumbnail: " + _thumbnailFile, _addThumbnailFile);
 
             if (_backgroundFiles.Count != 0 && ImGui.TreeNode("Backgrounds"))
             {
-                foreach (string file in _backgroundFiles)
-                    ImGuiExt.Checkbox(file, true);
+                foreach ((string file, bool @checked) in _backgroundFiles)
+                    _backgroundFiles[file] = ImGuiExt.Checkbox(file, @checked);
                 ImGui.TreePop();
             }
 
             if (_assetFiles.Count != 0 && ImGui.TreeNode($"Assets ({l.Desc.AssetDir})"))
             {
-                foreach (string file in _assetFiles)
-                    ImGuiExt.Checkbox(file, true);
+                foreach ((string file, bool @checked) in _assetFiles)
+                    _assetFiles[file] = ImGuiExt.Checkbox(file, @checked);
                 ImGui.TreePop();
             }
             ImGui.EndChild();
@@ -266,7 +267,7 @@ public class ExportWindow(PathPreferences prefs)
                 GameVersionInfo = prefs.GameVersionInfo ?? "",
                 ModVersionInfo = prefs.ModVersionInfo ?? "",
                 ModDescription = prefs.ModDescription ?? "",
-                CreatorInfo = prefs.ModAuthor ?? "", 
+                CreatorInfo = prefs.ModAuthor ?? "",
             };
 
             Task.Run(() =>
@@ -512,9 +513,21 @@ public class ExportWindow(PathPreferences prefs)
     {
         ModFileBuilder builder = new(header);
         builder.AddLevel(l);
-        if (_thumbnailFile is not null) builder.AddFilePath(brawlDir, Path.Combine(brawlDir, "images", "thumbnails", _thumbnailFile));
-        foreach (string bg in _backgroundFiles) builder.AddFilePath(brawlDir, Path.Combine(brawlDir, "mapArt", "Backgrounds", bg));
-        foreach (string a in _assetFiles) builder.AddFilePath(brawlDir, Path.Combine(brawlDir, "mapArt", l.Desc.AssetDir, a));
+        if (_thumbnailFile is not null && _addThumbnailFile)
+            builder.AddFilePath(brawlDir, Path.Combine(brawlDir, "images", "thumbnails", _thumbnailFile));
+
+        foreach ((string bg, bool shouldAddFile) in _backgroundFiles)
+        {
+            if (shouldAddFile)
+                builder.AddFilePath(brawlDir, Path.Combine(brawlDir, "mapArt", "Backgrounds", bg));
+        }
+
+        foreach ((string a, bool shouldAddFile) in _assetFiles)
+        {
+            if (shouldAddFile)
+                builder.AddFilePath(brawlDir, Path.Combine(brawlDir, "mapArt", l.Desc.AssetDir, a));
+        }
+
         return builder.CreateMod();
     }
 
@@ -554,19 +567,19 @@ public class ExportWindow(PathPreferences prefs)
 
         foreach (Background bg in l.Desc.Backgrounds)
         {
-            _backgroundFiles.Add(NormalizePartialPath("Backgrounds", bg.AssetName));
-            if (bg.AnimatedAssetName is not null) _backgroundFiles.Add(NormalizePartialPath("Backgrounds", bg.AnimatedAssetName));
+            _backgroundFiles[NormalizePartialPath("Backgrounds", bg.AssetName)] = true;
+            if (bg.AnimatedAssetName is not null) _backgroundFiles[NormalizePartialPath("Backgrounds", bg.AnimatedAssetName)] = true;
         }
 
         foreach (AbstractAsset a in l.Desc.Assets)
         {
             foreach (string path in FindChildAssetNames(a))
-                _assetFiles.Add(NormalizePartialPath(l.Desc.AssetDir, path));
+                _assetFiles[NormalizePartialPath(l.Desc.AssetDir, path)] = true;
         }
     }
 
     // removes '../baseDir/' from file paths if they are inside baseDir to make sure they are truly unique
-    private static string NormalizePartialPath(string baseDir, string path) => 
+    private static string NormalizePartialPath(string baseDir, string path) =>
         Path.GetRelativePath(baseDir, Path.Combine(baseDir, path));
 
     private static IEnumerable<string> FindChildAssetNames(AbstractAsset a) => a switch

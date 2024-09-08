@@ -269,7 +269,7 @@ public class ImportWindow(PathPreferences prefs)
 
     private void LoadButton(LevelLoader loader)
     {
-        if (ImGuiExt.WithDisabledButton(!uint.TryParse(_keyInput, out uint decryptionKey) 
+        if (ImGuiExt.WithDisabledButton(!uint.TryParse(_keyInput, out uint decryptionKey)
             && !WmeUtils.IsValidBrawlPath(prefs.BrawlhallaPath) || (_savedLdPath is null && _swzDescName is null), "Load map"))
         {
             Task.Run(() =>
@@ -280,7 +280,7 @@ public class ImportWindow(PathPreferences prefs)
                     (
                         brawlPath: prefs.BrawlhallaPath!,
                         swzLevelName: _savedLdPath is null ? _swzDescName : null,
-                        key: decryptionKey, 
+                        key: decryptionKey,
                         descPath: _savedLdPath,
                         typesPath: _savedLtPath,
                         setTypesPath: _savedLstPath,

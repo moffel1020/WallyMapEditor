@@ -72,7 +72,7 @@ public static class ImGuiExt
     public static string InputTextMultiline(string label, string value, Vector2 size, uint maxLength = 1024, ImGuiInputTextFlags flags = ImGuiInputTextFlags.None)
     {
         string v = value;
-        ImGui.InputTextMultiline(label, ref v , maxLength, size, flags);
+        ImGui.InputTextMultiline(label, ref v, maxLength, size, flags);
         return v;
     }
 
