@@ -1,3 +1,4 @@
+using System;
 using WallyMapSpinzor2;
 using ImGuiNET;
 
@@ -16,6 +17,11 @@ public partial class PropertiesWindow
         }
 
         bool propChanged = false;
+
+        if (data.Level is not null)
+            RemoveButton(r, cmd, GetRespawnParentArray(r, data.Level.Desc), SetRespawnParentArray(r, data.Level.Desc));
+        ImGui.Separator();
+
         propChanged |= ImGuiExt.DragDoubleHistory("X", r.X, val => r.X = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory("Y", r.Y, val => r.Y = val, cmd);
 
@@ -31,6 +37,14 @@ public partial class PropertiesWindow
 
         return propChanged;
     }
+
+    private static Respawn[] GetRespawnParentArray(Respawn r, LevelDesc desc) =>
+        r.Parent is null ? desc.Respawns : r.Parent.Children;
+
+    private static Action<Respawn[]> SetRespawnParentArray(Respawn r, LevelDesc desc) =>
+        r.Parent is null
+            ? val => desc.Respawns = val
+            : val => r.Parent.Children = val;
 
     public static Respawn DefaultRespawn(double posX, double posY) => new() { X = posX, Y = posY };
 }

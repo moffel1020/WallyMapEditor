@@ -12,6 +12,10 @@ public partial class PropertiesWindow
         propChanged |= ImGuiExt.InputTextHistory("PlatID", mp.PlatID, val => mp.PlatID = val, cmd, 32);
 
         ImGui.Separator();
+        if (data.Level is not null)
+            RemoveButton(mp, cmd, data.Level.Desc.Assets, val => data.Level.Desc.Assets = val);
+        ImGui.Separator();
+
         if (data.Level is not null && ImGui.TreeNode("Connected dynamics"))
         {
             ShowConnectedDynamics(data.Level.Desc, mp, data.Selection);
@@ -31,6 +35,7 @@ public partial class PropertiesWindow
             (int index) =>
             {
                 bool changed = false;
+                if (index >= mp.Assets.Length) return false;
                 AbstractAsset child = mp.Assets[index];
                 if (ImGui.TreeNode($"{child.GetType().Name} {MapOverviewWindow.GetExtraObjectInfo(child)}##{child.GetHashCode()}"))
                 {
@@ -68,7 +73,7 @@ public partial class PropertiesWindow
             if (ImGui.Button($"ItemSpawn ({di.X:0.###}, {di.Y:0.###})##{di.GetHashCode()}")) selection.Object = di;
 
         foreach (DynamicNavNode dn in desc.DynamicNavNodes.Where(d => d.PlatID == mp.PlatID))
-            if (ImGui.Button($"NavNode ({dn.X:0.###}, {dn.Y:0.###})##dynamicnavnode{dn.GetHashCode()}")) selection.Object = dn;
+            if (ImGui.Button($"NavNode ({dn.X:0.###}, {dn.Y:0.###})##{dn.GetHashCode()}")) selection.Object = dn;
     }
 
     private static Maybe<AbstractAsset> CreateNewMovingPlatformChild(MovingPlatform parent)

@@ -26,6 +26,10 @@ public partial class PropertiesWindow
 
         bool propChanged = false;
 
+        if (data.Level is not null)
+            RemoveButton(ac, cmd, GetColParentArray(ac, data.Level.Desc), SetColParentArray(ac, data.Level.Desc));
+        ImGui.Separator();
+
         if (data.Level is not null) propChanged |= ObjectChangeType(ac, cmd, ShowChangeColTypeMenu, () => ac.Parent?.Children ?? data.Level.Desc.Collisions);
         propChanged |= ImGuiExt.DragDoubleHistory($"X1##props{ac.GetHashCode()}", ac.X1, val => ac.X1 = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory($"Y1##props{ac.GetHashCode()}", ac.Y1, val => ac.Y1 = val, cmd);
@@ -249,4 +253,12 @@ public partial class PropertiesWindow
 
         return propChanged;
     }
+
+    private static AbstractCollision[] GetColParentArray(AbstractCollision c, LevelDesc desc) =>
+        c.Parent is null ? desc.Collisions : c.Parent.Children;
+    
+    private static Action<AbstractCollision[]> SetColParentArray(AbstractCollision c, LevelDesc desc) =>
+        c.Parent is null
+            ? val => desc.Collisions = val
+            : val => c.Parent.Children = val;
 }

@@ -47,6 +47,24 @@ public partial class PropertiesWindow
         return true;
     }
 
+    private static bool RemoveButton<T>(T value, CommandHistory cmd, T[] parentArray, Action<T[]> setParentArray)
+        where T : class
+    {
+        if (!ImGui.Button($"Delete##{value.GetHashCode()}")) return false;
+
+        int idx = Array.FindIndex(parentArray, val => val == value);
+        if (idx == -1)
+        {
+            Rl.TraceLog(TraceLogLevel.Error, $"Tried to remove orphaned value of type {value.GetType().Name}");
+            return false;
+        }
+
+        T[] removed = WmeUtils.RemoveAt(parentArray, idx);
+        cmd.Add(new ArrayRemoveCommand<T>(setParentArray, parentArray, removed, value));
+        cmd.SetAllowMerge(false);
+        return true;
+    }
+
     private static bool ShowProperties(object o, CommandHistory cmd, PropertiesWindowData data) => o switch
     {
         Respawn r => ShowRespawnProps(r, cmd, data),
