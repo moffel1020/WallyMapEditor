@@ -3,9 +3,11 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Linq;
 
+using BrawlhallaSwz;
+using WallyMapEditor.Mod;
+
 using ImGuiNET;
 using NativeFileDialogSharp;
-using BrawlhallaSwz;
 
 namespace WallyMapEditor;
 
@@ -96,7 +98,7 @@ public class ImportWindow(PathPreferences prefs)
         {
             Task.Run(() =>
             {
-                DialogResult result = Dialog.FileOpen("bmap", Path.GetDirectoryName(prefs.ModFilePath));
+                DialogResult result = Dialog.FileOpen(ModFile.EXTENSION, Path.GetDirectoryName(prefs.ModFilePath));
                 if (result.IsOk)
                     loader.LoadMap(new ModFileLoad(result.Path, prefs.BrawlhallaPath!));
             });

@@ -7,11 +7,11 @@ using System.Linq;
 
 using WallyMapSpinzor2;
 using BrawlhallaSwz;
+using WallyMapEditor.Mod;
 
 using ImGuiNET;
 using Raylib_cs;
 using NativeFileDialogSharp;
-using WallyMapEditor.Mod;
 
 namespace WallyMapEditor;
 
@@ -277,11 +277,11 @@ public class ExportWindow(PathPreferences prefs)
                     _exportError = null;
                     _exportStatus = "select file";
                     ModFile mod = CreateModFile(l, prefs.BrawlhallaPath!, header);
-                    DialogResult result = Dialog.FileSave("bmap", Path.GetDirectoryName(prefs.ModFilePath));  // TODO: decide on extension name
+                    DialogResult result = Dialog.FileSave(ModFile.EXTENSION, Path.GetDirectoryName(prefs.ModFilePath));  // TODO: decide on extension name
                     if (result.IsOk)
                     {
                         _exportStatus = "exporting...";
-                        string path = WmeUtils.ForcePathExtension(result.Path, ".bmap");
+                        string path = WmeUtils.ForcePathExtension(result.Path, '.' + ModFile.EXTENSION);
                         using FileStream stream = new(path, FileMode.Create, FileAccess.Write);
                         mod.Save(stream);
                     }

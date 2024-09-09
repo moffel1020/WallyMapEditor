@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using WallyMapEditor.Mod;
+
 using WallyMapSpinzor2;
+using WallyMapEditor.Mod;
 
 namespace WallyMapEditor;
 
