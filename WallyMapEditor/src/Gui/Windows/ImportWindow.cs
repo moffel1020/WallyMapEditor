@@ -37,7 +37,20 @@ public class ImportWindow(PathPreferences prefs)
         ImGui.SetNextWindowSizeConstraints(new(500, 400), new(int.MaxValue));
         ImGui.Begin("Import", ref _open, ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoCollapse);
 
-        ShowImportMenu(loader);
+        ImGui.BeginTabBar("importTabBar", ImGuiTabBarFlags.None);
+        if (ImGui.BeginTabItem("Level"))
+        {
+            ShowImportMenu(loader);
+            ImGui.EndTabItem();
+        }
+
+        if (ImGui.BeginTabItem("Mod file"))
+        {
+            ShowModFileImportMenu(loader);
+            ImGui.EndTabItem();
+        }
+
+        ImGui.EndTabBar();
 
         if (_loadingStatus is not null)
         {
@@ -54,6 +67,40 @@ public class ImportWindow(PathPreferences prefs)
         }
 
         ImGui.End();
+    }
+
+    private void ShowModFileImportMenu(LevelLoader loader)
+    {
+        if (loader.BoneTypes is null)
+        {
+            ImGui.Text("Required files are missing.\nPress \"Load required files only\" in the level import tab first");
+            return;
+        }
+
+        ImGui.Text("Import from mod file. \nThis may add extra files like images to your brawlhalla directory.");
+
+        ImGui.Separator();
+        if (ImGui.Button("Select Brawlhalla Path"))
+        {
+            Task.Run(() =>
+            {
+                DialogResult result = Dialog.FolderPicker(prefs.BrawlhallaPath);
+                if (result.IsOk)
+                    prefs.BrawlhallaPath = result.Path;
+            });
+        }
+        ImGui.Text($"Path: {prefs.BrawlhallaPath}");
+        ImGui.Separator();
+
+        if (ImGuiExt.WithDisabledButton(!WmeUtils.IsValidBrawlPath(prefs.BrawlhallaPath), "Import"))
+        {
+            Task.Run(() =>
+            {
+                DialogResult result = Dialog.FileOpen("bmap", Path.GetDirectoryName(prefs.ModFilePath));
+                if (result.IsOk)
+                    loader.LoadMap(new ModFileLoad(result.Path, prefs.BrawlhallaPath!));
+            });
+        }
     }
 
     private static void ShowFileImportSection(
