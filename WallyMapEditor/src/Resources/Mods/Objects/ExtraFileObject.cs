@@ -17,15 +17,15 @@ public sealed class ExtraFileObject
 
     public string Extension => FileType switch
     {
-        FileTypeEnum.PNG => "png",
-        FileTypeEnum.JPG => "jpg",
-        FileTypeEnum.ANM => "anm",
-        FileTypeEnum.BIN => "bin",
-        FileTypeEnum.BNK => "bnk",
+        FileTypeEnum.PNG => ".png",
+        FileTypeEnum.JPG => ".jpg",
+        FileTypeEnum.ANM => ".anm",
+        FileTypeEnum.BIN => ".bin",
+        FileTypeEnum.BNK => ".bnk",
         _ => ""
     };
 
-    public string FullPath => FilePath + '.' + Extension;
+    public string FullPath => FilePath + Extension;
 
     internal static ExtraFileObject Get(Stream stream)
     {

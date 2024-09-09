@@ -67,12 +67,12 @@ public sealed class ModFileBuilder(ModHeaderObject header)
         string extension = Path.GetExtension(path);
         FileTypeEnum fileType = extension switch
         {
-            "png" => FileTypeEnum.PNG,
-            "jpg" => FileTypeEnum.JPG,
-            "anm" => FileTypeEnum.ANM,
-            "bin" => FileTypeEnum.BIN,
-            "bnk" => FileTypeEnum.BNK,
-            _ => throw new ArgumentException("given path has invalid extension"),
+            ".png" => FileTypeEnum.PNG,
+            ".jpg" => FileTypeEnum.JPG,
+            ".anm" => FileTypeEnum.ANM,
+            ".bin" => FileTypeEnum.BIN,
+            ".bnk" => FileTypeEnum.BNK,
+            _ => throw new ArgumentException($"given path has invalid extension: {extension}"),
         };
 
         byte[] content = File.ReadAllBytes(path);
