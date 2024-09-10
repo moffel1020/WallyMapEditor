@@ -7,7 +7,7 @@ namespace WallyMapEditor.Mod;
 
 public sealed class ModFile
 {
-    public const string EXTENSION = "bmap";
+    public const string EXTENSION = "wally";
 
     public required ModHeaderObject Header { get; set; }
     // map objects

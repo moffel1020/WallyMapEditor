@@ -59,7 +59,7 @@ public class ExportWindow(PathPreferences prefs)
             ImGui.EndTabItem();
         }
 
-        if (ImGui.BeginTabItem("Mod file")) // TODO: rename to chosen file extension
+        if (ImGui.BeginTabItem($"Mod file (.{ModFile.EXTENSION})"))
         {
             ShowModFileExportTab(level);
             ImGui.EndTabItem();

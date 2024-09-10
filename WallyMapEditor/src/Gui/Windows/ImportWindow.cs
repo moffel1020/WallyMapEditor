@@ -46,7 +46,7 @@ public class ImportWindow(PathPreferences prefs)
             ImGui.EndTabItem();
         }
 
-        if (ImGui.BeginTabItem("Mod file"))
+        if (ImGui.BeginTabItem($"Mod file (.{ModFile.EXTENSION})"))
         {
             ShowModFileImportMenu(loader);
             ImGui.EndTabItem();
