@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Numerics;
 
 using BrawlhallaSwz;
 using WallyMapEditor.Mod;
@@ -21,6 +22,7 @@ public class ImportWindow(PathPreferences prefs)
     private string? _savedLstPath;
     private string? _savedBtPath;
     private string? _savedPtPath;
+    private string? _savedModPath;
     private string _keyInput = prefs.DecryptionKey ?? "";
 
     private bool _searchingDescNames = false;
@@ -30,6 +32,8 @@ public class ImportWindow(PathPreferences prefs)
 
     private string? _loadingError;
     private string? _loadingStatus;
+
+    private ModFileLoad? _modFileLoad;
 
     private bool _open;
     public bool Open { get => _open; set => _open = value; }
@@ -94,15 +98,80 @@ public class ImportWindow(PathPreferences prefs)
         ImGui.Text($"Path: {prefs.BrawlhallaPath}");
         ImGui.Separator();
 
-        if (ImGuiExt.WithDisabledButton(!WmeUtils.IsValidBrawlPath(prefs.BrawlhallaPath), "Import"))
+        if (ImGuiExt.WithDisabledButton(!WmeUtils.IsValidBrawlPath(prefs.BrawlhallaPath), "Select mod file"))
         {
             Task.Run(() =>
             {
                 DialogResult result = Dialog.FileOpen(ModFile.EXTENSION, Path.GetDirectoryName(prefs.ModFilePath));
                 if (result.IsOk)
-                    loader.LoadMap(new ModFileLoad(result.Path, prefs.BrawlhallaPath!));
+                {
+                    _savedModPath = result.Path;
+                    CreateModFileLoad(_savedModPath, prefs);
+                }
             });
         }
+        if (prefs.ModFilePath is not null)
+        {
+            ImGui.SameLine();
+            ImGui.Text("or");
+            ImGui.SameLine();
+            if (ImGui.Button("Use last path"))
+            {
+                _savedModPath = prefs.ModFilePath;
+                CreateModFileLoad(_savedModPath, prefs);
+            }
+            ImGui.SameLine();
+            ImGui.Text(prefs.ModFilePath);
+        }
+        ImGui.Text($"Path: {_savedModPath}");
+
+        if (_modFileLoad is not null && _modFileLoad.ModFile is not null)
+        {
+            ImGui.Separator();
+            if (ImGui.CollapsingHeader("Mod info##header"))
+            {
+                unsafe { ImGui.PushStyleColor(ImGuiCol.ChildBg, *ImGui.GetStyleColorVec4(ImGuiCol.FrameBg)); }
+                ImGui.BeginChild("##ModInfoWindow", new Vector2(0, ImGui.GetTextLineHeightWithSpacing() * 8), ImGuiChildFlags.ResizeY | ImGuiChildFlags.Border);
+                ModHeaderObject header = _modFileLoad.ModFile.Header;
+                ImGui.Text($"Name: {header.ModName}");
+                ImGui.Text($"Author: {header.CreatorInfo}");
+                ImGui.Text($"Mod Version: {header.ModVersionInfo}");
+                ImGui.Text($"Description:\n{header.ModDescription}");
+                ImGui.Text($"Game Version: {header.GameVersionInfo}");
+                ImGui.SeparatorText("Extra files");
+                string filesToWrite = string.Join("\n", _modFileLoad.ModFile.ExtraFiles.Select(e => e.FullPath));
+                ImGui.Text($"{filesToWrite}");
+                ImGui.EndChild();
+            }
+        }
+        ImGui.Separator();
+        if (ImGuiExt.WithDisabledButton(_modFileLoad is null, "Import"))
+            Task.Run(() =>
+            {
+                try
+                {
+                    _loadingError = null;
+                    _loadingStatus = "loading...";
+                    loader.LoadMap(_modFileLoad!);
+                }
+                catch (Exception e)
+                {
+                    _loadingError = e.Message;
+                }
+                finally
+                {
+                    _loadingStatus = null;
+                }
+            });
+    }
+
+    private void CreateModFileLoad(string path, PathPreferences prefs)
+    {
+        if (path != _modFileLoad?.FilePath)
+            _modFileLoad = new ModFileLoad(path, prefs.BrawlhallaPath!);
+
+        prefs.ModFilePath = path;
+        _modFileLoad?.CacheModFile();
     }
 
     private static void ShowFileImportSection(

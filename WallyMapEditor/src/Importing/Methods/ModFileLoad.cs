@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,11 +12,14 @@ public class ModFileLoad(string path, string brawlPath) : ILoadMethod
 {
     public string FilePath { get; init; } = path;
     public string BrawlPath { get; init; } = brawlPath;
+    public ModFile? ModFile => _cachedFile?.Item1;
+
+    private (ModFile, DateTime)? _cachedFile;
+    private bool CacheInvalid => _cachedFile is null || File.GetLastWriteTimeUtc(FilePath) != _cachedFile.Value.Item2;
 
     public LoadedData Load()
     {
-        using FileStream stream = new(FilePath, FileMode.Open, FileAccess.Read);
-        ModFile file = ModFile.Load(stream, false);
+        ModFile file = LoadModFile();
 
         LevelDescObject ldo = file.LevelDescs.Single(); // mod files with multiple levels are currently not supported in the editor
         LevelDesc ld = WmeUtils.DeserializeFromString<LevelDesc>(ldo.FileContent, true);
@@ -34,5 +38,23 @@ public class ModFileLoad(string path, string brawlPath) : ILoadMethod
         }
 
         return new(new(ld, lt, playlists), null, null);
+    }
+
+    private ModFile LoadModFile()
+    {
+        ModFile file;
+        if (CacheInvalid)
+        {
+            using FileStream stream = new(FilePath, FileMode.Open, FileAccess.Read);
+            file = ModFile.Load(stream);
+            _cachedFile = (file, File.GetLastWriteTimeUtc(FilePath));
+        }
+
+        return _cachedFile!.Value.Item1;
+    }
+
+    public void CacheModFile()
+    {
+        if (CacheInvalid) LoadModFile();
     }
 }

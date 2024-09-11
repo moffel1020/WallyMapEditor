@@ -245,6 +245,7 @@ public class ExportWindow(PathPreferences prefs)
                     _assetFiles[file] = ImGuiExt.Checkbox(file, @checked);
                 ImGui.TreePop();
             }
+            ImGui.PopStyleColor();
             ImGui.EndChild();
         },
         () =>
