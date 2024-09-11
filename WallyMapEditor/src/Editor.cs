@@ -18,8 +18,8 @@ public class Editor
     public const float MIN_ZOOM = 0.01f;
     public const float MAX_ZOOM = 5.0f;
     public const float LINE_WIDTH = 5; // width at Camera zoom = 1
-    public const int INITIAL_SCREEN_WIDTH = 800;
-    public const int INITIAL_SCREEN_HEIGHT = 480;
+    public const int INITIAL_SCREEN_WIDTH = 1280;
+    public const int INITIAL_SCREEN_HEIGHT = 720;
 
     public WindowTitleBar TitleBar { get; set; } = new();
 
