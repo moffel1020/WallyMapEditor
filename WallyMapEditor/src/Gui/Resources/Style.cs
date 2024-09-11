@@ -14,6 +14,12 @@ public static class Style
     {
         Font = LoadEmbeddedFont("WallyMapEditor.res.fonts.Roboto-Regular.ttf");
 
+        if (!File.Exists("imgui.ini"))
+        {
+            Rl.TraceLog(Raylib_cs.TraceLogLevel.Info, "Loading default imgui.ini");
+            LoadDefaultImGuiIni("WallyMapEditor.res.imgui.defaultimgui.ini");
+        }
+
         // stolen from https://github.com/ocornut/imgui/issues/707#issuecomment-917151020
         ImGuiStylePtr style = ImGui.GetStyle();
         style.WindowPadding = new(8.00f, 8.00f);
@@ -96,6 +102,17 @@ public static class Style
         // style.Colors[(int)ImGuiCol.NavWindowingHighlight] = new Vector4(1.00f, 0.00f, 0.00f, 0.70f);
         // style.Colors[(int)ImGuiCol.NavWindowingDimBg] = new Vector4(1.00f, 0.00f, 0.00f, 0.20f);
         // style.Colors[(int)ImGuiCol.ModalWindowDimBg] = new Vector4(1.00f, 0.00f, 0.00f, 0.35f);
+    }
+
+    private static void LoadDefaultImGuiIni(string resourceName)
+    {
+        using Stream? stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
+        if (stream is null) return;
+
+        using StreamReader reader = new(stream);
+        string iniFile = reader.ReadToEnd();
+
+        ImGui.LoadIniSettingsFromMemory(iniFile);
     }
 
     private static ImFontPtr LoadEmbeddedFont(string resourceName)

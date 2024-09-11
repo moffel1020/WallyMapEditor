@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include=".\res\fonts\Roboto-Regular.ttf" />
+    <EmbeddedResource Include=".\res\imgui\defaultimgui.ini" />
   </ItemGroup>
   
   <ItemGroup>
