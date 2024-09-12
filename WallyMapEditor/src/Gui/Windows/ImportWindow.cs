@@ -202,7 +202,7 @@ public class ImportWindow(PathPreferences prefs)
 
     private void ShowImportMenu(LevelLoader loader)
     {
-        ImGui.Text("Import from individual xml and csv files");
+        ImGui.Text("Import from game");
         ImGui.SameLine();
         ImGui.TextDisabled("(?)");
         if (ImGui.IsItemHovered())
