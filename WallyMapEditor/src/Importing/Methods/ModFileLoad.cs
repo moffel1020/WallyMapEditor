@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 
@@ -15,6 +16,8 @@ public class ModFileLoad(string path, string brawlPath) : ILoadMethod
     public ModFile? ModFile => _cachedFile?.Item1;
 
     private (ModFile, DateTime)? _cachedFile;
+
+    [MemberNotNullWhen(false, nameof(_cachedFile))]
     private bool CacheInvalid => _cachedFile is null || File.GetLastWriteTimeUtc(FilePath) != _cachedFile.Value.Item2;
 
     public LoadedData Load()
@@ -50,7 +53,7 @@ public class ModFileLoad(string path, string brawlPath) : ILoadMethod
             _cachedFile = (file, File.GetLastWriteTimeUtc(FilePath));
         }
 
-        return _cachedFile!.Value.Item1;
+        return _cachedFile.Value.Item1;
     }
 
     public void CacheModFile()
