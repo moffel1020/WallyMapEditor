@@ -7,6 +7,7 @@ using System.Linq;
 
 using WallyMapSpinzor2;
 using BrawlhallaSwz;
+using WallyMapEditor.Mod;
 
 using ImGuiNET;
 using Raylib_cs;
@@ -34,6 +35,12 @@ public class ExportWindow(PathPreferences prefs)
     private int _selectedBackupIndex;
     private bool _refreshListOnOpen = true;
 
+    private readonly Dictionary<string, bool> _assetFiles = [];
+    private readonly Dictionary<string, bool> _backgroundFiles = [];
+    private string? _thumbnailFile;
+    private bool _addThumbnailFile = true;
+    private Level? _lastLevel;
+
     public void Show(Level? level)
     {
         ImGui.SetNextWindowSizeConstraints(new(425, 425), new(int.MaxValue));
@@ -41,6 +48,7 @@ public class ExportWindow(PathPreferences prefs)
         if (level is null)
         {
             ImGui.Text("No map data open");
+            ImGui.End();
             return;
         }
 
@@ -48,6 +56,12 @@ public class ExportWindow(PathPreferences prefs)
         if (ImGui.BeginTabItem("Game"))
         {
             ShowGameExportTab(level);
+            ImGui.EndTabItem();
+        }
+
+        if (ImGui.BeginTabItem($"Mod file (.{ModFile.EXTENSION})"))
+        {
+            ShowModFileExportTab(level);
             ImGui.EndTabItem();
         }
 
@@ -84,10 +98,11 @@ public class ExportWindow(PathPreferences prefs)
             ImGui.PopTextWrapPos();
         }
 
+        _lastLevel = level;
         ImGui.End();
     }
 
-    public void ShowGameExportTab(Level l)
+    private void ShowGameExportTab(Level l)
     {
         ImGui.Text($"Export {l.Desc.LevelName} to game swz files");
         ImGui.TextWrapped("This will override the game swz files and you will not be able to play online (even if you changed nothing). To play online again restore from backup or if that doesn't work verify integrity of game files");
@@ -183,7 +198,108 @@ public class ExportWindow(PathPreferences prefs)
         }
     }
 
-    public void ShowLevelDescExportTab(LevelDesc ld)
+    private void ShowModFileExportTab(Level l)
+    {
+        if (l != _lastLevel || _thumbnailFile is null || _backgroundFiles.Count == 0 || _assetFiles.Count == 0)
+            FindUsedAssets(l);
+
+        ImGui.SeparatorText("Brawlhalla path");
+        if (ImGui.Button("Select Brawlhalla path"))
+        {
+            Task.Run(() =>
+            {
+                DialogResult result = Dialog.FolderPicker(prefs.BrawlhallaPath);
+                if (result.IsOk)
+                    prefs.BrawlhallaPath = result.Path;
+            });
+        }
+        ImGui.Text($"Path: {prefs.BrawlhallaPath}");
+
+        ImGui.SeparatorText("Info");
+        prefs.ModName = ImGuiExt.InputText("Mod name", prefs.ModName ?? "My mod", 64);
+        prefs.ModAuthor = ImGuiExt.InputText("Author", prefs.ModAuthor ?? "", 64);
+        prefs.ModVersionInfo = ImGuiExt.InputText("Mod version", prefs.ModVersionInfo ?? "1.0", 16);
+        prefs.ModDescription = ImGuiExt.InputTextMultiline("Description", prefs.ModDescription ?? "", new(0, ImGui.GetTextLineHeight() * 8), 1024);
+        prefs.GameVersionInfo = ImGuiExt.InputText("Game version", prefs.GameVersionInfo ?? "", 8);
+
+        ImGui.Separator();
+
+        ImGuiExt.HeaderWithWidget("Files to include", () =>
+        {
+            unsafe { ImGui.PushStyleColor(ImGuiCol.ChildBg, *ImGui.GetStyleColorVec4(ImGuiCol.FrameBg)); }
+            ImGui.BeginChild("files", new Vector2(0, ImGui.GetTextLineHeightWithSpacing() * 8), ImGuiChildFlags.ResizeY | ImGuiChildFlags.Border);
+
+            if (_thumbnailFile is not null)
+                _addThumbnailFile = ImGuiExt.Checkbox("Thumbnail: " + _thumbnailFile, _addThumbnailFile);
+
+            if (_backgroundFiles.Count != 0 && ImGui.TreeNode("Backgrounds"))
+            {
+                foreach ((string file, bool @checked) in _backgroundFiles)
+                    _backgroundFiles[file] = ImGuiExt.Checkbox(file, @checked);
+                ImGui.TreePop();
+            }
+
+            if (_assetFiles.Count != 0 && ImGui.TreeNode($"Assets ({l.Desc.AssetDir})"))
+            {
+                foreach ((string file, bool @checked) in _assetFiles)
+                    _assetFiles[file] = ImGuiExt.Checkbox(file, @checked);
+                ImGui.TreePop();
+            }
+            ImGui.PopStyleColor();
+            ImGui.EndChild();
+        },
+        () =>
+        {
+            if (ImGui.Button("Refresh"))
+                FindUsedAssets(l);
+        }, 60);
+
+        ImGui.Separator();
+        ModFileExportButton(l);
+    }
+
+    private void ModFileExportButton(Level l)
+    {
+        if (ImGuiExt.WithDisabledButton(!WmeUtils.IsValidBrawlPath(prefs.BrawlhallaPath), "Export"))
+        {
+            ModHeaderObject header = new()
+            {
+                ModName = prefs.ModName ?? "",
+                GameVersionInfo = prefs.GameVersionInfo ?? "",
+                ModVersionInfo = prefs.ModVersionInfo ?? "",
+                ModDescription = prefs.ModDescription ?? "",
+                CreatorInfo = prefs.ModAuthor ?? "",
+            };
+
+            Task.Run(() =>
+            {
+                try
+                {
+                    _exportError = null;
+                    _exportStatus = "select file";
+                    ModFile mod = CreateModFile(l, prefs.BrawlhallaPath!, header);
+                    DialogResult result = Dialog.FileSave(ModFile.EXTENSION, Path.GetDirectoryName(prefs.ModFilePath));  // TODO: decide on extension name
+                    if (result.IsOk)
+                    {
+                        _exportStatus = "exporting...";
+                        string path = WmeUtils.ForcePathExtension(result.Path, '.' + ModFile.EXTENSION);
+                        using FileStream stream = new(path, FileMode.Create, FileAccess.Write);
+                        mod.Save(stream);
+                    }
+                }
+                catch (Exception e)
+                {
+                    _exportError = e.Message;
+                }
+                finally
+                {
+                    _exportStatus = null;
+                }
+            });
+        }
+    }
+
+    private void ShowLevelDescExportTab(LevelDesc ld)
     {
         if (ld is null) return;
 
@@ -211,7 +327,7 @@ public class ExportWindow(PathPreferences prefs)
         }
     }
 
-    public void ShowLevelTypeExportTab(Level l)
+    private void ShowLevelTypeExportTab(Level l)
     {
         if (l.Type is null) return;
 
@@ -283,7 +399,7 @@ public class ExportWindow(PathPreferences prefs)
         }
     }
 
-    public void ShowPlaylistsExportTab(Level l)
+    private void ShowPlaylistsExportTab(Level l)
     {
         ImGui.Text($"{l.Desc.LevelName} is in {l.Playlists.Count} playlists");
         if (ImGui.TreeNode("Playlists"))
@@ -323,7 +439,7 @@ public class ExportWindow(PathPreferences prefs)
         }
     }
 
-    public void ExportToGameSwzFiles(Level l, bool backup)
+    private void ExportToGameSwzFiles(Level l, bool backup)
     {
         if (!WmeUtils.IsValidBrawlPath(prefs.BrawlhallaPath))
             throw new InvalidDataException("Selected brawlhalla path is invalid");
@@ -394,13 +510,35 @@ public class ExportWindow(PathPreferences prefs)
         return validBackupNumbers;
     }
 
+    private ModFile CreateModFile(Level l, string brawlDir, ModHeaderObject header)
+    {
+        ModFileBuilder builder = new(header);
+        builder.AddLevel(l);
+        if (_thumbnailFile is not null && _addThumbnailFile)
+            builder.AddFilePath(brawlDir, Path.Combine(brawlDir, "images", "thumbnails", _thumbnailFile));
+
+        foreach ((string bg, bool shouldAddFile) in _backgroundFiles)
+        {
+            if (shouldAddFile)
+                builder.AddFilePath(brawlDir, Path.Combine(brawlDir, "mapArt", "Backgrounds", bg));
+        }
+
+        foreach ((string a, bool shouldAddFile) in _assetFiles)
+        {
+            if (shouldAddFile)
+                builder.AddFilePath(brawlDir, Path.Combine(brawlDir, "mapArt", l.Desc.AssetDir, a));
+        }
+
+        return builder.CreateMod();
+    }
+
     private void RefreshBackupList(string brawlPath)
     {
         _backupNums = FindBackups(brawlPath);
         _backupDisplayNames = _backupNums.Select(n => $"Backup {n} - {File.GetLastWriteTime(Path.Combine(brawlPath, $"Dynamic_Backup{n}.swz"))}").ToArray();
     }
 
-    public static void UpdatePlaylists(LevelSetTypes levelSetTypes, Level l)
+    private static void UpdatePlaylists(LevelSetTypes levelSetTypes, Level l)
     {
         foreach (string plName in l.Playlists)
         {
@@ -418,4 +556,38 @@ public class ExportWindow(PathPreferences prefs)
             }
         }
     }
+
+    private void FindUsedAssets(Level l)
+    {
+        _thumbnailFile = null;
+        _backgroundFiles.Clear();
+        _assetFiles.Clear();
+
+        if (l.Type?.ThumbnailPNGFile is not null)
+            _thumbnailFile = l.Type.ThumbnailPNGFile;
+
+        foreach (Background bg in l.Desc.Backgrounds)
+        {
+            _backgroundFiles[NormalizePartialPath("Backgrounds", bg.AssetName)] = true;
+            if (bg.AnimatedAssetName is not null) _backgroundFiles[NormalizePartialPath("Backgrounds", bg.AnimatedAssetName)] = true;
+        }
+
+        foreach (AbstractAsset a in l.Desc.Assets)
+        {
+            foreach (string path in FindChildAssetNames(a))
+                _assetFiles[NormalizePartialPath(l.Desc.AssetDir, path)] = true;
+        }
+    }
+
+    // removes '../baseDir/' from file paths if they are inside baseDir to make sure they are truly unique
+    private static string NormalizePartialPath(string baseDir, string path) =>
+        Path.GetRelativePath(baseDir, Path.Combine(baseDir, path));
+
+    private static IEnumerable<string> FindChildAssetNames(AbstractAsset a) => a switch
+    {
+        AbstractAsset asset when asset.AssetName is not null => [asset.AssetName],
+        MovingPlatform mp => mp.Assets.SelectMany(FindChildAssetNames),
+        Platform p when p.AssetChildren is not null => p.AssetChildren.SelectMany(FindChildAssetNames),
+        _ => throw new Exception("Could not find associated assets. Unimplemented AbstractAsset type")
+    };
 }

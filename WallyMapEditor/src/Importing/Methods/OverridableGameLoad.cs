@@ -58,7 +58,7 @@ public class OverridableGameLoad : ILoadMethod
         if (TypesOverride is null) initSwzFiles = ["LevelTypes.xml"];
         else lt = WmeUtils.DeserializeFromPath<LevelTypes>(TypesOverride, bhstyle: true);
 
-        if (BonesOverride is null) initSwzFiles = [..initSwzFiles, "BoneTypes.xml"];
+        if (BonesOverride is null) initSwzFiles = [.. initSwzFiles, "BoneTypes.xml"];
         else bt = WmeUtils.DeserializeFromPath<BoneTypes>(BonesOverride, bhstyle: true);
 
         Dictionary<string, string> initFiles = ReadFilesFromSwz(initPath, initSwzFiles);
@@ -77,7 +77,7 @@ public class OverridableGameLoad : ILoadMethod
         if (SetTypesOverride is null) gameSwzFiles = ["LevelSetTypes.xml"];
         else lst = WmeUtils.DeserializeFromPath<LevelSetTypes>(SetTypesOverride, bhstyle: true);
 
-        if (PowersOverride is null) gameSwzFiles = [..gameSwzFiles, "powerTypes.csv"];
+        if (PowersOverride is null) gameSwzFiles = [.. gameSwzFiles, "powerTypes.csv"];
         else pt = WmeUtils.ParsePowerTypesFromPath(PowersOverride);
 
         Dictionary<string, string> gameFiles = ReadFilesFromSwz(initPath, gameSwzFiles);
@@ -93,7 +93,7 @@ public class OverridableGameLoad : ILoadMethod
         foreach (string content in WmeUtils.GetFilesInSwz(swzPath, DecryptionKey))
         {
             string swzName = SwzUtils.GetFileName(content);
-            if  (filesToSave.Contains(swzName))
+            if (filesToSave.Contains(swzName))
                 files.Add(swzName, content);
 
             if (files.Count == filesToSave.Length) break;

@@ -26,6 +26,13 @@ public class PathPreferences : IDeserializable, ISerializable
 
     public string? ConfigFolderPath { get; set; }
 
+    public string? ModFilePath { get; set; }
+    public string? ModName { get; set; }
+    public string? GameVersionInfo { get; set; }
+    public string? ModVersionInfo { get; set; }
+    public string? ModDescription { get; set; }
+    public string? ModAuthor { get; set; }
+
     public static string FilePath => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         APPDATA_DIR_NAME,
@@ -66,6 +73,12 @@ public class PathPreferences : IDeserializable, ISerializable
         PowerTypesPath = e.GetElementValue(nameof(PowerTypesPath));
         DecryptionKey = e.GetElementValue(nameof(DecryptionKey));
         ConfigFolderPath = e.GetElementValue(nameof(ConfigFolderPath));
+        ModFilePath = e.GetElementValue(nameof(ModFilePath));
+        ModName = e.GetElementValue(nameof(ModName));
+        GameVersionInfo = e.GetElementValue(nameof(GameVersionInfo));
+        ModVersionInfo = e.GetElementValue(nameof(ModVersionInfo));
+        ModDescription = e.GetElementValue(nameof(ModDescription));
+        ModAuthor = e.GetElementValue(nameof(ModAuthor));
     }
 
     public void Serialize(XElement e)
@@ -81,6 +94,12 @@ public class PathPreferences : IDeserializable, ISerializable
         e.AddIfNotNull(nameof(PowerTypesPath), PowerTypesPath);
         e.AddIfNotNull(nameof(DecryptionKey), DecryptionKey);
         e.AddIfNotNull(nameof(ConfigFolderPath), ConfigFolderPath);
+        e.AddIfNotNull(nameof(ModFilePath), ModFilePath);
+        e.AddIfNotNull(nameof(ModName), ModName);
+        e.AddIfNotNull(nameof(GameVersionInfo), GameVersionInfo);
+        e.AddIfNotNull(nameof(ModVersionInfo), ModVersionInfo);
+        e.AddIfNotNull(nameof(ModDescription), ModDescription);
+        e.AddIfNotNull(nameof(ModAuthor), ModAuthor);
     }
 
     public void SetBrawlhallaPath(string? path)

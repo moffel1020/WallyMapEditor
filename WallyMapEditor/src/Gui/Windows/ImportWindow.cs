@@ -2,10 +2,13 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Numerics;
+
+using BrawlhallaSwz;
+using WallyMapEditor.Mod;
 
 using ImGuiNET;
 using NativeFileDialogSharp;
-using BrawlhallaSwz;
 
 namespace WallyMapEditor;
 
@@ -19,6 +22,7 @@ public class ImportWindow(PathPreferences prefs)
     private string? _savedLstPath;
     private string? _savedBtPath;
     private string? _savedPtPath;
+    private string? _savedModPath;
     private string _keyInput = prefs.DecryptionKey ?? "";
 
     private bool _searchingDescNames = false;
@@ -29,6 +33,8 @@ public class ImportWindow(PathPreferences prefs)
     private string? _loadingError;
     private string? _loadingStatus;
 
+    private ModFileLoad? _modFileLoad;
+
     private bool _open;
     public bool Open { get => _open; set => _open = value; }
 
@@ -37,7 +43,20 @@ public class ImportWindow(PathPreferences prefs)
         ImGui.SetNextWindowSizeConstraints(new(500, 400), new(int.MaxValue));
         ImGui.Begin("Import", ref _open, ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoCollapse);
 
-        ShowImportMenu(loader);
+        ImGui.BeginTabBar("importTabBar", ImGuiTabBarFlags.None);
+        if (ImGui.BeginTabItem("Level"))
+        {
+            ShowImportMenu(loader);
+            ImGui.EndTabItem();
+        }
+
+        if (ImGui.BeginTabItem($"Mod file (.{ModFile.EXTENSION})"))
+        {
+            ShowModFileImportMenu(loader);
+            ImGui.EndTabItem();
+        }
+
+        ImGui.EndTabBar();
 
         if (_loadingStatus is not null)
         {
@@ -54,6 +73,105 @@ public class ImportWindow(PathPreferences prefs)
         }
 
         ImGui.End();
+    }
+
+    private void ShowModFileImportMenu(LevelLoader loader)
+    {
+        if (loader.BoneTypes is null)
+        {
+            ImGui.Text("Required files are missing.\nPress \"Load required files only\" in the level import tab first");
+            return;
+        }
+
+        ImGui.Text("Import from mod file. \nThis may add extra files like images to your brawlhalla directory.");
+
+        ImGui.Separator();
+        if (ImGui.Button("Select Brawlhalla Path"))
+        {
+            Task.Run(() =>
+            {
+                DialogResult result = Dialog.FolderPicker(prefs.BrawlhallaPath);
+                if (result.IsOk)
+                    prefs.BrawlhallaPath = result.Path;
+            });
+        }
+        ImGui.Text($"Path: {prefs.BrawlhallaPath}");
+        ImGui.Separator();
+
+        if (ImGuiExt.WithDisabledButton(!WmeUtils.IsValidBrawlPath(prefs.BrawlhallaPath), "Select mod file"))
+        {
+            Task.Run(() =>
+            {
+                DialogResult result = Dialog.FileOpen(ModFile.EXTENSION, Path.GetDirectoryName(prefs.ModFilePath));
+                if (result.IsOk)
+                {
+                    _savedModPath = result.Path;
+                    CreateModFileLoad(_savedModPath, prefs);
+                }
+            });
+        }
+        if (prefs.ModFilePath is not null)
+        {
+            ImGui.SameLine();
+            ImGui.Text("or");
+            ImGui.SameLine();
+            if (ImGui.Button("Use last path"))
+            {
+                _savedModPath = prefs.ModFilePath;
+                CreateModFileLoad(_savedModPath, prefs);
+            }
+            ImGui.SameLine();
+            ImGui.Text(prefs.ModFilePath);
+        }
+        ImGui.Text($"Path: {_savedModPath}");
+
+        if (_modFileLoad is not null && _modFileLoad.ModFile is not null)
+        {
+            ImGui.Separator();
+            if (ImGui.CollapsingHeader("Mod info##header"))
+            {
+                unsafe { ImGui.PushStyleColor(ImGuiCol.ChildBg, *ImGui.GetStyleColorVec4(ImGuiCol.FrameBg)); }
+                ImGui.BeginChild("##ModInfoWindow", new Vector2(0, ImGui.GetTextLineHeightWithSpacing() * 8), ImGuiChildFlags.ResizeY | ImGuiChildFlags.Border);
+                ModHeaderObject header = _modFileLoad.ModFile.Header;
+                ImGui.Text($"Name: {header.ModName}");
+                ImGui.Text($"Author: {header.CreatorInfo}");
+                ImGui.Text($"Mod Version: {header.ModVersionInfo}");
+                ImGui.Text($"Description:\n{header.ModDescription}");
+                ImGui.Text($"Game Version: {header.GameVersionInfo}");
+                ImGui.SeparatorText("Extra files");
+                string filesToWrite = string.Join("\n", _modFileLoad.ModFile.ExtraFiles.Select(e => e.FullPath));
+                ImGui.Text($"{filesToWrite}");
+                ImGui.EndChild();
+            }
+        }
+        ImGui.Separator();
+        if (ImGuiExt.WithDisabledButton(_modFileLoad is null, "Import"))
+            Task.Run(() =>
+            {
+                try
+                {
+                    _loadingError = null;
+                    _loadingStatus = "loading...";
+                    loader.LoadMap(_modFileLoad!);
+                }
+                catch (Exception e)
+                {
+                    _loadingError = e.Message;
+                }
+                finally
+                {
+                    _loadingStatus = null;
+                }
+            });
+    }
+
+    private void CreateModFileLoad(string path, PathPreferences prefs)
+    {
+        if (path != _modFileLoad?.FilePath)
+            _modFileLoad = new ModFileLoad(path, prefs.BrawlhallaPath!);
+
+        prefs.ModFilePath = path;
+        _modFileLoad?.CacheModFile();
     }
 
     private static void ShowFileImportSection(
@@ -269,7 +387,7 @@ public class ImportWindow(PathPreferences prefs)
 
     private void LoadButton(LevelLoader loader)
     {
-        if (ImGuiExt.WithDisabledButton(!uint.TryParse(_keyInput, out uint decryptionKey) 
+        if (ImGuiExt.WithDisabledButton(!uint.TryParse(_keyInput, out uint decryptionKey)
             && !WmeUtils.IsValidBrawlPath(prefs.BrawlhallaPath) || (_savedLdPath is null && _swzDescName is null), "Load map"))
         {
             Task.Run(() =>
@@ -280,7 +398,7 @@ public class ImportWindow(PathPreferences prefs)
                     (
                         brawlPath: prefs.BrawlhallaPath!,
                         swzLevelName: _savedLdPath is null ? _swzDescName : null,
-                        key: decryptionKey, 
+                        key: decryptionKey,
                         descPath: _savedLdPath,
                         typesPath: _savedLtPath,
                         setTypesPath: _savedLstPath,
