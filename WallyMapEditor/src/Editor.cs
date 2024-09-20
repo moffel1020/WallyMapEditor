@@ -243,7 +243,6 @@ public class Editor
             ImGui.Separator();
             if (ImGui.MenuItem("Import", "Ctrl+Shift+I")) ImportDialog = new(PathPrefs) { Open = true };
             if (ImGui.MenuItem("Export", "Ctrl+Shift+E")) ExportDialog = new(PathPrefs) { Open = true };
-            if (ImGui.MenuItem("Manage swz backups")) BackupsWindow = new(PathPrefs) { Open = true };
             ImGui.Separator();
             if (ImGuiExt.WithDisabledMenuItem(!EnableReloadMapButton, "Reload map", "Ctrl+Shift+R")) ReloadMap();
             ImGui.Separator();
@@ -272,6 +271,7 @@ public class Editor
             if (ImGui.MenuItem("History", null, HistoryPanel.Open)) HistoryPanel.Open = !HistoryPanel.Open;
             if (ImGui.MenuItem("Clear Cache")) Canvas?.ClearTextureCache();
             if (ImGui.MenuItem("Find swz key")) KeyFinderPanel.Open = !KeyFinderPanel.Open;
+            if (ImGui.MenuItem("Manage swz backups")) BackupsWindow = new(PathPrefs) { Open = true };
             ImGui.EndMenu();
         }
 
