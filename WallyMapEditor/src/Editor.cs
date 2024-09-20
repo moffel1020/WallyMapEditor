@@ -40,6 +40,7 @@ public class Editor
     public PropertiesWindow PropertiesWindow { get; set; } = new();
     public ExportWindow ExportDialog { get; set; }
     public ImportWindow ImportDialog { get; set; }
+    public BackupsWindow BackupsWindow { get; set; }
 
     public OverlayManager OverlayManager { get; set; } = new();
     public SelectionContext Selection { get; set; } = new();
@@ -54,9 +55,16 @@ public class Editor
 
     private bool _showMainMenuBar = true;
 
-    public Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault) =>
-        (PathPrefs, ConfigDefault, CommandHistory, ExportDialog, ImportDialog, LevelLoader) =
-            (pathPrefs, configDefault, new(Selection), new(pathPrefs), new(pathPrefs), new(this));
+    public Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault)
+    {
+        PathPrefs = pathPrefs;
+        ConfigDefault = configDefault;
+        CommandHistory = new(Selection);
+        ExportDialog = new(pathPrefs);
+        ImportDialog = new(pathPrefs);
+        BackupsWindow = new(pathPrefs);
+        LevelLoader = new(this);
+    }
 
     private OverlayData OverlayData => new()
     {
@@ -192,6 +200,8 @@ public class Editor
             ExportDialog.Show(Level);
         if (ImportDialog.Open)
             ImportDialog.Show(LevelLoader);
+        if (BackupsWindow.Open)
+            BackupsWindow.Show();
 
         if (ViewportWindow.Hovered && (Rl.IsKeyPressed(KeyboardKey.Space) || Rl.IsMouseButtonPressed(MouseButton.Middle)))
         {
@@ -233,6 +243,7 @@ public class Editor
             ImGui.Separator();
             if (ImGui.MenuItem("Import", "Ctrl+Shift+I")) ImportDialog = new(PathPrefs) { Open = true };
             if (ImGui.MenuItem("Export", "Ctrl+Shift+E")) ExportDialog = new(PathPrefs) { Open = true };
+            if (ImGui.MenuItem("Manage swz backups")) BackupsWindow = new(PathPrefs) { Open = true };
             ImGui.Separator();
             if (ImGuiExt.WithDisabledMenuItem(!EnableReloadMapButton, "Reload map", "Ctrl+Shift+R")) ReloadMap();
             ImGui.Separator();
