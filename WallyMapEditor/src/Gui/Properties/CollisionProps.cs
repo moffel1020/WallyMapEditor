@@ -256,7 +256,7 @@ public partial class PropertiesWindow
 
     private static AbstractCollision[] GetColParentArray(AbstractCollision c, LevelDesc desc) =>
         c.Parent is null ? desc.Collisions : c.Parent.Children;
-    
+
     private static Action<AbstractCollision[]> SetColParentArray(AbstractCollision c, LevelDesc desc) =>
         c.Parent is null
             ? val => desc.Collisions = val

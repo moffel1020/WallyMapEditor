@@ -40,7 +40,6 @@ public class Editor
     public PropertiesWindow PropertiesWindow { get; set; } = new();
     public ExportWindow ExportDialog { get; set; }
     public ImportWindow ImportDialog { get; set; }
-    public BackupsWindow BackupsWindow { get; set; }
 
     public OverlayManager OverlayManager { get; set; } = new();
     public SelectionContext Selection { get; set; } = new();
@@ -62,7 +61,6 @@ public class Editor
         CommandHistory = new(Selection);
         ExportDialog = new(pathPrefs);
         ImportDialog = new(pathPrefs);
-        BackupsWindow = new(pathPrefs);
         LevelLoader = new(this);
     }
 
@@ -195,13 +193,13 @@ public class Editor
             PlaylistEditPanel.Show(Level, PathPrefs);
         if (KeyFinderPanel.Open)
             KeyFinderPanel.Show(PathPrefs);
+        if (BackupsPanel.Open)
+            BackupsPanel.Show(PathPrefs);
 
         if (ExportDialog.Open)
             ExportDialog.Show(Level);
         if (ImportDialog.Open)
             ImportDialog.Show(LevelLoader);
-        if (BackupsWindow.Open)
-            BackupsWindow.Show();
 
         if (ViewportWindow.Hovered && (Rl.IsKeyPressed(KeyboardKey.Space) || Rl.IsMouseButtonPressed(MouseButton.Middle)))
         {
@@ -271,7 +269,7 @@ public class Editor
             if (ImGui.MenuItem("History", null, HistoryPanel.Open)) HistoryPanel.Open = !HistoryPanel.Open;
             if (ImGui.MenuItem("Clear Cache")) Canvas?.ClearTextureCache();
             if (ImGui.MenuItem("Find swz key")) KeyFinderPanel.Open = !KeyFinderPanel.Open;
-            if (ImGui.MenuItem("Manage swz backups")) BackupsWindow = new(PathPrefs) { Open = true };
+            if (ImGui.MenuItem("Manage swz backups")) BackupsPanel.Open = !BackupsPanel.Open;
             ImGui.EndMenu();
         }
 

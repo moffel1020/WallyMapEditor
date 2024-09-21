@@ -5,28 +5,28 @@ using ImGuiNET;
 
 namespace WallyMapEditor;
 
-public class BackupsWindow(PathPreferences prefs)
+public static class BackupsPanel
 {
-    private bool _open;
-    public bool Open { get => _open; set => _open = value; }
+    private static bool _open;
+    public static bool Open { get => _open; set => _open = value; }
 
-    private int[] _backupNums = [];
-    private string[] _backupDisplayNames = [];
-    private int _selectedBackupIndex;
-    private bool _refreshListOnOpen = true;
+    private static int[] _backupNums = [];
+    private static string[] _backupDisplayNames = [];
+    private static int _selectedBackupIndex;
+    private static bool _refreshListOnOpen = true;
 
-    private string? _backupStatus;
-    private bool _doingBackup = false;
+    private static string? _backupStatus;
+    private static bool _doingBackup = false;
 
-    public void Show()
+    public static void Show(PathPreferences prefs)
     {
         ImGui.SetNextWindowSizeConstraints(new(425, 425), new(int.MaxValue));
         ImGui.Begin("Backups", ref _open, ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoCollapse);
-        ShowBackupMenu();
+        ShowBackupMenu(prefs);
         ImGui.End();
     }
 
-    public void ShowBackupMenu()
+    public static void ShowBackupMenu(PathPreferences prefs)
     {
         if (prefs.BrawlhallaPath is null)
         {
@@ -42,8 +42,8 @@ public class BackupsWindow(PathPreferences prefs)
 
         string[] backedUpFiles = [
             Path.Combine(prefs.BrawlhallaPath, "Dynamic.swz"),
-                Path.Combine(prefs.BrawlhallaPath, "Init.swz"),
-                Path.Combine(prefs.BrawlhallaPath, "Game.swz")
+            Path.Combine(prefs.BrawlhallaPath, "Init.swz"),
+            Path.Combine(prefs.BrawlhallaPath, "Game.swz")
         ];
 
         ImGui.ListBox("Backups list", ref _selectedBackupIndex, _backupDisplayNames, _backupDisplayNames.Length);
@@ -122,7 +122,7 @@ public class BackupsWindow(PathPreferences prefs)
         return validBackupNumbers;
     }
 
-    public void RefreshBackupList(string brawlPath)
+    public static void RefreshBackupList(string brawlPath)
     {
         _backupNums = FindBackups(brawlPath);
         _backupDisplayNames = _backupNums.Select(n => $"Backup {n} - {File.GetLastWriteTime(Path.Combine(brawlPath, $"Dynamic_Backup{n}.swz"))}").ToArray();

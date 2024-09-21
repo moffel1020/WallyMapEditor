@@ -105,7 +105,7 @@ partial class PropertiesWindow
     };
 
     private static AbstractAsset[] GetAbstractAssetParentArray(AbstractAsset a, LevelDesc desc) =>
-        a.Parent is null 
+        a.Parent is null
             ? desc.Assets
             : a.Parent switch
             {
@@ -115,7 +115,7 @@ partial class PropertiesWindow
             };
 
     private static Action<AbstractAsset[]> SetAbstractAssetParentArray(AbstractAsset a, LevelDesc desc) =>
-        a.Parent is null 
+        a.Parent is null
             ? val => desc.Assets = val
             : a.Parent switch
             {

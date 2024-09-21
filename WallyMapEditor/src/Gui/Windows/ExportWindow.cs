@@ -30,8 +30,6 @@ public class ExportWindow(PathPreferences prefs)
 
     private const int PREVIEW_SIZE = 25;
 
-    private readonly BackupsWindow _integratedBackupsWindow = new(prefs);
-
     private readonly Dictionary<string, bool> _assetFiles = [];
     private readonly Dictionary<string, bool> _backgroundFiles = [];
     private string? _thumbnailFile;
@@ -149,7 +147,7 @@ public class ExportWindow(PathPreferences prefs)
 
         if (prefs.BrawlhallaPath is not null && ImGui.CollapsingHeader("Previous backups"))
         {
-            _integratedBackupsWindow.ShowBackupMenu();
+            BackupsPanel.ShowBackupMenu(prefs);
         }
     }
 
@@ -443,7 +441,7 @@ public class ExportWindow(PathPreferences prefs)
         WmeUtils.SerializeSwzFilesToPath(initPath, initFiles.Values, key);
         WmeUtils.SerializeSwzFilesToPath(gamePath, gameFiles.Values, key);
 
-        _integratedBackupsWindow.RefreshBackupList(prefs.BrawlhallaPath!);
+        BackupsPanel.RefreshBackupList(prefs.BrawlhallaPath!);
     }
 
     private ModFile CreateModFile(Level l, string brawlDir, ModHeaderObject header)
