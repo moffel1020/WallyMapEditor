@@ -54,9 +54,15 @@ public class Editor
 
     private bool _showMainMenuBar = true;
 
-    public Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault) =>
-        (PathPrefs, ConfigDefault, CommandHistory, ExportDialog, ImportDialog, LevelLoader) =
-            (pathPrefs, configDefault, new(Selection), new(pathPrefs), new(pathPrefs), new(this));
+    public Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault)
+    {
+        PathPrefs = pathPrefs;
+        ConfigDefault = configDefault;
+        CommandHistory = new(Selection);
+        ExportDialog = new(pathPrefs);
+        ImportDialog = new(pathPrefs);
+        LevelLoader = new(this);
+    }
 
     private OverlayData OverlayData => new()
     {
@@ -187,6 +193,8 @@ public class Editor
             PlaylistEditPanel.Show(Level, PathPrefs);
         if (KeyFinderPanel.Open)
             KeyFinderPanel.Show(PathPrefs);
+        if (BackupsPanel.Open)
+            BackupsPanel.Show(PathPrefs);
 
         if (ExportDialog.Open)
             ExportDialog.Show(Level);
@@ -261,6 +269,7 @@ public class Editor
             if (ImGui.MenuItem("History", null, HistoryPanel.Open)) HistoryPanel.Open = !HistoryPanel.Open;
             if (ImGui.MenuItem("Clear Cache")) Canvas?.ClearTextureCache();
             if (ImGui.MenuItem("Find swz key")) KeyFinderPanel.Open = !KeyFinderPanel.Open;
+            if (ImGui.MenuItem("Manage swz backups")) BackupsPanel.Open = !BackupsPanel.Open;
             ImGui.EndMenu();
         }
 

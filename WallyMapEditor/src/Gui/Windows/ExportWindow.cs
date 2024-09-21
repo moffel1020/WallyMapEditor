@@ -30,11 +30,6 @@ public class ExportWindow(PathPreferences prefs)
 
     private const int PREVIEW_SIZE = 25;
 
-    private int[] _backupNums = [];
-    private string[] _backupDisplayNames = [];
-    private int _selectedBackupIndex;
-    private bool _refreshListOnOpen = true;
-
     private readonly Dictionary<string, bool> _assetFiles = [];
     private readonly Dictionary<string, bool> _backgroundFiles = [];
     private string? _thumbnailFile;
@@ -152,49 +147,7 @@ public class ExportWindow(PathPreferences prefs)
 
         if (prefs.BrawlhallaPath is not null && ImGui.CollapsingHeader("Previous backups"))
         {
-            if (_refreshListOnOpen)
-            {
-                RefreshBackupList(prefs.BrawlhallaPath);
-                _refreshListOnOpen = false;
-            }
-
-            string[] backedUpFiles = [
-                Path.Combine(prefs.BrawlhallaPath, "Dynamic.swz"),
-                Path.Combine(prefs.BrawlhallaPath, "Init.swz"),
-                Path.Combine(prefs.BrawlhallaPath, "Game.swz")
-            ];
-
-            ImGui.ListBox("Backups", ref _selectedBackupIndex, _backupDisplayNames, _backupDisplayNames.Length);
-            if (ImGuiExt.WithDisabledButton(_selectedBackupIndex < 0 || _selectedBackupIndex >= _backupDisplayNames.Length, "Restore"))
-            {
-                int backupNum = _backupNums[_selectedBackupIndex];
-
-                foreach (string path in backedUpFiles)
-                {
-                    if (File.Exists(path)) File.Delete(path);
-                    File.Move(WmeUtils.CreateBackupPath(path, backupNum), path);
-                }
-
-                RefreshBackupList(prefs.BrawlhallaPath);
-            }
-
-            ImGui.SameLine();
-            if (ImGui.Button("Refresh"))
-                RefreshBackupList(prefs.BrawlhallaPath);
-
-            ImGui.SameLine();
-            if (ImGuiExt.WithDisabledButton(_selectedBackupIndex < 0 || _selectedBackupIndex >= _backupDisplayNames.Length, "Delete"))
-            {
-                int backupNum = _backupNums[_selectedBackupIndex];
-                foreach (string path in backedUpFiles)
-                {
-                    string backupPath = WmeUtils.CreateBackupPath(path, backupNum);
-                    if (File.Exists(backupPath)) File.Delete(backupPath);
-                }
-
-                RefreshBackupList(prefs.BrawlhallaPath!);
-            }
-
+            BackupsPanel.ShowBackupMenu(prefs);
         }
     }
 
@@ -488,26 +441,7 @@ public class ExportWindow(PathPreferences prefs)
         WmeUtils.SerializeSwzFilesToPath(initPath, initFiles.Values, key);
         WmeUtils.SerializeSwzFilesToPath(gamePath, gameFiles.Values, key);
 
-        RefreshBackupList(prefs.BrawlhallaPath!);
-    }
-
-    private static int[] FindBackups(string dir)
-    {
-        string[] requiredFiles(int num) => [
-            WmeUtils.CreateBackupPath(Path.Combine(dir, "Dynamic.swz"), num),
-            WmeUtils.CreateBackupPath(Path.Combine(dir, "Init.swz"), num),
-            WmeUtils.CreateBackupPath(Path.Combine(dir, "Game.swz"), num),
-        ];
-
-        int[] validBackupNumbers = Directory.EnumerateFiles(dir)
-            .Where(p => p.Contains("_Backup"))
-            .Select(p => Path.GetFileNameWithoutExtension(p).Split("_Backup").Last())
-            .MapFilter(n => int.TryParse(n, out int i) ? i : Maybe<int>.None)
-            .Distinct()
-            .Where(num => requiredFiles(num).All(File.Exists))
-            .ToArray();
-
-        return validBackupNumbers;
+        BackupsPanel.RefreshBackupList(prefs.BrawlhallaPath!);
     }
 
     private ModFile CreateModFile(Level l, string brawlDir, ModHeaderObject header)
@@ -530,12 +464,6 @@ public class ExportWindow(PathPreferences prefs)
         }
 
         return builder.CreateMod();
-    }
-
-    private void RefreshBackupList(string brawlPath)
-    {
-        _backupNums = FindBackups(brawlPath);
-        _backupDisplayNames = _backupNums.Select(n => $"Backup {n} - {File.GetLastWriteTime(Path.Combine(brawlPath, $"Dynamic_Backup{n}.swz"))}").ToArray();
     }
 
     private static void UpdatePlaylists(LevelSetTypes levelSetTypes, Level l)
