@@ -5,28 +5,21 @@ using ImGuiNET;
 
 namespace WallyMapEditor;
 
-public static class BackupsPanel
+public class BackupsList
 {
-    private static bool _open;
-    public static bool Open { get => _open; set => _open = value; }
-
-    private static int[] _backupNums = [];
-    private static string[] _backupDisplayNames = [];
-    private static int _selectedBackupIndex;
-    private static bool _refreshListOnOpen = true;
-
-    private static string? _backupStatus;
-    private static bool _doingBackup = false;
-
-    public static void Show(PathPreferences prefs)
+    // state that is unique to each instance
+    public sealed class ExternalState
     {
-        ImGui.SetNextWindowSizeConstraints(new(425, 425), new(int.MaxValue));
-        ImGui.Begin("Backups", ref _open, ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoCollapse);
-        ShowBackupMenu(prefs);
-        ImGui.End();
+        public int SelectedBackupIndex { get; set; }
+        public bool RefreshListOnOpen { get; set; } = true;
+        public string? BackupStatus { get; set; }
     }
 
-    public static void ShowBackupMenu(PathPreferences prefs)
+    private int[] _backupNums = [];
+    private string[] _backupDisplayNames = [];
+    private bool _doingBackup = false;
+
+    public void ShowBackupMenu(PathPreferences prefs, ExternalState state)
     {
         if (prefs.BrawlhallaPath is null)
         {
@@ -34,10 +27,10 @@ public static class BackupsPanel
             return;
         }
 
-        if (_refreshListOnOpen)
+        if (state.RefreshListOnOpen)
         {
             RefreshBackupList(prefs.BrawlhallaPath);
-            _refreshListOnOpen = false;
+            state.RefreshListOnOpen = false;
         }
 
         string[] backedUpFiles = [
@@ -46,11 +39,13 @@ public static class BackupsPanel
             Path.Combine(prefs.BrawlhallaPath, "Game.swz")
         ];
 
-        ImGui.ListBox("Backups list", ref _selectedBackupIndex, _backupDisplayNames, _backupDisplayNames.Length);
+        int selectedBackupIndex = state.SelectedBackupIndex;
+        ImGui.ListBox("Backups list", ref selectedBackupIndex, _backupDisplayNames, _backupDisplayNames.Length);
+        state.SelectedBackupIndex = selectedBackupIndex;
 
-        if (ImGuiExt.WithDisabledButton(_selectedBackupIndex < 0 || _selectedBackupIndex >= _backupDisplayNames.Length, "Restore"))
+        if (ImGuiExt.WithDisabledButton(state.SelectedBackupIndex < 0 || state.SelectedBackupIndex >= _backupDisplayNames.Length, "Restore"))
         {
-            int backupNum = _backupNums[_selectedBackupIndex];
+            int backupNum = _backupNums[state.SelectedBackupIndex];
 
             foreach (string path in backedUpFiles)
             {
@@ -66,9 +61,9 @@ public static class BackupsPanel
             RefreshBackupList(prefs.BrawlhallaPath);
 
         ImGui.SameLine();
-        if (ImGuiExt.WithDisabledButton(_selectedBackupIndex < 0 || _selectedBackupIndex >= _backupDisplayNames.Length, "Delete"))
+        if (ImGuiExt.WithDisabledButton(state.SelectedBackupIndex < 0 || state.SelectedBackupIndex >= _backupDisplayNames.Length, "Delete"))
         {
-            int backupNum = _backupNums[_selectedBackupIndex];
+            int backupNum = _backupNums[state.SelectedBackupIndex];
             foreach (string path in backedUpFiles)
             {
                 string backupPath = WmeUtils.CreateBackupPath(path, backupNum);
@@ -81,25 +76,25 @@ public static class BackupsPanel
         ImGui.SameLine();
         if (ImGuiExt.WithDisabledButton(_doingBackup, "Create backup"))
         {
+            state.BackupStatus = "creating backup...";
+            _doingBackup = true;
             string dynamicPath = Path.Combine(prefs.BrawlhallaPath, "Dynamic.swz");
             string initPath = Path.Combine(prefs.BrawlhallaPath, "Init.swz");
             string gamePath = Path.Combine(prefs.BrawlhallaPath, "Game.swz");
-            _backupStatus = "creating backup...";
-            _doingBackup = true;
             Task.Run(() =>
             {
                 WmeUtils.CreateBackupOfFile(dynamicPath);
                 WmeUtils.CreateBackupOfFile(initPath);
                 WmeUtils.CreateBackupOfFile(gamePath);
-                _backupStatus = null;
-                _doingBackup = false;
                 RefreshBackupList(prefs.BrawlhallaPath);
+                _doingBackup = false;
+                state.BackupStatus = null;
             });
         }
 
-        if (_backupStatus is not null)
+        if (state.BackupStatus is not null)
         {
-            ImGui.Text(_backupStatus);
+            ImGui.Text(state.BackupStatus);
         }
     }
 
@@ -122,7 +117,7 @@ public static class BackupsPanel
         return validBackupNumbers;
     }
 
-    public static void RefreshBackupList(string brawlPath)
+    public void RefreshBackupList(string brawlPath)
     {
         _backupNums = FindBackups(brawlPath);
         _backupDisplayNames = _backupNums.Select(n => $"Backup {n} - {File.GetLastWriteTime(Path.Combine(brawlPath, $"Dynamic_Backup{n}.swz"))}").ToArray();

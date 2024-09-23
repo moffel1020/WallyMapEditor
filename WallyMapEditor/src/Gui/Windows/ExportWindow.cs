@@ -15,7 +15,7 @@ using NativeFileDialogSharp;
 
 namespace WallyMapEditor;
 
-public class ExportWindow(PathPreferences prefs)
+public class ExportWindow(PathPreferences prefs, BackupsList backups)
 {
     private bool _open;
     public bool Open { get => _open; set => _open = value; }
@@ -35,6 +35,8 @@ public class ExportWindow(PathPreferences prefs)
     private string? _thumbnailFile;
     private bool _addThumbnailFile = true;
     private Level? _lastLevel;
+
+    private readonly BackupsList.ExternalState _state = new();
 
     public void Show(Level? level)
     {
@@ -147,7 +149,7 @@ public class ExportWindow(PathPreferences prefs)
 
         if (prefs.BrawlhallaPath is not null && ImGui.CollapsingHeader("Previous backups"))
         {
-            BackupsPanel.ShowBackupMenu(prefs);
+            backups.ShowBackupMenu(prefs, _state);
         }
     }
 
@@ -441,7 +443,7 @@ public class ExportWindow(PathPreferences prefs)
         WmeUtils.SerializeSwzFilesToPath(initPath, initFiles.Values, key);
         WmeUtils.SerializeSwzFilesToPath(gamePath, gameFiles.Values, key);
 
-        BackupsPanel.RefreshBackupList(prefs.BrawlhallaPath!);
+        backups.RefreshBackupList(prefs.BrawlhallaPath!);
     }
 
     private ModFile CreateModFile(Level l, string brawlDir, ModHeaderObject header)
