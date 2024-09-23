@@ -40,6 +40,7 @@ public class Editor
     public PropertiesWindow PropertiesWindow { get; set; } = new();
     public ExportWindow ExportDialog { get; set; }
     public ImportWindow ImportDialog { get; set; }
+    public BackupsWindow BackupsDialog { get; set; }
 
     public OverlayManager OverlayManager { get; set; } = new();
     public SelectionContext Selection { get; set; } = new();
@@ -50,6 +51,8 @@ public class Editor
     private readonly RenderState _state = new();
     private RenderContext _context = new();
 
+    private readonly BackupsList _backupsList = new();
+
     public MousePickingFramebuffer PickingFramebuffer { get; set; } = new();
 
     private bool _showMainMenuBar = true;
@@ -59,8 +62,9 @@ public class Editor
         PathPrefs = pathPrefs;
         ConfigDefault = configDefault;
         CommandHistory = new(Selection);
-        ExportDialog = new(pathPrefs);
+        ExportDialog = new(pathPrefs, _backupsList);
         ImportDialog = new(pathPrefs);
+        BackupsDialog = new(pathPrefs, _backupsList);
         LevelLoader = new(this);
     }
 
@@ -193,13 +197,13 @@ public class Editor
             PlaylistEditPanel.Show(Level, PathPrefs);
         if (KeyFinderPanel.Open)
             KeyFinderPanel.Show(PathPrefs);
-        if (BackupsPanel.Open)
-            BackupsPanel.Show(PathPrefs);
 
         if (ExportDialog.Open)
             ExportDialog.Show(Level);
         if (ImportDialog.Open)
             ImportDialog.Show(LevelLoader);
+        if (BackupsDialog.Open)
+            BackupsDialog.Show();
 
         if (ViewportWindow.Hovered && (Rl.IsKeyPressed(KeyboardKey.Space) || Rl.IsMouseButtonPressed(MouseButton.Middle)))
         {
@@ -240,7 +244,7 @@ public class Editor
             if (ImGuiExt.WithDisabledMenuItem(!EnableSaveButton, "Save As...", "Ctrl+Shift+S")) SaveLevelFileToPath();
             ImGui.Separator();
             if (ImGui.MenuItem("Import", "Ctrl+Shift+I")) ImportDialog = new(PathPrefs) { Open = true };
-            if (ImGui.MenuItem("Export", "Ctrl+Shift+E")) ExportDialog = new(PathPrefs) { Open = true };
+            if (ImGui.MenuItem("Export", "Ctrl+Shift+E")) ExportDialog = new(PathPrefs, _backupsList) { Open = true };
             ImGui.Separator();
             if (ImGuiExt.WithDisabledMenuItem(!EnableReloadMapButton, "Reload map", "Ctrl+Shift+R")) ReloadMap();
             ImGui.Separator();
@@ -268,8 +272,8 @@ public class Editor
             if (ImGui.MenuItem("Center Camera", "R")) ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
             if (ImGui.MenuItem("History", null, HistoryPanel.Open)) HistoryPanel.Open = !HistoryPanel.Open;
             if (ImGui.MenuItem("Clear Cache")) Canvas?.ClearTextureCache();
-            if (ImGui.MenuItem("Find swz key")) KeyFinderPanel.Open = !KeyFinderPanel.Open;
-            if (ImGui.MenuItem("Manage swz backups")) BackupsPanel.Open = !BackupsPanel.Open;
+            if (ImGui.MenuItem("Find swz key", null, KeyFinderPanel.Open)) KeyFinderPanel.Open = !KeyFinderPanel.Open;
+            if (ImGui.MenuItem("Manage swz backups")) BackupsDialog.Open = !BackupsDialog.Open;
             ImGui.EndMenu();
         }
 
@@ -324,7 +328,7 @@ public class Editor
             if (Rl.IsKeyDown(KeyboardKey.LeftShift) || Rl.IsKeyDown(KeyboardKey.RightShift))
             {
                 if (Rl.IsKeyPressed(KeyboardKey.I)) ImportDialog = new(PathPrefs) { Open = true };
-                if (Rl.IsKeyPressed(KeyboardKey.E)) ExportDialog = new(PathPrefs) { Open = true };
+                if (Rl.IsKeyPressed(KeyboardKey.E)) ExportDialog = new(PathPrefs, _backupsList) { Open = true };
                 if (EnableSaveButton && Rl.IsKeyPressed(KeyboardKey.S)) SaveLevelFileToPath();
                 if (EnableCloseMapButton && Rl.IsKeyPressed(KeyboardKey.W)) CloseCurrentLevel();
                 if (EnableReloadMapButton && Rl.IsKeyPressed(KeyboardKey.R)) ReloadMap();
