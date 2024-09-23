@@ -273,7 +273,7 @@ public class Editor
             if (ImGui.MenuItem("History", null, HistoryPanel.Open)) HistoryPanel.Open = !HistoryPanel.Open;
             if (ImGui.MenuItem("Clear Cache")) Canvas?.ClearTextureCache();
             if (ImGui.MenuItem("Find swz key", null, KeyFinderPanel.Open)) KeyFinderPanel.Open = !KeyFinderPanel.Open;
-            if (ImGui.MenuItem("Manage swz backups")) BackupsDialog.Open = !BackupsDialog.Open;
+            if (ImGui.MenuItem("Manage swz backups", null, BackupsDialog.Open)) BackupsDialog.Open = !BackupsDialog.Open;
             ImGui.EndMenu();
         }
 
