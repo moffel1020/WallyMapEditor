@@ -7,6 +7,7 @@ namespace WallyMapEditor;
 public abstract class UploadCache<K, I, V> where K : notnull
 {
     public Dictionary<K, V> Cache { get; } = [];
+    private readonly Queue<V> _deleteQueue = [];
     private readonly Queue<(K, I)> _queue = [];
     private readonly HashSet<K> _queueSet = [];
 
@@ -38,6 +39,7 @@ public abstract class UploadCache<K, I, V> where K : notnull
         });
     }
 
+    // ONLY CALL FROM MAIN THREAD!
     public void Upload(int amount)
     {
         lock (_queue)
@@ -55,22 +57,29 @@ public abstract class UploadCache<K, I, V> where K : notnull
                 UnloadIntermediate(i);
             }
         }
+
+        Unload();
+    }
+
+    private void Unload()
+    {
+        lock (_deleteQueue)
+        {
+            while (_deleteQueue.Count > 0)
+            {
+                V v = _deleteQueue.Dequeue();
+                UnloadValue(v);
+            }
+        }
     }
 
     public void Clear()
     {
-        Queue<V> deleteQueue = [];
-        // move the to-be-unloaded items into a queue to prevent main thread from reading unloaded items
-        lock (Cache)
+        lock (_deleteQueue)
         {
             foreach ((_, V v) in Cache)
-                deleteQueue.Enqueue(v);
+                _deleteQueue.Enqueue(v);
             Cache.Clear();
-        }
-        while (deleteQueue.Count > 0)
-        {
-            V v = deleteQueue.Dequeue();
-            UnloadValue(v);
         }
 
         _queueSet.Clear();
