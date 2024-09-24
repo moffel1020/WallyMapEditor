@@ -419,7 +419,8 @@ public class Editor
                 }
                 catch (Exception e)
                 {
-                    Rl.TraceLog(TraceLogLevel.Error, e.Message);
+                    Rl.TraceLog(TraceLogLevel.Error, $"Opening level file failed with error: {e.Message}");
+                    Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
                 }
             }
         });
@@ -474,7 +475,8 @@ public class Editor
             }
             catch (Exception e)
             {
-                Rl.TraceLog(TraceLogLevel.Error, e.Message);
+                Rl.TraceLog(TraceLogLevel.Error, $"Reloading map failed with error: {e.Message}");
+                Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
             }
         });
     }
