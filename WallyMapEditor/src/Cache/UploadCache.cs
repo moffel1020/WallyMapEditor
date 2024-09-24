@@ -59,9 +59,19 @@ public abstract class UploadCache<K, I, V> where K : notnull
 
     public void Clear()
     {
-        foreach ((_, V v) in Cache)
+        Queue<V> deleteQueue = [];
+        // move the to-be-unloaded items into a queue to prevent main thread from reading unloaded items
+        lock (Cache)
+        {
+            foreach ((_, V v) in Cache)
+                deleteQueue.Enqueue(v);
+            Cache.Clear();
+        }
+        while (deleteQueue.Count > 0)
+        {
+            V v = deleteQueue.Dequeue();
             UnloadValue(v);
-        Cache.Clear();
+        }
 
         _queueSet.Clear();
         lock (_queue)
