@@ -13,7 +13,7 @@ public static partial class WmeUtils
     public static RlImage LoadRlImage(string path)
     {
         RlImage img;
-        if (path.EndsWith(".jpg"))
+        if (Path.GetExtension(path) == ".jpg")
         {
             using Image<Rgba32> image = Image.Load<Rgba32>(path);
             img = ImgSharpImageToRlImage(image);
