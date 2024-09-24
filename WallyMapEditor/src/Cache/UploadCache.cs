@@ -42,6 +42,8 @@ public abstract class UploadCache<K, I, V> where K : notnull
     // ONLY CALL FROM MAIN THREAD!
     public void Upload(int amount)
     {
+        Unload();
+
         lock (_queue)
         {
             amount = Math.Clamp(amount, 0, _queue.Count);
@@ -57,8 +59,6 @@ public abstract class UploadCache<K, I, V> where K : notnull
                 UnloadIntermediate(i);
             }
         }
-
-        Unload();
     }
 
     private void Unload()
