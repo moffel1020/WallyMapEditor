@@ -109,11 +109,7 @@ public class Editor
 
     private void Setup()
     {
-#if DEBUG
-        Rl.SetTraceLogLevel(TraceLogLevel.All);
-#else
-        Rl.SetTraceLogLevel(TraceLogLevel.Warning);
-#endif
+        LogCallback.Init();
 
         _renderConfig.Deserialize(ConfigDefault.SerializeToXElement());
 
