@@ -26,6 +26,10 @@ internal partial class NativeVsPrintf {
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     private static partial int NativeVsnPrintf_Linux(nint buffer, nuint size, nint format, nint args);
 
+    [LibraryImport(LIBSYSTEM, EntryPoint = "vasprintf")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    private static partial int NativeVasPrintf_Osx(ref nint buffer, nint format, nint args);
+
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     private struct VaListLinux64
     {
@@ -49,6 +53,9 @@ internal partial class NativeVsPrintf {
 
             return VsPrintf_Linux86(format, args);
         }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            return VsPrintf_Osx(format, args);
 
         throw new PlatformNotSupportedException("Logging with va_list not supported on this platform");
     }
@@ -116,6 +123,25 @@ internal partial class NativeVsPrintf {
             _ = NativeVsPrintf_Linux(buffer, format, args);
 
             return Marshal.PtrToStringUTF8(buffer)!;
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(buffer);
+        }
+    }
+
+    private static string VsPrintf_Osx(nint format, nint args)
+    {
+        nint buffer = nint.Zero;
+
+        try
+        {
+            int byteSize = NativeVasPrintf_Osx(ref buffer, format, args);
+
+            if (byteSize == -1)
+                return string.Empty;
+
+            return Marshal.PtrToStringUTF8(buffer) ?? string.Empty;
         }
         finally
         {
