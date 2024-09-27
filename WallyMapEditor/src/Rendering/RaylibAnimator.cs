@@ -333,12 +333,14 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
                 null => true,
                 _ => boneType.Value.Item1 switch
                 {
-                    8 when finalBoneName == "a_Torso1R" => false,
-                    1 when isOtherHand => false,
-                    10 when finalBoneName == "a_WeaponFistsForearmR" => false,
-                    10 when finalBoneName == "a_WeaponFistsForearmRightR" => false,
-                    2 when BoneDatabase.ForearmVariantDict.ContainsValue(finalBoneName) => false,
+                    8 when finalBoneName == "a_Torso1R" || finalBoneName == "a_BotTorsoR" => false,
+                    10 when finalBoneName == "a_WeaponFistsForearmR" || finalBoneName == "a_WeaponFistsForearmRightR" => false,
                     12 when BoneDatabase.KatarVariantDict.ContainsValue(finalBoneName) => false,
+                    2 when BoneDatabase.ForearmVariantDict.ContainsValue(finalBoneName) => false,
+                    1 when isOtherHand => false,
+                    6 when BoneDatabase.ShinVariantDict.ContainsValue(finalBoneName) => false,
+                    5 when finalBoneName == "a_Leg1R" || finalBoneName == "a_Leg1RightR" => false,
+                    4 when finalBoneName == "a_Shoulder1R" || finalBoneName == "a_Shoulder1RightR" => false,
                     _ => true,
                 }
             };
@@ -362,11 +364,16 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         bool useRightEyes = gfx.UseRightEyes;
         bool useRightMouth = gfx.UseRightMouth;
         bool useRightHair = gfx.UseRightHair;
-        bool useRightGauntlet1 = gfx.UseRightGauntlet;
-        bool useRightGauntlet2 = gfx.UseRightGauntlet;
+        bool useRightGauntlet = gfx.UseRightGauntlet;
+        bool useRightGauntletRight = gfx.UseRightGauntlet;
         int rightKatarUses = gfx.UseRightKatar ? 2 : 0;
         int rightForearmUses = gfx.UseRightForearm ? 2 : 0;
         int trueLeftRightHandsUses = gfx.UseTrueLeftRightHands ? 4 : 0;
+        bool useRightShoulder1 = gfx.UseRightShoulder1;
+        bool useRightShoulder1Right = gfx.UseRightShoulder1;
+        int rightShinUses = gfx.UseRightShin ? 2 : 0;
+        bool useRightLeg1 = gfx.UseRightLeg1;
+        bool useRightLeg1Right = gfx.UseRightLeg1;
         for (int i = 0; i < bones.Count; ++i)
         {
             BoneInstance instance = bones[i];
@@ -417,15 +424,15 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
                 doVisibilitySwap();
                 useRightHair = false;
             }
-            else if (useRightGauntlet1 && instance.OgBoneName == "a_WeaponFistsForearm")
+            else if (useRightGauntlet && instance.OgBoneName == "a_WeaponFistsForearm")
             {
                 doVisibilitySwap();
-                useRightGauntlet1 = false;
+                useRightGauntlet = false;
             }
-            else if (useRightGauntlet2 && instance.OgBoneName == "a_WeaponFistsForearmRight")
+            else if (useRightGauntletRight && instance.OgBoneName == "a_WeaponFistsForearmRight")
             {
                 doVisibilitySwap();
-                useRightGauntlet2 = false;
+                useRightGauntletRight = false;
             }
             else if (rightKatarUses > 0 && BoneDatabase.KatarVariantDict.ContainsKey(instance.OgBoneName))
             {
@@ -441,6 +448,31 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
             {
                 bones[i].Visible = (i % 2 == 0) ? !spriteMirrored : spriteMirrored;
                 trueLeftRightHandsUses--;
+            }
+            else if (useRightShoulder1 && instance.OgBoneName == "a_Shoulder1")
+            {
+                doVisibilitySwap();
+                useRightShoulder1 = false;
+            }
+            else if (useRightShoulder1Right && instance.OgBoneName == "a_Shoulder1Right")
+            {
+                doVisibilitySwap();
+                useRightShoulder1Right = false;
+            }
+            else if (useRightLeg1 && instance.OgBoneName == "a_Leg1")
+            {
+                doVisibilitySwap();
+                useRightLeg1 = false;
+            }
+            else if (useRightLeg1Right && instance.OgBoneName == "a_Leg1Right")
+            {
+                doVisibilitySwap();
+                useRightLeg1Right = false;
+            }
+            else if (rightShinUses > 0 && BoneDatabase.ShinVariantDict.ContainsKey(instance.OgBoneName))
+            {
+                doVisibilitySwap();
+                rightShinUses--;
             }
         }
     }

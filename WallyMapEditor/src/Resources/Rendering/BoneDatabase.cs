@@ -110,8 +110,8 @@ public static class BoneDatabase
         Register2("a_Torso1Back", 2, 8, false);
         Register1("a_Torso2", 2);
         Register1("a_Torso2Back", 2);
-        Register2("a_Shoulder1", 2, 4, true);
-        Register2("a_Shoulder1Right", 2, 4, true);
+        Register2("a_Shoulder1", 2, 4, true, true);
+        Register2("a_Shoulder1Right", 2, 4, true, true);
         Register2("a_Arm", 2, 3, true);
         Register2("a_Arm1", 2, 3, true);
         Register2("a_ArmRight", 2, 3, true);
@@ -234,25 +234,25 @@ public static class BoneDatabase
         Register2("a_HandFist01aSword", 2, 1, true);
         Register1("a_Waist1", 2);
         Register1("a_Waist1Back", 2);
-        Register2("a_Leg1", 2, 5, true);
+        Register2("a_Leg1", 2, 5, true, true);
         Register2("a_Leg1Flip", 2, 5, true);
-        Register2("a_ShinBack", 2, 6, true);
-        Register2("a_ShinSide", 2, 6, true);
-        Register2("a_ShinSideStraight", 2, 6, true);
-        Register2("a_Shin", 2, 6, true);
-        Register2("a_ShinFrontAngle", 2, 6, true);
-        Register2("a_ShinSideBend", 2, 6, true);
+        Register2("a_ShinBack", 2, 6, true, true);
+        Register2("a_ShinSide", 2, 6, true, true);
+        Register2("a_ShinSideStraight", 2, 6, true, true);
+        Register2("a_Shin", 2, 6, true, true);
+        Register2("a_ShinFrontAngle", 2, 6, true, true);
+        Register2("a_ShinSideBend", 2, 6, true, true);
         Register2("a_Foot1", 2, 7, true);
         Register2("a_Foot1Side", 2, 7, true);
         Register2("a_Foot1Bent", 2, 7, true);
-        Register2("a_Leg1Right", 2, 5, true);
+        Register2("a_Leg1Right", 2, 5, true, true);
         Register2("a_Leg1FlipRight", 2, 5, true);
-        Register2("a_ShinBackRight", 2, 6, true);
-        Register2("a_ShinSideRight", 2, 6, true);
-        Register2("a_ShinSideStraightRight", 2, 6, true);
-        Register2("a_ShinRight", 2, 6, true);
-        Register2("a_ShinFrontAngleRight", 2, 6, true);
-        Register2("a_ShinSideBendRight", 2, 6, true);
+        Register2("a_ShinBackRight", 2, 6, true, true);
+        Register2("a_ShinSideRight", 2, 6, true, true);
+        Register2("a_ShinSideStraightRight", 2, 6, true, true);
+        Register2("a_ShinRight", 2, 6, true, true);
+        Register2("a_ShinFrontAngleRight", 2, 6, true, true);
+        Register2("a_ShinSideBendRight", 2, 6, true, true);
         Register2("a_Foot1Right", 2, 7, true);
         Register2("a_Foot1SideRight", 2, 7, true);
         Register2("a_Foot1BentRight", 2, 7, true);
@@ -382,13 +382,13 @@ public static class BoneDatabase
         Register2("a_WeaponKatarBladeUnderTowards", 1, 12, true, true);
         Register2("a_WeaponKatarBladeTop", 1, 12, true, true);
         Register2("a_WeaponKatarBladeTopStrap", 1, 12, true);
-        Register2("a_WeaponKatarBladeUnderRight", 1, 12, true);
+        Register2("a_WeaponKatarBladeUnderRight", 1, 12, true, true);
         Register2("a_WeaponKatarBladeUnderBuriedRight", 1, 12, true, true);
         Register2("a_WeaponKatarBladeUnderTowardsRight", 1, 12, true, true);
         Register2("a_WeaponKatarBladeTopRight", 1, 12, true, true);
         Register2("a_WeaponKatarBladeTopStrapRight", 1, 12, true);
         Register2("a_WeaponKatarOverlayBladeUnder", 1, 12, true);
-        Register2("a_WeaponKatarOverlayBladeUnderRight", 1, 12, true, true);
+        Register2("a_WeaponKatarOverlayBladeUnderRight", 1, 12, true);
         Register2("a_WeaponKatarOverlayBladeUnderTowards", 1, 12, true);
         Register2("a_WeaponKatarOverlayBladeUnderTowardsRight", 1, 12, true);
         Register2("a_WeaponKatarOverlay2BladeUnder", 1, 12, true);
@@ -537,6 +537,7 @@ public static class BoneDatabase
     public static Dictionary<string, uint> ArtTypeDict { get; } = [];
     public static Dictionary<string, (int, bool)> BoneTypeDict { get; } = [];
     public static Dictionary<string, string> ForearmVariantDict { get; } = [];
+    public static Dictionary<string, string> ShinVariantDict { get; } = [];
     public static Dictionary<string, string> KatarVariantDict { get; } = [];
     public static Dictionary<string, string> AsymSwapDict { get; } = [];
 
@@ -553,6 +554,8 @@ public static class BoneDatabase
             BoneTypeDict[name + "R"] = (boneType, dir);
             if (boneType == 2)
                 ForearmVariantDict[name] = name + "R";
+            else if (boneType == 6)
+                ShinVariantDict[name] = name + "R";
             else if (boneType == 12)
                 KatarVariantDict[name] = name + "R";
             Register1(name + "R", artType);
