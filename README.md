@@ -1,8 +1,18 @@
 # WallyMapEditor
+<p>
+  <a href="https://discord.com/invite/pxpe7FGwfQ">
+    <img src="https://img.shields.io/discord/1287853332853035150?logo=discord&logoColor=white&label=Discord&color=7289da" />
+ </a>
+</p>
 
-A map editor for Brawlhalla, using raylib for rendering. **Currently under development.**
+A map editor for Brawlhalla. **Currently under development.**
 
-## Installation and running from source
+## Download
+Download the latest release [here](https://github.com/moffel1020/WallyMapEditor/releases/latest)
+
+If the program doesn't launch on windows, you may need to install the [latest Visual C++ Redistributable](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170)
+
+## Building from source
 
 make sure you have _git_ installed.
 
