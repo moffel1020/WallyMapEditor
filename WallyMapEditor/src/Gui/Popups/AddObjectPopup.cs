@@ -31,6 +31,7 @@ public static class AddObjectPopup
         if (ImGui.BeginMenu("Respawns")) { AddDynamicRespawnMenuHistory(posX, posY, l, selection, cmd); ImGui.EndMenu(); }
         if (ImGui.BeginMenu("Platforms")) { AddMovingPlatformMenuHistory(posX, posY, l, selection, cmd); ImGui.EndMenu(); }
         if (ImGui.BeginMenu("NavNodes")) { AddDynamicNavNodeMenuHistory(posX, posY, l, selection, cmd); ImGui.EndMenu(); }
+        if (ImGui.BeginMenu("Volumes")) { AddDynamicVolumeMenuHistory(posX, posY, l, selection, cmd); ImGui.EndMenu(); }
 
         ImGui.EndPopup();
     }
@@ -89,6 +90,15 @@ public static class AddObjectPopup
         return result;
     }
 
+    public static Maybe<AbstractVolume> AddVolumeMenu(double x, double y)
+    {
+        Maybe<AbstractVolume> result = new();
+        if (ImGui.MenuItem("Goal")) result = PropertiesWindow.DefaultVolume<Goal>((int)x, (int)y, 100, 100);
+        if (ImGui.MenuItem("Volume (plain)")) result = PropertiesWindow.DefaultVolume<Volume>((int)x, (int)y, 100, 100);
+        if (ImGui.MenuItem("NoDodgeZone")) result = PropertiesWindow.DefaultVolume<NoDodgeZone>((int)x, (int)y, 100, 100);
+        return result;
+    }
+
     private static void AddObjectWithDynamicMenuHistory<N, D>(double posX, double posY, string dynName, Func<double, double, Maybe<N>> normalMenu, Action<N> normalCmdAdd, Action<D> dynamicCmdAdd, SelectionContext selection, CommandHistory cmd)
         where D : AbstractDynamic<N>, new()
         where N : ISerializable, IDeserializable, IDrawable
@@ -106,6 +116,18 @@ public static class AddObjectPopup
             dynamicCmdAdd(dynamic);
             cmd.SetAllowMerge(false);
             selection.Object = dynamic;
+        }
+    }
+
+    private static void AddObjectMenuHistory<N>(double posX, double posY, Func<double, double, Maybe<N>> menu, Action<N> cmdAdd, SelectionContext selection, CommandHistory cmd)
+        where N : ISerializable, IDeserializable, IDrawable
+    {
+        Maybe<N> maybeItem = menu(posX, posY);
+        if (maybeItem.TryGetValue(out N? item))
+        {
+            cmdAdd(item);
+            cmd.SetAllowMerge(false);
+            selection.Object = item;
         }
     }
 
@@ -135,6 +157,11 @@ public static class AddObjectPopup
             (x, y) => ImGui.MenuItem("NavNode") ? PropertiesWindow.DefaultNavNode(x, y, l.Desc) : Maybe<NavNode>.None,
             newVal => cmd.Add(new ArrayAddCommand<NavNode>(val => l.Desc.NavNodes = val, l.Desc.NavNodes, newVal)),
             newVal => cmd.Add(new ArrayAddCommand<DynamicNavNode>(val => l.Desc.DynamicNavNodes = val, l.Desc.DynamicNavNodes, newVal)),
+            selection, cmd);
+
+    public static void AddDynamicVolumeMenuHistory(double posX, double posY, Level l, SelectionContext selection, CommandHistory cmd) =>
+        AddObjectMenuHistory(posX, posY, AddVolumeMenu,
+            newVal => cmd.Add(new ArrayAddCommand<AbstractVolume>(val => l.Desc.Volumes = val, l.Desc.Volumes, newVal)),
             selection, cmd);
 
     public static void AddMovingPlatformMenuHistory(double posX, double posY, Level l, SelectionContext selection, CommandHistory cmd)

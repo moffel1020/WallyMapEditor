@@ -84,7 +84,7 @@ public partial class PropertiesWindow
         AbstractCollision ac => ShowCollisionProps(ac, cmd, data),
         AbstractItemSpawn i => ShowItemSpawnProps(i, cmd, data),
         AbstractAsset a => ShowAbstractAssetProps(a, cmd, data),
-        AbstractVolume v => ShowAbstractVolumeProps(v, cmd),
+        AbstractVolume v => ShowAbstractVolumeProps(v, cmd, data),
         NavNode n => ShowNavNodeProps(n, cmd, data),
 
         LevelSound ls => ShowLevelSoundProps(ls, cmd),
