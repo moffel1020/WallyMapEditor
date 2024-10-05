@@ -126,6 +126,12 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
                 return false;
             if (xg.UseRightKatar != yg.UseRightKatar)
                 return false;
+            if (xg.UseRightShoulder1 != yg.UseRightShoulder1)
+                return false;
+            if (xg.UseRightLeg1 != yg.UseRightLeg1)
+                return false;
+            if (xg.UseRightShin != yg.UseRightShin)
+                return false;
             if (xg.BoneOverrides.Count != yg.BoneOverrides.Count)
                 return false;
             foreach ((string k, string v) in xg.BoneOverrides)
@@ -140,6 +146,8 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
 
         public int GetHashCode((Gfx, string) obj)
         {
+            // why are we not including the UseRightX things here?
+
             (Gfx gfx, string anim) = obj;
             uint flags = 0;
             foreach (Gfx.AsymmetrySwapFlagEnum flag in gfx.AsymmetrySwapFlags)
