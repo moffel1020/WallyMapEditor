@@ -250,10 +250,11 @@ public class MapOverviewWindow
         },
         () => addButton("navnode", (x, y) => AddObjectPopup.AddDynamicNavNodeMenuHistory(x, y, l, selection, cmd)));
 
-        if (ImGui.CollapsingHeader("Volumes##overview"))
+        ImGuiExt.HeaderWithWidget("Volumes##overview", () =>
         {
             ShowSelectableList(l.Desc.Volumes, selection, val => l.Desc.Volumes = val, cmd);
-        }
+        },
+        () => addButton("volume", (x, y) => AddObjectPopup.AddVolumeMenuHistory(x, y, l, selection, cmd)));
 
         if (ImGui.CollapsingHeader("Sounds##overview"))
         {

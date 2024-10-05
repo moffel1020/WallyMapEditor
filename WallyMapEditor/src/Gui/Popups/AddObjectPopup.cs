@@ -31,7 +31,7 @@ public static class AddObjectPopup
         if (ImGui.BeginMenu("Respawns")) { AddDynamicRespawnMenuHistory(posX, posY, l, selection, cmd); ImGui.EndMenu(); }
         if (ImGui.BeginMenu("Platforms")) { AddMovingPlatformMenuHistory(posX, posY, l, selection, cmd); ImGui.EndMenu(); }
         if (ImGui.BeginMenu("NavNodes")) { AddDynamicNavNodeMenuHistory(posX, posY, l, selection, cmd); ImGui.EndMenu(); }
-        if (ImGui.BeginMenu("Volumes")) { AddDynamicVolumeMenuHistory(posX, posY, l, selection, cmd); ImGui.EndMenu(); }
+        if (ImGui.BeginMenu("Volumes")) { AddVolumeMenuHistory(posX, posY, l, selection, cmd); ImGui.EndMenu(); }
 
         ImGui.EndPopup();
     }
@@ -159,7 +159,7 @@ public static class AddObjectPopup
             newVal => cmd.Add(new ArrayAddCommand<DynamicNavNode>(val => l.Desc.DynamicNavNodes = val, l.Desc.DynamicNavNodes, newVal)),
             selection, cmd);
 
-    public static void AddDynamicVolumeMenuHistory(double posX, double posY, Level l, SelectionContext selection, CommandHistory cmd) =>
+    public static void AddVolumeMenuHistory(double posX, double posY, Level l, SelectionContext selection, CommandHistory cmd) =>
         AddObjectMenuHistory(posX, posY, AddVolumeMenu,
             newVal => cmd.Add(new ArrayAddCommand<AbstractVolume>(val => l.Desc.Volumes = val, l.Desc.Volumes, newVal)),
             selection, cmd);
