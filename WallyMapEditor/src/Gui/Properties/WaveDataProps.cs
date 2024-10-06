@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using WallyMapSpinzor2;
 using ImGuiNET;
 
@@ -145,6 +146,15 @@ public partial class PropertiesWindow
         "red" => BehaviorEnum.TANKY,
         "random" => BehaviorEnum.ANY,
         _ => BehaviorEnum._,
+    };
+
+    public static WaveData DefaultWaveData(LevelDesc desc) => new()
+    {
+        // max ID + 1, or ID 0 if none exist
+        ID = desc.WaveDatas.Select(w => w.ID).DefaultIfEmpty(-1).Max() + 1,
+        LoopIdx = 0,
+        CustomPaths = [],
+        Groups = [],
     };
 
     private static Maybe<Point> CreateNewPoint()

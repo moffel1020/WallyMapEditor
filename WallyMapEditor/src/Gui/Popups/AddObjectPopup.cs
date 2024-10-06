@@ -164,6 +164,14 @@ public static class AddObjectPopup
             newVal => cmd.Add(new ArrayAddCommand<AbstractVolume>(val => l.Desc.Volumes = val, l.Desc.Volumes, newVal)),
             selection, cmd);
 
+    public static void AddWaveDataMenuHistory(Level l, SelectionContext selection, CommandHistory cmd)
+    {
+        WaveData wave = PropertiesWindow.DefaultWaveData(l.Desc);
+        cmd.Add(new ArrayAddCommand<WaveData>(val => l.Desc.WaveDatas = val, l.Desc.WaveDatas, wave));
+        cmd.SetAllowMerge(false);
+        selection.Object = wave;
+    }
+
     public static void AddMovingPlatformMenuHistory(double posX, double posY, Level l, SelectionContext selection, CommandHistory cmd)
     {
         Maybe<AbstractAsset> maybeAsset = AddAssetMenu(posX, posY, allowAsset: false);

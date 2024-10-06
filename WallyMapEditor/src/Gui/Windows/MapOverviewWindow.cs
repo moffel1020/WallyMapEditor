@@ -261,10 +261,17 @@ public class MapOverviewWindow
             ShowSelectableList(l.Desc.LevelSounds, selection, val => l.Desc.LevelSounds = val, cmd);
         }
 
-        if (ImGui.CollapsingHeader("Horde##overview"))
+        ImGuiExt.HeaderWithWidget("Horde##overview", () =>
         {
             ShowSelectableList(l.Desc.WaveDatas, selection, val => l.Desc.WaveDatas = val, cmd);
-        }
+        },
+        () =>
+        {
+            if (ImGui.Button("+##wave"))
+            {
+                AddObjectPopup.AddWaveDataMenuHistory(l, selection, cmd);
+            }
+        });
 
         ImGui.End();
     }
