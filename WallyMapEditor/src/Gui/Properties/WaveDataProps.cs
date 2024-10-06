@@ -9,6 +9,10 @@ public partial class PropertiesWindow
 {
     public static bool ShowWaveDataProps(WaveData w, CommandHistory cmd, PropertiesWindowData data)
     {
+        if (data.Level is not null)
+            RemoveButton(w, cmd, data.Level.Desc.WaveDatas, val => data.Level.Desc.WaveDatas = val);
+        ImGui.Separator();
+
         bool propChanged = false;
         ImGui.Text("ID: " + w.ID);
         propChanged |= ImGuiExt.DragNullableDoubleHistory("Speed", w.Speed, 8, val => w.Speed = val, cmd, minValue: 0);
