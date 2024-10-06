@@ -73,8 +73,8 @@ public partial class PropertiesWindow
         Platform p => ShowPlatformProps(p, cmd, data),
         AnimatedBackground ab => ShowAnimatedBackgroundProps(ab, cmd, data),
         Gfx gfx => ShowGfxProps(gfx, cmd, data),
-        LevelAnim la => ShowLevelAnimProps(la, cmd),
-        LevelAnimation la => ShowLevelAnimationProps(la, cmd),
+        LevelAnim la => ShowLevelAnimProps(la, cmd, data),
+        LevelAnimation la => ShowLevelAnimationProps(la, cmd, data),
 
         MovingPlatform mp => ShowMovingPlatformProps(mp, cmd, data),
 
@@ -87,7 +87,7 @@ public partial class PropertiesWindow
         AbstractVolume v => ShowAbstractVolumeProps(v, cmd, data),
         NavNode n => ShowNavNodeProps(n, cmd, data),
 
-        LevelSound ls => ShowLevelSoundProps(ls, cmd),
+        LevelSound ls => ShowLevelSoundProps(ls, cmd, data),
 
         WaveData w => ShowWaveDataProps(w, cmd, data),
         CustomPath cp => ShowCustomPathProps(cp, cmd, data),

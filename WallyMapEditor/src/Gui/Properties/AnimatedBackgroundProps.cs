@@ -7,6 +7,10 @@ partial class PropertiesWindow
 {
     public static bool ShowAnimatedBackgroundProps(AnimatedBackground ab, CommandHistory cmd, PropertiesWindowData data)
     {
+        if (data.Level is not null)
+            RemoveButton(ab, cmd, data.Level.Desc.AnimatedBackgrounds, val => data.Level.Desc.AnimatedBackgrounds = val);
+        ImGui.Separator();
+
         bool propChanged = false;
         if (ImGui.CollapsingHeader("Gfx"))
             propChanged |= ShowProperties(ab.Gfx, cmd, data);
