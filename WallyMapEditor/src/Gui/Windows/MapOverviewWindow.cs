@@ -166,6 +166,13 @@ public class MapOverviewWindow
             _propChanged |= PropertiesWindow.ShowSpawnBotBoundsProps(l.Desc.SpawnBotBounds, cmd);
         }
 
+        if (l.Type is not null && ImGui.CollapsingHeader("Bot behavior##overview"))
+        {
+            _propChanged |= ImGuiExt.CheckboxHistory("AIStrictRecover", l.Type.AIStrictRecover ?? false, val => l.Type.AIStrictRecover = val ? val : null, cmd);
+            _propChanged |= ImGuiExt.CheckboxHistory("IsClimbMap", l.Type.IsClimbMap ?? false, val => l.Type.IsClimbMap = val ? val : null, cmd);
+            _propChanged |= ImGuiExt.DragNullableDoubleHistory("AIPanicLine", l.Type.AIPanicLine, 0, val => l.Type.AIPanicLine = val, cmd);
+        }
+
         if (l.Type is not null && ImGui.CollapsingHeader("Weapon Spawn Color##overview") && l.Type.CrateColorA is not null && l.Type.CrateColorB is not null)
         {
             WmsColor colA = ImGuiExt.ColorPicker3("Outer##crateColorA", new(l.Type.CrateColorA.Value.R, l.Type.CrateColorA.Value.G, l.Type.CrateColorA.Value.B, 255));
