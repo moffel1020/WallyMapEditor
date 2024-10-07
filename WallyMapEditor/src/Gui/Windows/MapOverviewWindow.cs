@@ -124,6 +124,7 @@ public class MapOverviewWindow
 
         if (l.Type is not null)
         {
+            _propChanged |= ImGuiExt.ColorPicker3HexHistory("Shadow Tint##overview", (uint)(l.Type.ShadowTint ?? 0), val => l.Type.ShadowTint = val == 0 ? null : (int)val, cmd);
             _propChanged |= ImGuiExt.CheckboxHistory("NegateOverlaps##overview", l.Type.NegateOverlaps ?? false, val => l.Type.NegateOverlaps = !val ? null : val, cmd);
             _propChanged |= ImGuiExt.DragIntHistory("extra StartFrame##overview", l.Type.StartFrame ?? 0, val => l.Type.StartFrame = val == 0 ? null : val, cmd);
         }
