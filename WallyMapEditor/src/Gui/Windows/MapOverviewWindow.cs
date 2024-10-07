@@ -122,17 +122,11 @@ public class MapOverviewWindow
             ImGui.Separator();
         }
 
-        ImGuiExt.WithDisabled(l.Type is null, () =>
+        if (l.Type is not null)
         {
-            _propChanged |= ImGuiExt.CheckboxHistory("NegateOverlaps##overview", l.Type?.NegateOverlaps ?? false, val =>
-            {
-                if (l.Type is not null) l.Type.NegateOverlaps = !val ? null : val;
-            }, cmd);
-            _propChanged |= ImGuiExt.DragIntHistory("extra StartFrame##overview", l.Type?.StartFrame ?? 0, val =>
-            {
-                if (l.Type is not null) l.Type.StartFrame = val == 0 ? null : val;
-            }, cmd);
-        });
+            _propChanged |= ImGuiExt.CheckboxHistory("NegateOverlaps##overview", l.Type.NegateOverlaps ?? false, val => l.Type.NegateOverlaps = !val ? null : val, cmd);
+            _propChanged |= ImGuiExt.DragIntHistory("extra StartFrame##overview", l.Type.StartFrame ?? 0, val => l.Type.StartFrame = val == 0 ? null : val, cmd);
+        }
         _propChanged |= ImGuiExt.DragDoubleHistory("default SlowMult##overview", l.Desc.SlowMult, val => l.Desc.SlowMult = val, cmd, speed: 0.05f);
         _propChanged |= ImGuiExt.DragIntHistory("default NumFrames##overview", l.Desc.NumFrames, val => l.Desc.NumFrames = val, cmd, minValue: 0);
 
@@ -175,6 +169,13 @@ public class MapOverviewWindow
         if (ImGui.CollapsingHeader("Spawn Bot Bounds##overview"))
         {
             _propChanged |= PropertiesWindow.ShowSpawnBotBoundsProps(l.Desc.SpawnBotBounds, cmd);
+            if (l.Type is not null)
+            {
+                ImGui.SeparatorText("Colors");
+                _propChanged |= ImGuiExt.ColorPicker3HexHistory("Sidekick tint", l.Type.BotTint ?? 0, val => l.Type.BotTint = val, cmd);
+                _propChanged |= ImGuiExt.DragDoubleHistory("Sidekick tint fraction", l.Type.BotFraction ?? 0, val => l.Type.BotFraction = val == 0 ? null : val, cmd, minValue: 0, maxValue: 1, speed: 0.05f);
+                _propChanged |= ImGuiExt.ColorPicker3HexHistory("Sidekick tint offset", l.Type.BotOffset ?? 0, val => l.Type.BotOffset = val, cmd);
+            }
         }
 
         if (l.Type is not null && ImGui.CollapsingHeader("Bot behavior##overview"))
@@ -185,24 +186,14 @@ public class MapOverviewWindow
             _propChanged |= ImGuiExt.DragNullableDoubleHistory("AIGroundLine", l.Type.AIGroundLine, 0, val => l.Type.AIGroundLine = val, cmd);
         }
 
-        if (l.Type is not null && ImGui.CollapsingHeader("Weapon Spawn Color##overview") && l.Type.CrateColorA is not null && l.Type.CrateColorB is not null)
+        if (l.Type is not null && ImGui.CollapsingHeader("Weapon Spawn Color##overview"))
         {
-            WmsColor colA = ImGuiExt.ColorPicker3("Outer##crateColorA", new(l.Type.CrateColorA.Value.R, l.Type.CrateColorA.Value.G, l.Type.CrateColorA.Value.B, 255));
-            WmsColor colB = ImGuiExt.ColorPicker3("Inner##crateColorB", new(l.Type.CrateColorB.Value.R, l.Type.CrateColorB.Value.G, l.Type.CrateColorB.Value.B, 255));
-            CrateColor crateColA = new(colA.R, colA.G, colA.B);
-            CrateColor crateColB = new(colB.R, colB.G, colB.B);
+            WmsColor? crateToWms(CrateColor? c) => c is null ? null : new(c.Value.R, c.Value.G, c.Value.B, 255);
+            CrateColor? wmsToCrate(WmsColor? c) => c is null ? null : new(c.Value.R, c.Value.G, c.Value.B);
 
-            if (crateColA != l.Type.CrateColorA)
-            {
-                cmd.Add(new PropChangeCommand<CrateColor?>(val => l.Type.CrateColorA = val, l.Type.CrateColorA, crateColA));
-                _propChanged = true;
-            }
-
-            if (crateColB != l.Type.CrateColorB)
-            {
-                cmd.Add(new PropChangeCommand<CrateColor?>(val => l.Type.CrateColorB = val, l.Type.CrateColorB, crateColB));
-                _propChanged = true;
-            }
+            // defaults taken from Brawlhaven
+            _propChanged |= ImGuiExt.NullableColorPicker3History("Outer", crateToWms(l.Type.CrateColorA), WmsColor.FromHex(0xff7c5b), val => l.Type.CrateColorA = wmsToCrate(val), cmd);
+            _propChanged |= ImGuiExt.NullableColorPicker3History("Inner", crateToWms(l.Type.CrateColorB), WmsColor.FromHex(0xffc1b3), val => l.Type.CrateColorA = wmsToCrate(val), cmd);
         }
 
         if (ImGui.CollapsingHeader("Images##overview"))
