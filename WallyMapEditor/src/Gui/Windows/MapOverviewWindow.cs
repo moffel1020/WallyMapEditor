@@ -124,9 +124,13 @@ public class MapOverviewWindow
 
         ImGuiExt.WithDisabled(l.Type is null, () =>
         {
-            _propChanged |= ImGuiExt.DragNullableIntHistory("extra StartFrame##overview", l.Type?.StartFrame, 0, val =>
+            _propChanged |= ImGuiExt.CheckboxHistory("NegateOverlaps##overview", l.Type?.NegateOverlaps ?? false, val =>
             {
-                if (l.Type is not null) l.Type.StartFrame = val;
+                if (l.Type is not null) l.Type.NegateOverlaps = !val ? null : val;
+            }, cmd);
+            _propChanged |= ImGuiExt.DragIntHistory("extra StartFrame##overview", l.Type?.StartFrame ?? 0, val =>
+            {
+                if (l.Type is not null) l.Type.StartFrame = val == 0 ? null : val;
             }, cmd);
         });
         _propChanged |= ImGuiExt.DragDoubleHistory("default SlowMult##overview", l.Desc.SlowMult, val => l.Desc.SlowMult = val, cmd, speed: 0.05f);
