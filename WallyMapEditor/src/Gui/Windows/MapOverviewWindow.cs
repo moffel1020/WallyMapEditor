@@ -197,6 +197,17 @@ public class MapOverviewWindow
             _propChanged |= ImGuiExt.NullableColorPicker3History("Inner", crateToWms(l.Type.CrateColorB), WmsColor.FromHex(0xffc1b3), val => l.Type.CrateColorA = wmsToCrate(val), cmd);
         }
 
+        if (l.Type is not null && ImGui.CollapsingHeader("Color exclusion##overview"))
+        {
+            _propChanged |= ImGuiExt.GenericStringComboHistory("AvoidTeamColor", l.Type.AvoidTeamColor, val => l.Type.AvoidTeamColor = val,
+                c => c == TeamColorEnum.Default ? "None" : c.ToString(),
+                s => Enum.TryParse(s, out TeamColorEnum e) ? e : TeamColorEnum.Default,
+            Enum.GetValues<TeamColorEnum>(), cmd);
+
+            ImGui.Text("TeamColorOrder");
+            _propChanged |= TeamColorOrder(l.Type.TeamColorOrder, val => l.Type.TeamColorOrder = val, cmd);
+        }
+
         if (ImGui.CollapsingHeader("Images##overview"))
         {
             ShowSelectableList(l.Desc.Backgrounds, selection, val => l.Desc.Backgrounds = val, cmd, false);
@@ -308,7 +319,7 @@ public class MapOverviewWindow
             if (movable)
             {
                 // couldn't get unicode char to work
-                if (ImGui.Button($"^##{o.GetHashCode()}"))
+                if (ImGuiExt.WithDisabledButton(i == 0, $"^##{o.GetHashCode()}"))
                 {
                     T[] result = WmeUtils.MoveUp(values, i);
                     cmd.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
@@ -316,7 +327,7 @@ public class MapOverviewWindow
                     _propChanged |= true;
                 }
                 ImGui.SameLine();
-                if (ImGui.Button($"v##{o.GetHashCode()}"))
+                if (ImGuiExt.WithDisabledButton(i == values.Length - 1, $"v##{o.GetHashCode()}"))
                 {
                     T[] result = WmeUtils.MoveDown(values, i);
                     cmd.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
@@ -364,4 +375,32 @@ public class MapOverviewWindow
         AbstractKeyFrame kf => $"({PropertiesWindow.FirstKeyFrameNum(kf)})",
         _ => ""
     };
+
+    private static bool TeamColorOrder(TeamColorEnum[] order, Action<TeamColorEnum[]> setOrder, CommandHistory cmd)
+    {
+        bool _propChanged = false;
+        for (int i = 0; i < order.Length; i++)
+        {
+            TeamColorEnum c = order[i];
+
+            if (ImGuiExt.WithDisabledButton(i == 0, $"^##{c}"))
+            {
+                TeamColorEnum[] result = WmeUtils.MoveUp(order, i);
+                cmd.Add(new PropChangeCommand<TeamColorEnum[]>(setOrder, order, result));
+                cmd.SetAllowMerge(false);
+                _propChanged |= true;
+            }
+            ImGui.SameLine();
+            if (ImGuiExt.WithDisabledButton(i == order.Length - 1, $"v##{c}"))
+            {
+                TeamColorEnum[] result = WmeUtils.MoveDown(order, i);
+                cmd.Add(new PropChangeCommand<TeamColorEnum[]>(setOrder, order, result));
+                cmd.SetAllowMerge(false);
+                _propChanged |= true;
+            }
+            ImGui.SameLine();
+            ImGui.Text(c.ToString());
+        }
+        return _propChanged;
+    }
 }
