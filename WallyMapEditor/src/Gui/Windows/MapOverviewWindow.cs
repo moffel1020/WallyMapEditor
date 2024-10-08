@@ -166,17 +166,22 @@ public class MapOverviewWindow
             }
         }
 
+        if (ImGui.CollapsingHeader("Sidekick Bounds"))
+        {
+            ImGui.Text("Spawn bot bounds");
+            ImGui.SameLine();
+            ImGui.TextDisabled("(?)");
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Area for sidekicks to fly in.\nSidekicks are called spawn bots internally");
+            _propChanged |= PropertiesWindow.ShowSpawnBotBoundsProps(l.Desc.SpawnBotBounds, cmd);
+        }
+
         if (l.Type is not null && ImGui.CollapsingHeader("Bot Behavior##overview"))
         {
-            ImGui.Text("Spawn bounds");
-            _propChanged |= PropertiesWindow.ShowSpawnBotBoundsProps(l.Desc.SpawnBotBounds, cmd);
-            if (l.Type is not null)
-            {
-                _propChanged |= ImGuiExt.CheckboxHistory("IsClimbMap", l.Type.IsClimbMap ?? false, val => l.Type.IsClimbMap = val ? val : null, cmd);
-                _propChanged |= ImGuiExt.CheckboxHistory("AIStrictRecover", l.Type.AIStrictRecover ?? false, val => l.Type.AIStrictRecover = val ? val : null, cmd);
-                _propChanged |= ImGuiExt.DragNullableDoubleHistory("AIPanicLine", l.Type.AIPanicLine, 0, val => l.Type.AIPanicLine = val, cmd);
-                _propChanged |= ImGuiExt.DragNullableDoubleHistory("AIGroundLine", l.Type.AIGroundLine, 0, val => l.Type.AIGroundLine = val, cmd);
-            }
+            _propChanged |= ImGuiExt.CheckboxHistory("IsClimbMap", l.Type.IsClimbMap ?? false, val => l.Type.IsClimbMap = val ? val : null, cmd);
+            _propChanged |= ImGuiExt.CheckboxHistory("AIStrictRecover", l.Type.AIStrictRecover ?? false, val => l.Type.AIStrictRecover = val ? val : null, cmd);
+            _propChanged |= ImGuiExt.DragNullableDoubleHistory("AIPanicLine", l.Type.AIPanicLine, 0, val => l.Type.AIPanicLine = val, cmd);
+            _propChanged |= ImGuiExt.DragNullableDoubleHistory("AIGroundLine", l.Type.AIGroundLine, 0, val => l.Type.AIGroundLine = val, cmd);
         }
 
         if (l.Type is not null && ImGui.CollapsingHeader("Colors##overview"))
