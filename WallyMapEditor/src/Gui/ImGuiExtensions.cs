@@ -84,6 +84,15 @@ public static class ImGuiExt
         return a;
     }
 
+    public static uint ColorPicker3Hex(string label, uint col)
+    {
+        byte r = (byte)(col >> 16), g = (byte)(col >> 8), b = (byte)col;
+        Vector3 imCol = new((float)r / 255, (float)g / 255, (float)b / 255);
+        ImGui.ColorEdit3(label, ref imCol, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaBar);
+        r = (byte)(imCol.X * 255); g = (byte)(imCol.Y * 255); b = (byte)(imCol.Z * 255);
+        return ((uint)r << 16) | ((uint)g << 8) | b;
+    }
+
     public static WmsColor ColorPicker4(string label, WmsColor col)
     {
         Vector4 imCol = new((float)col.R / 255, (float)col.G / 255, (float)col.B / 255, (float)col.A / 255);
@@ -382,6 +391,54 @@ public static class ImGuiExt
         return false;
     }
 
+    public static bool ColorPicker3History(string label, WmsColor value, Action<WmsColor> changeCommand, CommandHistory cmd)
+    {
+        WmsColor newValue = ColorPicker3(label, value);
+        if (value != newValue)
+        {
+            cmd.Add(new PropChangeCommand<WmsColor>(changeCommand, value, newValue));
+            return true;
+        }
+        return false;
+    }
+
+    public static bool ColorPicker3HexHistory(string label, uint value, Action<uint> changeCommand, CommandHistory cmd)
+    {
+        uint newValue = ColorPicker3Hex(label, value);
+        if (value != newValue)
+        {
+            cmd.Add(new PropChangeCommand<uint>(changeCommand, value, newValue));
+            return true;
+        }
+        return false;
+    }
+
+    public static bool NullableColorPicker3History(string label, WmsColor? value, WmsColor defaultValue, Action<WmsColor?> changeCommand, CommandHistory cmd)
+    {
+        if (value is not null)
+        {
+            bool changed = ColorPicker3History(label, value.Value, val => changeCommand(val), cmd);
+            ImGui.SameLine();
+            if (ImGui.Button("Remove##" + label))
+            {
+                cmd.Add(new PropChangeCommand<WmsColor?>(changeCommand, value, null));
+                return true;
+            }
+            return changed;
+        }
+        else
+        {
+            ImGui.Text(label);
+            ImGui.SameLine();
+            if (ImGui.Button("Add##" + label))
+            {
+                cmd.Add(new PropChangeCommand<WmsColor?>(changeCommand, value, defaultValue));
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static void Animation(RaylibCanvas canvas, Gfx gfx, string animName, int frame)
     {
         Texture2D? texture_ = canvas.Animator.AnimToTexture(gfx, animName, frame);
@@ -420,7 +477,7 @@ public static class ImGuiExt
         {
             T value = values[i];
             changed |= edit(i);
-            if (WithDisabledButton(!allowRemove, $"Remove##{value.GetHashCode()}"))
+            if (WithDisabledButton(!allowRemove, $"x##{value.GetHashCode()}"))
             {
                 T[] result = WmeUtils.RemoveAt(values, i);
                 commands.Add((new ArrayRemoveCommand<T>(changeCommand, values, result, value), false));
@@ -429,14 +486,14 @@ public static class ImGuiExt
             if (allowMove)
             {
                 ImGui.SameLine();
-                if (WithDisabledButton(i == 0, $"Move up##{value.GetHashCode()}"))
+                if (WithDisabledButton(i == 0, $"^##{value.GetHashCode()}"))
                 {
                     T[] result = WmeUtils.MoveUp(values, i);
                     commands.Add((new PropChangeCommand<T[]>(changeCommand, values, result), false));
                     changed = true;
                 }
                 ImGui.SameLine();
-                if (WithDisabledButton(i == values.Length - 1, $"Move down##{value.GetHashCode()}"))
+                if (WithDisabledButton(i == values.Length - 1, $"v##{value.GetHashCode()}"))
                 {
                     T[] result = WmeUtils.MoveDown(values, i);
                     commands.Add((new PropChangeCommand<T[]>(changeCommand, values, result), false));

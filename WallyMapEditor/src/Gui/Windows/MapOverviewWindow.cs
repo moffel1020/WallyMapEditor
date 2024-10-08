@@ -122,8 +122,13 @@ public class MapOverviewWindow
             ImGui.Separator();
         }
 
-        _propChanged |= ImGuiExt.DragDoubleHistory("default SlowMult##overview", l.Desc.SlowMult, val => l.Desc.SlowMult = val, cmd, speed: 0.05f);
-        _propChanged |= ImGuiExt.DragIntHistory("default NumFrames##overview", l.Desc.NumFrames, val => l.Desc.NumFrames = val, cmd, minValue: 0);
+        if (l.Type is not null)
+        {
+            _propChanged |= ImGuiExt.CheckboxHistory("NegateOverlaps##overview", l.Type.NegateOverlaps ?? false, val => l.Type.NegateOverlaps = !val ? null : val, cmd);
+            _propChanged |= ImGuiExt.DragIntHistory("Extra StartFrame##overview", l.Type.StartFrame ?? 0, val => l.Type.StartFrame = val == 0 ? null : val, cmd);
+        }
+        _propChanged |= ImGuiExt.DragDoubleHistory("Default SlowMult##overview", l.Desc.SlowMult, val => l.Desc.SlowMult = val, cmd, speed: 0.05f);
+        _propChanged |= ImGuiExt.DragIntHistory("Default NumFrames##overview", l.Desc.NumFrames, val => l.Desc.NumFrames = val, cmd, minValue: 0);
 
         if (l.Type is not null && l.Type.LevelName != "Random")
         {
@@ -146,8 +151,9 @@ public class MapOverviewWindow
             }
         }
 
-        if (ImGui.CollapsingHeader("Camera Bounds##overview"))
+        if (ImGui.CollapsingHeader("Camera##overview"))
         {
+            _propChanged |= PropertiesWindow.ShowCameraBoundsProps(l.Desc.CameraBounds, cmd);
             if (l.Type is not null)
             {
                 _propChanged |= ImGuiExt.CheckboxHistory("FixedCamera", l.Type.FixedCamera ?? false, val => l.Type.FixedCamera = val ? val : null, cmd);
@@ -158,32 +164,47 @@ public class MapOverviewWindow
                     _propChanged |= ImGuiExt.CheckboxHistory("ShowLavaLevelDuringMove", l.Type.ShowLavaLevelDuringMove ?? false, val => l.Type.ShowLavaLevelDuringMove = val ? val : null, cmd);
                 });
             }
-            _propChanged |= PropertiesWindow.ShowCameraBoundsProps(l.Desc.CameraBounds, cmd);
         }
 
-        if (ImGui.CollapsingHeader("Spawn Bot Bounds##overview"))
+        if (l.Type is not null && ImGui.CollapsingHeader("Bot Behavior##overview"))
         {
+            ImGui.Text("Spawn bounds");
             _propChanged |= PropertiesWindow.ShowSpawnBotBoundsProps(l.Desc.SpawnBotBounds, cmd);
+            if (l.Type is not null)
+            {
+                _propChanged |= ImGuiExt.CheckboxHistory("IsClimbMap", l.Type.IsClimbMap ?? false, val => l.Type.IsClimbMap = val ? val : null, cmd);
+                _propChanged |= ImGuiExt.CheckboxHistory("AIStrictRecover", l.Type.AIStrictRecover ?? false, val => l.Type.AIStrictRecover = val ? val : null, cmd);
+                _propChanged |= ImGuiExt.DragNullableDoubleHistory("AIPanicLine", l.Type.AIPanicLine, 0, val => l.Type.AIPanicLine = val, cmd);
+                _propChanged |= ImGuiExt.DragNullableDoubleHistory("AIGroundLine", l.Type.AIGroundLine, 0, val => l.Type.AIGroundLine = val, cmd);
+            }
         }
 
-        if (l.Type is not null && ImGui.CollapsingHeader("Weapon Spawn Color##overview") && l.Type.CrateColorA is not null && l.Type.CrateColorB is not null)
+        if (l.Type is not null && ImGui.CollapsingHeader("Colors##overview"))
         {
-            WmsColor colA = ImGuiExt.ColorPicker3("Outer##crateColorA", new(l.Type.CrateColorA.Value.R, l.Type.CrateColorA.Value.G, l.Type.CrateColorA.Value.B, 255));
-            WmsColor colB = ImGuiExt.ColorPicker3("Inner##crateColorB", new(l.Type.CrateColorB.Value.R, l.Type.CrateColorB.Value.G, l.Type.CrateColorB.Value.B, 255));
-            CrateColor crateColA = new(colA.R, colA.G, colA.B);
-            CrateColor crateColB = new(colB.R, colB.G, colB.B);
+            WmsColor? crateToWms(CrateColor? c) => c is null ? null : new(c.Value.R, c.Value.G, c.Value.B, 255);
+            CrateColor? wmsToCrate(WmsColor? c) => c is null ? null : new(c.Value.R, c.Value.G, c.Value.B);
 
-            if (crateColA != l.Type.CrateColorA)
-            {
-                cmd.Add(new PropChangeCommand<CrateColor?>(val => l.Type.CrateColorA = val, l.Type.CrateColorA, crateColA));
-                _propChanged = true;
-            }
+            // defaults taken from Brawlhaven
+            ImGui.SeparatorText("Weapon spawn");
+            _propChanged |= ImGuiExt.NullableColorPicker3History("Outer", crateToWms(l.Type.CrateColorA), WmsColor.FromHex(0xff7c5b), val => l.Type.CrateColorA = wmsToCrate(val), cmd);
+            _propChanged |= ImGuiExt.NullableColorPicker3History("Inner", crateToWms(l.Type.CrateColorB), WmsColor.FromHex(0xffc1b3), val => l.Type.CrateColorA = wmsToCrate(val), cmd);
 
-            if (crateColB != l.Type.CrateColorB)
-            {
-                cmd.Add(new PropChangeCommand<CrateColor?>(val => l.Type.CrateColorB = val, l.Type.CrateColorB, crateColB));
-                _propChanged = true;
-            }
+            ImGui.SeparatorText("Sidekick"); 
+            _propChanged |= ImGuiExt.ColorPicker3HexHistory("Sidekick tint", l.Type.BotTint ?? 0, val => l.Type.BotTint = val, cmd);
+            _propChanged |= ImGuiExt.DragDoubleHistory("Sidekick tint fraction", l.Type.BotFraction ?? 0, val => l.Type.BotFraction = val == 0 ? null : val, cmd, minValue: 0, maxValue: 1, speed: 0.05f);
+            _propChanged |= ImGuiExt.ColorPicker3HexHistory("Sidekick tint offset", l.Type.BotOffset ?? 0, val => l.Type.BotOffset = val, cmd);
+
+            ImGui.SeparatorText("Color exclusions"); 
+            _propChanged |= ImGuiExt.GenericStringComboHistory("AvoidTeamColor", l.Type.AvoidTeamColor, val => l.Type.AvoidTeamColor = val,
+                c => c == TeamColorEnum.Default ? "None" : c.ToString(),
+                s => Enum.TryParse(s, out TeamColorEnum e) ? e : TeamColorEnum.Default,
+            Enum.GetValues<TeamColorEnum>(), cmd);
+
+            ImGui.Text("TeamColorOrder");
+            _propChanged |= TeamColorOrder(l.Type.TeamColorOrder, val => l.Type.TeamColorOrder = val, cmd);
+
+            ImGui.SeparatorText("Misc");
+            _propChanged |= ImGuiExt.ColorPicker3HexHistory("Shadow Tint##overview", (uint)(l.Type.ShadowTint ?? 0), val => l.Type.ShadowTint = val == 0 ? null : (int)val, cmd);
         }
 
         if (ImGui.CollapsingHeader("Images##overview"))
@@ -297,7 +318,7 @@ public class MapOverviewWindow
             if (movable)
             {
                 // couldn't get unicode char to work
-                if (ImGui.Button($"^##{o.GetHashCode()}"))
+                if (ImGuiExt.WithDisabledButton(i == 0, $"^##{o.GetHashCode()}"))
                 {
                     T[] result = WmeUtils.MoveUp(values, i);
                     cmd.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
@@ -305,7 +326,7 @@ public class MapOverviewWindow
                     _propChanged |= true;
                 }
                 ImGui.SameLine();
-                if (ImGui.Button($"v##{o.GetHashCode()}"))
+                if (ImGuiExt.WithDisabledButton(i == values.Length - 1, $"v##{o.GetHashCode()}"))
                 {
                     T[] result = WmeUtils.MoveDown(values, i);
                     cmd.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
@@ -353,4 +374,32 @@ public class MapOverviewWindow
         AbstractKeyFrame kf => $"({PropertiesWindow.FirstKeyFrameNum(kf)})",
         _ => ""
     };
+
+    private static bool TeamColorOrder(TeamColorEnum[] order, Action<TeamColorEnum[]> setOrder, CommandHistory cmd)
+    {
+        bool _propChanged = false;
+        for (int i = 0; i < order.Length; i++)
+        {
+            TeamColorEnum c = order[i];
+
+            if (ImGuiExt.WithDisabledButton(i == 0, $"^##{c}"))
+            {
+                TeamColorEnum[] result = WmeUtils.MoveUp(order, i);
+                cmd.Add(new PropChangeCommand<TeamColorEnum[]>(setOrder, order, result));
+                cmd.SetAllowMerge(false);
+                _propChanged |= true;
+            }
+            ImGui.SameLine();
+            if (ImGuiExt.WithDisabledButton(i == order.Length - 1, $"v##{c}"))
+            {
+                TeamColorEnum[] result = WmeUtils.MoveDown(order, i);
+                cmd.Add(new PropChangeCommand<TeamColorEnum[]>(setOrder, order, result));
+                cmd.SetAllowMerge(false);
+                _propChanged |= true;
+            }
+            ImGui.SameLine();
+            ImGui.Text(c.ToString());
+        }
+        return _propChanged;
+    }
 }

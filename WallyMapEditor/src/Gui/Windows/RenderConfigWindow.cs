@@ -123,6 +123,8 @@ public class RenderConfigWindow
 
         ImGui.SeparatorText("NavNodes##config");
         config.ShowNavNode = ImGuiExt.Checkbox("NavNodes##config", config.ShowNavNode);
+        config.ShowBotPanicLine = ImGuiExt.Checkbox("Bot panic line##config", config.ShowBotPanicLine);
+        config.ShowBotGroundLine = ImGuiExt.Checkbox("Bot ground line##config", config.ShowBotGroundLine);
 
         ImGui.SeparatorText("Volumes##config");
         config.ShowGoal = ImGuiExt.Checkbox("Goals##config", config.ShowGoal);
@@ -268,6 +270,8 @@ public class RenderConfigWindow
                 config.ColorNavNodeT = ImGuiExt.ColorPicker4("NavNodeT##configColors", config.ColorNavNodeT);
                 config.ColorNavNodeS = ImGuiExt.ColorPicker4("NavNodeS##configColors", config.ColorNavNodeS);
                 config.ColorNavPath = ImGuiExt.ColorPicker4("NavPath##configColors", config.ColorNavPath);
+                config.ColorBotPanicLine = ImGuiExt.ColorPicker4("BotPanicLine##configColors", config.ColorBotPanicLine);
+                config.ColorBotGroundLine = ImGuiExt.ColorPicker4("BotGroundLine##configColors", config.ColorBotGroundLine);
                 ImGui.TreePop();
             }
 
