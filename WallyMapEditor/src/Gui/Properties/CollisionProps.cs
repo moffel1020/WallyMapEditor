@@ -80,22 +80,7 @@ public partial class PropertiesWindow
         propChanged |= ShowAbstractCollisionProps(pc, cmd, data);
 
         ImGui.SeparatorText($"Pressure plate props##props{pc.GetHashCode()}");
-        if (pc.PlatID is not null)
-        {
-            propChanged = ShowPlatIDEdit(val => pc.PlatID = val, pc.PlatID, data, cmd);
-            if (ImGui.Button("Remove Asset PlatID##pressureplate"))
-            {
-                cmd.Add(new PropChangeCommand<string?>(val => pc.PlatID = val, pc.PlatID, null));
-                cmd.SetAllowMerge(false);
-                propChanged = true;
-            }
-        }
-        else if (ImGui.Button("Add Asset PlatID"))
-        {
-            cmd.Add(new PropChangeCommand<string?>(val => pc.PlatID = val, pc.PlatID, "0"));
-            cmd.SetAllowMerge(false);
-            propChanged = true;
-        }
+        propChanged |= ShowNullablePlatIDEdit(val => pc.PlatID = val, pc.PlatID, data, cmd);
         ImGui.Separator();
 
         ImGui.Text("AssetName: " + pc.AssetName);

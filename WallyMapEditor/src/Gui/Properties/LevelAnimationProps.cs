@@ -14,12 +14,13 @@ partial class PropertiesWindow
 
         bool propChanged = false;
 
+        propChanged |= ShowNullablePlatIDEdit(val => la.PlatID = val, la.PlatID, data, cmd);
+        ImGui.Separator();
+
         ImGui.Text("FileName: " + la.FileName);
         ImGui.Text($"AnimationName:");
         foreach (string anim in la.AnimationName)
             ImGui.BulletText(anim);
-        if (la.PlatID is not null)
-            ImGui.Text("PlatID: " + la.PlatID);
         ImGui.Separator();
         // having 3 mutually exclusive properties is very dumb. so give the user a select list.
         LevelAnimationLayerEnum layer = GetLayer(la);

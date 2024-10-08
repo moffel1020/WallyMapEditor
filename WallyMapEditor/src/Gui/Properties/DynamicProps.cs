@@ -49,6 +49,29 @@ public partial class PropertiesWindow
     private static string[] GetKnownPlatIDs(PropertiesWindowData data) 
         => data.Level?.Desc.Assets.OfType<MovingPlatform>().Select(mp => mp.PlatID).ToArray() ?? [];
 
+    public static bool ShowNullablePlatIDEdit(Action<string?> changeCommand, string? value, PropertiesWindowData data, CommandHistory cmd)
+    {
+        bool propChanged = false;
+        if (value is not null)
+        {
+            propChanged = ShowPlatIDEdit(changeCommand, value, data, cmd);
+            if (ImGui.Button("Remove PlatID"))
+            {
+                cmd.Add(new PropChangeCommand<string?>(changeCommand, value, null));
+                cmd.SetAllowMerge(false);
+                propChanged = true;
+            }
+        }
+        else if (ImGui.Button("Add PlatID"))
+        {
+            cmd.Add(new PropChangeCommand<string?>(changeCommand, value, "0"));
+            cmd.SetAllowMerge(false);
+            propChanged = true;
+        }
+
+        return propChanged;
+    }
+
     public static bool ShowPlatIDEdit(Action<string> changeCommand, string value, PropertiesWindowData data, CommandHistory cmd)
     {
         string[] knownPlatIds = GetKnownPlatIDs(data);
