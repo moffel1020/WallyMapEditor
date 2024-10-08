@@ -12,34 +12,7 @@ public partial class PropertiesWindow
     {
         bool propChanged = false;
 
-        string[] knownPlatIds = data.Level?.Desc.Assets.OfType<MovingPlatform>().Select(mp => mp.PlatID).ToArray() ?? [];
-        if (data.Level is not null && knownPlatIds.Contains(ad.PlatID))
-        {
-            ImGui.Text("Animated by MovingPlatform");
-            ImGui.SameLine();
-            if (ImGui.Button($"({ad.PlatID})"))
-                data.Selection.Object = data.Level.Desc.Assets.OfType<MovingPlatform>().Last(mp => mp.PlatID == ad.PlatID);
-        }
-
-        propChanged |= ImGuiExt.InputTextHistory("##platid", ad.PlatID, val => ad.PlatID = val, cmd);
-        if (knownPlatIds.Length > 0)
-        {
-            ImGui.SameLine();
-            if (ImGui.BeginCombo("##platidselect", ad.PlatID, ImGuiComboFlags.NoPreview | ImGuiComboFlags.PopupAlignLeft))
-            {
-                foreach (string id in knownPlatIds)
-                {
-                    if (ImGui.Selectable(id, id == ad.PlatID))
-                    {
-                        cmd.Add(new PropChangeCommand<string>(val => ad.PlatID = val, ad.PlatID, id));
-                        cmd.SetAllowMerge(false);
-                    }
-                }
-                ImGui.EndCombo();
-            }
-        }
-        ImGui.SameLine();
-        ImGui.Text("PlatID");
+        ShowPlatIDEdit(val => ad.PlatID = val, ad.PlatID, data, cmd);
 
         ImGui.Separator();
         if (data.Level is not null) ShowDynamicRemoveButton(ad, data.Level.Desc, cmd);
@@ -69,6 +42,45 @@ public partial class PropertiesWindow
                 return changed;
             }, cmd);
         }
+
+        return propChanged;
+    }
+
+    private static string[] GetKnownPlatIDs(PropertiesWindowData data) 
+        => data.Level?.Desc.Assets.OfType<MovingPlatform>().Select(mp => mp.PlatID).ToArray() ?? [];
+
+    public static bool ShowPlatIDEdit(Action<string> changeCommand, string value, PropertiesWindowData data, CommandHistory cmd)
+    {
+        string[] knownPlatIds = GetKnownPlatIDs(data);
+
+        if (data.Level is not null && knownPlatIds.Contains(value))
+        {
+            ImGui.Text("Animated by MovingPlatform");
+            ImGui.SameLine();
+            if (ImGui.Button($"({value})"))
+                data.Selection.Object = data.Level.Desc.Assets.OfType<MovingPlatform>().Last(mp => mp.PlatID == value);
+        }
+
+        bool propChanged = ImGuiExt.InputTextHistory("##platid", value, changeCommand, cmd);
+        if (knownPlatIds.Length > 0)
+        {
+            ImGui.SameLine();
+            if (ImGui.BeginCombo("##platidselect", value, ImGuiComboFlags.NoPreview | ImGuiComboFlags.PopupAlignLeft))
+            {
+                foreach (string id in knownPlatIds)
+                {
+                    if (ImGui.Selectable(id, id == value))
+                    {
+                        cmd.Add(new PropChangeCommand<string>(changeCommand, value, id));
+                        cmd.SetAllowMerge(false);
+                        propChanged = true;
+                    }
+                }
+                ImGui.EndCombo();
+            }
+        }
+        ImGui.SameLine();
+        ImGui.Text("PlatID");
 
         return propChanged;
     }
