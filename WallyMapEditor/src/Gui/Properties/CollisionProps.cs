@@ -81,6 +81,8 @@ public partial class PropertiesWindow
 
         ImGui.SeparatorText($"Pressure plate props##props{pc.GetHashCode()}");
         propChanged |= ShowNullablePlatIDEdit(val => pc.PlatID = val, pc.PlatID, data, cmd);
+        if (pc.Parent?.PlatID != pc.PlatID)
+            ImGui.TextWrapped("Warning: Pressure plate asset PlatID and parent PlatID do not match");
         ImGui.Separator();
 
         ImGui.Text("AssetName: " + pc.AssetName);
