@@ -24,8 +24,6 @@ run the project (inside the WallyMapEditor folder created by git clone):
 
 `dotnet run --project WallyMapEditor`
 
-_an exe will be provided in the future_
-
 ## Requirements
 
 - .NET 8 SDK
