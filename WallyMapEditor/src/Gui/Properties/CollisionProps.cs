@@ -78,8 +78,15 @@ public partial class PropertiesWindow
     {
         bool propChanged = false;
         propChanged |= ShowAbstractCollisionProps(pc, cmd, data);
+
         ImGui.SeparatorText($"Pressure plate props##props{pc.GetHashCode()}");
+        propChanged |= ShowNullablePlatIDEdit(val => pc.PlatID = val, pc.PlatID, data, cmd);
+        if (pc.Parent?.PlatID != pc.PlatID)
+            ImGui.TextWrapped("Warning: Pressure plate asset PlatID and parent PlatID do not match");
+        ImGui.Separator();
+
         ImGui.Text("AssetName: " + pc.AssetName);
+
         if (data.Canvas is not null)
         {
             ImGuiExt.Animation(data.Canvas, pc.Gfx, "Ready", 0);
