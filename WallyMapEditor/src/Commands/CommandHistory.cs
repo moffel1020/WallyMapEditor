@@ -10,7 +10,7 @@ public class CommandHistory(SelectionContext selection)
 
     public event EventHandler? Changed;
 
-    public void Add(ICommand cmd)
+    public void Add(ICommand cmd, bool? allowMerge = null)
     {
         Changed?.Invoke(this, EventArgs.Empty);
 
@@ -24,6 +24,9 @@ public class CommandHistory(SelectionContext selection)
             d.ModifyOnExecute(selection);
 
         Commands.Push(cmd);
+
+        if (allowMerge is not null)
+            SetAllowMerge(allowMerge.Value);
     }
 
     public void Undo()
