@@ -214,6 +214,20 @@ public static class ImGuiExt
         return false;
     }
 
+    public static bool DragDoubleCustom(string label, double value, Action<double> onChange, float speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
+    {
+        double oldVal = value;
+        double newVal = DragDouble(label, value, speed, minValue, maxValue);
+        // prevent NaN from fucking up history
+        if (newVal != oldVal && (!double.IsNaN(newVal) || !double.IsNaN(oldVal)))
+        {
+            onChange(newVal);
+            return true;
+        }
+
+        return false;
+    }
+
     public static bool DragNullableDoubleHistory(string label, double? value, double defaultValue, Action<double?> changeCommand, CommandHistory cmd, float speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
     {
         if (value is not null)
