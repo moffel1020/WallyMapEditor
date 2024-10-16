@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 
 namespace WallyMapEditor;
 
-internal partial class NativeVsPrintf {
-
+internal partial class NativeVsPrintf
+{
     private const string MSVCRT = "msvcrt";
     private const string LIBC = "libc";
     private const string LIBSYSTEM = "libSystem";

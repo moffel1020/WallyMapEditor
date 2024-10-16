@@ -5,7 +5,7 @@ using Raylib_cs;
 
 namespace WallyMapEditor;
 
-public static class LogCallback 
+public static class LogCallback
 {
     public static void Init()
     {

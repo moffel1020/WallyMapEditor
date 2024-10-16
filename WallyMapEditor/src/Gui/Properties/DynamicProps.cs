@@ -46,7 +46,7 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
-    private static string[] GetKnownPlatIDs(PropertiesWindowData data) 
+    private static string[] GetKnownPlatIDs(PropertiesWindowData data)
         => data.Level?.Desc.Assets.OfType<MovingPlatform>().Select(mp => mp.PlatID).ToArray() ?? [];
 
     public static bool ShowNullablePlatIDEdit(Action<string?> changeCommand, string? value, PropertiesWindowData data, CommandHistory cmd)
