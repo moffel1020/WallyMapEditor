@@ -40,6 +40,23 @@ public static class ImGuiExt
         }
     }
 
+    public static void DragUInt(string label, ref uint value, float speed = 1, uint minValue = uint.MinValue, uint maxValue = uint.MaxValue)
+    {
+        unsafe
+        {
+            IntPtr valuePtr = (IntPtr)Unsafe.AsPointer(ref value);
+            IntPtr minValuePtr = (IntPtr)(&minValue);
+            IntPtr maxValuePtr = (IntPtr)(&maxValue);
+            ImGui.DragScalar(label, ImGuiDataType.U32, valuePtr, speed, minValuePtr, maxValuePtr);
+        }
+    }
+
+    public static uint DragUInt(string label, uint value, float speed = 1, uint minValue = uint.MinValue, uint maxValue = uint.MaxValue)
+    {
+        DragUInt(label, ref value, speed, minValue, maxValue);
+        return value;
+    }
+
     public static double DragDouble(string label, double value, float speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
     {
         double v = value;
@@ -256,6 +273,45 @@ public static class ImGuiExt
             if (ImGui.Button("Add##" + label))
             {
                 cmd.Add(new PropChangeCommand<int?>(changeCommand, value, defaultValue));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static bool DragUIntHistory(string label, uint value, Action<uint> changeCommand, CommandHistory cmd, float speed = 1, uint minValue = uint.MinValue, uint maxValue = uint.MaxValue)
+    {
+        uint oldVal = value;
+        uint newVal = DragUInt(label, value, speed, minValue, maxValue);
+        if (newVal != oldVal)
+        {
+            cmd.Add(new PropChangeCommand<uint>(changeCommand, oldVal, newVal));
+            return true;
+        }
+
+        return false;
+    }
+
+    public static bool DragNullableUIntHistory(string label, uint? value, uint defaultValue, Action<uint?> changeCommand, CommandHistory cmd, float speed = 1, uint minValue = uint.MinValue, uint maxValue = uint.MaxValue)
+    {
+        if (value is not null)
+        {
+            bool dragged = DragUIntHistory(label, value.Value, val => changeCommand(val), cmd, speed, minValue, maxValue);
+            ImGui.SameLine();
+            if (ImGui.Button("Remove##" + label))
+            {
+                cmd.Add(new PropChangeCommand<uint?>(changeCommand, value, null));
+                return true;
+            }
+            return dragged;
+        }
+        else
+        {
+            ImGui.Text(label);
+            ImGui.SameLine();
+            if (ImGui.Button("Add##" + label))
+            {
+                cmd.Add(new PropChangeCommand<uint?>(changeCommand, value, defaultValue));
                 return true;
             }
         }

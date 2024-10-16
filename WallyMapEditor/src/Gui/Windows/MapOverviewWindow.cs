@@ -69,6 +69,7 @@ public class MapOverviewWindow
             _propChanged |= ImGuiExt.InputTextHistory("DisplayName", l.Type.DisplayName, val => l.Type.DisplayName = val, cmd);
             _propChanged |= ImGuiExt.CheckboxHistory("DevOnly", l.Type.DevOnly, val => l.Type.DevOnly = val, cmd);
             _propChanged |= ImGuiExt.CheckboxHistory("TestLevel", l.Type.TestLevel, val => l.Type.TestLevel = val, cmd);
+            _propChanged |= ImGuiExt.DragNullableUIntHistory("MinNumOnlineGamesBeforeRandom", l.Type.MinNumOnlineGamesBeforeRandom, 0, val => l.Type.MinNumOnlineGamesBeforeRandom = val, cmd, speed: 0.1f);
             ImGui.Separator();
 
             ImGui.Text($"Playlists: {l.Playlists.Count}");
@@ -194,12 +195,17 @@ public class MapOverviewWindow
             _propChanged |= ImGuiExt.NullableColorPicker3History("Outer", crateToWms(l.Type.CrateColorA), WmsColor.FromHex(0xff7c5b), val => l.Type.CrateColorA = wmsToCrate(val), cmd);
             _propChanged |= ImGuiExt.NullableColorPicker3History("Inner", crateToWms(l.Type.CrateColorB), WmsColor.FromHex(0xffc1b3), val => l.Type.CrateColorA = wmsToCrate(val), cmd);
 
-            ImGui.SeparatorText("Sidekick"); 
+            ImGui.SeparatorText("Midground (doesn't do anything ingame)");
+            _propChanged |= ImGuiExt.ColorPicker3HexHistory("Midground tint", l.Type.MidgroundTint ?? 0, val => l.Type.MidgroundTint = val, cmd);
+            _propChanged |= ImGuiExt.DragDoubleHistory("Midground tint fraction", l.Type.MidgroundFraction ?? 0, val => l.Type.MidgroundFraction = val == 0 ? null : val, cmd, minValue: 0, maxValue: 1, speed: 0.05f);
+            _propChanged |= ImGuiExt.ColorPicker3HexHistory("Midground tint offset", l.Type.MidgroundOffset ?? 0, val => l.Type.MidgroundOffset = val, cmd);
+
+            ImGui.SeparatorText("Sidekick");
             _propChanged |= ImGuiExt.ColorPicker3HexHistory("Sidekick tint", l.Type.BotTint ?? 0, val => l.Type.BotTint = val, cmd);
-            _propChanged |= ImGuiExt.DragDoubleHistory("Sidekick tint fraction", l.Type.BotFraction ?? 0, val => l.Type.BotFraction = val == 0 ? null : val, cmd, minValue: 0, maxValue: 1, speed: 0.05f);
+            _propChanged |= ImGuiExt.DragDoubleHistory("Sidekick tint fraction", l.Type.BotFraction ?? 0.5, val => l.Type.BotFraction = val == 0.5 ? null : val, cmd, minValue: 0, maxValue: 1, speed: 0.05f);
             _propChanged |= ImGuiExt.ColorPicker3HexHistory("Sidekick tint offset", l.Type.BotOffset ?? 0, val => l.Type.BotOffset = val, cmd);
 
-            ImGui.SeparatorText("Color exclusions"); 
+            ImGui.SeparatorText("Color exclusions");
             _propChanged |= ImGuiExt.GenericStringComboHistory("AvoidTeamColor", l.Type.AvoidTeamColor, val => l.Type.AvoidTeamColor = val,
                 c => c == TeamColorEnum.Default ? "None" : c.ToString(),
                 s => Enum.TryParse(s, out TeamColorEnum e) ? e : TeamColorEnum.Default,
