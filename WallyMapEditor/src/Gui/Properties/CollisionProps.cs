@@ -74,6 +74,8 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
+    private const string EMPTY_TRAP_POWERS_WARNING = "Warning: An empty TrapPowers list will crash the game";
+
     public static bool ShowAbstractPressurePlateCollisionProps(AbstractPressurePlateCollision pc, CommandHistory cmd, PropertiesWindowData data)
     {
         bool propChanged = false;
@@ -102,12 +104,19 @@ public partial class PropertiesWindow
         {
             ImGui.Text("In order to edit the TrapPowers, import powerTypes.csv");
             ImGui.Spacing();
+
+            if (pc.TrapPowers.Length == 0)
+                ImGui.TextWrapped(EMPTY_TRAP_POWERS_WARNING);
+
             ImGui.Text("TrapPowers:");
             foreach (string power in pc.TrapPowers)
                 ImGui.BulletText(power);
         }
         else
         {
+            if (pc.TrapPowers.Length == 0)
+                ImGui.TextWrapped(EMPTY_TRAP_POWERS_WARNING);
+
             propChanged |= ImGuiExt.EditArrayHistory("TrapPowers", pc.TrapPowers, val => pc.TrapPowers = val,
             () =>
             {
@@ -124,7 +133,7 @@ public partial class PropertiesWindow
                 bool changed = PowerEditPopup(data.PowerNames, pc.TrapPowers[index], val => pc.TrapPowers[index] = val, cmd, index.ToString());
                 ImGui.SameLine();
                 return changed;
-            }, cmd, allowMove: false);
+            }, cmd, allowRemove: pc.TrapPowers.Length >= 2, allowMove: false);
         }
 
         return propChanged;
@@ -160,8 +169,8 @@ public partial class PropertiesWindow
         {
             pcol.AssetName = "a__AnimationPressurePlate";
             pcol.FireOffsetX = [];
-            pcol.FireOffsetY = [];
-            pcol.TrapPowers = [];
+            pcol.FireOffsetY = [-10];
+            pcol.TrapPowers = ["ClimbTrap"];
             pcol.AnimOffsetX = (col.X1 + col.X2) / 2;
             pcol.AnimOffsetY = (col.Y1 + col.Y2) / 2;
             pcol.Cooldown = 3000;
