@@ -130,8 +130,7 @@ public class ImportWindow(PathPreferences prefs)
             ImGui.Separator();
             if (ImGui.CollapsingHeader("Mod info##header"))
             {
-                unsafe { ImGui.PushStyleColor(ImGuiCol.ChildBg, *ImGui.GetStyleColorVec4(ImGuiCol.FrameBg)); }
-                ImGui.BeginChild("##ModInfoWindow", new Vector2(0, ImGui.GetTextLineHeightWithSpacing() * 8), ImGuiChildFlags.ResizeY | ImGuiChildFlags.Border);
+                ImGuiExt.BeginStyledChild("##ModInfoWindow");
                 ModHeaderObject header = _modFileLoad.ModFile.Header;
                 ImGui.Text($"Name: {header.ModName}");
                 ImGui.Text($"Author: {header.CreatorInfo}");
@@ -141,7 +140,7 @@ public class ImportWindow(PathPreferences prefs)
                 ImGui.SeparatorText("Extra files");
                 string filesToWrite = string.Join("\n", _modFileLoad.ModFile.ExtraFiles.Select(e => e.FullPath));
                 ImGui.Text($"{filesToWrite}");
-                ImGui.EndChild();
+                ImGuiExt.EndStyledChild();
             }
         }
         ImGui.Separator();

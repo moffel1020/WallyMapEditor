@@ -99,8 +99,11 @@ public partial class PropertiesWindow
         propChanged |= ImGuiExt.DragIntHistory($"Cooldown##props{pc.GetHashCode()}", pc.Cooldown, val => pc.Cooldown = val, cmd, minValue: 0);
         propChanged |= ImGuiExt.CheckboxHistory($"FaceLeft##props{pc.GetHashCode()}", pc.FaceLeft, val => pc.FaceLeft = val, cmd);
 
-        propChanged |= TrapPowerOffsetEdit("FireOffsetX", pc.TrapPowers.Length, pc.FireOffsetX, val => pc.FireOffsetX = val, (idx, val) => pc.FireOffsetX[idx] = val, 0, cmd);
-        propChanged |= TrapPowerOffsetEdit("FireOffsetY", pc.TrapPowers.Length, pc.FireOffsetY, val => pc.FireOffsetY = val, (idx, val) => pc.FireOffsetY[idx] = val, -10, cmd);
+        if (pc.TrapPowers.Length != 0)
+        {
+            propChanged |= TrapPowerOffsetEdit("FireOffsetX", pc.TrapPowers.Length, pc.FireOffsetX, val => pc.FireOffsetX = val, 0, cmd);
+            propChanged |= TrapPowerOffsetEdit("FireOffsetY", pc.TrapPowers.Length, pc.FireOffsetY, val => pc.FireOffsetY = val, -10, cmd);
+        }
 
         if (data.PowerNames is null)
         {
@@ -235,16 +238,35 @@ public partial class PropertiesWindow
         return result;
     }
 
-    // FIXME: shits itself if trapPowerCount is 1
-    private static bool TrapPowerOffsetEdit(string offsetText, int trapPowerCount, double[] offsets, Action<double[]> change, Action<int, double> setAt, double @default, CommandHistory cmd)
+    private static bool TrapPowerOffsetEdit(string offsetText, int trapPowerCount, double[] offsets, Action<double[]> change, double @default, CommandHistory cmd)
     {
         bool changed = false;
 
-        double[] ogOffsets = offsets;
         // normalize
-        if (offsets.Length == 0) offsets = [@default];
-        else if (offsets.Length != 1 && offsets.Length != trapPowerCount) offsets = [offsets[0]];
+        if (offsets.Length == 0)
+        {
+            offsets = [@default];
+            change([@default]);
+        }
+        else if (offsets.Length != trapPowerCount)
+        {
+            offsets = [offsets[0]];
+            change([offsets[0]]);
+        }
 
+        if (trapPowerCount == 1) // shared or separate doesn't matter in this case
+        {
+            double newOffset = ImGuiExt.DragDouble(offsetText, offsets[0]);
+            if (newOffset != offsets[0])
+            {
+                cmd.Add(new PropChangeCommand<double[]>(change, offsets, [newOffset]));
+                changed = true;
+            }
+            return changed;
+        }
+
+        // shared (0): all trappowers share the same fire offset
+        // seperate (1): all trappowers have an individual fire offset
         int mode = offsets.Length == 1 ? 0 : 1, oldMode = mode;
         ImGui.Combo($"{offsetText} mode", ref mode, ["shared", "separate"], 2);
         if (mode != oldMode)
@@ -253,51 +275,44 @@ public partial class PropertiesWindow
             if (mode == 0)
             {
                 double[] newOffsets = [offsets[0]];
-                cmd.Add(new PropChangeCommand<double[]>(change, ogOffsets, newOffsets), allowMerge: false);
+                cmd.Add(new PropChangeCommand<double[]>(change, offsets, newOffsets), allowMerge: false);
                 changed = true;
-                ogOffsets = offsets = newOffsets;
+                offsets = newOffsets;
             }
             // shared to separate
             else
             {
                 double[] newOffsets = [.. Enumerable.Repeat(offsets[0], trapPowerCount)];
-                cmd.Add(new PropChangeCommand<double[]>(change, ogOffsets, newOffsets), allowMerge: false);
+                cmd.Add(new PropChangeCommand<double[]>(change, offsets, newOffsets), allowMerge: false);
                 changed = true;
-                ogOffsets = offsets = newOffsets;
+                offsets = newOffsets;
             }
         }
 
         if (mode == 0)
         {
-            changed |= ImGuiExt.DragDoubleCustom($"{offsetText} for trap power", offsets[0], newVal =>
+            double newOffset = ImGuiExt.DragDouble(offsetText, offsets[0]);
+            if (newOffset != offsets[0])
             {
-                // changing shared value but the array has non-1 length
-                // this turns [1,2,3] -> [1] when there aren't 3 trap powers
-                // TODO: somehow allow merging [...] -> [1 -> 2] to [...] -> [2]
-                // this would require merging a double[] with a double...
-                if (ogOffsets.Length != 1)
-                {
-                    cmd.Add(new PropChangeCommand<double[]>(change, ogOffsets, [newVal]), allowMerge: false);
-                }
-                // just changing single value
-                else
-                {
-                    cmd.Add(new PropChangeCommand<double>(val => setAt(0, val), offsets[0], newVal));
-                }
-            });
+                cmd.Add(new PropChangeCommand<double[]>(change, offsets, [newOffset]));
+                changed = true;
+            }
         }
         else
         {
-            // we can assume rawOffsets will be valid here
-            if (ImGui.BeginListBox(offsetText))
+            ImGuiExt.BeginStyledChild("FireOffsetEdit");
+            for (int i = 0; i < offsets.Length; i++)
             {
-                for (int i = 0; i < trapPowerCount; ++i)
+                double newOffset = ImGuiExt.DragDouble($"{offsetText} {i}", offsets[i]);
+                if (newOffset != offsets[i])
                 {
-                    int iCapture = i; // prevents issues with setAt using the post-for value of i
-                    changed |= ImGuiExt.DragDoubleHistory($"{offsetText} for trap power {i + 1}", ogOffsets[i], val => setAt(iCapture, val), cmd);
+                    double[] oldOffsets = [..offsets];
+                    offsets[i] = newOffset;
+                    cmd.Add(new PropChangeCommand<double[]>(change, oldOffsets, offsets));
+                    changed = true;
                 }
-                ImGui.EndListBox();
             }
+            ImGuiExt.EndStyledChild();
         }
 
         return changed;

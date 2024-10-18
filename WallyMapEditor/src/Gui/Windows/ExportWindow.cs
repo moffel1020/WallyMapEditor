@@ -181,9 +181,7 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
 
         ImGuiExt.HeaderWithWidget("Files to include", () =>
         {
-            unsafe { ImGui.PushStyleColor(ImGuiCol.ChildBg, *ImGui.GetStyleColorVec4(ImGuiCol.FrameBg)); }
-            ImGui.BeginChild("files", new Vector2(0, ImGui.GetTextLineHeightWithSpacing() * 8), ImGuiChildFlags.ResizeY | ImGuiChildFlags.Border);
-
+            ImGuiExt.BeginStyledChild("files");
             if (_thumbnailFile is not null)
                 _addThumbnailFile = ImGuiExt.Checkbox("Thumbnail: " + _thumbnailFile, _addThumbnailFile);
 
@@ -200,8 +198,7 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
                     _assetFiles[file] = ImGuiExt.Checkbox(file, @checked);
                 ImGui.TreePop();
             }
-            ImGui.PopStyleColor();
-            ImGui.EndChild();
+            ImGuiExt.EndStyledChild();
         },
         () =>
         {

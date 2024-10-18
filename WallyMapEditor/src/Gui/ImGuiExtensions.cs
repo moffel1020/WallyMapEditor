@@ -214,20 +214,6 @@ public static class ImGuiExt
         return false;
     }
 
-    public static bool DragDoubleCustom(string label, double value, Action<double> onChange, float speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
-    {
-        double oldVal = value;
-        double newVal = DragDouble(label, value, speed, minValue, maxValue);
-        // prevent NaN from fucking up history
-        if (newVal != oldVal && (!double.IsNaN(newVal) || !double.IsNaN(oldVal)))
-        {
-            onChange(newVal);
-            return true;
-        }
-
-        return false;
-    }
-
     public static bool DragNullableDoubleHistory(string label, double? value, double defaultValue, Action<double?> changeCommand, CommandHistory cmd, float speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
     {
         if (value is not null)
@@ -536,12 +522,23 @@ public static class ImGuiExt
         ImGui.Image(new IntPtr(image.Id), new Vector2(destWidth, destHeight), uv0, uv1);
     }
 
+    public static void BeginStyledChild(string label)
+    {
+        unsafe { ImGui.PushStyleColor(ImGuiCol.ChildBg, *ImGui.GetStyleColorVec4(ImGuiCol.FrameBg)); }
+        ImGui.BeginChild(label, new Vector2(0, ImGui.GetTextLineHeightWithSpacing() * 8), ImGuiChildFlags.ResizeY | ImGuiChildFlags.Border);
+    }
+
+    public static void EndStyledChild()
+    {
+        ImGui.EndChild();
+        ImGui.PopStyleColor();
+    }
+
     public static bool EditArrayHistory<T>(string label, T[] values, Action<T[]> changeCommand, Func<Maybe<T>> create, Func<int, bool> edit, CommandHistory cmd, bool allowRemove = true, bool allowMove = true)
         where T : notnull
     {
         List<(PropChangeCommand<T[]>, bool)> commands = [];
-        unsafe { ImGui.PushStyleColor(ImGuiCol.ChildBg, *ImGui.GetStyleColorVec4(ImGuiCol.FrameBg)); }
-        ImGui.BeginChild(label, new Vector2(0, ImGui.GetTextLineHeightWithSpacing() * 8), ImGuiChildFlags.ResizeY | ImGuiChildFlags.Border);
+        BeginStyledChild(label);
         bool changed = false;
         for (int i = 0; i < values.Length; ++i)
         {
@@ -571,8 +568,7 @@ public static class ImGuiExt
                 }
             }
         }
-        ImGui.EndChild();
-        ImGui.PopStyleColor();
+        EndStyledChild();
         Maybe<T> maybeNewValue = create();
         if (maybeNewValue.TryGetValue(out T? newValue))
         {
