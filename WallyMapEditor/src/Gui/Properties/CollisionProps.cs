@@ -129,7 +129,11 @@ public partial class PropertiesWindow
             {
                 Maybe<string> result = new();
                 if (ImGui.Button("Add new power"))
+                {
                     result = data.PowerNames[0];
+                    if (pc.FireOffsetX.Length > 1) pc.FireOffsetX = [..pc.FireOffsetX, 0];
+                    if (pc.FireOffsetY.Length > 1) pc.FireOffsetY = [..pc.FireOffsetY, -10];
+                }
                 return result;
             },
             (int index) =>
@@ -248,10 +252,15 @@ public partial class PropertiesWindow
             offsets = [@default];
             change([@default]);
         }
-        else if (offsets.Length != trapPowerCount)
+        else if (offsets.Length < trapPowerCount)
         {
             offsets = [offsets[0]];
-            change([offsets[0]]);
+            change(offsets);
+        }
+        else if (offsets.Length > trapPowerCount)
+        {
+            offsets = offsets.Take(trapPowerCount).ToArray();
+            change(offsets);
         }
 
         if (trapPowerCount == 1) // shared or separate doesn't matter in this case
@@ -300,7 +309,7 @@ public partial class PropertiesWindow
         }
         else
         {
-            ImGuiExt.BeginStyledChild("FireOffsetEdit");
+            ImGuiExt.BeginStyledChild(offsetText);
             for (int i = 0; i < offsets.Length; i++)
             {
                 double newOffset = ImGuiExt.DragDouble($"{offsetText} {i}", offsets[i]);
