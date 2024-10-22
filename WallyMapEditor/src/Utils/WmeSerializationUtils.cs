@@ -100,13 +100,23 @@ public static partial class WmeUtils
         return DeserializeFromString<T>(content, bhstyle);
     }
 
-    public static string[]? ParsePowerTypesFromPath(string path) => ParsePowerTypesFromString(File.ReadAllText(path));
+    public static string[]? ParsePowerTypesFromPath(string path)
+    {
+        using FileStream stream = new(path, FileMode.Open, FileAccess.Read);
+        using StreamReader reader = new(stream);
+        return ParsePowerTypes(reader);
+    }
 
     public static string[]? ParsePowerTypesFromString(string str)
     {
-        int lineEnd = str.IndexOf('\n');
-        str = str[(lineEnd + 1)..];
-        using SepReader reader = Sep.New(',').Reader().FromText(str);
-        return [.. reader.Enumerate(row => row[0].ToString())];
+        using StringReader reader = new(str);
+        return ParsePowerTypes(reader);
+    }
+
+    public static string[]? ParsePowerTypes(TextReader reader)
+    {
+        reader.ReadLine(); // skip first line bs
+        using SepReader sep = Sep.New(',').Reader().From(reader);
+        return [.. sep.Enumerate(row => row["PowerName"].ToString())];
     }
 }
