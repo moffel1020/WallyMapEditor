@@ -27,10 +27,14 @@ public class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
         Position.Radius = data.OverlayConfig.RadiusMovingPlatformPosition;
 
         bool dragging = false;
+        HashSet<KeyFrame> currentKeyFrames = [];
+
         // we go through the keyframes in the reverse order
         // this gives higher framenum keyframes priority
         foreach ((KeyFrame kf, int num) in EnumerateKeyFrames(plat.Animation.KeyFrames).Reverse())
         {
+            currentKeyFrames.Add(kf);
+
             if (!KeyFrameCircles.ContainsKey(kf))
                 KeyFrameCircles[kf] = new(kf);
 
@@ -39,6 +43,13 @@ public class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
             kfo.AllowDragging = !dragging;
             kfo.FrameNumOverride = num;
             dragging |= kfo.Update(data, cmd);
+        }
+
+        // temporary hack to remove deleted keyframes
+        foreach (KeyFrame kf in KeyFrameCircles.Keys)
+        {
+            if (!currentKeyFrames.Contains(kf))
+                KeyFrameCircles.Remove(kf);
         }
 
         if (!data.Context.PlatIDMovingPlatformTransform.TryGetValue(plat.PlatID, out Transform platTransform))
