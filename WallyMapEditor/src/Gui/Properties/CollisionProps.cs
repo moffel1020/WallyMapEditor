@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using WallyMapSpinzor2;
 using ImGuiNET;
@@ -98,43 +99,110 @@ public partial class PropertiesWindow
         propChanged |= ImGuiExt.DragDoubleHistory($"AnimRotation##props{pc.GetHashCode()}", pc.AnimRotation, val => pc.AnimRotation = BrawlhallaMath.SafeMod(val, 360.0), cmd);
         propChanged |= ImGuiExt.DragIntHistory($"Cooldown##props{pc.GetHashCode()}", pc.Cooldown, val => pc.Cooldown = val, cmd, minValue: 0);
         propChanged |= ImGuiExt.CheckboxHistory($"FaceLeft##props{pc.GetHashCode()}", pc.FaceLeft, val => pc.FaceLeft = val, cmd);
-        //TODO: add FireOffsetX, FireOffsetY
+
+        ImGui.SeparatorText("Powers");
+
+        pc.FireOffsetX = NormalizeFireOffset(pc.TrapPowers.Length, pc.FireOffsetX, 0);
+        propChanged |= FireOffsetModeEdit("FireOffsetX", pc.TrapPowers.Length, pc.FireOffsetX, val => pc.FireOffsetX = val, cmd);
+        bool fireOffsetXShared = pc.FireOffsetX.Length == 1;
+        if (fireOffsetXShared)
+            propChanged |= ImGuiExt.DragDoubleHistory("shared FireOffsetX", pc.FireOffsetX[0], val => pc.FireOffsetX[0] = val, cmd);
+
+        ImGui.Separator();
+
+        pc.FireOffsetY = NormalizeFireOffset(pc.TrapPowers.Length, pc.FireOffsetY, -10);
+        propChanged |= FireOffsetModeEdit("FireOffsetY", pc.TrapPowers.Length, pc.FireOffsetY, val => pc.FireOffsetY = val, cmd);
+        bool fireOffsetYShared = pc.FireOffsetY.Length == 1;
+        if (fireOffsetYShared)
+            propChanged |= ImGuiExt.DragDoubleHistory("shared FireOffsetY", pc.FireOffsetY[0], val => pc.FireOffsetY[0] = val, cmd);
+
+        ImGui.Separator();
 
         if (data.PowerNames is null)
         {
             ImGui.Text("In order to edit the TrapPowers, import powerTypes.csv");
             ImGui.Spacing();
-
-            if (pc.TrapPowers.Length == 0)
-                ImGui.TextWrapped(EMPTY_TRAP_POWERS_WARNING);
-
-            ImGui.Text("TrapPowers:");
-            foreach (string power in pc.TrapPowers)
-                ImGui.BulletText(power);
         }
-        else
+
+        // do the commands that change the array's shape at the end
+        List<ICommand> arrayAlterCommands = [];
+        void changeTrapPowersCommand(string[] newTrapPowers, double[]? newFireOffsetX, double[]? newFireOffsetY)
         {
-            if (pc.TrapPowers.Length == 0)
-                ImGui.TextWrapped(EMPTY_TRAP_POWERS_WARNING);
-
-            propChanged |= ImGuiExt.EditArrayHistory("TrapPowers", pc.TrapPowers, val => pc.TrapPowers = val,
-            () =>
+            arrayAlterCommands.Add(new PropChangeCommand<(string[], double[]?, double[]?)>(val =>
             {
-                Maybe<string> result = new();
-                if (ImGui.Button("Add new power"))
-                    result = data.PowerNames[0];
-                return result;
+                (string[] trapPowers, double[]? fireOffsetX, double[]? fireOffsetY) = val;
+                pc.TrapPowers = trapPowers;
+                if (fireOffsetX is not null) pc.FireOffsetX = fireOffsetX;
+                if (fireOffsetY is not null) pc.FireOffsetY = fireOffsetY;
             },
-            (int index) =>
-            {
-                ImGui.Text($"{pc.TrapPowers[index]}");
-                if (ImGui.Button($"Edit##trappower{index}"))
-                    ImGui.OpenPopup(POWER_POPUP_NAME + index);
-                bool changed = PowerEditPopup(data.PowerNames, pc.TrapPowers[index], val => pc.TrapPowers[index] = val, cmd, index.ToString());
-                ImGui.SameLine();
-                return changed;
-            }, cmd, allowRemove: pc.TrapPowers.Length >= 2, allowMove: false);
+            (pc.TrapPowers, fireOffsetXShared ? null : pc.FireOffsetX, fireOffsetYShared ? null : pc.FireOffsetY),
+            (newTrapPowers, newFireOffsetX, newFireOffsetY)));
+
+            propChanged = true;
         }
+
+        if (pc.TrapPowers.Length == 0)
+            ImGui.TextWrapped(EMPTY_TRAP_POWERS_WARNING);
+
+        ImGuiExt.BeginStyledChild("TrapPowers");
+        for (int i = 0; i < pc.TrapPowers.Length; ++i)
+        {
+            int iCapture = i;
+            string trapPower = pc.TrapPowers[i];
+
+            if (ImGuiExt.WithDisabledButton(pc.TrapPowers.Length < 2, $"Remove##{i}{trapPower.GetHashCode()}"))
+            {
+                string[] newTrapPowers = WmeUtils.RemoveAt(pc.TrapPowers, i);
+                double[]? newFireOffsetX = fireOffsetXShared ? null : WmeUtils.RemoveAt(pc.FireOffsetX, i);
+                double[]? newFireOffsetY = fireOffsetYShared ? null : WmeUtils.RemoveAt(pc.FireOffsetY, i);
+                changeTrapPowersCommand(newTrapPowers, newFireOffsetX, newFireOffsetY);
+            }
+
+            ImGui.Text($"{trapPower}");
+            if (data.PowerNames is not null)
+            {
+                ImGui.SameLine();
+                if (ImGui.Button($"Edit##trappower{i}"))
+                    ImGui.OpenPopup(POWER_POPUP_NAME + i);
+                propChanged |= PowerEditPopup(data.PowerNames, pc.TrapPowers[i], val => pc.TrapPowers[iCapture] = val, cmd, i.ToString());
+            }
+
+            if (!fireOffsetXShared)
+            {
+                double newOffset = ImGuiExt.DragDouble($"FireOffsetX##{i}", pc.FireOffsetX[i]);
+                if (newOffset != pc.FireOffsetX[i])
+                {
+                    cmd.Add(new PropChangeCommand<double>(val => pc.FireOffsetX[iCapture] = val, pc.FireOffsetX[i], newOffset));
+                    propChanged = true;
+                }
+            }
+
+            if (!fireOffsetYShared)
+            {
+                double newOffset = ImGuiExt.DragDouble($"FireOffsetY##{i}", pc.FireOffsetY[i]);
+                if (newOffset != pc.FireOffsetY[i])
+                {
+                    cmd.Add(new PropChangeCommand<double>(val => pc.FireOffsetY[iCapture] = val, pc.FireOffsetY[i], newOffset));
+                    propChanged = true;
+                }
+            }
+
+            if (i != pc.TrapPowers.Length - 1)
+                ImGui.Separator();
+        }
+        ImGuiExt.EndStyledChild();
+
+        if (data.PowerNames is not null && ImGui.Button("Add new power"))
+        {
+            string newTrapPower = data.PowerNames[0];
+            string[] newTrapPowers = [.. pc.TrapPowers, newTrapPower];
+            double[]? newFireOffsetX = fireOffsetXShared ? null : [.. pc.FireOffsetX, 0];
+            double[]? newFireOffsetY = fireOffsetYShared ? null : [.. pc.FireOffsetY, -10];
+            changeTrapPowersCommand(newTrapPowers, newFireOffsetX, newFireOffsetY);
+        }
+
+        foreach (ICommand command in arrayAlterCommands)
+            cmd.Add(command, allowMerge: false);
 
         return propChanged;
     }
@@ -152,7 +220,7 @@ public partial class PropertiesWindow
         }
         else
         {
-            ImGui.Text($"Power: {lc.LavaPower}");
+            ImGui.Text($"LavaPower: {lc.LavaPower}");
             ImGui.SameLine();
             if (ImGui.Button("Edit##lavapower"))
                 ImGui.OpenPopup(POWER_POPUP_NAME);
@@ -229,6 +297,49 @@ public partial class PropertiesWindow
             ImGui.EndPopup();
         }
         return result;
+    }
+
+    private static double[] NormalizeFireOffset(int trapPowerCount, double[] offsets, double @default)
+    {
+        if (offsets.Length == 0)
+        {
+            return [@default];
+        }
+        else if (offsets.Length != trapPowerCount)
+        {
+            return [offsets[0]];
+        }
+        else
+        {
+            return offsets;
+        }
+    }
+
+    private static bool FireOffsetModeEdit(string offsetText, int trapPowerCount, double[] offsets, Action<double[]> change, CommandHistory cmd)
+    {
+        bool shared = offsets.Length == 1;
+        // shared (0): all trappowers share the same fire offset
+        // seperate (1): all trappowers have an individual fire offset
+        int mode = shared ? 0 : 1, oldMode = mode;
+        ImGui.Combo($"{offsetText} mode", ref mode, ["shared", "separate"], 2);
+        if (mode != oldMode)
+        {
+            // separate to shared
+            if (mode == 0)
+            {
+                double[] newOffsets = [offsets[0]];
+                cmd.Add(new PropChangeCommand<double[]>(change, offsets, newOffsets), allowMerge: false);
+                return true;
+            }
+            // shared to separate
+            else
+            {
+                double[] newOffsets = [.. Enumerable.Repeat(offsets[0], trapPowerCount)];
+                cmd.Add(new PropChangeCommand<double[]>(change, offsets, newOffsets), allowMerge: false);
+                return true;
+            }
+        }
+        return false;
     }
 
     private const string POWER_POPUP_NAME = "PowerEdit";
