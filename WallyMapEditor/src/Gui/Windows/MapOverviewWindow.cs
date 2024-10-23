@@ -366,7 +366,7 @@ public class MapOverviewWindow
         Respawn r => $"({r.X:0.###}, {r.Y:0.###})",
         AbstractItemSpawn i => $"({i.X:0.###}, {i.Y:0.###}, {i.W:0.###}, {i.H:0.###})",
         AbstractCollision c => $"({c.X1:0.###}, {c.Y1:0.###}, {c.X2:0.###}, {c.Y2:0.###})",
-        AbstractVolume v => $"(team {v.Team} - {v.X:0.###}, {v.Y:0.###}, {v.W:0.###}, {v.H:0.###})",
+        AbstractVolume v => $"(team {v.Team}, {v.X:0.###}, {v.Y:0.###}, {v.W:0.###}, {v.H:0.###})",
         AbstractAsset a => $"({a.AssetName ?? $"{a.X:0.###}, {a.Y:0.###}"})",
         NavNode n => $"({NavNode.NavIDToString(n.NavID, n.Type)})",
 
