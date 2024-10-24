@@ -193,7 +193,7 @@ public class MapOverviewWindow
             // defaults taken from Brawlhaven
             ImGui.SeparatorText("Weapon spawn");
             _propChanged |= ImGuiExt.NullableColorPicker3History("Outer", crateToWms(l.Type.CrateColorA), WmsColor.FromHex(0xff7c5b), val => l.Type.CrateColorA = wmsToCrate(val), cmd);
-            _propChanged |= ImGuiExt.NullableColorPicker3History("Inner", crateToWms(l.Type.CrateColorB), WmsColor.FromHex(0xffc1b3), val => l.Type.CrateColorA = wmsToCrate(val), cmd);
+            _propChanged |= ImGuiExt.NullableColorPicker3History("Inner", crateToWms(l.Type.CrateColorB), WmsColor.FromHex(0xffc1b3), val => l.Type.CrateColorB = wmsToCrate(val), cmd);
 
             ImGui.SeparatorText("Midground (doesn't do anything ingame)");
             _propChanged |= ImGuiExt.ColorPicker3HexHistory("Midground tint", l.Type.MidgroundTint ?? 0, val => l.Type.MidgroundTint = val, cmd);
