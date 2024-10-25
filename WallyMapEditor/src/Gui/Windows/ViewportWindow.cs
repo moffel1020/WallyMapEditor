@@ -2,6 +2,8 @@ using System.Numerics;
 using Raylib_cs;
 using ImGuiNET;
 using rlImGui_cs;
+using WallyMapSpinzor2;
+using System.Collections.Generic;
 
 namespace WallyMapEditor;
 
@@ -14,7 +16,7 @@ public class ViewportWindow
     private bool _open = true;
     public bool Open { get => _open; set => _open = value; }
 
-    public void Show()
+    public void Show(IEnumerable<Level> loadedLevels, ref Level? currentLevel)
     {
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0, 0));
 
@@ -26,7 +28,22 @@ public class ViewportWindow
 
         if (SizeChanged()) CreateFramebuffer((int)Bounds.Size.X, (int)Bounds.Size.Y);
 
-        rlImGui.ImageRenderTexture(Framebuffer);
+        if (ImGui.BeginTabBar("levels", ImGuiTabBarFlags.Reorderable))
+        {
+            foreach (Level l in loadedLevels)
+            {
+                if (ImGui.BeginTabItem($"{l.Desc.LevelName}##{l.GetHashCode()}"))
+                {
+                    currentLevel = l;
+                    rlImGui.ImageRenderTexture(Framebuffer);
+
+                    ImGui.EndTabItem();
+                }
+            }
+
+            ImGui.EndTabBar();
+        }
+
         ImGui.End();
 
         ImGui.PopStyleVar();

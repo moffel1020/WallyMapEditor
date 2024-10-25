@@ -29,19 +29,20 @@ public class LevelLoader(Editor editor)
 
     public void ReImport()
     {
-        if (ReloadMethod is not null) LoadMap(ReloadMethod);
+        if (ReloadMethod is not null) LoadMap(ReloadMethod, true);
     }
 
-    public void LoadMap(ILoadMethod loadMethod)
+    public void LoadMap(ILoadMethod loadMethod, bool reload = false)
     {
         (Level l, BoneTypes? bt, string[]? pn) = loadMethod.Load();
         if (BoneTypes is null && bt is null) throw new InvalidOperationException("Could not load map. BoneTypes has not been imported.");
 
-        _editor.CloseCurrentLevel();
+        if (reload) _editor.CloseCurrentLevel();
         if (bt is not null) (BoneTypes, PowerNames) = (bt, pn);
         ReloadMethod = loadMethod;
 
-        _editor.Level = l;
+        _editor.LoadedLevels.Add(l);
+        _editor.CurrentLevel = l;
         _editor.ResetCam();
     }
 
@@ -56,10 +57,12 @@ public class LevelLoader(Editor editor)
         lt.DisplayName = displayName;
         HashSet<string> playlists = [.. (addDefaultPlaylists ? DefaultPlaylists : [])];
 
-        _editor.CloseCurrentLevel();
         ReloadMethod = null; // loaded default map can't be reimported, it's not on disk
 
-        _editor.Level = new(ld, lt, playlists);
+        Level l = new(ld, lt, playlists);
+
+        _editor.LoadedLevels.Add(l);
+        _editor.CurrentLevel = l;
         _editor.ResetCam();
     }
 
