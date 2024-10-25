@@ -9,6 +9,8 @@ using Raylib_cs;
 using rlImGui_cs;
 using ImGuiNET;
 using NativeFileDialogSharp;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace WallyMapEditor;
 
@@ -26,7 +28,10 @@ public class Editor
     PathPreferences PathPrefs { get; }
     RenderConfigDefault ConfigDefault { get; }
 
-    public Level? Level { get; set; }
+    private Level? _currentLevel;
+    public Level? CurrentLevel { get => _currentLevel; set => _currentLevel = value; }
+
+    public List<Level> LoadedLevels { get; set; } = [];
     public LevelLoader LevelLoader { get; set; }
 
     public RaylibCanvas? Canvas { get; set; }
@@ -75,7 +80,7 @@ public class Editor
         Context = _context,
         RenderConfig = _renderConfig,
         OverlayConfig = _overlayConfig,
-        Level = Level,
+        Level = CurrentLevel,
     };
 
     private PropertiesWindowData PropertiesWindowData => new()
@@ -83,7 +88,7 @@ public class Editor
         Time = Time,
         Canvas = Canvas,
         Loader = AssetLoader,
-        Level = Level,
+        Level = CurrentLevel,
         PathPrefs = PathPrefs,
         Selection = Selection,
         PowerNames = LevelLoader.PowerNames,
@@ -153,7 +158,7 @@ public class Editor
             Canvas.CameraMatrix = Rl.GetCameraMatrix2D(_cam);
 
             _context = new();
-            Level?.DrawOn(Canvas, WmsTransform.IDENTITY, _renderConfig, _context, _state);
+            CurrentLevel?.DrawOn(Canvas, WmsTransform.IDENTITY, _renderConfig, _context, _state);
             Canvas.FinalizeDraw();
         }
 
@@ -174,11 +179,11 @@ public class Editor
             ShowMainMenuBar();
 
         if (ViewportWindow.Open)
-            ViewportWindow.Show();
+            ViewportWindow.Show(LoadedLevels, ref _currentLevel);
         if (RenderConfigWindow.Open)
             RenderConfigWindow.Show(_renderConfig, ConfigDefault, PathPrefs);
-        if (MapOverviewWindow.Open && Level is not null)
-            MapOverviewWindow.Show(Level, CommandHistory, PathPrefs, AssetLoader, Selection);
+        if (MapOverviewWindow.Open && CurrentLevel is not null)
+            MapOverviewWindow.Show(CurrentLevel, CommandHistory, PathPrefs, AssetLoader, Selection);
 
         if (Selection.Object is not null)
             PropertiesWindow.Open = true;
@@ -189,13 +194,13 @@ public class Editor
 
         if (HistoryPanel.Open)
             HistoryPanel.Show(CommandHistory);
-        if (PlaylistEditPanel.Open && Level is not null)
-            PlaylistEditPanel.Show(Level, PathPrefs);
+        if (PlaylistEditPanel.Open && CurrentLevel is not null)
+            PlaylistEditPanel.Show(CurrentLevel, PathPrefs);
         if (KeyFinderPanel.Open)
             KeyFinderPanel.Show(PathPrefs);
 
         if (ExportDialog.Open)
-            ExportDialog.Show(Level);
+            ExportDialog.Show(CurrentLevel);
         if (ImportDialog.Open)
             ImportDialog.Show(LevelLoader);
         if (BackupsDialog.Open)
@@ -207,16 +212,16 @@ public class Editor
             AddObjectPopup.NewPos = ViewportWindow.ScreenToWorld(Rl.GetMousePosition(), _cam);
         }
 
-        if (Level is not null)
-            AddObjectPopup.Update(Level, CommandHistory, Selection);
+        if (CurrentLevel is not null)
+            AddObjectPopup.Update(CurrentLevel, CommandHistory, Selection);
 
         NewLevelModal.Update(LevelLoader, PathPrefs);
     }
 
     private bool EnableNewAndOpenMapButtons => LevelLoader.BoneTypes is not null;
-    private bool EnableSaveButton => Level is not null;
+    private bool EnableSaveButton => CurrentLevel is not null;
     private bool EnableReloadMapButton => LevelLoader.CanReImport;
-    private bool EnableCloseMapButton => Level is not null;
+    private bool EnableCloseMapButton => CurrentLevel is not null;
 
     private void ShowMainMenuBar()
     {
@@ -307,7 +312,7 @@ public class Editor
         usingOverlay |= OverlayManager.IsUsing;
 
         if (ViewportWindow.Hovered && !usingOverlay && Rl.IsMouseButtonReleased(MouseButton.Left))
-            Selection.Object = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, Level, _cam, _renderConfig, _state);
+            Selection.Object = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, CurrentLevel, _cam, _renderConfig, _state);
 
         if (!wantCaptureKeyboard && Rl.IsKeyDown(KeyboardKey.LeftControl))
         {
@@ -349,7 +354,7 @@ public class Editor
     public void ResetCam(int surfaceW, int surfaceH)
     {
         _cam.Zoom = 1.0f;
-        CameraBounds? bounds = Level?.Desc.CameraBounds;
+        CameraBounds? bounds = CurrentLevel?.Desc.CameraBounds;
         if (bounds is null) return;
 
         double scale = Math.Min(surfaceW / bounds.W, surfaceH / bounds.H);
@@ -360,9 +365,9 @@ public class Editor
 
     public void ExportWorldImage()
     {
-        if (Level is null || Canvas is null) return;
+        if (CurrentLevel is null || Canvas is null) return;
 
-        Image image = GetWorldRect((float)Level.Desc.CameraBounds.X, (float)Level.Desc.CameraBounds.Y, (int)Level.Desc.CameraBounds.W, (int)Level.Desc.CameraBounds.H);
+        Image image = GetWorldRect((float)CurrentLevel.Desc.CameraBounds.X, (float)CurrentLevel.Desc.CameraBounds.Y, (int)CurrentLevel.Desc.CameraBounds.W, (int)CurrentLevel.Desc.CameraBounds.H);
         Task.Run(() =>
         {
             string extension = "png";
@@ -389,7 +394,7 @@ public class Editor
         Rl.ClearBackground(RlColor.Blank);
         Rl.BeginMode2D(camera);
         Canvas.CameraMatrix = Rl.GetCameraMatrix2D(camera);
-        Level?.DrawOn(Canvas, WmsTransform.IDENTITY, _renderConfig, new RenderContext(), _state);
+        CurrentLevel?.DrawOn(Canvas, WmsTransform.IDENTITY, _renderConfig, new RenderContext(), _state);
         Canvas.FinalizeDraw();
         Rl.EndMode2D();
         Rl.EndTextureMode();
@@ -426,7 +431,7 @@ public class Editor
     {
         if (LevelLoader.ReloadMethod is LevelPathLoad lpLoad)
         {
-            WmeUtils.SerializeToPath(Level!, lpLoad.Path);
+            WmeUtils.SerializeToPath(CurrentLevel!, lpLoad.Path);
             TitleBar.SetTitle(lpLoad.Path, false);
             return;
         }
@@ -444,7 +449,7 @@ public class Editor
             {
                 string path = result.Path;
                 path = WmeUtils.ForcePathExtension(path, extension);
-                WmeUtils.SerializeToPath(Level!, path);
+                WmeUtils.SerializeToPath(CurrentLevel!, path);
                 PathPrefs.LevelPath = path;
                 LevelLoader.ReloadMethod = new LevelPathLoad(path);
                 TitleBar.SetTitle(path, false);
@@ -454,7 +459,8 @@ public class Editor
 
     public void CloseCurrentLevel()
     {
-        Level = null;
+        if (CurrentLevel is not null) LoadedLevels.Remove(CurrentLevel);
+        CurrentLevel = null;
         TitleBar.Reset();
         ResetState();
     }
