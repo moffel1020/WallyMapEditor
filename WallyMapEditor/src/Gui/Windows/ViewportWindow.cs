@@ -32,7 +32,7 @@ public class ViewportWindow
         {
             foreach (Level l in loadedLevels)
             {
-                if (ImGui.BeginTabItem($"{l.Desc.LevelName}##{l.GetHashCode()}"))
+                if (ImGui.BeginTabItem($"{l.Desc.LevelName}###{l.GetHashCode()}"))
                 {
                     currentLevel = l;
                     rlImGui.ImageRenderTexture(Framebuffer);
