@@ -43,18 +43,23 @@ public class MapOverviewWindow
         if (l.Type is not null)
         {
             string newLevelName;
-            unsafe
-            {
-                newLevelName = ImGuiExt.InputTextWithCallback("LevelName", l.Type.LevelName, LevelNameFilter, flags: ImGuiInputTextFlags.CallbackCharFilter);
-            }
+            unsafe { newLevelName = ImGuiExt.InputTextWithCallback("LevelName", l.Type.LevelName, LevelNameFilter, flags: ImGuiInputTextFlags.CallbackCharFilter); }
             if (ImGui.IsItemHovered())
             {
                 ImGui.SetTooltip("Warning: when exporting, the LevelName is used as the name of a new map.\nIf another map exists with that LevelName, it will be overwritten.");
             }
-
             if (newLevelName != l.Type.LevelName)
             {
                 cmd.Add(new PropChangeCommand<string>(val => l.Type.LevelName = l.Desc.LevelName = val, l.Type.LevelName, newLevelName));
+                _propChanged = true;
+            }
+
+            string newAssetDir;
+            unsafe { newAssetDir = ImGuiExt.InputTextWithCallback("AssetDir", l.Desc.AssetDir, LevelNameFilter, flags: ImGuiInputTextFlags.CallbackCharFilter); }
+            if (newAssetDir != l.Desc.AssetDir)
+            {
+                cmd.Add(new PropChangeCommand<string>(val => l.Desc.AssetDir = val, l.Desc.AssetDir, newAssetDir));
+                loader?.ClearCache();
                 _propChanged = true;
             }
 

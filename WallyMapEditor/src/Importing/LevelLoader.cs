@@ -42,13 +42,14 @@ public class LevelLoader(Editor editor)
         _editor.ResetCam();
     }
 
-    public void LoadDefaultMap(string levelName, string displayName, bool addDefaultPlaylists = true)
+    public void LoadDefaultMap(string levelName, string assetDir, string displayName, bool addDefaultPlaylists = true)
     {
         if (BoneTypes is null) throw new InvalidOperationException("Could not load default map. BoneTypes has not been imported.");
 
         LevelDesc ld = DefaultLevelDesc;
         LevelType lt = DefaultLevelType;
-        ld.LevelName = ld.AssetDir = lt.LevelName = levelName;
+        ld.LevelName = lt.LevelName = levelName;
+        ld.AssetDir = assetDir;
         lt.DisplayName = displayName;
         HashSet<string> playlists = [.. (addDefaultPlaylists ? DefaultPlaylists : [])];
 

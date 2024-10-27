@@ -14,6 +14,7 @@ public static class NewLevelModal
     public static void Open() => _shouldOpen = true;
 
     private static string _newLevelName = "";
+    private static string _newLevelDir = "";
     private static string _newDisplayName = "";
     private static bool _addToPlaylists = true;
 
@@ -29,14 +30,17 @@ public static class NewLevelModal
 
         ImGui.Text("Pick a name for the new level");
         ImGui.Text("These settings can always be changed later");
-        unsafe
-        {
-            _newLevelName = ImGuiExt.InputTextWithCallback("LevelName", _newLevelName, MapOverviewWindow.LevelNameFilter, 64);
-        }
+        unsafe { _newLevelName = ImGuiExt.InputTextWithCallback("LevelName", _newLevelName, MapOverviewWindow.LevelNameFilter, 64); }
         ImGui.SameLine();
         ImGui.TextDisabled("(?)");
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip("Unique name of the level, this will be used as the name of the asset folder.\nIf another map exists with this LevelName, it will be overwritten.");
+
+        unsafe { _newLevelDir = ImGuiExt.InputTextWithCallback("AssetDir", _newLevelDir, MapOverviewWindow.LevelNameFilter, 64); }
+        ImGui.SameLine();
+        ImGui.TextDisabled("(?)");
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip("The folder name to take assets from. Leave empty to use the LevelName.");
 
         ImGui.InputText("DisplayName", ref _newDisplayName, 64);
         ImGui.SameLine();
@@ -60,8 +64,9 @@ public static class NewLevelModal
 
         if (ImGuiExt.WithDisabledButton(string.IsNullOrWhiteSpace(_newDisplayName) || string.IsNullOrWhiteSpace(_newLevelName) || string.IsNullOrWhiteSpace(prefs.BrawlhallaPath), "Create"))
         {
-            loader.LoadDefaultMap(_newLevelName, _newDisplayName, _addToPlaylists);
-            string dir = Path.Combine(prefs.BrawlhallaPath!, "mapArt", _newLevelName);
+            string assetDir = string.IsNullOrWhiteSpace(_newLevelDir) ? _newLevelName : _newLevelDir;
+            loader.LoadDefaultMap(_newLevelName, assetDir, _newDisplayName, _addToPlaylists);
+            string dir = Path.Combine(prefs.BrawlhallaPath!, "mapArt", assetDir);
             Directory.CreateDirectory(dir);
 
             ImGui.CloseCurrentPopup();
