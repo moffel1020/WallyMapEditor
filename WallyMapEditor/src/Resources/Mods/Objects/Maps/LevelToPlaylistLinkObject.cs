@@ -17,7 +17,8 @@ public sealed class LevelToPlaylistLinkObject
     {
         _ = (VersionEnum)stream.GetU8();
         string levelname = stream.GetStr();
-        string[] playlists = stream.GetStr().Split(',');
+        string playlistsString = stream.GetStr();
+        string[] playlists = string.IsNullOrWhiteSpace(playlistsString) ? [] : playlistsString.Split(',');
         return new()
         {
             LevelName = levelname,
