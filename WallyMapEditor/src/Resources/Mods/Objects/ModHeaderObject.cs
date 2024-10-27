@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 
 namespace WallyMapEditor.Mod;
@@ -19,13 +18,12 @@ public sealed class ModHeaderObject
 
     internal static ModHeaderObject Get(Stream stream)
     {
-        Span<byte> buf = stackalloc byte[2];
         _ = (VersionEnum)stream.GetU8();
-        string modName = stream.GetStr(buf);
-        string gameVersionInfo = stream.GetStr(buf);
-        string modVersionInfo = stream.GetStr(buf);
-        string modDescription = stream.GetStr(buf);
-        string creatorInfo = stream.GetStr(buf);
+        string modName = stream.GetStr();
+        string gameVersionInfo = stream.GetStr();
+        string modVersionInfo = stream.GetStr();
+        string modDescription = stream.GetStr();
+        string creatorInfo = stream.GetStr();
         return new()
         {
             ModName = modName,
@@ -38,12 +36,11 @@ public sealed class ModHeaderObject
 
     internal void Put(Stream stream)
     {
-        Span<byte> buf = stackalloc byte[2];
         stream.PutU8((byte)VersionEnum.LATEST);
-        stream.PutStr(buf, ModName);
-        stream.PutStr(buf, GameVersionInfo);
-        stream.PutStr(buf, ModVersionInfo);
-        stream.PutStr(buf, ModDescription);
-        stream.PutStr(buf, CreatorInfo);
+        stream.PutStr(ModName);
+        stream.PutStr(GameVersionInfo);
+        stream.PutStr(ModVersionInfo);
+        stream.PutStr(ModDescription);
+        stream.PutStr(CreatorInfo);
     }
 }

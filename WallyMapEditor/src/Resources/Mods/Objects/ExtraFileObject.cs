@@ -29,15 +29,14 @@ public sealed class ExtraFileObject
 
     internal static ExtraFileObject Get(Stream stream)
     {
-        Span<byte> buf = stackalloc byte[4];
         _ = (VersionEnum)stream.GetU8();
 
         FileTypeEnum fileType = (FileTypeEnum)stream.GetU8();
         if (!Enum.IsDefined(fileType))
             throw new ModSerializationException($"Invalid file type {fileType} in mod file");
 
-        string filePath = stream.GetStr(buf);
-        byte[] fileContent = stream.GetBytes(buf);
+        string filePath = stream.GetStr();
+        byte[] fileContent = stream.GetBytes();
         return new()
         {
             FileType = fileType,
@@ -48,10 +47,9 @@ public sealed class ExtraFileObject
 
     internal void Put(Stream stream)
     {
-        Span<byte> buf = stackalloc byte[4];
         stream.PutU8((byte)VersionEnum.LATEST);
         stream.PutU8((byte)FileType);
-        stream.PutStr(buf, FilePath);
-        stream.PutBytes(buf, FileContent);
+        stream.PutStr(FilePath);
+        stream.PutBytes(FileContent);
     }
 }

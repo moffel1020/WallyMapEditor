@@ -7,51 +7,50 @@ namespace WallyMapEditor.Mod;
 
 internal static class StreamExtensions
 {
-    public static byte[] GetBytes(this Stream stream, Span<byte> buf)
+    public static byte[] GetBytes(this Stream stream)
     {
-        uint length = stream.GetU32(buf);
+        uint length = stream.GetU32();
         byte[] bytesBuf = new byte[length];
         stream.ReadExactly(bytesBuf);
         return bytesBuf;
     }
-    public static void PutBytes(this Stream stream, Span<byte> buf, byte[] value)
+    public static void PutBytes(this Stream stream, byte[] value)
     {
-        stream.PutU32(buf, (uint)value.Length);
+        stream.PutU32((uint)value.Length);
         stream.Write(value);
     }
 
-    public static bool GetB(this Stream stream) => stream.GetU8() != 0;
-    public static void PutB(this Stream stream, bool value) => stream.PutU8((byte)(value ? 1 : 0));
+    public static bool GetBool(this Stream stream) => stream.GetU8() != 0;
+    public static void PutBool(this Stream stream, bool value) => stream.PutU8((byte)(value ? 1 : 0));
 
-    public static string GetStr(this Stream stream, Span<byte> buf)
+    public static string GetStr(this Stream stream)
     {
-        int length = stream.GetU16(buf);
-        Span<byte> strBuf = length >= 1024 ? new byte[length] : stackalloc byte[length];
-        stream.ReadExactly(strBuf);
-        return Encoding.UTF8.GetString(strBuf);
+        int length = stream.GetU16();
+        Span<byte> buf = length >= 1024 ? new byte[length] : stackalloc byte[length];
+        stream.ReadExactly(buf);
+        return Encoding.UTF8.GetString(buf);
     }
-    public static void PutStr(this Stream stream, Span<byte> buf, string value)
+    public static void PutStr(this Stream stream, string value)
     {
-        byte[] strBuf = Encoding.UTF8.GetBytes(value);
-        if (strBuf.Length > ushort.MaxValue)
+        byte[] buf = Encoding.UTF8.GetBytes(value);
+        if (buf.Length > ushort.MaxValue)
             throw new ArgumentException("String is too long");
-        stream.PutU16(buf, (ushort)strBuf.Length);
-        stream.Write(strBuf);
+        stream.PutU16((ushort)buf.Length);
+        stream.Write(buf);
     }
 
-    public static string GetLongStr(this Stream stream, Span<byte> buf)
+    public static string GetLongStr(this Stream stream)
     {
-        uint length = stream.GetU32(buf);
-        Span<byte> strBuf = length >= 1024 ? new byte[length] : stackalloc byte[(int)length];
-        stream.ReadExactly(strBuf);
-        return Encoding.UTF8.GetString(strBuf);
+        uint length = stream.GetU32();
+        Span<byte> buf = length >= 1024 ? new byte[length] : stackalloc byte[(int)length];
+        stream.ReadExactly(buf);
+        return Encoding.UTF8.GetString(buf);
     }
-
-    public static void PutLongStr(this Stream stream, Span<byte> buf, string value)
+    public static void PutLongStr(this Stream stream, string value)
     {
-        byte[] strBuf = Encoding.UTF8.GetBytes(value);
-        stream.PutU32(buf, (uint)strBuf.Length);
-        stream.Write(strBuf);
+        byte[] buf = Encoding.UTF8.GetBytes(value);
+        stream.PutU32((uint)buf.Length);
+        stream.Write(buf);
     }
 
     public static byte GetU8(this Stream stream)
@@ -65,124 +64,146 @@ internal static class StreamExtensions
     public static sbyte GetI8(this Stream stream) => (sbyte)stream.GetU8();
     public static void PutI8(this Stream stream, sbyte value) => stream.PutU8((byte)value);
 
-    public static ushort GetU16(this Stream stream, Span<byte> buf)
+    public static ushort GetU16(this Stream stream)
     {
-        stream.ReadExactly(buf[..2]);
+        Span<byte> buf = stackalloc byte[2];
+        stream.ReadExactly(buf);
         return BinaryPrimitives.ReadUInt16LittleEndian(buf);
     }
-    public static void PutU16(this Stream stream, Span<byte> buf, ushort value)
+    public static void PutU16(this Stream stream, ushort value)
     {
-        BinaryPrimitives.WriteUInt16LittleEndian(buf[..2], value);
-        stream.Write(buf[..2]);
+        Span<byte> buf = stackalloc byte[2];
+        BinaryPrimitives.WriteUInt16LittleEndian(buf, value);
+        stream.Write(buf);
     }
 
-    public static short GetI16(this Stream stream, Span<byte> buf)
+    public static short GetI16(this Stream stream)
     {
-        stream.ReadExactly(buf[..2]);
+        Span<byte> buf = stackalloc byte[2];
+        stream.ReadExactly(buf);
         return BinaryPrimitives.ReadInt16LittleEndian(buf);
     }
-    public static void PutI16(this Stream stream, Span<byte> buf, short value)
+    public static void PutI16(this Stream stream, short value)
     {
-        BinaryPrimitives.WriteInt16LittleEndian(buf[..2], value);
-        stream.Write(buf[..2]);
+        Span<byte> buf = stackalloc byte[2];
+        BinaryPrimitives.WriteInt16LittleEndian(buf, value);
+        stream.Write(buf);
     }
 
-    public static uint GetU32(this Stream stream, Span<byte> buf)
+    public static uint GetU32(this Stream stream)
     {
-        stream.ReadExactly(buf[..4]);
+        Span<byte> buf = stackalloc byte[4];
+        stream.ReadExactly(buf);
         return BinaryPrimitives.ReadUInt32LittleEndian(buf);
     }
-    public static void PutU32(this Stream stream, Span<byte> buf, uint value)
+    public static void PutU32(this Stream stream, uint value)
     {
-        BinaryPrimitives.WriteUInt32LittleEndian(buf[..4], value);
-        stream.Write(buf[..4]);
+        Span<byte> buf = stackalloc byte[4];
+        BinaryPrimitives.WriteUInt32LittleEndian(buf, value);
+        stream.Write(buf);
     }
 
-    public static int GetI32(this Stream stream, Span<byte> buf)
+    public static int GetI32(this Stream stream)
     {
-        stream.ReadExactly(buf[..4]);
+        Span<byte> buf = stackalloc byte[4];
+        stream.ReadExactly(buf);
         return BinaryPrimitives.ReadInt32LittleEndian(buf);
     }
-    public static void PutI32(this Stream stream, Span<byte> buf, int value)
+    public static void PutI32(this Stream stream, int value)
     {
-        BinaryPrimitives.WriteInt32LittleEndian(buf[..4], value);
-        stream.Write(buf[..4]);
+        Span<byte> buf = stackalloc byte[4];
+        BinaryPrimitives.WriteInt32LittleEndian(buf, value);
+        stream.Write(buf);
     }
 
-    public static ulong GetU64(this Stream stream, Span<byte> buf)
+    public static ulong GetU64(this Stream stream)
     {
-        stream.ReadExactly(buf[..8]);
+        Span<byte> buf = stackalloc byte[8];
+        stream.ReadExactly(buf);
         return BinaryPrimitives.ReadUInt64LittleEndian(buf);
     }
-    public static void PutU64(this Stream stream, Span<byte> buf, ulong value)
+    public static void PutU64(this Stream stream, ulong value)
     {
-        BinaryPrimitives.WriteUInt64LittleEndian(buf[..8], value);
-        stream.Write(buf[..8]);
+        Span<byte> buf = stackalloc byte[8];
+        BinaryPrimitives.WriteUInt64LittleEndian(buf, value);
+        stream.Write(buf);
     }
 
-    public static long GetI64(this Stream stream, Span<byte> buf)
+    public static long GetI64(this Stream stream)
     {
-        stream.ReadExactly(buf[..8]);
+        Span<byte> buf = stackalloc byte[8];
+        stream.ReadExactly(buf);
         return BinaryPrimitives.ReadInt64LittleEndian(buf);
     }
-    public static void PutI64(this Stream stream, Span<byte> buf, long value)
+    public static void PutI64(this Stream stream, long value)
     {
-        BinaryPrimitives.WriteInt64LittleEndian(buf[..8], value);
-        stream.Write(buf[..8]);
+        Span<byte> buf = stackalloc byte[8];
+        BinaryPrimitives.WriteInt64LittleEndian(buf, value);
+        stream.Write(buf);
     }
 
-    public static UInt128 GetU128(this Stream stream, Span<byte> buf)
+    public static UInt128 GetU128(this Stream stream)
     {
-        stream.ReadExactly(buf[..16]);
+        Span<byte> buf = stackalloc byte[16];
+        stream.ReadExactly(buf);
         return BinaryPrimitives.ReadUInt128LittleEndian(buf);
     }
-    public static void PutU128(this Stream stream, Span<byte> buf, UInt128 value)
+    public static void PutU128(this Stream stream, UInt128 value)
     {
-        BinaryPrimitives.WriteUInt128LittleEndian(buf[..16], value);
-        stream.Write(buf[..16]);
+        Span<byte> buf = stackalloc byte[16];
+        BinaryPrimitives.WriteUInt128LittleEndian(buf, value);
+        stream.Write(buf);
     }
 
-    public static Int128 GetI128(this Stream stream, Span<byte> buf)
+    public static Int128 GetI128(this Stream stream)
     {
-        stream.ReadExactly(buf[..16]);
+        Span<byte> buf = stackalloc byte[16];
+        stream.ReadExactly(buf);
         return BinaryPrimitives.ReadInt128LittleEndian(buf);
     }
-    public static void PutI128(this Stream stream, Span<byte> buf, Int128 value)
+    public static void PutI128(this Stream stream, Int128 value)
     {
-        BinaryPrimitives.WriteInt128LittleEndian(buf[..16], value);
-        stream.Write(buf[..16]);
+        Span<byte> buf = stackalloc byte[16];
+        BinaryPrimitives.WriteInt128LittleEndian(buf, value);
+        stream.Write(buf);
     }
 
-    public static Half GetF16(this Stream stream, Span<byte> buf)
+    public static Half GetF16(this Stream stream)
     {
-        stream.ReadExactly(buf[..2]);
+        Span<byte> buf = stackalloc byte[2];
+        stream.ReadExactly(buf);
         return BinaryPrimitives.ReadHalfLittleEndian(buf);
     }
-    public static void PutF16(this Stream stream, Span<byte> buf, Half value)
+    public static void PutF16(this Stream stream, Half value)
     {
-        BinaryPrimitives.WriteHalfLittleEndian(buf[..2], value);
-        stream.Write(buf[..2]);
+        Span<byte> buf = stackalloc byte[2];
+        BinaryPrimitives.WriteHalfLittleEndian(buf, value);
+        stream.Write(buf);
     }
 
-    public static float GetF32(this Stream stream, Span<byte> buf)
+    public static float GetF32(this Stream stream)
     {
-        stream.ReadExactly(buf[..4]);
+        Span<byte> buf = stackalloc byte[4];
+        stream.ReadExactly(buf);
         return BinaryPrimitives.ReadSingleLittleEndian(buf);
     }
-    public static void PutF32(this Stream stream, Span<byte> buf, float value)
+    public static void PutF32(this Stream stream, float value)
     {
-        BinaryPrimitives.WriteSingleLittleEndian(buf[..4], value);
-        stream.Write(buf[..4]);
+        Span<byte> buf = stackalloc byte[4];
+        BinaryPrimitives.WriteSingleLittleEndian(buf, value);
+        stream.Write(buf);
     }
 
-    public static double GetF64(this Stream stream, Span<byte> buf)
+    public static double GetF64(this Stream stream)
     {
-        stream.ReadExactly(buf[..8]);
+        Span<byte> buf = stackalloc byte[8];
+        stream.ReadExactly(buf);
         return BinaryPrimitives.ReadDoubleLittleEndian(buf);
     }
-    public static void PutF64(this Stream stream, Span<byte> buf, double value)
+    public static void PutF64(this Stream stream, double value)
     {
-        BinaryPrimitives.WriteDoubleLittleEndian(buf[..8], value);
-        stream.Write(buf[..8]);
+        Span<byte> buf = stackalloc byte[8];
+        BinaryPrimitives.WriteDoubleLittleEndian(buf, value);
+        stream.Write(buf);
     }
 }

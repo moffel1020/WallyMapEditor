@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 
 namespace WallyMapEditor.Mod;
@@ -15,9 +14,8 @@ public sealed class LevelSetTypeObject
 
     internal static LevelSetTypeObject Get(Stream stream)
     {
-        Span<byte> buf = stackalloc byte[2];
         _ = (VersionEnum)stream.GetU8();
-        string elementString = stream.GetStr(buf);
+        string elementString = stream.GetStr();
         return new()
         {
             ElementString = elementString,
@@ -26,8 +24,7 @@ public sealed class LevelSetTypeObject
 
     internal void Put(Stream stream)
     {
-        Span<byte> buf = stackalloc byte[2];
         stream.PutU8((byte)VersionEnum.LATEST);
-        stream.PutStr(buf, ElementString);
+        stream.PutStr(ElementString);
     }
 }

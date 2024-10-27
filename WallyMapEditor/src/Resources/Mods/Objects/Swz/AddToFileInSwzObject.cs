@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 
 namespace WallyMapEditor.Mod;
@@ -17,11 +16,10 @@ public sealed class AddToFileInSwzObject
 
     internal static AddToFileInSwzObject Get(Stream stream)
     {
-        Span<byte> buf = stackalloc byte[4];
         _ = (VersionEnum)stream.GetU8();
         SwzFileEnum swzFile = (SwzFileEnum)stream.GetU8();
-        string fileName = stream.GetStr(buf);
-        string elementContent = stream.GetLongStr(buf);
+        string fileName = stream.GetStr();
+        string elementContent = stream.GetLongStr();
         return new()
         {
             SwzFile = swzFile,
@@ -32,10 +30,9 @@ public sealed class AddToFileInSwzObject
 
     internal void Put(Stream stream)
     {
-        Span<byte> buf = stackalloc byte[4];
         stream.PutU8((byte)VersionEnum.LATEST);
         stream.PutU8((byte)SwzFile);
-        stream.PutStr(buf, FileName);
-        stream.PutLongStr(buf, ElementContent);
+        stream.PutStr(FileName);
+        stream.PutLongStr(ElementContent);
     }
 }

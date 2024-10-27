@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -24,8 +23,7 @@ public sealed class ModFile
 
     public static ModFile Load(Stream stream, bool leaveOpen = false)
     {
-        Span<byte> buf = stackalloc byte[4];
-        ModVersionEnum version = (ModVersionEnum)stream.GetU32(buf);
+        ModVersionEnum version = (ModVersionEnum)stream.GetU32();
         if (version > ModVersionEnum.LATEST)
             throw new ModSerializationException($"Invalid mod file version {version}");
 
@@ -33,7 +31,7 @@ public sealed class ModFile
 
         ObjectTypeEnum firstObject = (ObjectTypeEnum)zLibStream.GetU8();
         if (firstObject != ObjectTypeEnum.Header)
-            throw new ModSerializationException($"Invalid mod file. First object must be the header.");
+            throw new ModSerializationException("Invalid mod file. First object must be the header.");
 
         ModHeaderObject header = ModHeaderObject.Get(zLibStream);
 
@@ -53,7 +51,7 @@ public sealed class ModFile
             switch (objectType)
             {
                 case ObjectTypeEnum.Header:
-                    throw new ModSerializationException($"Invalid mod file. There should only be one header object.");
+                    throw new ModSerializationException("Invalid mod file. There should only be one header object.");
                 case ObjectTypeEnum.LevelDesc:
                     levelDescs.Add(LevelDescObject.Get(zLibStream));
                     break;
@@ -102,8 +100,7 @@ public sealed class ModFile
 
     public void Save(Stream stream, bool leaveOpen = false)
     {
-        Span<byte> buf = stackalloc byte[4];
-        stream.PutU32(buf, (uint)ModVersionEnum.LATEST);
+        stream.PutU32((uint)ModVersionEnum.LATEST);
         using ZLibStream zLibStream = new(stream, CompressionLevel.SmallestSize, leaveOpen);
 
         zLibStream.PutU8((byte)ObjectTypeEnum.Header);

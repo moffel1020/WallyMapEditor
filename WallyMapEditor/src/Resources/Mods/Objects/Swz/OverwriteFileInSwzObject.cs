@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 
 namespace WallyMapEditor.Mod;
@@ -16,10 +15,9 @@ public sealed class OverwriteFileInSwzObject
 
     internal static OverwriteFileInSwzObject Get(Stream stream)
     {
-        Span<byte> buf = stackalloc byte[4];
         _ = (VersionEnum)stream.GetU8();
         SwzFileEnum swzFile = (SwzFileEnum)stream.GetU8();
-        string fileContent = stream.GetLongStr(buf);
+        string fileContent = stream.GetLongStr();
         return new()
         {
             SwzFile = swzFile,
@@ -29,9 +27,8 @@ public sealed class OverwriteFileInSwzObject
 
     internal void Put(Stream stream)
     {
-        Span<byte> buf = stackalloc byte[4];
         stream.PutU8((byte)VersionEnum.LATEST);
         stream.PutU8((byte)SwzFile);
-        stream.PutLongStr(buf, FileContent);
+        stream.PutLongStr(FileContent);
     }
 }
