@@ -92,13 +92,22 @@ public class MapOverviewWindow
 
             _propChanged |= ImGuiExt.InputTextHistory("AssetName", l.Type.AssetName ?? "", val => l.Type.AssetName = val == "" ? null : val, cmd);
             if (ImGui.IsItemHovered()) ImGui.SetTooltip("Note: this doesn't do anything in game");
+
             _propChanged |= ImGuiExt.InputTextHistory("FileName", l.Type.FileName ?? "", val => l.Type.FileName = val == "" ? null : val, cmd);
             if (ImGui.IsItemHovered()) ImGui.SetTooltip("Note: this doesn't do anything in game");
+
             ImGui.Separator();
+
             _propChanged |= ImGuiExt.InputTextHistory("DisplayName", l.Type.DisplayName, val => l.Type.DisplayName = val, cmd);
+            ImGuiExt.HintTooltip(Strings.UI_DISPLAY_NAME_TOOLTIP);
+
             _propChanged |= ImGuiExt.CheckboxHistory("DevOnly", l.Type.DevOnly, val => l.Type.DevOnly = val, cmd);
+
             _propChanged |= ImGuiExt.CheckboxHistory("TestLevel", l.Type.TestLevel, val => l.Type.TestLevel = val, cmd);
+            ImGuiExt.HintTooltip(Strings.UI_TEST_LEVEL_TOOLTIP);
+
             _propChanged |= ImGuiExt.DragNullableUIntHistory("MinNumOnlineGamesBeforeRandom", l.Type.MinNumOnlineGamesBeforeRandom, 0, val => l.Type.MinNumOnlineGamesBeforeRandom = val, cmd, speed: 0.1f);
+
             ImGui.Separator();
 
             ImGui.Text($"Playlists: {l.Playlists.Count}");
@@ -153,6 +162,7 @@ public class MapOverviewWindow
 
             _propChanged |= ImGuiExt.CheckboxHistory("NegateOverlaps##overview", l.Type.NegateOverlaps ?? false, val => l.Type.NegateOverlaps = !val ? null : val, cmd);
             _propChanged |= ImGuiExt.DragUIntHistory("Extra StartFrame##overview", l.Type.StartFrame ?? 0, val => l.Type.StartFrame = val == 0 ? null : val, cmd);
+            ImGuiExt.HintTooltip(Strings.UI_EXTRA_SF_TOOLTIP);
         }
 
         _propChanged |= ImGuiExt.DragDoubleHistory("Default SlowMult##overview", l.Desc.SlowMult, val => l.Desc.SlowMult = val, cmd, speed: 0.05f);
@@ -168,10 +178,13 @@ public class MapOverviewWindow
                 _propChanged |= ImGuiExt.DragUIntHistory("RightKill##killbounds", l.Type.RightKill!.Value, val => l.Type.RightKill = val, cmd);
 
                 _propChanged |= ImGuiExt.CheckboxHistory("SoftTopKill", l.Type.SoftTopKill ?? true, val => l.Type.SoftTopKill = val ? null : val, cmd);
+                ImGuiExt.HintTooltip(Strings.UI_SOFT_TOP_TOOLTIP);
                 using (ImGuiExt.DisabledIf(l.Type.LeftKill < 200))
                     _propChanged |= ImGuiExt.CheckboxHistory("HardLeftKill", l.Type.HardLeftKill ?? false, val => l.Type.HardLeftKill = val ? val : null, cmd);
+                ImGuiExt.HintTooltip(Strings.UI_HARD_LEFT_TOOLTIP);
                 using (ImGuiExt.DisabledIf(l.Type.RightKill < 200))
                     _propChanged |= ImGuiExt.CheckboxHistory("HardRightKill", l.Type.HardRightKill ?? false, val => l.Type.HardRightKill = val ? val : null, cmd);
+                ImGuiExt.HintTooltip(Strings.UI_HARD_RIGHT_TOOLTIP);
             }
         }
 
@@ -197,17 +210,16 @@ public class MapOverviewWindow
         if (ImGui.CollapsingHeader("Sidekick Bounds"))
         {
             ImGui.Text("Spawn bot bounds");
-            ImGui.SameLine();
-            ImGui.TextDisabled("(?)");
-            if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Area for sidekicks to fly in.\nSidekicks are called spawn bots internally");
+            ImGuiExt.HintTooltip(Strings.UI_SIDEKICK_BOUNDS_TOOLTIP);
             _propChanged |= PropertiesWindow.ShowSpawnBotBoundsProps(l.Desc.SpawnBotBounds, cmd);
         }
 
         if (l.Type is not null && ImGui.CollapsingHeader("Bot Behavior##overview"))
         {
             _propChanged |= ImGuiExt.CheckboxHistory("IsClimbMap", l.Type.IsClimbMap ?? false, val => l.Type.IsClimbMap = val ? val : null, cmd);
+            ImGuiExt.HintTooltip(Strings.UI_IS_CLIMB_MAP_TOOLTIP);
             _propChanged |= ImGuiExt.CheckboxHistory("AIStrictRecover", l.Type.AIStrictRecover ?? false, val => l.Type.AIStrictRecover = val ? val : null, cmd);
+            ImGuiExt.HintTooltip(Strings.UI_STRICT_RECOVER_TOOLTIP);
             _propChanged |= ImGuiExt.DragNullableDoubleHistory("AIPanicLine", l.Type.AIPanicLine, 0, val => l.Type.AIPanicLine = val, cmd);
             _propChanged |= ImGuiExt.DragNullableDoubleHistory("AIGroundLine", l.Type.AIGroundLine, 0, val => l.Type.AIGroundLine = val, cmd);
         }
@@ -222,7 +234,8 @@ public class MapOverviewWindow
             _propChanged |= ImGuiExt.NullableColorPicker3History("Outer", crateToWms(l.Type.CrateColorA), WmsColor.FromHex(0xff7c5b), val => l.Type.CrateColorA = wmsToCrate(val), cmd);
             _propChanged |= ImGuiExt.NullableColorPicker3History("Inner", crateToWms(l.Type.CrateColorB), WmsColor.FromHex(0xffc1b3), val => l.Type.CrateColorB = wmsToCrate(val), cmd);
 
-            ImGui.SeparatorText("Midground (doesn't do anything ingame)");
+            ImGui.SeparatorText("Midground");
+            ImGuiExt.HintTooltip(Strings.UI_MIDGROUND_SECTION_TOOLTIP);
             _propChanged |= ImGuiExt.ColorPicker3HexHistory("Midground tint", l.Type.MidgroundTint ?? 0, val => l.Type.MidgroundTint = val, cmd);
             _propChanged |= ImGuiExt.DragDoubleHistory("Midground tint fraction", l.Type.MidgroundFraction ?? 0, val => l.Type.MidgroundFraction = val == 0 ? null : val, cmd, minValue: 0, maxValue: 1, speed: 0.05f);
             _propChanged |= ImGuiExt.ColorPicker3HexHistory("Midground tint offset", l.Type.MidgroundOffset ?? 0, val => l.Type.MidgroundOffset = val, cmd);
