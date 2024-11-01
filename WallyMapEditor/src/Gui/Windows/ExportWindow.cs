@@ -258,7 +258,7 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
         ImGui.Text("preview");
 
         if (_descPreview is not null)
-            ImGui.InputTextMultiline("leveldesc##preview", ref _descPreview, uint.MaxValue, new Vector2(-1, ImGui.GetTextLineHeight() * PREVIEW_SIZE));
+            ImGui.InputTextMultiline("leveldesc##preview", ref _descPreview, uint.MaxValue, new Vector2(-1, ImGui.GetTextLineHeight() * PREVIEW_SIZE), ImGuiInputTextFlags.ReadOnly);
         else if (ImGui.Button("Generate preview"))
             _descPreview = WmeUtils.SerializeToString(ld, bhstyle: true);
 
@@ -285,7 +285,7 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
 
         ImGui.Text("preview");
         if (_typePreview is not null)
-            ImGui.InputTextMultiline("leveltype##preview", ref _typePreview, uint.MaxValue, new Vector2(-1, ImGui.GetTextLineHeight() * PREVIEW_SIZE));
+            ImGui.InputTextMultiline("leveltype##preview", ref _typePreview, uint.MaxValue, new Vector2(-1, ImGui.GetTextLineHeight() * PREVIEW_SIZE), ImGuiInputTextFlags.ReadOnly);
         else if (ImGui.Button("Generate preview"))
             _typePreview = WmeUtils.SerializeToString(l.Type, bhstyle: true);
 
