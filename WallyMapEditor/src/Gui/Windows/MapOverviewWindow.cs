@@ -80,11 +80,14 @@ public class MapOverviewWindow
 
         if (l.Type is not null)
         {
-            _propChanged |= ImGuiExt.DragUIntHistory("LevelID", l.Type.LevelID, val => l.Type.LevelID = val, cmd, maxValue: 255);
+            _propChanged |= ImGuiExt.InputUIntHistory("LevelID", l.Type.LevelID, val => l.Type.LevelID = val, cmd);
             ImGui.SameLine();
             ImGui.Text("(!)");
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("There must not be two maps with the same LevelID");
+
+            if (l.Type.LevelID > 255)
+                ImGui.Text("WARNING: LevelID must be less than 255");
             ImGui.Separator();
 
             _propChanged |= ImGuiExt.InputTextHistory("AssetName", l.Type.AssetName ?? "", val => l.Type.AssetName = val == "" ? null : val, cmd);

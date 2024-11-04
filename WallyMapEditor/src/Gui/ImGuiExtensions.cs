@@ -51,6 +51,17 @@ public static class ImGuiExt
         }
     }
 
+    public static void InputUInt(string label, ref uint value, uint step = 1, uint stepFast = 100)
+    {
+        unsafe
+        {
+            IntPtr valuePtr = (IntPtr)Unsafe.AsPointer(ref value);
+            IntPtr stepPtr = (IntPtr)(&step);
+            IntPtr stepFastPtr = (IntPtr)(&stepFast);
+            ImGui.InputScalar(label, ImGuiDataType.U32, valuePtr, stepPtr, stepFastPtr);
+        }
+    }
+
     public static uint DragUInt(string label, uint value, float speed = 1, uint minValue = uint.MinValue, uint maxValue = uint.MaxValue)
     {
         DragUInt(label, ref value, speed, minValue, maxValue);
@@ -61,6 +72,13 @@ public static class ImGuiExt
     {
         double v = value;
         DragDouble(label, ref v, speed, minValue, maxValue);
+        return v;
+    }
+
+    public static uint InputUInt(string label, uint value, uint step = 1, uint stepFast = 100)
+    {
+        uint v = value;
+        InputUInt(label, ref v, step, stepFast);
         return v;
     }
 
@@ -331,6 +349,19 @@ public static class ImGuiExt
     {
         uint oldVal = value;
         uint newVal = DragUInt(label, value, speed, minValue, maxValue);
+        if (newVal != oldVal)
+        {
+            cmd.Add(new PropChangeCommand<uint>(changeCommand, oldVal, newVal));
+            return true;
+        }
+
+        return false;
+    }
+
+    public static bool InputUIntHistory(string label, uint value, Action<uint> changeCommand, CommandHistory cmd, uint step = 1, uint stepFast = 100)
+    {
+        uint oldVal = value;
+        uint newVal = InputUInt(label, value, step, stepFast);
         if (newVal != oldVal)
         {
             cmd.Add(new PropChangeCommand<uint>(changeCommand, oldVal, newVal));
