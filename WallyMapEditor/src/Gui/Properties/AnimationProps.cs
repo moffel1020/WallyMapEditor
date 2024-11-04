@@ -12,10 +12,10 @@ public partial class PropertiesWindow
 
         propChanged |= ImGuiExt.DragNullableIntHistory("NumFrames", anim.NumFrames, LastKeyFrameNum(anim.KeyFrames), val => anim.NumFrames = val, cmd, minValue: LastKeyFrameNum(anim.KeyFrames));
         propChanged |= ImGuiExt.DragNullableDoubleHistory("SlowMult", anim.SlowMult, 1, val => anim.SlowMult = val, cmd, speed: 0.05f);
-        propChanged |= ImGuiExt.DragIntHistory("StartFrame", anim.StartFrame, val => anim.StartFrame = val, cmd, minValue: 0, maxValue: anim.NumFrames ?? int.MaxValue);
+        propChanged |= ImGuiExt.DragUIntHistory("StartFrame", anim.StartFrame, val => anim.StartFrame = val, cmd, maxValue: (uint?)anim.NumFrames ?? uint.MaxValue);
         propChanged |= ImGuiExt.CheckboxHistory("EaseIn", anim.EaseIn, val => anim.EaseIn = val, cmd);
         propChanged |= ImGuiExt.CheckboxHistory("EaseOut", anim.EaseOut, val => anim.EaseOut = val, cmd);
-        propChanged |= ImGuiExt.DragIntHistory("EasePower", anim.EasePower, val => anim.EasePower = val, cmd, minValue: 2);
+        propChanged |= ImGuiExt.DragUIntHistory("EasePower", anim.EasePower, val => anim.EasePower = val, cmd, minValue: 2);
 
         if (anim.HasCenter)
         {

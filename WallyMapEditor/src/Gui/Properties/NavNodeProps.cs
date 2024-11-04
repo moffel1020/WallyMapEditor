@@ -29,11 +29,11 @@ public partial class PropertiesWindow
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("If the new ID already exists this NavID will not be renamed");
 
-            if (!removed && int.TryParse(newIDText, out int newID))
+            if (!removed && uint.TryParse(newIDText, out uint newID))
             {
                 if (!NavIDExists(newID, data.Level.Desc))
                 {
-                    cmd.Add(new PropChangeCommand<int>(val => RenameNavID(n, val, data.Level.Desc), n.NavID, newID));
+                    cmd.Add(new PropChangeCommand<uint>(val => RenameNavID(n, val, data.Level.Desc), n.NavID, newID));
                     cmd.SetAllowMerge(false);
                 }
             }
@@ -55,8 +55,8 @@ public partial class PropertiesWindow
                 int index = i;
                 remove = () =>
                 {
-                    (int, NavNodeTypeEnum)[] result = WmeUtils.RemoveAt(n.Path, index);
-                    cmd.Add(new PropChangeCommand<(int, NavNodeTypeEnum)[]>(val => n.Path = val, n.Path, result));
+                    (uint, NavNodeTypeEnum)[] result = WmeUtils.RemoveAt(n.Path, index);
+                    cmd.Add(new PropChangeCommand<(uint, NavNodeTypeEnum)[]>(val => n.Path = val, n.Path, result));
                     cmd.SetAllowMerge(false);
                     propChanged = true;
                 };
@@ -74,7 +74,7 @@ public partial class PropertiesWindow
                 {
                     if (node.NavID != n.NavID && ImGui.Selectable($"{node.NavID}##pathselect"))
                     {
-                        cmd.Add(new PropChangeCommand<(int, NavNodeTypeEnum)[]>(val => n.Path = val, n.Path, [.. n.Path, (node.NavID, node.Type)]));
+                        cmd.Add(new PropChangeCommand<(uint, NavNodeTypeEnum)[]>(val => n.Path = val, n.Path, [.. n.Path, (node.NavID, node.Type)]));
                         cmd.SetAllowMerge(false);
                     }
                 }
@@ -100,18 +100,18 @@ public partial class PropertiesWindow
         _ => Enum.Parse<NavNodeTypeEnum>(s),
     };
 
-    private static bool RenameNavID(NavNode toRename, int newID, LevelDesc ld)
+    private static bool RenameNavID(NavNode toRename, uint newID, LevelDesc ld)
     {
         if (NavIDExists(newID, ld)) return false;
 
-        int oldID = toRename.NavID;
+        uint oldID = toRename.NavID;
         toRename.NavID = newID;
 
         foreach (NavNode node in EnumerateNavNodes(ld))
         {
             for (int i = 0; i < node.Path.Length; i++)
             {
-                (int id, NavNodeTypeEnum type) = node.Path[i];
+                (uint id, NavNodeTypeEnum type) = node.Path[i];
                 if (id == oldID)
                     node.Path[i] = (newID, type);
             }
@@ -136,7 +136,7 @@ public partial class PropertiesWindow
         }
     }
 
-    private static bool NavIDExists(int id, LevelDesc ld) =>
+    private static bool NavIDExists(uint id, LevelDesc ld) =>
         EnumerateNavNodes(ld).Any(n => n.NavID == id);
 
     public static NavNode DefaultNavNode(double posX, double posY, LevelDesc desc) => new()

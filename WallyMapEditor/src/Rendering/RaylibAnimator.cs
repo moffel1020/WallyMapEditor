@@ -27,7 +27,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         public required bool Visible { get; set; }
     }
 
-    public void DrawAnim(Gfx gfx, string animName, int frame, WmsTransform trans, DrawPriorityEnum priority, object? caller, int loopLimit = -1)
+    public void DrawAnim(Gfx gfx, string animName, int frame, WmsTransform trans, DrawPriorityEnum priority, object? caller, uint? loopLimit = null)
     {
         BoneSprite[] bones = BuildAnim(gfx, animName, frame, trans, loopLimit);
         foreach (BoneSprite bone in bones)
@@ -46,7 +46,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         }
     }
 
-    public int? GetAnimationFrameCount(Gfx gfx, string animName)
+    public uint? GetAnimationFrameCount(Gfx gfx, string animName)
     {
         // TODO: check how exactly the game does this
         if (gfx.AnimFile.StartsWith("SFX_"))
@@ -58,7 +58,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
             SwfSprite? sprite = loader.LoadSpriteFromSwf(gfx.AnimFile, spriteId);
             if (sprite is null)
                 return null;
-            return sprite.Frames.Length;
+            return (uint)sprite.Frames.Length;
         }
         // anm animation
         else if (gfx.AnimFile.StartsWith("Animation_"))
@@ -66,7 +66,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
             if (!loader.AnmClasses.TryGetValue($"{gfx.AnimFile}/{gfx.AnimClass}", out AnmClass? anmClass))
                 return null;
             AnmAnimation animation = anmClass.Animations[animName];
-            return animation.Frames.Length;
+            return (uint)animation.Frames.Length;
         }
         return null;
     }
@@ -194,7 +194,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         return rect.RenderTexture.Texture;
     }
 
-    private (double x, double y, double w, double h)? CalculateAnimBounds(Gfx gfx, string animName, int frame, WmsTransform trans, int loopLimit = -1)
+    private (double x, double y, double w, double h)? CalculateAnimBounds(Gfx gfx, string animName, int frame, WmsTransform trans, uint? loopLimit = null)
     {
         BoneSprite[] bones = BuildAnim(gfx, animName, frame, trans, loopLimit);
         double xMin = double.MaxValue, xMax = double.MinValue, yMin = double.MaxValue, yMax = double.MinValue;
@@ -231,7 +231,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
 
 
     #region building
-    private BoneSprite[] BuildAnim(Gfx gfx, string animName, int frame, WmsTransform trans, int loopLimit = -1)
+    private BoneSprite[] BuildAnim(Gfx gfx, string animName, int frame, WmsTransform trans, uint? loopLimit = null)
     {
         trans *= WmsTransform.CreateScale(gfx.AnimScale, gfx.AnimScale);
         // TODO: check how the game does this
@@ -251,7 +251,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
                 return [];
             AnmAnimation animation = anmClass.Animations[animName];
 
-            if (loopLimit != -1 && Math.Abs(frame) >= loopLimit * animation.Frames.Length)
+            if (loopLimit is not null && Math.Abs(frame) >= loopLimit.Value * animation.Frames.Length)
                 return [];
             AnmFrame anmFrame = animation.Frames[BrawlhallaMath.SafeMod(frame, animation.Frames.Length)];
 
@@ -504,7 +504,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         return null;
     }
 
-    private BoneSprite[] BuildSwfSprite(string filePath, ushort spriteId, int frame, double animScale, uint tint, double opacity, WmsTransform trans, int loopLimit = -1)
+    private BoneSprite[] BuildSwfSprite(string filePath, ushort spriteId, int frame, double animScale, uint tint, double opacity, WmsTransform trans, uint? loopLimit = null)
     {
         SwfFileData? file = loader.LoadSwf(filePath);
         if (file is null) return [];

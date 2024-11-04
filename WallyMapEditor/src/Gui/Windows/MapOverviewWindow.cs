@@ -159,7 +159,7 @@ public class MapOverviewWindow
         if (l.Type is not null)
         {
             _propChanged |= ImGuiExt.CheckboxHistory("NegateOverlaps##overview", l.Type.NegateOverlaps ?? false, val => l.Type.NegateOverlaps = !val ? null : val, cmd);
-            _propChanged |= ImGuiExt.DragIntHistory("Extra StartFrame##overview", l.Type.StartFrame ?? 0, val => l.Type.StartFrame = val == 0 ? null : val, cmd);
+            _propChanged |= ImGuiExt.DragUIntHistory("Extra StartFrame##overview", l.Type.StartFrame ?? 0, val => l.Type.StartFrame = val == 0 ? null : val, cmd);
         }
         _propChanged |= ImGuiExt.DragDoubleHistory("Default SlowMult##overview", l.Desc.SlowMult, val => l.Desc.SlowMult = val, cmd, speed: 0.05f);
         _propChanged |= ImGuiExt.DragIntHistory("Default NumFrames##overview", l.Desc.NumFrames, val => l.Desc.NumFrames = val, cmd, minValue: 0);
@@ -168,10 +168,10 @@ public class MapOverviewWindow
         {
             if (ImGui.CollapsingHeader("Kill Bounds##overview"))
             {
-                _propChanged |= ImGuiExt.DragIntHistory("TopKill##killbounds", l.Type.TopKill!.Value, val => l.Type.TopKill = val, cmd, minValue: 1);
-                _propChanged |= ImGuiExt.DragIntHistory("BottomKill##killbounds", l.Type.BottomKill!.Value, val => l.Type.BottomKill = val, cmd, minValue: 1);
-                _propChanged |= ImGuiExt.DragIntHistory("LeftKill##killbounds", l.Type.LeftKill!.Value, val => l.Type.LeftKill = val, cmd, minValue: 1);
-                _propChanged |= ImGuiExt.DragIntHistory("RightKill##killbounds", l.Type.RightKill!.Value, val => l.Type.RightKill = val, cmd, minValue: 1);
+                _propChanged |= ImGuiExt.DragUIntHistory("TopKill##killbounds", l.Type.TopKill!.Value, val => l.Type.TopKill = val, cmd);
+                _propChanged |= ImGuiExt.DragUIntHistory("BottomKill##killbounds", l.Type.BottomKill!.Value, val => l.Type.BottomKill = val, cmd);
+                _propChanged |= ImGuiExt.DragUIntHistory("LeftKill##killbounds", l.Type.LeftKill!.Value, val => l.Type.LeftKill = val, cmd);
+                _propChanged |= ImGuiExt.DragUIntHistory("RightKill##killbounds", l.Type.RightKill!.Value, val => l.Type.RightKill = val, cmd);
 
                 _propChanged |= ImGuiExt.CheckboxHistory("SoftTopKill", l.Type.SoftTopKill ?? true, val => l.Type.SoftTopKill = val ? null : val, cmd);
                 ImGuiExt.WithDisabled(l.Type.LeftKill < 200, () =>

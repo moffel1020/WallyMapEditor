@@ -13,8 +13,8 @@ public partial class PropertiesWindow
 
         bool propChanged = false;
         ImGui.Text("SoundEventName: " + ls.SoundEventName);
-        propChanged |= ImGuiExt.DragIntHistory("Interval", ls.Interval, val => ls.Interval = val, cmd, minValue: 0, speed: 16);
-        propChanged |= ImGuiExt.DragIntHistory("Delay", ls.Delay, val => ls.Delay = val, cmd, minValue: 0, speed: 16);
+        propChanged |= ImGuiExt.DragUIntHistory("Interval", ls.Interval, val => ls.Interval = val, cmd, speed: 16);
+        propChanged |= ImGuiExt.DragUIntHistory("Delay", ls.Delay, val => ls.Delay = val, cmd, speed: 16);
         return propChanged;
     }
 }

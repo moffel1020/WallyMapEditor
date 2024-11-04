@@ -21,7 +21,7 @@ public partial class PropertiesWindow
         ImGui.Spacing();
         propChanged |= ImGuiExt.NullableCheckboxHistory("EaseIn", k.EaseIn, false, val => k.EaseIn = val, cmd);
         propChanged |= ImGuiExt.NullableCheckboxHistory("EaseOut", k.EaseOut, false, val => k.EaseOut = val, cmd);
-        propChanged |= ImGuiExt.DragNullableIntHistory("EasePower", k.EasePower, 2, val => k.EasePower = val, cmd, minValue: 2);
+        propChanged |= ImGuiExt.DragNullableUIntHistory("EasePower", k.EasePower, 2, val => k.EasePower = val, cmd, minValue: 2);
 
         return propChanged;
     }

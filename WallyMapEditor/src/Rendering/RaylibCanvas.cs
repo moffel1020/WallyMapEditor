@@ -119,12 +119,12 @@ public class RaylibCanvas : ICanvas
         ), (int)priority);
     }
 
-    public void DrawAnim(Gfx gfx, string animName, int frame, WmsTransform trans, DrawPriorityEnum priority, object? caller, int loopLimit = -1)
+    public void DrawAnim(Gfx gfx, string animName, int frame, WmsTransform trans, DrawPriorityEnum priority, object? caller, uint? loopLimit = null)
     {
         Animator.DrawAnim(gfx, animName, frame, trans, priority, caller, loopLimit);
     }
 
-    public int? GetAnimationFrameCount(Gfx gfx, string animName)
+    public uint? GetAnimationFrameCount(Gfx gfx, string animName)
     {
         return Animator.GetAnimationFrameCount(gfx, animName);
     }

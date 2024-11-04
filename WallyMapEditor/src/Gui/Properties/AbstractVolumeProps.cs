@@ -17,10 +17,10 @@ public partial class PropertiesWindow
         propChanged |= ImGuiExt.DragIntHistory($"Y##props{v.GetHashCode()}", v.Y, val => v.Y = val, cmd);
         propChanged |= ImGuiExt.DragIntHistory($"W##props{v.GetHashCode()}", v.W, val => v.W = val, cmd, minValue: 1);
         propChanged |= ImGuiExt.DragIntHistory($"H##props{v.GetHashCode()}", v.H, val => v.H = val, cmd, minValue: 1);
-        int newTeam = int.Parse(ImGuiExt.StringCombo($"Team##props{v.GetHashCode()}", v.Team.ToString(), ["0", "1", "2", "3", "4", "5"]));
+        uint newTeam = uint.Parse(ImGuiExt.StringCombo($"Team##props{v.GetHashCode()}", v.Team.ToString(), ["0", "1", "2", "3", "4", "5"]));
         if (v.Team != newTeam)
         {
-            cmd.Add(new PropChangeCommand<int>(val => v.Team = val, v.Team, newTeam));
+            cmd.Add(new PropChangeCommand<uint>(val => v.Team = val, v.Team, newTeam));
             propChanged = true;
         }
         return propChanged;

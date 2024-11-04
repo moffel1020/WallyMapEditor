@@ -22,7 +22,7 @@ partial class PropertiesWindow
         propChanged |= ImGuiExt.DragDoubleHistory("SkewX", ab.Skew_X, val => ab.Skew_X = BrawlhallaMath.SafeMod(val, 360.0), cmd, speed: 0.1f);
         propChanged |= ImGuiExt.DragDoubleHistory("SkewY", ab.Skew_Y, val => ab.Skew_Y = BrawlhallaMath.SafeMod(val, 360.0), cmd, speed: 0.1f);
         propChanged |= ImGuiExt.DragDoubleHistory("Rotation", ab.Rotation, val => ab.Rotation = BrawlhallaMath.SafeMod(val, 360.0), cmd, speed: 0.1f);
-        propChanged |= ImGuiExt.DragIntHistory("FrameOffset", ab.FrameOffset, val => ab.FrameOffset = val, cmd);
+        propChanged |= ImGuiExt.DragUIntHistory("FrameOffset", ab.FrameOffset, val => ab.FrameOffset = val, cmd);
         propChanged |= ImGuiExt.CheckboxHistory("ForceDraw", ab.ForceDraw, val => ab.ForceDraw = val, cmd);
         return propChanged;
     }

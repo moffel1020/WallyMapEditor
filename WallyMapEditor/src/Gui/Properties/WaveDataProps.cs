@@ -19,7 +19,7 @@ public partial class PropertiesWindow
         propChanged |= ImGuiExt.DragNullableDoubleHistory("Speed3", w.Speed3, w.Speed ?? 8, val => w.Speed3 = val, cmd, minValue: 0);
         propChanged |= ImGuiExt.DragNullableDoubleHistory("Speed4", w.Speed4, w.Speed3 ?? w.Speed ?? 8, val => w.Speed4 = val, cmd, minValue: 0);
         // use nullable-like editing to be more user friendly (0 means no loop)
-        propChanged |= ImGuiExt.DragNullableIntHistory("LoopIdx", w.LoopIdx == 0 ? null : w.LoopIdx, 1, val => w.LoopIdx = val ?? 0, cmd, minValue: 1, maxValue: w.Groups.Length - 1);
+        propChanged |= ImGuiExt.DragNullableUIntHistory("LoopIdx", w.LoopIdx == 0 ? null : w.LoopIdx, 1, val => w.LoopIdx = val ?? 0, cmd, minValue: 1, maxValue: (uint)w.Groups.Length - 1);
         if (ImGui.CollapsingHeader($"CustomPaths##props{w.GetHashCode()}"))
         {
             propChanged |= ImGuiExt.EditArrayHistory("##custompathslist", w.CustomPaths, val => w.CustomPaths = val,
@@ -89,17 +89,17 @@ public partial class PropertiesWindow
     {
         bool propChanged = false;
         ImGui.SeparatorText("Count");
-        propChanged |= ImGuiExt.DragNullableIntHistory("Count", g.Count, 1, val => g.Count = val, cmd, minValue: 0);
-        propChanged |= ImGuiExt.DragNullableIntHistory("Count3", g.Count3, g.Count ?? 1, val => g.Count3 = val, cmd, minValue: 0);
-        propChanged |= ImGuiExt.DragNullableIntHistory("Count4", g.Count4, g.Count3 ?? g.Count ?? 1, val => g.Count4 = val, cmd, minValue: 0);
+        propChanged |= ImGuiExt.DragNullableUIntHistory("Count", g.Count, 1, val => g.Count = val, cmd);
+        propChanged |= ImGuiExt.DragNullableUIntHistory("Count3", g.Count3, g.Count ?? 1, val => g.Count3 = val, cmd);
+        propChanged |= ImGuiExt.DragNullableUIntHistory("Count4", g.Count4, g.Count3 ?? g.Count ?? 1, val => g.Count4 = val, cmd);
         ImGui.SeparatorText("Delay");
-        propChanged |= ImGuiExt.DragNullableIntHistory("Delay", g.Delay, 0, val => g.Delay = val, cmd, speed: 100, minValue: 0);
-        propChanged |= ImGuiExt.DragNullableIntHistory("Delay3", g.Delay3, g.Delay ?? 0, val => g.Delay3 = val, cmd, speed: 100, minValue: 0);
-        propChanged |= ImGuiExt.DragNullableIntHistory("Delay4", g.Delay4, g.Delay3 ?? g.Delay ?? 0, val => g.Delay4 = val, cmd, speed: 100, minValue: 0);
+        propChanged |= ImGuiExt.DragNullableUIntHistory("Delay", g.Delay, 0, val => g.Delay = val, cmd, speed: 100);
+        propChanged |= ImGuiExt.DragNullableUIntHistory("Delay3", g.Delay3, g.Delay ?? 0, val => g.Delay3 = val, cmd, speed: 100);
+        propChanged |= ImGuiExt.DragNullableUIntHistory("Delay4", g.Delay4, g.Delay3 ?? g.Delay ?? 0, val => g.Delay4 = val, cmd, speed: 100);
         ImGui.SeparatorText("Stagger");
-        propChanged |= ImGuiExt.DragNullableIntHistory("Stagger", g.Stagger, 500, val => g.Stagger = val, cmd, speed: 100, minValue: 0);
-        propChanged |= ImGuiExt.DragNullableIntHistory("Stagger3", g.Stagger3, g.Stagger ?? 500, val => g.Stagger3 = val, cmd, speed: 100, minValue: 0);
-        propChanged |= ImGuiExt.DragNullableIntHistory("Stagger4", g.Stagger4, g.Stagger3 ?? g.Stagger ?? 500, val => g.Stagger4 = val, cmd, speed: 100, minValue: 0);
+        propChanged |= ImGuiExt.DragNullableUIntHistory("Stagger", g.Stagger, 500, val => g.Stagger = val, cmd, speed: 100);
+        propChanged |= ImGuiExt.DragNullableUIntHistory("Stagger3", g.Stagger3, g.Stagger ?? 500, val => g.Stagger3 = val, cmd, speed: 100);
+        propChanged |= ImGuiExt.DragNullableUIntHistory("Stagger4", g.Stagger4, g.Stagger3 ?? g.Stagger ?? 500, val => g.Stagger4 = val, cmd, speed: 100);
         ImGui.SeparatorText("Demons");
         propChanged |= ImGuiExt.EnumComboHistory("Dir", g.Dir, val => g.Dir = val, cmd);
         // Path is either an enum or an int between 0 and 19
@@ -155,7 +155,7 @@ public partial class PropertiesWindow
     public static WaveData DefaultWaveData(LevelDesc desc) => new()
     {
         // max ID + 1, or ID 0 if none exist
-        ID = desc.WaveDatas.Select(w => w.ID).DefaultIfEmpty(-1).Max() + 1,
+        ID = desc.WaveDatas.Select(w => w.ID + 1).DefaultIfEmpty(0u).Max(),
         LoopIdx = 0,
         CustomPaths = [],
         Groups = [],

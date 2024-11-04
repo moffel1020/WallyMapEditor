@@ -48,7 +48,7 @@ partial class PropertiesWindow
         ImGui.Text("Interval: " + la.Interval);
         ImGui.Text("IntervalRand: " + la.IntervalRand);
         // this one is fine
-        propChanged |= ImGuiExt.DragIntHistory("LoopIterations", la.LoopIterations, val => la.LoopIterations = val, cmd, minValue: 0);
+        propChanged |= ImGuiExt.DragUIntHistory("LoopIterations", la.LoopIterations, val => la.LoopIterations = val, cmd);
 
         return propChanged;
     }
