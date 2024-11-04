@@ -14,9 +14,11 @@ public static class NewLevelModal
     public static void Open() => _shouldOpen = true;
 
     private static string _newLevelName = "";
-    private static string _newLevelDir = "";
+    private static string? _newLevelDir = null;
     private static string _newDisplayName = "";
     private static bool _addToPlaylists = true;
+
+    private static string? _levelDirSelectError = null;
 
     public static void Update(LevelLoader loader, PathPreferences prefs)
     {
@@ -25,6 +27,7 @@ public static class NewLevelModal
             ImGui.OpenPopup(NAME);
             _shouldOpen = false;
             _open = true;
+            _levelDirSelectError = null;
         }
         if (!ImGui.BeginPopupModal(NAME, ref _open)) return;
 
@@ -36,11 +39,45 @@ public static class NewLevelModal
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip("Unique name of the level, this will be used as the name of the asset folder.\nIf another map exists with this LevelName, it will be overwritten.");
 
-        _newLevelDir = ImGuiExt.InputTextWithFilter("AssetDir", _newLevelDir, 64);
-        ImGui.SameLine();
-        ImGui.TextDisabled("(?)");
-        if (ImGui.IsItemHovered())
-            ImGui.SetTooltip("The folder name to take assets from. Leave empty to use the LevelName.");
+        if (prefs.BrawlhallaPath is not null)
+        {
+            if (ImGui.Button("Select AssetDir"))
+            {
+                string mapArtPath = Path.Combine(prefs.BrawlhallaPath, "mapArt");
+                Task.Run(() =>
+                {
+                    DialogResult dialogResult = Dialog.FolderPicker(mapArtPath);
+                    if (dialogResult.IsOk)
+                    {
+                        string path = dialogResult.Path;
+                        string dir = Path.GetRelativePath(mapArtPath, path).Replace("\\", "/");
+                        if (!WmeUtils.IsInDirectory(prefs.BrawlhallaPath, path))
+                        {
+                            _levelDirSelectError = "AssetDir has to be inside the brawlhalla directory";
+                        }
+                        else
+                        {
+                            _newLevelDir = dir;
+                        }
+                    }
+                });
+            }
+            if (_newLevelDir is not null)
+            {
+                ImGui.SameLine();
+                ImGui.Text(_newLevelDir);
+            }
+            ImGui.SameLine();
+            ImGui.TextDisabled("(?)");
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("The folder name to take assets from. Leave empty to use the LevelName.");
+        }
+        if (_levelDirSelectError is not null)
+        {
+            ImGui.PushTextWrapPos();
+            ImGui.Text("[Error]: " + _levelDirSelectError);
+            ImGui.PopTextWrapPos();
+        }
 
         ImGui.InputText("DisplayName", ref _newDisplayName, 64);
         ImGui.SameLine();
