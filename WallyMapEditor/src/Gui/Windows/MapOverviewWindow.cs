@@ -22,15 +22,6 @@ public class MapOverviewWindow
     private string? _thumbnailSelectError;
     private string? _assetDirSelectError;
 
-    // type ImGuiInputTextCallback
-    public unsafe static int LevelNameFilter(ImGuiInputTextCallbackData* data) => (char)data->EventChar switch
-    {
-        >= 'a' and <= 'z' => 0,
-        >= 'A' and <= 'Z' => 0,
-        >= '0' and <= '9' => 0,
-        _ => 1,
-    };
-
     public void Show(Level l, CommandHistory cmd, PathPreferences pathPrefs, AssetLoader? loader, SelectionContext selection)
     {
         ImGui.Begin("Map Overview", ref _open);
@@ -41,57 +32,59 @@ public class MapOverviewWindow
             cmd.SetAllowMerge(false);
         }
 
+        _propChanged |= ImGuiExt.InputTextWithFilterHistory("LevelName", l.Desc.LevelName, val =>
+        {
+            l.Desc.LevelName = val;
+            if (l.Type is not null) l.Type.LevelName = val;
+        }, cmd);
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("Warning: when exporting, the LevelName is used as the name of a new map.\nIf another map exists with that LevelName, it will be overwritten.");
+        }
+
+        ImGui.Text("AssetDir: " + l.Desc.AssetDir);
+        if (pathPrefs.BrawlhallaPath is not null)
+        {
+            ImGui.SameLine();
+            if (ImGui.Button("Select##AssetDir"))
+            {
+                string mapArtPath = Path.Combine(pathPrefs.BrawlhallaPath, "mapArt");
+                Task.Run(() =>
+                {
+                    DialogResult dialogResult = Dialog.FolderPicker(mapArtPath);
+                    if (dialogResult.IsOk)
+                    {
+                        string path = dialogResult.Path;
+                        string newAssetDir = Path.GetRelativePath(mapArtPath, path).Replace("\\", "/");
+                        if (!WmeUtils.IsInDirectory(pathPrefs.BrawlhallaPath, path))
+                        {
+                            _assetDirSelectError = "AssetDir has to be inside the brawlhalla directory";
+                        }
+                        else if (newAssetDir != l.Desc.AssetDir)
+                        {
+                            cmd.Add(new PropChangeCommand<string>(val => l.Desc.AssetDir = val, l.Desc.AssetDir, newAssetDir));
+                            _propChanged = true;
+                            _assetDirSelectError = null;
+                            loader?.ClearCache();
+                        }
+                    }
+                });
+            }
+            if (_assetDirSelectError is not null)
+            {
+                ImGui.PushTextWrapPos();
+                ImGui.Text("[Error]: " + _assetDirSelectError);
+                ImGui.PopTextWrapPos();
+            }
+        }
+
         if (l.Type is not null)
         {
-            string newLevelName;
-            unsafe { newLevelName = ImGuiExt.InputTextWithCallback("LevelName", l.Type.LevelName, LevelNameFilter, flags: ImGuiInputTextFlags.CallbackCharFilter); }
+            _propChanged |= ImGuiExt.DragUIntHistory("LevelID", l.Type.LevelID, val => l.Type.LevelID = val, cmd, maxValue: 255);
+            ImGui.SameLine();
+            ImGui.Text("(!)");
             if (ImGui.IsItemHovered())
-            {
-                ImGui.SetTooltip("Warning: when exporting, the LevelName is used as the name of a new map.\nIf another map exists with that LevelName, it will be overwritten.");
-            }
-            if (newLevelName != l.Type.LevelName)
-            {
-                cmd.Add(new PropChangeCommand<string>(val => l.Type.LevelName = l.Desc.LevelName = val, l.Type.LevelName, newLevelName));
-                _propChanged = true;
-            }
-
-            ImGui.Text("AssetDir: " + l.Desc.AssetDir);
-            if (pathPrefs.BrawlhallaPath is not null)
-            {
-                ImGui.SameLine();
-                if (ImGui.Button("Select##AssetDir"))
-                {
-                    string mapArtPath = Path.Combine(pathPrefs.BrawlhallaPath, "mapArt");
-                    Task.Run(() =>
-                    {
-                        DialogResult dialogResult = Dialog.FolderPicker(mapArtPath);
-                        if (dialogResult.IsOk)
-                        {
-                            string path = dialogResult.Path;
-                            string newAssetDir = Path.GetRelativePath(mapArtPath, path).Replace("\\", "/");
-                            if (!WmeUtils.IsInDirectory(pathPrefs.BrawlhallaPath, path))
-                            {
-                                _assetDirSelectError = "AssetDir has to be inside the brawlhalla directory";
-                            }
-                            else if (newAssetDir != l.Desc.AssetDir)
-                            {
-                                cmd.Add(new PropChangeCommand<string>(val => l.Desc.AssetDir = val, l.Desc.AssetDir, newAssetDir));
-                                _propChanged = true;
-                                _assetDirSelectError = null;
-                                loader?.ClearCache();
-                            }
-                        }
-                    });
-                }
-                if (_assetDirSelectError is not null)
-                {
-                    ImGui.PushTextWrapPos();
-                    ImGui.Text("[Error]: " + _assetDirSelectError);
-                    ImGui.PopTextWrapPos();
-                }
-            }
-
-            ImGui.Text($"LevelID: {l.Type.LevelID}");
+                ImGui.SetTooltip("There must not be two maps with the same LevelID");
             ImGui.Separator();
 
             _propChanged |= ImGuiExt.InputTextHistory("AssetName", l.Type.AssetName ?? "", val => l.Type.AssetName = val == "" ? null : val, cmd);
@@ -154,13 +147,11 @@ public class MapOverviewWindow
                 }
             }
             ImGui.Separator();
-        }
 
-        if (l.Type is not null)
-        {
             _propChanged |= ImGuiExt.CheckboxHistory("NegateOverlaps##overview", l.Type.NegateOverlaps ?? false, val => l.Type.NegateOverlaps = !val ? null : val, cmd);
             _propChanged |= ImGuiExt.DragUIntHistory("Extra StartFrame##overview", l.Type.StartFrame ?? 0, val => l.Type.StartFrame = val == 0 ? null : val, cmd);
         }
+
         _propChanged |= ImGuiExt.DragDoubleHistory("Default SlowMult##overview", l.Desc.SlowMult, val => l.Desc.SlowMult = val, cmd, speed: 0.05f);
         _propChanged |= ImGuiExt.DragIntHistory("Default NumFrames##overview", l.Desc.NumFrames, val => l.Desc.NumFrames = val, cmd, minValue: 0);
 
@@ -198,6 +189,12 @@ public class MapOverviewWindow
                     _propChanged |= ImGuiExt.CheckboxHistory("ShowLavaLevelDuringMove", l.Type.ShowLavaLevelDuringMove ?? false, val => l.Type.ShowLavaLevelDuringMove = val ? val : null, cmd);
                 });
             }
+        }
+
+        if (l.Type is not null && ImGui.CollapsingHeader("Music##overview"))
+        {
+            _propChanged |= ImGuiExt.InputNullableTextWithFilterHistory("BGMusic", l.Type.BGMusic, "Level09Theme", val => l.Type.BGMusic = val, cmd, 64);
+            _propChanged |= ImGuiExt.InputNullableTextWithFilterHistory("StreamerBGMusic", l.Type.StreamerBGMusic, "Level09Theme", val => l.Type.StreamerBGMusic = val, cmd, 64);
         }
 
         if (ImGui.CollapsingHeader("Sidekick Bounds"))

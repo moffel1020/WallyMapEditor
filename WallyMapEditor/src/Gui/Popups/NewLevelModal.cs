@@ -30,13 +30,13 @@ public static class NewLevelModal
 
         ImGui.Text("Pick a name for the new level");
         ImGui.Text("These settings can always be changed later");
-        unsafe { _newLevelName = ImGuiExt.InputTextWithCallback("LevelName", _newLevelName, MapOverviewWindow.LevelNameFilter, 64); }
+        _newLevelName = ImGuiExt.InputTextWithFilter("LevelName", _newLevelName, 64);
         ImGui.SameLine();
         ImGui.TextDisabled("(?)");
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip("Unique name of the level, this will be used as the name of the asset folder.\nIf another map exists with this LevelName, it will be overwritten.");
 
-        unsafe { _newLevelDir = ImGuiExt.InputTextWithCallback("AssetDir", _newLevelDir, MapOverviewWindow.LevelNameFilter, 64); }
+        _newLevelDir = ImGuiExt.InputTextWithFilter("AssetDir", _newLevelDir, 64);
         ImGui.SameLine();
         ImGui.TextDisabled("(?)");
         if (ImGui.IsItemHovered())

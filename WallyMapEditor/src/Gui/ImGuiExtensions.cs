@@ -93,6 +93,54 @@ public static class ImGuiExt
         return v;
     }
 
+    // type ImGuiInputTextCallback
+    private unsafe static int NumAlphaFilter(ImGuiInputTextCallbackData* data) => (char)data->EventChar switch
+    {
+        >= 'a' and <= 'z' => 0,
+        >= 'A' and <= 'Z' => 0,
+        >= '0' and <= '9' => 0,
+        _ => 1,
+    };
+
+    public static unsafe string InputTextWithFilter(string label, string value, uint maxLength = 512) => InputTextWithCallback(label, value, NumAlphaFilter, maxLength: maxLength, flags: ImGuiInputTextFlags.CallbackCharFilter);
+
+    public static bool InputTextWithFilterHistory(string label, string value, Action<string> changeCommand, CommandHistory cmd, uint maxLength = 512)
+    {
+        string newValue = InputTextWithFilter(label, value, maxLength);
+        if (value != newValue)
+        {
+            cmd.Add(new PropChangeCommand<string>(changeCommand, value, newValue));
+            return true;
+        }
+        return false;
+    }
+
+    public static bool InputNullableTextWithFilterHistory(string label, string? value, string defaultValue, Action<string?> changeCommand, CommandHistory cmd, uint maxLength = 512)
+    {
+        if (value is not null)
+        {
+            bool dragged = InputTextWithFilterHistory(label, value, x => changeCommand(x), cmd, maxLength);
+            ImGui.SameLine();
+            if (ImGui.Button("Remove##" + label))
+            {
+                cmd.Add(new PropChangeCommand<string?>(changeCommand, value, null));
+                return true;
+            }
+            return dragged;
+        }
+        else
+        {
+            ImGui.Text(label);
+            ImGui.SameLine();
+            if (ImGui.Button("Add##" + label))
+            {
+                cmd.Add(new PropChangeCommand<string?>(changeCommand, value, defaultValue));
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static WmsColor ColorPicker3(string label, WmsColor col)
     {
         Vector3 imCol = new((float)col.R / 255, (float)col.G / 255, (float)col.B / 255);
