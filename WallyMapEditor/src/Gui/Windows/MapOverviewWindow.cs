@@ -119,6 +119,7 @@ public class MapOverviewWindow
             ImGui.Separator();
 
             ImGui.Text("ThumbnailPNGFile: " + (l.Type.ThumbnailPNGFile ?? "None"));
+            ImGuiExt.HintTooltip(Strings.UI_LEVEL_THUMBNAIL_TOOLTIP);
             if (pathPrefs.BrawlhallaPath is not null)
             {
                 string thumbnailPath = Path.Combine(pathPrefs.BrawlhallaPath, "images", "thumbnails");
@@ -172,6 +173,9 @@ public class MapOverviewWindow
         {
             if (ImGui.CollapsingHeader("Kill Bounds##overview"))
             {
+                ImGui.Text("Kill bounds");
+                ImGuiExt.HintTooltip(Strings.UI_KILL_BOUNDS_TOOLTIP);
+
                 _propChanged |= ImGuiExt.DragUIntHistory("TopKill##killbounds", l.Type.TopKill!.Value, val => l.Type.TopKill = val, cmd);
                 _propChanged |= ImGuiExt.DragUIntHistory("BottomKill##killbounds", l.Type.BottomKill!.Value, val => l.Type.BottomKill = val, cmd);
                 _propChanged |= ImGuiExt.DragUIntHistory("LeftKill##killbounds", l.Type.LeftKill!.Value, val => l.Type.LeftKill = val, cmd);
@@ -190,6 +194,8 @@ public class MapOverviewWindow
 
         if (ImGui.CollapsingHeader("Camera##overview"))
         {
+            ImGui.Text("Camera bounds");
+            ImGuiExt.HintTooltip(Strings.UI_CAMERA_BOUNDS_TOOLTIP);
             _propChanged |= PropertiesWindow.ShowCameraBoundsProps(l.Desc.CameraBounds, cmd);
             if (l.Type is not null)
             {
@@ -205,6 +211,7 @@ public class MapOverviewWindow
         {
             _propChanged |= ImGuiExt.InputNullableTextWithFilterHistory("BGMusic", l.Type.BGMusic, "Level09Theme", val => l.Type.BGMusic = val, cmd, 64);
             _propChanged |= ImGuiExt.InputNullableTextWithFilterHistory("StreamerBGMusic", l.Type.StreamerBGMusic, "Level09Theme", val => l.Type.StreamerBGMusic = val, cmd, 64);
+            ImGuiExt.HintTooltip(Strings.UI_STREAMER_BG_MUSIC_TOOLTIP);
         }
 
         if (ImGui.CollapsingHeader("Sidekick Bounds"))
@@ -246,19 +253,23 @@ public class MapOverviewWindow
             _propChanged |= ImGuiExt.ColorPicker3HexHistory("Sidekick tint offset", l.Type.BotOffset ?? 0, val => l.Type.BotOffset = val, cmd);
 
             ImGui.SeparatorText("Color exclusions");
-            _propChanged |= ImGuiExt.GenericStringComboHistory("AvoidTeamColor", l.Type.AvoidTeamColor, val => l.Type.AvoidTeamColor = val,
+            _propChanged |= ImGuiExt.GenericStringComboHistory(
+                "AvoidTeamColor", l.Type.AvoidTeamColor, val => l.Type.AvoidTeamColor = val,
                 c => c == TeamColorEnum.Default ? "None" : c.ToString(),
                 s => Enum.TryParse(s, out TeamColorEnum e) ? e : TeamColorEnum.Default,
-            Enum.GetValues<TeamColorEnum>(), cmd);
-
+                Enum.GetValues<TeamColorEnum>(), cmd
+            );
+            ImGuiExt.HintTooltip(Strings.UI_AVOID_TEAM_COLOR_TOOLTIP);
             ImGui.Text("TeamColorOrder");
+            ImGuiExt.HintTooltip(Strings.UI_TEAM_COLOR_ORDER_TOOLTIP);
             _propChanged |= TeamColorOrder(l.Type.TeamColorOrder, val => l.Type.TeamColorOrder = val, cmd);
 
             ImGui.SeparatorText("Misc");
             _propChanged |= ImGuiExt.ColorPicker3HexHistory("Shadow Tint##overview", (uint)(l.Type.ShadowTint ?? 0), val => l.Type.ShadowTint = val == 0 ? null : (int)val, cmd);
+            ImGuiExt.HintTooltip(Strings.UI_SHADOW_TINT_TOOLTIP);
         }
 
-        if (ImGui.CollapsingHeader("Images##overview"))
+        if (ImGui.CollapsingHeader("Backgrounds##overview"))
         {
             ShowSelectableList(l.Desc.Backgrounds, selection, val => l.Desc.Backgrounds = val, cmd, false);
         }
