@@ -20,6 +20,7 @@ public class MapOverviewWindow
     private bool _propChanged = false;
 
     private string? _thumbnailSelectError;
+    private string? _assetDirSelectError;
 
     // type ImGuiInputTextCallback
     public unsafe static int LevelNameFilter(ImGuiInputTextCallbackData* data) => (char)data->EventChar switch
@@ -54,13 +55,40 @@ public class MapOverviewWindow
                 _propChanged = true;
             }
 
-            string newAssetDir;
-            unsafe { newAssetDir = ImGuiExt.InputTextWithCallback("AssetDir", l.Desc.AssetDir, LevelNameFilter, flags: ImGuiInputTextFlags.CallbackCharFilter); }
-            if (newAssetDir != l.Desc.AssetDir)
+            ImGui.Text("AssetDir: " + l.Desc.AssetDir);
+            if (pathPrefs.BrawlhallaPath is not null)
             {
-                cmd.Add(new PropChangeCommand<string>(val => l.Desc.AssetDir = val, l.Desc.AssetDir, newAssetDir));
-                loader?.ClearCache();
-                _propChanged = true;
+                ImGui.SameLine();
+                if (ImGui.Button("Select##AssetDir"))
+                {
+                    string mapArtPath = Path.Combine(pathPrefs.BrawlhallaPath, "mapArt");
+                    Task.Run(() =>
+                    {
+                        DialogResult dialogResult = Dialog.FolderPicker(mapArtPath);
+                        if (dialogResult.IsOk)
+                        {
+                            string path = dialogResult.Path;
+                            string newAssetDir = Path.GetRelativePath(mapArtPath, path).Replace("\\", "/");
+                            if (!WmeUtils.IsInDirectory(pathPrefs.BrawlhallaPath, path))
+                            {
+                                _assetDirSelectError = "AssetDir has to be inside the brawlhalla directory";
+                            }
+                            else if (newAssetDir != l.Desc.AssetDir)
+                            {
+                                cmd.Add(new PropChangeCommand<string>(val => l.Desc.AssetDir = val, l.Desc.AssetDir, newAssetDir));
+                                _propChanged = true;
+                                _assetDirSelectError = null;
+                                loader?.ClearCache();
+                            }
+                        }
+                    });
+                }
+                if (_assetDirSelectError is not null)
+                {
+                    ImGui.PushTextWrapPos();
+                    ImGui.Text("[Error]: " + _assetDirSelectError);
+                    ImGui.PopTextWrapPos();
+                }
             }
 
             ImGui.Text($"LevelID: {l.Type.LevelID}");
