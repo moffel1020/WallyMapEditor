@@ -19,4 +19,11 @@ public static class Strings
     public const string UI_AVOID_TEAM_COLOR_TOOLTIP = "Prevent picking this team color.";
     public const string UI_TEAM_COLOR_ORDER_TOOLTIP = "Defines the priority order of team colors.";
     public const string UI_SHADOW_TINT_TOOLTIP = "Defines the color of shadows.";
+    public const string UI_ANIMATED_MIDGROUND_TOOLTIP = "If true, the animated background will be on the midground layer.";
+    public const string UI_FORCE_DRAW_TOOLTIP = "If true, the animated background will be shown even if animated backgrounds are turned off.";
+    public const string UI_EASING_TOOLTIP = "These properties allow smoothing out the movement between keyframes.";
+    public const string UI_EASE_IN_TOOLTIP = "If true, movement will start slow and then speed up.";
+    public const string UI_EASE_OUT_TOOLTIP = "If true, movement will slow down near the next keyframe.";
+    public const string UI_EASE_POWER_TOOLTIP = "Controls how aggressive the speed curve is.";
+    public const string UI_CENTER_TOOLTIP = "Defines a position to do an elliptical orbit around. Must have the same X or Y as one of the keyframes or it won't work correctly.";
 }

@@ -15,6 +15,7 @@ partial class PropertiesWindow
         if (ImGui.CollapsingHeader("Gfx"))
             propChanged |= ShowProperties(ab.Gfx, cmd, data);
         propChanged |= ImGuiExt.CheckboxHistory("Midground", ab.Midground, val => ab.Midground = val, cmd);
+        ImGuiExt.HintTooltip(Strings.UI_ANIMATED_MIDGROUND_TOOLTIP);
         propChanged |= ImGuiExt.DragDoubleHistory("PositionX", ab.Position_X, val => ab.Position_X = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory("PositionY", ab.Position_Y, val => ab.Position_Y = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory("ScaleX", ab.Scale_X, val => ab.Scale_X = val, cmd);
@@ -24,6 +25,7 @@ partial class PropertiesWindow
         propChanged |= ImGuiExt.DragDoubleHistory("Rotation", ab.Rotation, val => ab.Rotation = BrawlhallaMath.SafeMod(val, 360.0), cmd, speed: 0.1f);
         propChanged |= ImGuiExt.DragIntHistory("FrameOffset", ab.FrameOffset, val => ab.FrameOffset = val, cmd);
         propChanged |= ImGuiExt.CheckboxHistory("ForceDraw", ab.ForceDraw, val => ab.ForceDraw = val, cmd);
+        ImGuiExt.HintTooltip(Strings.UI_FORCE_DRAW_TOOLTIP);
         return propChanged;
     }
 

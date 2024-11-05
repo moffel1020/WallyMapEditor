@@ -13,32 +13,29 @@ public partial class PropertiesWindow
         propChanged |= ImGuiExt.DragNullableIntHistory("NumFrames", anim.NumFrames, LastKeyFrameNum(anim.KeyFrames), val => anim.NumFrames = val, cmd, minValue: LastKeyFrameNum(anim.KeyFrames));
         propChanged |= ImGuiExt.DragNullableDoubleHistory("SlowMult", anim.SlowMult, 1, val => anim.SlowMult = val, cmd, speed: 0.05f);
         propChanged |= ImGuiExt.DragUIntHistory("StartFrame", anim.StartFrame, val => anim.StartFrame = val, cmd, maxValue: (uint?)anim.NumFrames ?? uint.MaxValue);
+
+        ImGui.SeparatorText("Easing");
+        ImGuiExt.HintTooltip(Strings.UI_EASING_TOOLTIP);
         propChanged |= ImGuiExt.CheckboxHistory("EaseIn", anim.EaseIn, val => anim.EaseIn = val, cmd);
+        ImGuiExt.HintTooltip(Strings.UI_EASE_IN_TOOLTIP);
         propChanged |= ImGuiExt.CheckboxHistory("EaseOut", anim.EaseOut, val => anim.EaseOut = val, cmd);
-        propChanged |= ImGuiExt.DragUIntHistory("EasePower", anim.EasePower, val => anim.EasePower = val, cmd, minValue: 2);
+        ImGuiExt.HintTooltip(Strings.UI_EASE_OUT_TOOLTIP);
+        using (ImGuiExt.DisabledIf(!anim.EaseIn && !anim.EaseOut))
+            propChanged |= ImGuiExt.DragUIntHistory("EasePower", anim.EasePower, val => anim.EasePower = val, cmd, minValue: 2);
+        ImGuiExt.HintTooltip(Strings.UI_EASE_POWER_TOOLTIP);
 
-        if (anim.HasCenter)
-        {
-            propChanged |= ImGuiExt.DragDoubleHistory("CenterX", anim.CenterX!.Value, val => anim.CenterX = val, cmd);
-            propChanged |= ImGuiExt.DragDoubleHistory("CenterY", anim.CenterY!.Value, val => anim.CenterY = val, cmd);
-            if (ImGui.Button("Remove center"))
-            {
-                propChanged = true;
-                cmd.Add(new PropChangeCommand<(double?, double?)>(
-                    val => (anim.CenterX, anim.CenterY) = val,
-                    (anim.CenterX, anim.CenterY),
-                    (null, null)));
-            }
-        }
-        else if (ImGui.Button("Add center"))
-        {
-            propChanged = true;
-            cmd.Add(new PropChangeCommand<(double?, double?)>(
-                val => (anim.CenterX, anim.CenterY) = val,
-                (anim.CenterX, anim.CenterY),
-                (0, 0)));
-        }
+        ImGui.SeparatorText("Center");
+        ImGuiExt.HintTooltip(Strings.UI_CENTER_TOOLTIP);
+        propChanged |= ImGuiExt.DragNullableDoublePairHistory(
+            "center",
+            "CenterX", "CenterY",
+            anim.CenterX, anim.CenterY,
+            0, 0,
+            val => (anim.CenterX, anim.CenterY) = val,
+            cmd
+        );
 
+        ImGui.Separator();
         if (ImGui.CollapsingHeader("KeyFrames"))
         {
             propChanged |=
