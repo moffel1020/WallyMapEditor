@@ -17,6 +17,25 @@ impl -> functional -> nullable -> history -> nullable history
 */
 public static partial class ImGuiExt
 {
+    #region Generics
+    private static bool GenericDragScalarImpl<T>(ImGuiDataType type, string label, ref T value, float speed, T minValue, T maxValue) where T : unmanaged
+    {
+        unsafe
+        {
+            IntPtr valuePtr = (IntPtr)Unsafe.AsPointer(ref value);
+            IntPtr minValuePtr = (IntPtr)(&minValue);
+            IntPtr maxValuePtr = (IntPtr)(&maxValue);
+            return ImGui.DragScalar(label, type, valuePtr, speed, minValuePtr, maxValuePtr);
+        }
+    }
+
+    private delegate bool ScalarDragDelegate<T>(string label, ref T value, float speed, T maxValue, T minValue);
+    private static T GenericDragScalar<T>(ScalarDragDelegate<T> func, string label, T value, float speed, T maxValue, T minValue) where T : struct
+    {
+        func(label, ref value, speed, maxValue, minValue);
+        return value;
+    }
+
     private static bool GenericHistory<T>(T value, T newValue, Action<T> changeCommand, CommandHistory cmd)
     {
         if (!Equals(value, newValue))
@@ -73,6 +92,7 @@ public static partial class ImGuiExt
     private static bool NullableGenericHistory<T>(string label, T? value, Func<T, T> modifier, T defaultValue, Action<T?> changeCommand, CommandHistory cmd) where T : struct
         => GenericHistory(value, NullableGeneric(label, value, modifier, defaultValue), changeCommand, cmd);
 
+    #endregion
     #region Bool
     #region Checkbox
 
@@ -93,11 +113,7 @@ public static partial class ImGuiExt
     #region DragInt
 
     public static int DragInt(string label, int value, float speed = 1, int minValue = int.MinValue, int maxValue = int.MaxValue)
-    {
-        ImGui.DragInt(label, ref value, speed, minValue, maxValue);
-        return value;
-    }
-
+        => GenericDragScalar(ImGui.DragInt, label, value, speed, minValue, maxValue);
     public static bool DragIntHistory(string label, int value, Action<int> changeCommand, CommandHistory cmd, float speed = 1, int minValue = int.MinValue, int maxValue = int.MaxValue)
         => GenericHistory(value, DragInt(label, value, speed, minValue, maxValue), changeCommand, cmd);
     public static bool DragNullableIntHistory(string label, int? value, int defaultValue, Action<int?> changeCommand, CommandHistory cmd, float speed = 1, int minValue = int.MinValue, int maxValue = int.MaxValue)
@@ -117,23 +133,10 @@ public static partial class ImGuiExt
     #region UInt
     #region DragUInt
 
-    public static void DragUInt(string label, ref uint value, float speed = 1, uint minValue = uint.MinValue, uint maxValue = uint.MaxValue)
-    {
-        unsafe
-        {
-            IntPtr valuePtr = (IntPtr)Unsafe.AsPointer(ref value);
-            IntPtr minValuePtr = (IntPtr)(&minValue);
-            IntPtr maxValuePtr = (IntPtr)(&maxValue);
-            ImGui.DragScalar(label, ImGuiDataType.U32, valuePtr, speed, minValuePtr, maxValuePtr);
-        }
-    }
-
+    public static bool DragUInt(string label, ref uint value, float speed = 1, uint minValue = uint.MinValue, uint maxValue = uint.MaxValue)
+        => GenericDragScalarImpl(ImGuiDataType.U32, label, ref value, speed, minValue, maxValue);
     public static uint DragUInt(string label, uint value, float speed = 1, uint minValue = uint.MinValue, uint maxValue = uint.MaxValue)
-    {
-        DragUInt(label, ref value, speed, minValue, maxValue);
-        return value;
-    }
-
+        => GenericDragScalar(DragUInt, label, value, speed, minValue, maxValue);
     public static bool DragUIntHistory(string label, uint value, Action<uint> changeCommand, CommandHistory cmd, float speed = 1, uint minValue = uint.MinValue, uint maxValue = uint.MaxValue)
         => GenericHistory(value, DragUInt(label, value, speed, minValue, maxValue), changeCommand, cmd);
     public static bool DragNullableUIntHistory(string label, uint? value, uint defaultValue, Action<uint?> changeCommand, CommandHistory cmd, float speed = 1, uint minValue = uint.MinValue, uint maxValue = uint.MaxValue)
@@ -168,24 +171,10 @@ public static partial class ImGuiExt
     #region Double
     #region DragDouble
 
-    public static void DragDouble(string label, ref double value, float speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
-    {
-        unsafe
-        {
-            IntPtr valuePtr = (IntPtr)Unsafe.AsPointer(ref value);
-            IntPtr minValuePtr = (IntPtr)(&minValue);
-            IntPtr maxValuePtr = (IntPtr)(&maxValue);
-            ImGui.DragScalar(label, ImGuiDataType.Double, valuePtr, speed, minValuePtr, maxValuePtr);
-        }
-    }
-
+    public static bool DragDouble(string label, ref double value, float speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
+        => GenericDragScalarImpl(ImGuiDataType.Double, label, ref value, speed, minValue, maxValue);
     public static double DragDouble(string label, double value, float speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
-    {
-        double v = value;
-        DragDouble(label, ref v, speed, minValue, maxValue);
-        return v;
-    }
-
+        => GenericDragScalar(DragDouble, label, value, speed, minValue, maxValue);
     public static bool DragDoubleHistory(string label, double value, Action<double> changeCommand, CommandHistory cmd, float speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
         => GenericHistory(value, DragDouble(label, value, speed, minValue, maxValue), changeCommand, cmd);
     public static bool DragNullableDoubleHistory(string label, double? value, double defaultValue, Action<double?> changeCommand, CommandHistory cmd, float speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
@@ -247,7 +236,6 @@ public static partial class ImGuiExt
         WmsColor a = new((byte)(imCol.X * 255), (byte)(imCol.Y * 255), (byte)(imCol.Z * 255), 255);
         return a;
     }
-
     public static bool NullableColorPicker3History(string label, WmsColor? value, WmsColor defaultValue, Action<WmsColor?> changeCommand, CommandHistory cmd)
         => NullableGenericHistory(label, value, val => ColorPicker3(label, val), defaultValue, changeCommand, cmd);
 
@@ -262,7 +250,6 @@ public static partial class ImGuiExt
         r = (byte)(imCol.X * 255); g = (byte)(imCol.Y * 255); b = (byte)(imCol.Z * 255);
         return ((uint)r << 16) | ((uint)g << 8) | b;
     }
-
     public static bool ColorPicker3HexHistory(string label, uint value, Action<uint> changeCommand, CommandHistory cmd)
         => GenericHistory(value, ColorPicker3Hex(label, value), changeCommand, cmd);
 
@@ -289,35 +276,17 @@ public static partial class ImGuiExt
     }
 
     public static E EnumCombo<E>(string label, E currentValue) where E : struct, Enum
-    {
-        return Enum.Parse<E>(StringCombo(label, Enum.GetName(currentValue)!, Enum.GetNames<E>()));
-    }
-
+        => Enum.Parse<E>(StringCombo(label, Enum.GetName(currentValue)!, Enum.GetNames<E>()));
     public static E? EnumComboWithNone<E>(string label, E? currentValue) where E : struct, Enum
-    {
-        return
-        Enum.TryParse(StringCombo(label, currentValue is null ? "None" : Enum.GetName(currentValue.Value)!, ["None", .. Enum.GetNames<E>()]), out E e)
+        => Enum.TryParse(StringCombo(label, currentValue is null ? "None" : Enum.GetName(currentValue.Value)!, ["None", .. Enum.GetNames<E>()]), out E e)
             ? e
             : null;
-    }
-
     public static bool EnumComboHistory<E>(string label, E value, Action<E> changeCommand, CommandHistory cmd) where E : struct, Enum
         => GenericHistory(value, EnumCombo(label, value), changeCommand, cmd);
     public static bool NullableEnumComboHistory<E>(string label, E? value, Action<E?> changeCommand, CommandHistory cmd) where E : struct, Enum
         => GenericHistory(value, EnumComboWithNone(label, value), changeCommand, cmd);
-
     public static bool GenericStringComboHistory<T>(string label, T value, Action<T> changeCommand, Func<T, string> stringify, Func<string, T> parse, T[] options, CommandHistory cmd)
-    {
-        string valueString = stringify(value);
-        string newValueString = StringCombo(label, valueString, [.. options.Select(stringify)]);
-        T newValue = parse(newValueString);
-        if (!Equals(value, newValue))
-        {
-            cmd.Add(new PropChangeCommand<T>(changeCommand, value, newValue));
-            return true;
-        }
-        return false;
-    }
+        => GenericHistory(value, parse(StringCombo(label, stringify(value), [.. options.Select(stringify)])), changeCommand, cmd);
 
     #endregion
     #region Text
@@ -360,13 +329,13 @@ public static partial class ImGuiExt
         _ => 1,
     };
 
-    public static unsafe string InputTextWithFilter(string label, string value, uint maxLength = 512) => InputTextWithCallback(label, value, NumAlphaFilter, maxLength: maxLength, flags: ImGuiInputTextFlags.CallbackCharFilter);
-
+    public static unsafe string InputTextWithFilter(string label, string value, uint maxLength = 512)
+        => InputTextWithCallback(label, value, NumAlphaFilter, maxLength: maxLength, flags: ImGuiInputTextFlags.CallbackCharFilter);
     public static bool InputTextWithFilterHistory(string label, string value, Action<string> changeCommand, CommandHistory cmd, uint maxLength = 512)
         => GenericHistory(value, InputTextWithFilter(label, value, maxLength), changeCommand, cmd);
-
     public static bool InputNullableTextWithFilterHistory(string label, string? value, string defaultValue, Action<string?> changeCommand, CommandHistory cmd, uint maxLength = 512)
         => NullableGenericHistory(label, value, val => InputTextWithFilter(label, val, maxLength), defaultValue, changeCommand, cmd);
+
     #endregion
     #endregion
 }
