@@ -226,25 +226,25 @@ public class Editor
         {
             bool btIsNull = LevelLoader.BoneTypes is null;
             ImGui.BeginGroup();
-            ImGuiExt.WithDisabled(!EnableNewAndOpenMapButtons, () =>
+            using (ImGuiExt.DisabledIf(!EnableNewAndOpenMapButtons))
             {
                 if (ImGui.MenuItem("New", "Ctrl+N")) NewLevelModal.Open();
                 ImGui.Separator();
                 if (ImGui.MenuItem("Open", "Ctrl+O")) OpenLevelFile();
-            });
+            };
             ImGui.EndGroup();
             if (btIsNull && ImGui.IsItemHovered())
                 ImGui.SetTooltip("Required files need to be imported first.\nPress \"Load required files only\" in the import menu or override the individual files manually.");
 
-            if (ImGuiExt.WithDisabledMenuItem(!EnableSaveButton, "Save", "Ctrl+S")) SaveLevelFile();
-            if (ImGuiExt.WithDisabledMenuItem(!EnableSaveButton, "Save As...", "Ctrl+Shift+S")) SaveLevelFileToPath();
+            if (ImGuiExt.MenuItemDisabledIf(!EnableSaveButton, "Save", "Ctrl+S")) SaveLevelFile();
+            if (ImGuiExt.MenuItemDisabledIf(!EnableSaveButton, "Save As...", "Ctrl+Shift+S")) SaveLevelFileToPath();
             ImGui.Separator();
             if (ImGui.MenuItem("Import", "Ctrl+Shift+I")) ImportDialog = new(PathPrefs) { Open = true };
             if (ImGui.MenuItem("Export", "Ctrl+Shift+E")) ExportDialog = new(PathPrefs, _backupsList) { Open = true };
             ImGui.Separator();
-            if (ImGuiExt.WithDisabledMenuItem(!EnableReloadMapButton, "Reload map", "Ctrl+Shift+R")) ReloadMap();
+            if (ImGuiExt.MenuItemDisabledIf(!EnableReloadMapButton, "Reload map", "Ctrl+Shift+R")) ReloadMap();
             ImGui.Separator();
-            if (ImGuiExt.WithDisabledMenuItem(!EnableCloseMapButton, "Close", "Ctrl+Shift+W")) CloseCurrentLevel();
+            if (ImGuiExt.MenuItemDisabledIf(!EnableCloseMapButton, "Close", "Ctrl+Shift+W")) CloseCurrentLevel();
             ImGui.EndMenu();
         }
         if (ImGui.BeginMenu("Edit"))

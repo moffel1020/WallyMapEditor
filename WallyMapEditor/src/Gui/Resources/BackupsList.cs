@@ -43,7 +43,7 @@ public class BackupsList
         ImGui.ListBox("Backups list", ref selectedBackupIndex, _backupDisplayNames, _backupDisplayNames.Length);
         state.SelectedBackupIndex = selectedBackupIndex;
 
-        if (ImGuiExt.WithDisabledButton(state.SelectedBackupIndex < 0 || state.SelectedBackupIndex >= _backupDisplayNames.Length, "Restore"))
+        if (ImGuiExt.ButtonDisabledIf(state.SelectedBackupIndex < 0 || state.SelectedBackupIndex >= _backupDisplayNames.Length, "Restore"))
         {
             int backupNum = _backupNums[state.SelectedBackupIndex];
 
@@ -61,7 +61,7 @@ public class BackupsList
             RefreshBackupList(prefs.BrawlhallaPath);
 
         ImGui.SameLine();
-        if (ImGuiExt.WithDisabledButton(state.SelectedBackupIndex < 0 || state.SelectedBackupIndex >= _backupDisplayNames.Length, "Delete"))
+        if (ImGuiExt.ButtonDisabledIf(state.SelectedBackupIndex < 0 || state.SelectedBackupIndex >= _backupDisplayNames.Length, "Delete"))
         {
             int backupNum = _backupNums[state.SelectedBackupIndex];
             foreach (string path in backedUpFiles)
@@ -74,7 +74,7 @@ public class BackupsList
         }
 
         ImGui.SameLine();
-        if (ImGuiExt.WithDisabledButton(_doingBackup, "Create backup"))
+        if (ImGuiExt.ButtonDisabledIf(_doingBackup, "Create backup"))
         {
             state.BackupStatus = "creating backup...";
             _doingBackup = true;

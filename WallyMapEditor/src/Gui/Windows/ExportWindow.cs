@@ -212,7 +212,7 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
 
     private void ModFileExportButton(Level l)
     {
-        if (ImGuiExt.WithDisabledButton(!WmeUtils.IsValidBrawlPath(prefs.BrawlhallaPath), "Export"))
+        if (ImGuiExt.ButtonDisabledIf(!WmeUtils.IsValidBrawlPath(prefs.BrawlhallaPath), "Export"))
         {
             ModHeaderObject header = new()
             {
@@ -306,7 +306,7 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
             ImGui.SameLine();
             ImGui.Text(prefs.LevelTypesPath ?? "None");
 
-            if (ImGuiExt.WithDisabledButton(prefs.LevelTypesPath is null, "Export"))
+            if (ImGuiExt.ButtonDisabledIf(prefs.LevelTypesPath is null, "Export"))
             {
                 Task.Run(() =>
                 {
@@ -377,7 +377,7 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
         ImGui.SameLine();
         ImGui.Text(prefs.LevelSetTypesPath ?? "Not Selected");
 
-        if (ImGuiExt.WithDisabledButton(string.IsNullOrEmpty(prefs.LevelSetTypesPath), "Export##lst"))
+        if (ImGuiExt.ButtonDisabledIf(string.IsNullOrEmpty(prefs.LevelSetTypesPath), "Export##lst"))
         {
             LevelSetTypes levelSetTypes = WmeUtils.DeserializeFromPath<LevelSetTypes>(prefs.LevelSetTypesPath!, bhstyle: true);
             UpdatePlaylists(levelSetTypes, l);

@@ -9,6 +9,25 @@ namespace WallyMapEditor;
 
 public static partial class ImGuiExt
 {
+    public readonly struct DisabledIf_ : IDisposable
+    {
+        private readonly bool _disabled;
+
+        ///<summary>Do not use this constructor. Use ImGuiExt.DisabledIf instead.</summary>
+        internal DisabledIf_(bool disabled)
+        {
+            _disabled = disabled;
+            if (_disabled) ImGui.BeginDisabled();
+        }
+
+        public void Dispose()
+        {
+            if (_disabled) ImGui.EndDisabled();
+        }
+    }
+    ///<summary>RAII hack. Should be used as the argument of a using statement.</summary>
+    public static DisabledIf_ DisabledIf(bool disabled) => new(disabled);
+
     public static string StringListBox(string label, string value, string[] options, float width, int heightItems = 8)
     {
         if (ImGui.BeginListBox(label, new(width, heightItems * ImGui.GetTextLineHeightWithSpacing())))
@@ -27,30 +46,19 @@ public static partial class ImGuiExt
         return value;
     }
 
-    public static void WithDisabled(bool disabled, Action a)
+    public static bool ButtonDisabledIf(bool disabled, string label)
     {
-        if (disabled) ImGui.BeginDisabled();
-        a();
-        if (disabled) ImGui.EndDisabled();
+        using (DisabledIf(disabled))
+            return ImGui.Button(label);
     }
 
-    public static bool WithDisabled(bool disabled, Func<bool> a)
+    public static bool MenuItemDisabledIf(bool disabled, string label, string? hotkey = null)
     {
-        if (disabled) ImGui.BeginDisabled();
-        bool res = a();
-        if (disabled) ImGui.EndDisabled();
-        return !disabled && res;
+        using (DisabledIf(disabled))
+            return hotkey is null
+               ? ImGui.MenuItem(label)
+               : ImGui.MenuItem(label, hotkey);
     }
-
-    public static bool WithDisabledButton(bool disabled, string label)
-    {
-        return WithDisabled(disabled, () => ImGui.Button(label));
-    }
-
-    public static bool WithDisabledMenuItem(bool disabled, string label, string? hotkey = null) =>
-        hotkey is null
-            ? WithDisabled(disabled, () => ImGui.MenuItem(label))
-            : WithDisabled(disabled, () => ImGui.MenuItem(label, hotkey));
 
     public static void Animation(RaylibCanvas canvas, Gfx gfx, string animName, int frame)
     {
@@ -101,7 +109,7 @@ public static partial class ImGuiExt
         {
             T value = values[i];
             changed |= edit(i);
-            if (WithDisabledButton(!allowRemove, $"x##{i}{value.GetHashCode()}"))
+            if (ButtonDisabledIf(!allowRemove, $"x##{i}{value.GetHashCode()}"))
             {
                 T[] result = WmeUtils.RemoveAt(values, i);
                 commands.Add((new ArrayRemoveCommand<T>(changeCommand, values, result, value), false));
@@ -110,14 +118,14 @@ public static partial class ImGuiExt
             if (allowMove)
             {
                 ImGui.SameLine();
-                if (WithDisabledButton(i == 0, $"^##{i}{value.GetHashCode()}"))
+                if (ButtonDisabledIf(i == 0, $"^##{i}{value.GetHashCode()}"))
                 {
                     T[] result = WmeUtils.MoveUp(values, i);
                     commands.Add((new PropChangeCommand<T[]>(changeCommand, values, result), false));
                     changed = true;
                 }
                 ImGui.SameLine();
-                if (WithDisabledButton(i == values.Length - 1, $"v##{i}{value.GetHashCode()}"))
+                if (ButtonDisabledIf(i == values.Length - 1, $"v##{i}{value.GetHashCode()}"))
                 {
                     T[] result = WmeUtils.MoveDown(values, i);
                     commands.Add((new PropChangeCommand<T[]>(changeCommand, values, result), false));

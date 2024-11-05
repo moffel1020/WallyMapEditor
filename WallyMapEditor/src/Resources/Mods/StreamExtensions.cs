@@ -1,10 +1,12 @@
 using System;
 using System.Buffers.Binary;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace WallyMapEditor.Mod;
 
+[SkipLocalsInit]
 internal static class StreamExtensions
 {
     public static byte[] GetBytes(this Stream stream)
