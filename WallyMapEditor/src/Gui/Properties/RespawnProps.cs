@@ -26,9 +26,9 @@ public partial class PropertiesWindow
         propChanged |= ImGuiExt.DragDoubleHistory("Y", r.Y, val => r.Y = val, cmd);
 
         if (r.ExpandedInit && r.Initial) r.Initial = false;
-        using (DisabledIf._(r.ExpandedInit))
+        using (ImGuiExt.DisabledIf(r.ExpandedInit))
             propChanged |= ImGuiExt.CheckboxHistory("Initial", r.Initial, val => r.Initial = val, cmd);
-        using (DisabledIf._(r.Initial))
+        using (ImGuiExt.DisabledIf(r.Initial))
             propChanged |= ImGuiExt.CheckboxHistory("ExpandedInit", r.ExpandedInit, val => r.ExpandedInit = val, cmd);
 
         return propChanged;

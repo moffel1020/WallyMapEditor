@@ -124,10 +124,10 @@ public partial class PropertiesWindow
         }
         propChanged |= ImGuiExt.GenericStringComboHistory("Behavior", g.Behavior, val => g.Behavior = val, BehaviorToString, ParseBehaviorString, Enum.GetValues<BehaviorEnum>(), cmd);
         bool realIsShared = MapUtils.IsSharedDir(g.Dir) || g.Shared;
-        using (DisabledIf._(MapUtils.IsSharedDir(g.Dir)))
+        using (ImGuiExt.DisabledIf(MapUtils.IsSharedDir(g.Dir)))
             propChanged |= ImGuiExt.CheckboxHistory("Shared", realIsShared, val => g.Shared = val, cmd);
         bool realIsSharedPath = MapUtils.IsSharedPath(g.Path) || g.SharedPath;
-        using (DisabledIf._(MapUtils.IsSharedPath(g.Path)))
+        using (ImGuiExt.DisabledIf(MapUtils.IsSharedPath(g.Path)))
             propChanged |= ImGuiExt.CheckboxHistory("SharedPath", realIsSharedPath, val => g.SharedPath = val, cmd);
         return propChanged;
     }

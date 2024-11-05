@@ -226,7 +226,7 @@ public class Editor
         {
             bool btIsNull = LevelLoader.BoneTypes is null;
             ImGui.BeginGroup();
-            using (DisabledIf._(!EnableNewAndOpenMapButtons))
+            using (ImGuiExt.DisabledIf(!EnableNewAndOpenMapButtons))
             {
                 if (ImGui.MenuItem("New", "Ctrl+N")) NewLevelModal.Open();
                 ImGui.Separator();

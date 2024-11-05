@@ -9,6 +9,25 @@ namespace WallyMapEditor;
 
 public static partial class ImGuiExt
 {
+    public readonly struct DisabledIf_ : IDisposable
+    {
+        private readonly bool _disabled;
+
+        ///<summary>Do not use this constructor. Use ImGuiExt.DisabledIf instead.</summary>
+        internal DisabledIf_(bool disabled)
+        {
+            _disabled = disabled;
+            if (_disabled) ImGui.BeginDisabled();
+        }
+
+        public void Dispose()
+        {
+            if (_disabled) ImGui.EndDisabled();
+        }
+    }
+    ///<summary>RAII hack. Should be used as the argument of a using statement.</summary>
+    public static DisabledIf_ DisabledIf(bool disabled) => new(disabled);
+
     public static string StringListBox(string label, string value, string[] options, float width, int heightItems = 8)
     {
         if (ImGui.BeginListBox(label, new(width, heightItems * ImGui.GetTextLineHeightWithSpacing())))
@@ -27,22 +46,19 @@ public static partial class ImGuiExt
         return value;
     }
 
-    private static bool WithDisabled(bool disabled, Func<bool> a)
-    {
-        bool res;
-        using (DisabledIf._(disabled)) res = a();
-        return !disabled && res;
-    }
-
     public static bool ButtonDisabledIf(bool disabled, string label)
     {
-        return WithDisabled(disabled, () => ImGui.Button(label));
+        using (DisabledIf(disabled))
+            return ImGui.Button(label);
     }
 
-    public static bool MenuItemDisabledIf(bool disabled, string label, string? hotkey = null) =>
-        hotkey is null
-            ? WithDisabled(disabled, () => ImGui.MenuItem(label))
-            : WithDisabled(disabled, () => ImGui.MenuItem(label, hotkey));
+    public static bool MenuItemDisabledIf(bool disabled, string label, string? hotkey = null)
+    {
+        using (DisabledIf(disabled))
+            return hotkey is null
+               ? ImGui.MenuItem(label)
+               : ImGui.MenuItem(label, hotkey);
+    }
 
     public static void Animation(RaylibCanvas canvas, Gfx gfx, string animName, int frame)
     {
