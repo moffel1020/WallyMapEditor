@@ -144,10 +144,8 @@ public class RenderConfigWindow
             config.RedScore = ImGuiExt.SliderInt("Red team score##config", config.RedScore, minValue: 0, maxValue: 99);
             ImGui.Separator();
             config.ShowPickedPlatform = ImGuiExt.Checkbox("Highlight platform king platform##config", config.ShowPickedPlatform);
-            ImGuiExt.WithDisabled(!config.ShowPickedPlatform, () =>
-            {
+            using (DisabledIf._(!config.ShowPickedPlatform))
                 config.PickedPlatform = ImGuiExt.SliderInt("Platform king platform index##config", config.PickedPlatform, minValue: 0, maxValue: 9);
-            });
             ImGui.Separator();
             config.ShowZombieSpawns = ImGuiExt.Checkbox("Show zombie spawns##config", config.ShowZombieSpawns);
             ImGui.Separator();
@@ -169,25 +167,22 @@ public class RenderConfigWindow
             if (ImGui.TreeNode("Horde##config"))
             {
                 config.ShowHordeDoors = ImGuiExt.Checkbox("Show horde doors##config", config.ShowHordeDoors);
-                ImGuiExt.WithDisabled(!config.ShowHordeDoors, () =>
+                using (DisabledIf._(!config.ShowHordeDoors))
                 {
                     // we're gonna assume for now we won't be dealing with more than 2
                     config.DamageHordeDoors[0] = ImGuiExt.SliderInt("Door 1 damage##config", config.DamageHordeDoors[0], minValue: 0, maxValue: 24);
                     config.DamageHordeDoors[1] = ImGuiExt.SliderInt("Door 2 damage##config", config.DamageHordeDoors[1], minValue: 0, maxValue: 24);
-                });
+                }
                 config.HordePathType = ImGuiExt.EnumCombo("Horde path type##config", config.HordePathType);
-                ImGuiExt.WithDisabled(config.HordePathType == RenderConfig.PathConfigEnum.NONE, () =>
+                using (DisabledIf._(config.HordePathType == RenderConfig.PathConfigEnum.NONE))
                 {
                     config.HordePathIndex = ImGuiExt.SliderInt("Horde path index##config", config.HordePathIndex, 0, 19);
-                    ImGuiExt.WithDisabled(config.HordePathType != RenderConfig.PathConfigEnum.CUSTOM, () =>
-                    {
+                    using (DisabledIf._(config.HordePathType != RenderConfig.PathConfigEnum.CUSTOM))
                         config.HordeWave = ImGuiExt.SliderInt("Horde wave##config", config.HordeWave, 0, 99);
-                    });
-                    ImGuiExt.WithDisabled(config.HordePathType == RenderConfig.PathConfigEnum.CUSTOM, () =>
-                    {
-                        config.HordeRandomSeed = (uint)ImGuiExt.DragInt("Horde random seed##config", (int)config.HordeRandomSeed, minValue: 0);
-                    });
-                });
+                    // because of how brawlhalla seeds the prng, its seed is actually only 31 bits
+                    using (DisabledIf._(config.HordePathType == RenderConfig.PathConfigEnum.CUSTOM))
+                        config.HordeRandomSeed = ImGuiExt.DragUInt("Horde random seed##config", config.HordeRandomSeed, maxValue: (1u << 32) - 1);
+                }
 
                 ImGui.TreePop();
             }

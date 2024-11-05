@@ -27,27 +27,19 @@ public static partial class ImGuiExt
         return value;
     }
 
-    public static void WithDisabled(bool disabled, Action a)
+    private static bool WithDisabled(bool disabled, Func<bool> a)
     {
-        if (disabled) ImGui.BeginDisabled();
-        a();
-        if (disabled) ImGui.EndDisabled();
-    }
-
-    public static bool WithDisabled(bool disabled, Func<bool> a)
-    {
-        if (disabled) ImGui.BeginDisabled();
-        bool res = a();
-        if (disabled) ImGui.EndDisabled();
+        bool res;
+        using (DisabledIf._(disabled)) res = a();
         return !disabled && res;
     }
 
-    public static bool WithDisabledButton(bool disabled, string label)
+    public static bool ButtonDisabledIf(bool disabled, string label)
     {
         return WithDisabled(disabled, () => ImGui.Button(label));
     }
 
-    public static bool WithDisabledMenuItem(bool disabled, string label, string? hotkey = null) =>
+    public static bool MenuItemDisabledIf(bool disabled, string label, string? hotkey = null) =>
         hotkey is null
             ? WithDisabled(disabled, () => ImGui.MenuItem(label))
             : WithDisabled(disabled, () => ImGui.MenuItem(label, hotkey));
@@ -101,7 +93,7 @@ public static partial class ImGuiExt
         {
             T value = values[i];
             changed |= edit(i);
-            if (WithDisabledButton(!allowRemove, $"x##{i}{value.GetHashCode()}"))
+            if (ButtonDisabledIf(!allowRemove, $"x##{i}{value.GetHashCode()}"))
             {
                 T[] result = WmeUtils.RemoveAt(values, i);
                 commands.Add((new ArrayRemoveCommand<T>(changeCommand, values, result, value), false));
@@ -110,14 +102,14 @@ public static partial class ImGuiExt
             if (allowMove)
             {
                 ImGui.SameLine();
-                if (WithDisabledButton(i == 0, $"^##{i}{value.GetHashCode()}"))
+                if (ButtonDisabledIf(i == 0, $"^##{i}{value.GetHashCode()}"))
                 {
                     T[] result = WmeUtils.MoveUp(values, i);
                     commands.Add((new PropChangeCommand<T[]>(changeCommand, values, result), false));
                     changed = true;
                 }
                 ImGui.SameLine();
-                if (WithDisabledButton(i == values.Length - 1, $"v##{i}{value.GetHashCode()}"))
+                if (ButtonDisabledIf(i == values.Length - 1, $"v##{i}{value.GetHashCode()}"))
                 {
                     T[] result = WmeUtils.MoveDown(values, i);
                     commands.Add((new PropChangeCommand<T[]>(changeCommand, values, result), false));

@@ -98,7 +98,7 @@ public class ImportWindow(PathPreferences prefs)
         ImGui.Text($"Path: {prefs.BrawlhallaPath}");
         ImGui.Separator();
 
-        if (ImGuiExt.WithDisabledButton(!WmeUtils.IsValidBrawlPath(prefs.BrawlhallaPath), "Select mod file"))
+        if (ImGuiExt.ButtonDisabledIf(!WmeUtils.IsValidBrawlPath(prefs.BrawlhallaPath), "Select mod file"))
         {
             Task.Run(() =>
             {
@@ -144,7 +144,7 @@ public class ImportWindow(PathPreferences prefs)
             }
         }
         ImGui.Separator();
-        if (ImGuiExt.WithDisabledButton(_modFileLoad is null, "Import"))
+        if (ImGuiExt.ButtonDisabledIf(_modFileLoad is null, "Import"))
             Task.Run(() =>
             {
                 try
@@ -386,7 +386,7 @@ public class ImportWindow(PathPreferences prefs)
 
     private void LoadButton(LevelLoader loader)
     {
-        if (ImGuiExt.WithDisabledButton(!uint.TryParse(_keyInput, out uint decryptionKey)
+        if (ImGuiExt.ButtonDisabledIf(!uint.TryParse(_keyInput, out uint decryptionKey)
             && !WmeUtils.IsValidBrawlPath(prefs.BrawlhallaPath) || (_savedLdPath is null && _swzDescName is null), "Load map"))
         {
             Task.Run(() =>
@@ -429,7 +429,7 @@ public class ImportWindow(PathPreferences prefs)
 
     private void RequiredFilesLoadButton(LevelLoader loader)
     {
-        if (ImGuiExt.WithDisabledButton(prefs.BrawlhallaPath is null, "Load required files only"))
+        if (ImGuiExt.ButtonDisabledIf(prefs.BrawlhallaPath is null, "Load required files only"))
         {
             Task.Run(() =>
             {

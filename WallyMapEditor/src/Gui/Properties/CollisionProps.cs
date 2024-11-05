@@ -150,7 +150,7 @@ public partial class PropertiesWindow
             int iCapture = i;
             string trapPower = pc.TrapPowers[i];
 
-            if (ImGuiExt.WithDisabledButton(pc.TrapPowers.Length < 2, $"Remove##{i}{trapPower.GetHashCode()}"))
+            if (ImGuiExt.ButtonDisabledIf(pc.TrapPowers.Length < 2, $"Remove##{i}{trapPower.GetHashCode()}"))
             {
                 string[] newTrapPowers = WmeUtils.RemoveAt(pc.TrapPowers, i);
                 double[]? newFireOffsetX = fireOffsetXShared ? null : WmeUtils.RemoveAt(pc.FireOffsetX, i);

@@ -82,7 +82,7 @@ public partial class PropertiesWindow
                 });
             }
             ImGui.SameLine();
-            if (ImGuiExt.WithDisabledButton(b.AnimatedAssetName is null, "Remove##AnimatedAssetName"))
+            if (ImGuiExt.ButtonDisabledIf(b.AnimatedAssetName is null, "Remove##AnimatedAssetName"))
             {
                 if (b.AnimatedAssetName is not null)
                 {

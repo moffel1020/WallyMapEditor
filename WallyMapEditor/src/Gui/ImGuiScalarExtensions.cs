@@ -9,7 +9,7 @@ namespace WallyMapEditor;
 /*
 Order:
 
-bool -> int -> uint -> float -> double -> color3 -> color4 -> enum -> text
+bool -> int -> uint -> double -> color3 -> color4 -> enum -> text
 then
 drag -> slider -> input
 then
@@ -67,7 +67,6 @@ public static partial class ImGuiExt
 
     #endregion
     #endregion
-
     #region Int
     #region DragInt
 
@@ -222,6 +221,7 @@ public static partial class ImGuiExt
 
     #endregion
     #endregion
+    #region Double
     #region DragDouble
 
     public static void DragDouble(string label, ref double value, float speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
@@ -326,6 +326,7 @@ public static partial class ImGuiExt
         return propChanged;
     }
 
+    #endregion
     #endregion
     #region ColorPicker3
 

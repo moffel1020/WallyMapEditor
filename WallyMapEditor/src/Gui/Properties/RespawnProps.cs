@@ -26,14 +26,10 @@ public partial class PropertiesWindow
         propChanged |= ImGuiExt.DragDoubleHistory("Y", r.Y, val => r.Y = val, cmd);
 
         if (r.ExpandedInit && r.Initial) r.Initial = false;
-        ImGuiExt.WithDisabled(r.ExpandedInit, () =>
-        {
+        using (DisabledIf._(r.ExpandedInit))
             propChanged |= ImGuiExt.CheckboxHistory("Initial", r.Initial, val => r.Initial = val, cmd);
-        });
-        ImGuiExt.WithDisabled(r.Initial, () =>
-        {
+        using (DisabledIf._(r.Initial))
             propChanged |= ImGuiExt.CheckboxHistory("ExpandedInit", r.ExpandedInit, val => r.ExpandedInit = val, cmd);
-        });
 
         return propChanged;
     }

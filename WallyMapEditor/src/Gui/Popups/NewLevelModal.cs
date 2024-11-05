@@ -99,7 +99,7 @@ public static class NewLevelModal
         ImGui.SameLine();
         ImGui.Text(prefs.BrawlhallaPath ?? "Not selected");
 
-        if (ImGuiExt.WithDisabledButton(string.IsNullOrWhiteSpace(_newDisplayName) || string.IsNullOrWhiteSpace(_newLevelName) || string.IsNullOrWhiteSpace(prefs.BrawlhallaPath), "Create"))
+        if (ImGuiExt.ButtonDisabledIf(string.IsNullOrWhiteSpace(_newDisplayName) || string.IsNullOrWhiteSpace(_newLevelName) || string.IsNullOrWhiteSpace(prefs.BrawlhallaPath), "Create"))
         {
             string assetDir = string.IsNullOrWhiteSpace(_newLevelDir) ? _newLevelName : _newLevelDir;
             loader.LoadDefaultMap(_newLevelName, assetDir, _newDisplayName, _addToPlaylists);
