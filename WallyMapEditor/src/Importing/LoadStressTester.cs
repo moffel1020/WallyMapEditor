@@ -14,7 +14,15 @@ public static class LoadStressTester
         string dynamicPath = Path.Combine(brawlPath, "Dynamic.swz");
         string initPath = Path.Combine(brawlPath, "Init.swz");
 
-        LevelTypes lt = WmeUtils.DeserializeSwzFromPath<LevelTypes>(initPath, "LevelTypes.xml", key, bhstyle: true)!;
+        try
+        {
+            WmeUtils.DeserializeSwzFromPath<LevelTypes>(initPath, "LevelTypes.xml", key, bhstyle: true);
+        }
+        catch (Exception e)
+        {
+            return $"Error while loading LevelTypes: {e.Message}";
+        }
+
         foreach (string file in WmeUtils.GetFilesInSwz(dynamicPath, key))
         {
             string fileName = SwzUtils.GetFileName(file);
