@@ -382,6 +382,18 @@ public class ImportWindow(PathPreferences prefs)
             ImGui.Separator();
             ShowPowerNamesImportSection();
         }
+
+#if DEBUG
+        // secret stress testing option :3
+        if (prefs.BrawlhallaPath is not null && uint.TryParse(_keyInput, out uint decryptionKey))
+        {
+            ImGui.Separator();
+            if (ImGui.Button("stress test"))
+            {
+                _loadingError = LoadStressTester.StressTest(prefs.BrawlhallaPath, decryptionKey);
+            }
+        }
+#endif
     }
 
     private void LoadButton(LevelLoader loader)
