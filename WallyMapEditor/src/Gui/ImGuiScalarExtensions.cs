@@ -9,14 +9,90 @@ namespace WallyMapEditor;
 /*
 Order:
 
-bool -> int -> uint -> double -> color3 -> color4 -> enum -> text
-then
+bool -> int -> uint -> double -> color3 -> color3 hex -> color4 -> enum -> text
+then (when applicable)
 drag -> slider -> input
 then
-impl -> functional -> history -> nullable history
+impl -> functional -> nullable -> history -> nullable history
 */
 public static partial class ImGuiExt
 {
+    #region Generics
+    private static bool GenericDragScalarImpl<T>(ImGuiDataType type, string label, ref T value, float speed, T minValue, T maxValue) where T : unmanaged
+    {
+        unsafe
+        {
+            IntPtr valuePtr = (IntPtr)Unsafe.AsPointer(ref value);
+            IntPtr minValuePtr = (IntPtr)(&minValue);
+            IntPtr maxValuePtr = (IntPtr)(&maxValue);
+            return ImGui.DragScalar(label, type, valuePtr, speed, minValuePtr, maxValuePtr);
+        }
+    }
+
+    private delegate bool ScalarDragDelegate<T>(string label, ref T value, float speed, T maxValue, T minValue);
+    private static T GenericDragScalar<T>(ScalarDragDelegate<T> func, string label, T value, float speed, T maxValue, T minValue) where T : struct
+    {
+        func(label, ref value, speed, maxValue, minValue);
+        return value;
+    }
+
+    private static bool GenericHistory<T>(T value, T newValue, Action<T> changeCommand, CommandHistory cmd)
+    {
+        if (!Equals(value, newValue))
+        {
+            // don't merge with nulls
+            cmd.Add(new PropChangeCommand<T>(changeCommand, value, newValue), allowMerge: value is not null);
+            return true;
+        }
+        return false;
+    }
+
+    private static T? NullableGeneric<T>(string label, T? value, Func<T, T> modifier, T defaultValue) where T : class
+    {
+        if (value is not null)
+        {
+            T newValue = modifier(value);
+            ImGui.SameLine();
+            if (ImGui.Button("Remove##" + label))
+                return null;
+            return newValue;
+        }
+        else
+        {
+            ImGui.Text(label);
+            ImGui.SameLine();
+            if (ImGui.Button("Add##" + label))
+                return defaultValue;
+            return null;
+        }
+    }
+
+    private static T? NullableGeneric<T>(string label, T? value, Func<T, T> modifier, T defaultValue) where T : struct
+    {
+        if (value is not null)
+        {
+            T newValue = modifier(value.Value);
+            ImGui.SameLine();
+            if (ImGui.Button("Remove##" + label))
+                return null;
+            return newValue;
+        }
+        else
+        {
+            ImGui.Text(label);
+            ImGui.SameLine();
+            if (ImGui.Button("Add##" + label))
+                return defaultValue;
+            return null;
+        }
+    }
+
+    private static bool NullableGenericHistory<T>(string label, T? value, Func<T, T> modifier, T defaultValue, Action<T?> changeCommand, CommandHistory cmd) where T : class
+        => GenericHistory(value, NullableGeneric(label, value, modifier, defaultValue), changeCommand, cmd);
+    private static bool NullableGenericHistory<T>(string label, T? value, Func<T, T> modifier, T defaultValue, Action<T?> changeCommand, CommandHistory cmd) where T : struct
+        => GenericHistory(value, NullableGeneric(label, value, modifier, defaultValue), changeCommand, cmd);
+
+    #endregion
     #region Bool
     #region Checkbox
 
@@ -27,43 +103,9 @@ public static partial class ImGuiExt
     }
 
     public static bool CheckboxHistory(string label, bool value, Action<bool> changeCommand, CommandHistory cmd)
-    {
-        bool oldVal = value;
-        bool newVal = Checkbox(label, value);
-        if (newVal != oldVal)
-        {
-            cmd.Add(new PropChangeCommand<bool>(changeCommand, oldVal, newVal));
-            return true;
-        }
-
-        return false;
-    }
-
+        => GenericHistory(value, Checkbox(label, value), changeCommand, cmd);
     public static bool NullableCheckboxHistory(string label, bool? value, bool defaultValue, Action<bool?> changeCommand, CommandHistory cmd)
-    {
-        if (value is not null)
-        {
-            bool changed = CheckboxHistory(label, value.Value, val => changeCommand(val), cmd);
-            ImGui.SameLine();
-            if (ImGui.Button("Remove##" + label))
-            {
-                cmd.Add(new PropChangeCommand<bool?>(changeCommand, value, null));
-                return true;
-            }
-            return changed;
-        }
-        else
-        {
-            ImGui.Text(label);
-            ImGui.SameLine();
-            if (ImGui.Button("Add##" + label))
-            {
-                cmd.Add(new PropChangeCommand<bool?>(changeCommand, value, defaultValue));
-                return true;
-            }
-        }
-        return false;
-    }
+        => NullableGenericHistory(label, value, val => Checkbox(label, val), defaultValue, changeCommand, cmd);
 
     #endregion
     #endregion
@@ -71,49 +113,11 @@ public static partial class ImGuiExt
     #region DragInt
 
     public static int DragInt(string label, int value, float speed = 1, int minValue = int.MinValue, int maxValue = int.MaxValue)
-    {
-        ImGui.DragInt(label, ref value, speed, minValue, maxValue);
-        return value;
-    }
-
+        => GenericDragScalar(ImGui.DragInt, label, value, speed, minValue, maxValue);
     public static bool DragIntHistory(string label, int value, Action<int> changeCommand, CommandHistory cmd, float speed = 1, int minValue = int.MinValue, int maxValue = int.MaxValue)
-    {
-        int oldVal = value;
-        int newVal = DragInt(label, value, speed, minValue, maxValue);
-        if (newVal != oldVal)
-        {
-            cmd.Add(new PropChangeCommand<int>(changeCommand, oldVal, newVal));
-            return true;
-        }
-
-        return false;
-    }
-
+        => GenericHistory(value, DragInt(label, value, speed, minValue, maxValue), changeCommand, cmd);
     public static bool DragNullableIntHistory(string label, int? value, int defaultValue, Action<int?> changeCommand, CommandHistory cmd, float speed = 1, int minValue = int.MinValue, int maxValue = int.MaxValue)
-    {
-        if (value is not null)
-        {
-            bool dragged = DragIntHistory(label, value.Value, val => changeCommand(val), cmd, speed, minValue, maxValue);
-            ImGui.SameLine();
-            if (ImGui.Button("Remove##" + label))
-            {
-                cmd.Add(new PropChangeCommand<int?>(changeCommand, value, null));
-                return true;
-            }
-            return dragged;
-        }
-        else
-        {
-            ImGui.Text(label);
-            ImGui.SameLine();
-            if (ImGui.Button("Add##" + label))
-            {
-                cmd.Add(new PropChangeCommand<int?>(changeCommand, value, defaultValue));
-                return true;
-            }
-        }
-        return false;
-    }
+        => NullableGenericHistory(label, value, val => DragInt(label, val, speed, minValue, maxValue), defaultValue, changeCommand, cmd);
 
     #endregion
     #region SliderInt
@@ -129,61 +133,14 @@ public static partial class ImGuiExt
     #region UInt
     #region DragUInt
 
-    public static void DragUInt(string label, ref uint value, float speed = 1, uint minValue = uint.MinValue, uint maxValue = uint.MaxValue)
-    {
-        unsafe
-        {
-            IntPtr valuePtr = (IntPtr)Unsafe.AsPointer(ref value);
-            IntPtr minValuePtr = (IntPtr)(&minValue);
-            IntPtr maxValuePtr = (IntPtr)(&maxValue);
-            ImGui.DragScalar(label, ImGuiDataType.U32, valuePtr, speed, minValuePtr, maxValuePtr);
-        }
-    }
-
+    public static bool DragUInt(string label, ref uint value, float speed = 1, uint minValue = uint.MinValue, uint maxValue = uint.MaxValue)
+        => GenericDragScalarImpl(ImGuiDataType.U32, label, ref value, speed, minValue, maxValue);
     public static uint DragUInt(string label, uint value, float speed = 1, uint minValue = uint.MinValue, uint maxValue = uint.MaxValue)
-    {
-        DragUInt(label, ref value, speed, minValue, maxValue);
-        return value;
-    }
-
+        => GenericDragScalar(DragUInt, label, value, speed, minValue, maxValue);
     public static bool DragUIntHistory(string label, uint value, Action<uint> changeCommand, CommandHistory cmd, float speed = 1, uint minValue = uint.MinValue, uint maxValue = uint.MaxValue)
-    {
-        uint oldVal = value;
-        uint newVal = DragUInt(label, value, speed, minValue, maxValue);
-        if (newVal != oldVal)
-        {
-            cmd.Add(new PropChangeCommand<uint>(changeCommand, oldVal, newVal));
-            return true;
-        }
-
-        return false;
-    }
-
+        => GenericHistory(value, DragUInt(label, value, speed, minValue, maxValue), changeCommand, cmd);
     public static bool DragNullableUIntHistory(string label, uint? value, uint defaultValue, Action<uint?> changeCommand, CommandHistory cmd, float speed = 1, uint minValue = uint.MinValue, uint maxValue = uint.MaxValue)
-    {
-        if (value is not null)
-        {
-            bool dragged = DragUIntHistory(label, value.Value, val => changeCommand(val), cmd, speed, minValue, maxValue);
-            ImGui.SameLine();
-            if (ImGui.Button("Remove##" + label))
-            {
-                cmd.Add(new PropChangeCommand<uint?>(changeCommand, value, null));
-                return true;
-            }
-            return dragged;
-        }
-        else
-        {
-            ImGui.Text(label);
-            ImGui.SameLine();
-            if (ImGui.Button("Add##" + label))
-            {
-                cmd.Add(new PropChangeCommand<uint?>(changeCommand, value, defaultValue));
-                return true;
-            }
-        }
-        return false;
-    }
+        => NullableGenericHistory(label, value, val => DragUInt(label, val, speed, minValue, maxValue), defaultValue, changeCommand, cmd);
 
     #endregion
     #region  InputUInt
@@ -207,81 +164,23 @@ public static partial class ImGuiExt
     }
 
     public static bool InputUIntHistory(string label, uint value, Action<uint> changeCommand, CommandHistory cmd, uint step = 1, uint stepFast = 100)
-    {
-        uint oldVal = value;
-        uint newVal = InputUInt(label, value, step, stepFast);
-        if (newVal != oldVal)
-        {
-            cmd.Add(new PropChangeCommand<uint>(changeCommand, oldVal, newVal));
-            return true;
-        }
-
-        return false;
-    }
+        => GenericHistory(value, InputUInt(label, value, step, stepFast), changeCommand, cmd);
 
     #endregion
     #endregion
     #region Double
     #region DragDouble
 
-    public static void DragDouble(string label, ref double value, float speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
-    {
-        unsafe
-        {
-            IntPtr valuePtr = (IntPtr)Unsafe.AsPointer(ref value);
-            IntPtr minValuePtr = (IntPtr)(&minValue);
-            IntPtr maxValuePtr = (IntPtr)(&maxValue);
-            ImGui.DragScalar(label, ImGuiDataType.Double, valuePtr, speed, minValuePtr, maxValuePtr);
-        }
-    }
-
+    public static bool DragDouble(string label, ref double value, float speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
+        => GenericDragScalarImpl(ImGuiDataType.Double, label, ref value, speed, minValue, maxValue);
     public static double DragDouble(string label, double value, float speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
-    {
-        double v = value;
-        DragDouble(label, ref v, speed, minValue, maxValue);
-        return v;
-    }
-
+        => GenericDragScalar(DragDouble, label, value, speed, minValue, maxValue);
     public static bool DragDoubleHistory(string label, double value, Action<double> changeCommand, CommandHistory cmd, float speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
-    {
-        double oldVal = value;
-        double newVal = DragDouble(label, value, speed, minValue, maxValue);
-        // prevent NaN from fucking up history
-        if (newVal != oldVal && (!double.IsNaN(newVal) || !double.IsNaN(oldVal)))
-        {
-            cmd.Add(new PropChangeCommand<double>(changeCommand, oldVal, newVal));
-            return true;
-        }
-
-        return false;
-    }
-
+        => GenericHistory(value, DragDouble(label, value, speed, minValue, maxValue), changeCommand, cmd);
     public static bool DragNullableDoubleHistory(string label, double? value, double defaultValue, Action<double?> changeCommand, CommandHistory cmd, float speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
-    {
-        if (value is not null)
-        {
-            bool dragged = DragDoubleHistory(label, value.Value, x => changeCommand(x), cmd, speed, minValue, maxValue);
-            ImGui.SameLine();
-            if (ImGui.Button("Remove##" + label))
-            {
-                cmd.Add(new PropChangeCommand<double?>(changeCommand, value, null));
-                return true;
-            }
-            return dragged;
-        }
-        else
-        {
-            ImGui.Text(label);
-            ImGui.SameLine();
-            if (ImGui.Button("Add##" + label))
-            {
-                cmd.Add(new PropChangeCommand<double?>(changeCommand, value, defaultValue));
-                return true;
-            }
-        }
-        return false;
-    }
+        => NullableGenericHistory(label, value, val => DragDouble(label, val, speed, minValue, maxValue), defaultValue, changeCommand, cmd);
 
+    // this is a monster
     public static bool DragNullableDoublePairHistory(
         string mainLabel,
         string label1, string label2,
@@ -337,6 +236,11 @@ public static partial class ImGuiExt
         WmsColor a = new((byte)(imCol.X * 255), (byte)(imCol.Y * 255), (byte)(imCol.Z * 255), 255);
         return a;
     }
+    public static bool NullableColorPicker3History(string label, WmsColor? value, WmsColor defaultValue, Action<WmsColor?> changeCommand, CommandHistory cmd)
+        => NullableGenericHistory(label, value, val => ColorPicker3(label, val), defaultValue, changeCommand, cmd);
+
+    #endregion
+    #region ColorPicker3 Hex
 
     public static uint ColorPicker3Hex(string label, uint col)
     {
@@ -346,54 +250,8 @@ public static partial class ImGuiExt
         r = (byte)(imCol.X * 255); g = (byte)(imCol.Y * 255); b = (byte)(imCol.Z * 255);
         return ((uint)r << 16) | ((uint)g << 8) | b;
     }
-
-    public static bool ColorPicker3History(string label, WmsColor value, Action<WmsColor> changeCommand, CommandHistory cmd)
-    {
-        WmsColor newValue = ColorPicker3(label, value);
-        if (value != newValue)
-        {
-            cmd.Add(new PropChangeCommand<WmsColor>(changeCommand, value, newValue));
-            return true;
-        }
-        return false;
-    }
-
     public static bool ColorPicker3HexHistory(string label, uint value, Action<uint> changeCommand, CommandHistory cmd)
-    {
-        uint newValue = ColorPicker3Hex(label, value);
-        if (value != newValue)
-        {
-            cmd.Add(new PropChangeCommand<uint>(changeCommand, value, newValue));
-            return true;
-        }
-        return false;
-    }
-
-    public static bool NullableColorPicker3History(string label, WmsColor? value, WmsColor defaultValue, Action<WmsColor?> changeCommand, CommandHistory cmd)
-    {
-        if (value is not null)
-        {
-            bool changed = ColorPicker3History(label, value.Value, val => changeCommand(val), cmd);
-            ImGui.SameLine();
-            if (ImGui.Button("Remove##" + label))
-            {
-                cmd.Add(new PropChangeCommand<WmsColor?>(changeCommand, value, null));
-                return true;
-            }
-            return changed;
-        }
-        else
-        {
-            ImGui.Text(label);
-            ImGui.SameLine();
-            if (ImGui.Button("Add##" + label))
-            {
-                cmd.Add(new PropChangeCommand<WmsColor?>(changeCommand, value, defaultValue));
-                return true;
-            }
-        }
-        return false;
-    }
+        => GenericHistory(value, ColorPicker3Hex(label, value), changeCommand, cmd);
 
     #endregion
     #region ColorPicker4
@@ -418,52 +276,17 @@ public static partial class ImGuiExt
     }
 
     public static E EnumCombo<E>(string label, E currentValue) where E : struct, Enum
-    {
-        return Enum.Parse<E>(StringCombo(label, Enum.GetName(currentValue)!, Enum.GetNames<E>()));
-    }
-
+        => Enum.Parse<E>(StringCombo(label, Enum.GetName(currentValue)!, Enum.GetNames<E>()));
     public static E? EnumComboWithNone<E>(string label, E? currentValue) where E : struct, Enum
-    {
-        return
-        Enum.TryParse(StringCombo(label, currentValue is null ? "None" : Enum.GetName(currentValue.Value)!, ["None", .. Enum.GetNames<E>()]), out E e)
+        => Enum.TryParse(StringCombo(label, currentValue is null ? "None" : Enum.GetName(currentValue.Value)!, ["None", .. Enum.GetNames<E>()]), out E e)
             ? e
             : null;
-    }
-
-    public static bool EnumComboHistory<T>(string label, T value, Action<T> changeCommand, CommandHistory cmd) where T : struct, Enum
-    {
-        T newValue = EnumCombo(label, value);
-        if (!value.Equals(newValue))
-        {
-            cmd.Add(new PropChangeCommand<T>(changeCommand, value, newValue));
-            return true;
-        }
-        return false;
-    }
-
-    public static bool NullableEnumComboHistory<T>(string label, T? value, Action<T?> changeCommand, CommandHistory cmd) where T : struct, Enum
-    {
-        T? newValue = EnumComboWithNone(label, value);
-        if (!value.Equals(newValue))
-        {
-            cmd.Add(new PropChangeCommand<T?>(changeCommand, value, newValue));
-            return true;
-        }
-        return false;
-    }
-
+    public static bool EnumComboHistory<E>(string label, E value, Action<E> changeCommand, CommandHistory cmd) where E : struct, Enum
+        => GenericHistory(value, EnumCombo(label, value), changeCommand, cmd);
+    public static bool NullableEnumComboHistory<E>(string label, E? value, Action<E?> changeCommand, CommandHistory cmd) where E : struct, Enum
+        => GenericHistory(value, EnumComboWithNone(label, value), changeCommand, cmd);
     public static bool GenericStringComboHistory<T>(string label, T value, Action<T> changeCommand, Func<T, string> stringify, Func<string, T> parse, T[] options, CommandHistory cmd)
-    {
-        string valueString = stringify(value);
-        string newValueString = StringCombo(label, valueString, [.. options.Select(stringify)]);
-        T newValue = parse(newValueString);
-        if (!Equals(value, newValue))
-        {
-            cmd.Add(new PropChangeCommand<T>(changeCommand, value, newValue));
-            return true;
-        }
-        return false;
-    }
+        => GenericHistory(value, parse(StringCombo(label, stringify(value), [.. options.Select(stringify)])), changeCommand, cmd);
 
     #endregion
     #region Text
@@ -492,15 +315,7 @@ public static partial class ImGuiExt
     }
 
     public static bool InputTextHistory(string label, string value, Action<string> changeCommand, CommandHistory cmd, uint maxLength = 512, ImGuiInputTextFlags flags = ImGuiInputTextFlags.None)
-    {
-        string newValue = InputText(label, value, maxLength, flags);
-        if (value != newValue)
-        {
-            cmd.Add(new PropChangeCommand<string>(changeCommand, value, newValue));
-            return true;
-        }
-        return false;
-    }
+        => GenericHistory(value, InputText(label, value, maxLength, flags), changeCommand, cmd);
 
     #endregion
     #region InputTextWithFilter
@@ -514,44 +329,12 @@ public static partial class ImGuiExt
         _ => 1,
     };
 
-    public static unsafe string InputTextWithFilter(string label, string value, uint maxLength = 512) => InputTextWithCallback(label, value, NumAlphaFilter, maxLength: maxLength, flags: ImGuiInputTextFlags.CallbackCharFilter);
-
+    public static unsafe string InputTextWithFilter(string label, string value, uint maxLength = 512)
+        => InputTextWithCallback(label, value, NumAlphaFilter, maxLength: maxLength, flags: ImGuiInputTextFlags.CallbackCharFilter);
     public static bool InputTextWithFilterHistory(string label, string value, Action<string> changeCommand, CommandHistory cmd, uint maxLength = 512)
-    {
-        string newValue = InputTextWithFilter(label, value, maxLength);
-        if (value != newValue)
-        {
-            cmd.Add(new PropChangeCommand<string>(changeCommand, value, newValue));
-            return true;
-        }
-        return false;
-    }
-
+        => GenericHistory(value, InputTextWithFilter(label, value, maxLength), changeCommand, cmd);
     public static bool InputNullableTextWithFilterHistory(string label, string? value, string defaultValue, Action<string?> changeCommand, CommandHistory cmd, uint maxLength = 512)
-    {
-        if (value is not null)
-        {
-            bool dragged = InputTextWithFilterHistory(label, value, x => changeCommand(x), cmd, maxLength);
-            ImGui.SameLine();
-            if (ImGui.Button("Remove##" + label))
-            {
-                cmd.Add(new PropChangeCommand<string?>(changeCommand, value, null));
-                return true;
-            }
-            return dragged;
-        }
-        else
-        {
-            ImGui.Text(label);
-            ImGui.SameLine();
-            if (ImGui.Button("Add##" + label))
-            {
-                cmd.Add(new PropChangeCommand<string?>(changeCommand, value, defaultValue));
-                return true;
-            }
-        }
-        return false;
-    }
+        => NullableGenericHistory(label, value, val => InputTextWithFilter(label, val, maxLength), defaultValue, changeCommand, cmd);
 
     #endregion
     #endregion
