@@ -32,10 +32,18 @@ public class ModFileLoad(string path, string brawlPath) : ILoadMethod
 
         HashSet<string> playlists = file.LevelToPlaylistLinks.Where(l => l.LevelName == ld.LevelName).SelectMany(l => l.Playlists).ToHashSet();
 
-        Directory.CreateDirectory(Path.Combine(BrawlPath, "mapArt", ld.AssetDir));
         foreach (ExtraFileObject efo in file.ExtraFiles)
         {
             string destPath = Path.Combine(BrawlPath, efo.FullPath);
+            // path not in brawl dir. stinky!
+            if (!WmeUtils.IsInDirectory(BrawlPath, destPath))
+            {
+                Rl.TraceLog(Raylib_cs.TraceLogLevel.Warning, $"Mod file had a file with dangerous path {destPath}. It was skipped");
+                continue;
+            }
+            string? pathDir = Path.GetDirectoryName(destPath);
+            if (pathDir is not null && !Directory.Exists(pathDir))
+                Directory.CreateDirectory(pathDir);
             using FileStream objectStream = new(destPath, FileMode.Create, FileAccess.Write);
             objectStream.Write(efo.FileContent);
         }
