@@ -91,7 +91,10 @@ public class ImportWindow(PathPreferences prefs)
             {
                 DialogResult result = Dialog.FolderPicker(prefs.BrawlhallaPath);
                 if (result.IsOk)
+                {
                     prefs.BrawlhallaPath = result.Path;
+                    UpdateModFileBrawlPath(result.Path);
+                }
             });
         }
         ImGui.Text($"Path: {prefs.BrawlhallaPath}");
@@ -163,9 +166,15 @@ public class ImportWindow(PathPreferences prefs)
             });
     }
 
+    private void UpdateModFileBrawlPath(string brawlPath)
+    {
+        if (_modFileLoad is not null && _modFileLoad.BrawlPath != brawlPath)
+            _modFileLoad = new ModFileLoad(_modFileLoad.FilePath, brawlPath);
+    }
+
     private void CreateModFileLoad(string path, PathPreferences prefs)
     {
-        if (path != _modFileLoad?.FilePath)
+        if (_modFileLoad is null || path != _modFileLoad.FilePath || prefs.BrawlhallaPath! != _modFileLoad.BrawlPath)
             _modFileLoad = new ModFileLoad(path, prefs.BrawlhallaPath!);
 
         prefs.ModFilePath = path;
@@ -331,7 +340,10 @@ public class ImportWindow(PathPreferences prefs)
             {
                 DialogResult result = Dialog.FolderPicker(prefs.BrawlhallaPath);
                 if (result.IsOk)
+                {
                     prefs.BrawlhallaPath = result.Path;
+                    UpdateModFileBrawlPath(result.Path);
+                }
             });
         }
         ImGui.Text($"Path: {prefs.BrawlhallaPath}");
