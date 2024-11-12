@@ -16,12 +16,26 @@ public partial class PropertiesWindow
         propChanged |= ImGuiExt.DragDoubleHistory("Y", k.Y, val => k.Y = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory("Rotation", k.Rotation, val => k.Rotation = val, cmd, speed: 0.1f);
 
-        propChanged |= ImGuiExt.DragNullableDoubleHistory("CenterX", k.CenterX, 0, val => k.CenterX = val, cmd);
-        propChanged |= ImGuiExt.DragNullableDoubleHistory("CenterY", k.CenterY, 0, val => k.CenterY = val, cmd);
-        ImGui.Spacing();
+        ImGui.SeparatorText("Easing");
+        ImGuiExt.HintTooltip(Strings.UI_EASING_TOOLTIP);
         propChanged |= ImGuiExt.NullableCheckboxHistory("EaseIn", k.EaseIn, false, val => k.EaseIn = val, cmd);
+        ImGuiExt.HintTooltip(Strings.UI_EASE_IN_TOOLTIP);
         propChanged |= ImGuiExt.NullableCheckboxHistory("EaseOut", k.EaseOut, false, val => k.EaseOut = val, cmd);
-        propChanged |= ImGuiExt.DragNullableUIntHistory("EasePower", k.EasePower, 2, val => k.EasePower = val, cmd, minValue: 2);
+        ImGuiExt.HintTooltip(Strings.UI_EASE_OUT_TOOLTIP);
+        using (ImGuiExt.DisabledIf(k.EaseIn != true && k.EaseOut != true))
+            propChanged |= ImGuiExt.DragUIntHistory("EasePower", k.EasePower ?? 2, val => k.EasePower = val, cmd, minValue: 2);
+        ImGuiExt.HintTooltip(Strings.UI_EASE_POWER_TOOLTIP);
+
+        ImGui.SeparatorText("Center");
+        ImGuiExt.HintTooltip(Strings.UI_CENTER_TOOLTIP);
+        propChanged |= ImGuiExt.DragNullableDoublePairHistory(
+            "center",
+            "CenterX", "CenterY",
+            k.CenterX, k.CenterY,
+            0, 0,
+            val => (k.CenterX, k.CenterY) = val,
+            cmd
+        );
 
         return propChanged;
     }

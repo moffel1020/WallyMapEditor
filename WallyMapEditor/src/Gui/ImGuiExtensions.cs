@@ -165,4 +165,12 @@ public static partial class ImGuiExt
             widget();
         }
     }
+
+    public static void HintTooltip(string explanation)
+    {
+        ImGui.SameLine();
+        ImGui.TextDisabled("(?)");
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip(explanation);
+    }
 }

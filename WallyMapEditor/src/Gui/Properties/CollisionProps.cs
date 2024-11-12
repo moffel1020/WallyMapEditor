@@ -32,6 +32,7 @@ public partial class PropertiesWindow
         ImGui.Separator();
 
         if (data.Level is not null) propChanged |= ObjectChangeType(ac, cmd, ShowChangeColTypeMenu, () => ac.Parent?.Children ?? data.Level.Desc.Collisions);
+
         propChanged |= ImGuiExt.DragDoubleHistory($"X1##props{ac.GetHashCode()}", ac.X1, val => ac.X1 = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory($"Y1##props{ac.GetHashCode()}", ac.Y1, val => ac.Y1 = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory($"X2##props{ac.GetHashCode()}", ac.X2, val => ac.X2 = val, cmd);
@@ -49,26 +50,19 @@ public partial class PropertiesWindow
         }, [0, 1, 2, 3, 4, 5], cmd);
         propChanged |= ImGuiExt.NullableEnumComboHistory($"Flag##{ac.GetHashCode()}", ac.Flag, val => ac.Flag = val, cmd);
         propChanged |= ImGuiExt.NullableEnumComboHistory($"ColorFlag##{ac.GetHashCode()}", ac.ColorFlag, val => ac.ColorFlag = val, cmd);
+        propChanged |= ImGuiExt.InputTextHistory($"TauntEvent##{ac.GetHashCode()}", ac.TauntEvent ?? "", val => ac.TauntEvent = val == "" ? null : val, cmd);
 
-        string tauntEventString = ac.TauntEvent ?? "";
-        string newTauntEventString = ImGuiExt.InputText($"TauntEvent##{ac.GetHashCode()}", tauntEventString);
-        if (tauntEventString != newTauntEventString)
-        {
-            cmd.Add(new PropChangeCommand<string?>(val => ac.TauntEvent = val, ac.TauntEvent, newTauntEventString == "" ? null : newTauntEventString));
-            propChanged = true;
-        }
-
-        ImGui.SeparatorText($"Anchor##props{ac.GetHashCode()}");
+        ImGui.SeparatorText("Anchor");
         propChanged |= ImGuiExt.DragNullableDoublePairHistory(
             "anchor",
             $"AnchorX##props{ac.GetHashCode()}", $"AnchorY##props{ac.GetHashCode()}",
             ac.AnchorX, ac.AnchorY,
             (ac.X1 + ac.X2) / 2 + (ac.Parent?.X ?? 0), (ac.Y1 + ac.Y2) / 2 + (ac.Parent?.Y ?? 0),
-            (val1, val2) => (ac.AnchorX, ac.AnchorY) = (val1, val2),
+            val => (ac.AnchorX, ac.AnchorY) = val,
             cmd
         );
 
-        ImGui.SeparatorText($"Normal##props{ac.GetHashCode()}");
+        ImGui.SeparatorText("Normal");
         propChanged |= ImGuiExt.DragDoubleHistory($"NormalX##props{ac.GetHashCode()}", ac.NormalX, val => ac.NormalX = val, cmd, speed: 0.01f, minValue: -1, maxValue: 1);
         propChanged |= ImGuiExt.DragDoubleHistory($"NormalY##props{ac.GetHashCode()}", ac.NormalY, val => ac.NormalY = val, cmd, speed: 0.01f, minValue: -1, maxValue: 1);
 

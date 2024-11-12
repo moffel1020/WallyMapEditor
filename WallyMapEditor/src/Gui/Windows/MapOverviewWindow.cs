@@ -92,13 +92,22 @@ public class MapOverviewWindow
 
             _propChanged |= ImGuiExt.InputTextHistory("AssetName", l.Type.AssetName ?? "", val => l.Type.AssetName = val == "" ? null : val, cmd);
             if (ImGui.IsItemHovered()) ImGui.SetTooltip("Note: this doesn't do anything in game");
+
             _propChanged |= ImGuiExt.InputTextHistory("FileName", l.Type.FileName ?? "", val => l.Type.FileName = val == "" ? null : val, cmd);
             if (ImGui.IsItemHovered()) ImGui.SetTooltip("Note: this doesn't do anything in game");
+
             ImGui.Separator();
+
             _propChanged |= ImGuiExt.InputTextHistory("DisplayName", l.Type.DisplayName, val => l.Type.DisplayName = val, cmd);
+            ImGuiExt.HintTooltip(Strings.UI_DISPLAY_NAME_TOOLTIP);
+
             _propChanged |= ImGuiExt.CheckboxHistory("DevOnly", l.Type.DevOnly, val => l.Type.DevOnly = val, cmd);
+
             _propChanged |= ImGuiExt.CheckboxHistory("TestLevel", l.Type.TestLevel, val => l.Type.TestLevel = val, cmd);
+            ImGuiExt.HintTooltip(Strings.UI_TEST_LEVEL_TOOLTIP);
+
             _propChanged |= ImGuiExt.DragNullableUIntHistory("MinNumOnlineGamesBeforeRandom", l.Type.MinNumOnlineGamesBeforeRandom, 0, val => l.Type.MinNumOnlineGamesBeforeRandom = val, cmd, speed: 0.1f);
+
             ImGui.Separator();
 
             ImGui.Text($"Playlists: {l.Playlists.Count}");
@@ -110,6 +119,7 @@ public class MapOverviewWindow
             ImGui.Separator();
 
             ImGui.Text("ThumbnailPNGFile: " + (l.Type.ThumbnailPNGFile ?? "None"));
+            ImGuiExt.HintTooltip(Strings.UI_LEVEL_THUMBNAIL_TOOLTIP);
             if (pathPrefs.BrawlhallaPath is not null)
             {
                 string thumbnailPath = Path.Combine(pathPrefs.BrawlhallaPath, "images", "thumbnails");
@@ -153,6 +163,7 @@ public class MapOverviewWindow
 
             _propChanged |= ImGuiExt.CheckboxHistory("NegateOverlaps##overview", l.Type.NegateOverlaps ?? false, val => l.Type.NegateOverlaps = !val ? null : val, cmd);
             _propChanged |= ImGuiExt.DragUIntHistory("Extra StartFrame##overview", l.Type.StartFrame ?? 0, val => l.Type.StartFrame = val == 0 ? null : val, cmd);
+            ImGuiExt.HintTooltip(Strings.UI_EXTRA_SF_TOOLTIP);
         }
 
         _propChanged |= ImGuiExt.DragDoubleHistory("Default SlowMult##overview", l.Desc.SlowMult, val => l.Desc.SlowMult = val, cmd, speed: 0.05f);
@@ -162,21 +173,29 @@ public class MapOverviewWindow
         {
             if (ImGui.CollapsingHeader("Kill Bounds##overview"))
             {
+                ImGui.Text("Kill bounds");
+                ImGuiExt.HintTooltip(Strings.UI_KILL_BOUNDS_TOOLTIP);
+
                 _propChanged |= ImGuiExt.DragUIntHistory("TopKill##killbounds", l.Type.TopKill!.Value, val => l.Type.TopKill = val, cmd);
                 _propChanged |= ImGuiExt.DragUIntHistory("BottomKill##killbounds", l.Type.BottomKill!.Value, val => l.Type.BottomKill = val, cmd);
                 _propChanged |= ImGuiExt.DragUIntHistory("LeftKill##killbounds", l.Type.LeftKill!.Value, val => l.Type.LeftKill = val, cmd);
                 _propChanged |= ImGuiExt.DragUIntHistory("RightKill##killbounds", l.Type.RightKill!.Value, val => l.Type.RightKill = val, cmd);
 
                 _propChanged |= ImGuiExt.CheckboxHistory("SoftTopKill", l.Type.SoftTopKill ?? true, val => l.Type.SoftTopKill = val ? null : val, cmd);
+                ImGuiExt.HintTooltip(Strings.UI_SOFT_TOP_TOOLTIP);
                 using (ImGuiExt.DisabledIf(l.Type.LeftKill < 200))
                     _propChanged |= ImGuiExt.CheckboxHistory("HardLeftKill", l.Type.HardLeftKill ?? false, val => l.Type.HardLeftKill = val ? val : null, cmd);
+                ImGuiExt.HintTooltip(Strings.UI_HARD_LEFT_TOOLTIP);
                 using (ImGuiExt.DisabledIf(l.Type.RightKill < 200))
                     _propChanged |= ImGuiExt.CheckboxHistory("HardRightKill", l.Type.HardRightKill ?? false, val => l.Type.HardRightKill = val ? val : null, cmd);
+                ImGuiExt.HintTooltip(Strings.UI_HARD_RIGHT_TOOLTIP);
             }
         }
 
         if (ImGui.CollapsingHeader("Camera##overview"))
         {
+            ImGui.Text("Camera bounds");
+            ImGuiExt.HintTooltip(Strings.UI_CAMERA_BOUNDS_TOOLTIP);
             _propChanged |= PropertiesWindow.ShowCameraBoundsProps(l.Desc.CameraBounds, cmd);
             if (l.Type is not null)
             {
@@ -192,22 +211,22 @@ public class MapOverviewWindow
         {
             _propChanged |= ImGuiExt.InputNullableTextWithFilterHistory("BGMusic", l.Type.BGMusic, "Level09Theme", val => l.Type.BGMusic = val, cmd, 64);
             _propChanged |= ImGuiExt.InputNullableTextWithFilterHistory("StreamerBGMusic", l.Type.StreamerBGMusic, "Level09Theme", val => l.Type.StreamerBGMusic = val, cmd, 64);
+            ImGuiExt.HintTooltip(Strings.UI_STREAMER_BG_MUSIC_TOOLTIP);
         }
 
         if (ImGui.CollapsingHeader("Sidekick Bounds"))
         {
             ImGui.Text("Spawn bot bounds");
-            ImGui.SameLine();
-            ImGui.TextDisabled("(?)");
-            if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Area for sidekicks to fly in.\nSidekicks are called spawn bots internally");
+            ImGuiExt.HintTooltip(Strings.UI_SIDEKICK_BOUNDS_TOOLTIP);
             _propChanged |= PropertiesWindow.ShowSpawnBotBoundsProps(l.Desc.SpawnBotBounds, cmd);
         }
 
         if (l.Type is not null && ImGui.CollapsingHeader("Bot Behavior##overview"))
         {
             _propChanged |= ImGuiExt.CheckboxHistory("IsClimbMap", l.Type.IsClimbMap ?? false, val => l.Type.IsClimbMap = val ? val : null, cmd);
+            ImGuiExt.HintTooltip(Strings.UI_IS_CLIMB_MAP_TOOLTIP);
             _propChanged |= ImGuiExt.CheckboxHistory("AIStrictRecover", l.Type.AIStrictRecover ?? false, val => l.Type.AIStrictRecover = val ? val : null, cmd);
+            ImGuiExt.HintTooltip(Strings.UI_STRICT_RECOVER_TOOLTIP);
             _propChanged |= ImGuiExt.DragNullableDoubleHistory("AIPanicLine", l.Type.AIPanicLine, 0, val => l.Type.AIPanicLine = val, cmd);
             _propChanged |= ImGuiExt.DragNullableDoubleHistory("AIGroundLine", l.Type.AIGroundLine, 0, val => l.Type.AIGroundLine = val, cmd);
         }
@@ -222,7 +241,8 @@ public class MapOverviewWindow
             _propChanged |= ImGuiExt.NullableColorPicker3History("Outer", crateToWms(l.Type.CrateColorA), WmsColor.FromHex(0xff7c5b), val => l.Type.CrateColorA = wmsToCrate(val), cmd);
             _propChanged |= ImGuiExt.NullableColorPicker3History("Inner", crateToWms(l.Type.CrateColorB), WmsColor.FromHex(0xffc1b3), val => l.Type.CrateColorB = wmsToCrate(val), cmd);
 
-            ImGui.SeparatorText("Midground (doesn't do anything ingame)");
+            ImGui.SeparatorText("Midground");
+            ImGuiExt.HintTooltip(Strings.UI_MIDGROUND_SECTION_TOOLTIP);
             _propChanged |= ImGuiExt.ColorPicker3HexHistory("Midground tint", l.Type.MidgroundTint ?? 0, val => l.Type.MidgroundTint = val, cmd);
             _propChanged |= ImGuiExt.DragDoubleHistory("Midground tint fraction", l.Type.MidgroundFraction ?? 0, val => l.Type.MidgroundFraction = val == 0 ? null : val, cmd, minValue: 0, maxValue: 1, speed: 0.05f);
             _propChanged |= ImGuiExt.ColorPicker3HexHistory("Midground tint offset", l.Type.MidgroundOffset ?? 0, val => l.Type.MidgroundOffset = val, cmd);
@@ -233,19 +253,23 @@ public class MapOverviewWindow
             _propChanged |= ImGuiExt.ColorPicker3HexHistory("Sidekick tint offset", l.Type.BotOffset ?? 0, val => l.Type.BotOffset = val, cmd);
 
             ImGui.SeparatorText("Color exclusions");
-            _propChanged |= ImGuiExt.GenericStringComboHistory("AvoidTeamColor", l.Type.AvoidTeamColor, val => l.Type.AvoidTeamColor = val,
+            _propChanged |= ImGuiExt.GenericStringComboHistory(
+                "AvoidTeamColor", l.Type.AvoidTeamColor, val => l.Type.AvoidTeamColor = val,
                 c => c == TeamColorEnum.Default ? "None" : c.ToString(),
                 s => Enum.TryParse(s, out TeamColorEnum e) ? e : TeamColorEnum.Default,
-            Enum.GetValues<TeamColorEnum>(), cmd);
-
+                Enum.GetValues<TeamColorEnum>(), cmd
+            );
+            ImGuiExt.HintTooltip(Strings.UI_AVOID_TEAM_COLOR_TOOLTIP);
             ImGui.Text("TeamColorOrder");
+            ImGuiExt.HintTooltip(Strings.UI_TEAM_COLOR_ORDER_TOOLTIP);
             _propChanged |= TeamColorOrder(l.Type.TeamColorOrder, val => l.Type.TeamColorOrder = val, cmd);
 
             ImGui.SeparatorText("Misc");
             _propChanged |= ImGuiExt.ColorPicker3HexHistory("Shadow Tint##overview", (uint)(l.Type.ShadowTint ?? 0), val => l.Type.ShadowTint = val == 0 ? null : (int)val, cmd);
+            ImGuiExt.HintTooltip(Strings.UI_SHADOW_TINT_TOOLTIP);
         }
 
-        if (ImGui.CollapsingHeader("Images##overview"))
+        if (ImGui.CollapsingHeader("Backgrounds##overview"))
         {
             ShowSelectableList(l.Desc.Backgrounds, selection, val => l.Desc.Backgrounds = val, cmd, false);
         }
