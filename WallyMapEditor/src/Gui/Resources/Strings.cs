@@ -26,4 +26,5 @@ public static class Strings
     public const string UI_EASE_OUT_TOOLTIP = "If true, movement will slow down near the next keyframe.";
     public const string UI_EASE_POWER_TOOLTIP = "Controls how aggressive the speed curve is.";
     public const string UI_CENTER_TOOLTIP = "Defines a position to do an elliptical orbit around. Must have the same X or Y as one of the keyframes or it won't work correctly.";
+    public const string UI_RESPAWN_OFF_TOOLTIP = "If true, DynamicRespawns animated by the moving platform won't get used for respawning while interpolating from this keyframe.";
 }

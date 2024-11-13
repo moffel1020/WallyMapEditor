@@ -86,8 +86,8 @@ public class MapOverviewWindow
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("There must not be two maps with the same LevelID");
 
-            if (l.Type.LevelID > 255)
-                ImGui.Text("WARNING: LevelID must be less than 255");
+            if (l.Type.LevelID > LevelTypes.MAX_LEVEL_ID)
+                ImGui.Text($"WARNING: LevelID must not exceed {LevelTypes.MAX_LEVEL_ID}");
             ImGui.Separator();
 
             _propChanged |= ImGuiExt.InputTextHistory("AssetName", l.Type.AssetName ?? "", val => l.Type.AssetName = val == "" ? null : val, cmd);

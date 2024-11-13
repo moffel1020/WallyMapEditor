@@ -37,6 +37,10 @@ public partial class PropertiesWindow
             cmd
         );
 
+        ImGui.SeparatorText("Respawning");
+        propChanged |= ImGuiExt.CheckboxHistory("RespawnOff", k.RespawnOff, val => k.RespawnOff = val, cmd);
+        ImGuiExt.HintTooltip(Strings.UI_RESPAWN_OFF_TOOLTIP);
+
         return propChanged;
     }
 

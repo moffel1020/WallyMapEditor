@@ -49,6 +49,8 @@ partial class PropertiesWindow
         ImGui.Text("IntervalRand: " + la.IntervalRand);
         // this one is fine
         propChanged |= ImGuiExt.DragUIntHistory("LoopIterations", la.LoopIterations, val => la.LoopIterations = val, cmd);
+        // do nullable editing because 0 = infinity
+        propChanged |= ImGuiExt.DragNullableIntHistory("TotalLoops", la.TotalLoops == 0 ? null : la.TotalLoops, 1, val => la.TotalLoops = val ?? 0, cmd, minValue: 1);
 
         return propChanged;
     }
