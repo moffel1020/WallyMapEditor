@@ -22,9 +22,9 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
     private const double MAX_SNAP_DISTANCE = 4000;  // squared distance
     private const double SNAP_POINT_VISIBLE_DISTANCE = 100000; // squared distance
 
-    private const int ROUND_DECIMALS = 6;
+    public const int ROUND_DECIMALS = 6;
 
-    public bool Update(OverlayData data, CommandHistory cmd)
+    public virtual bool Update(OverlayData data, CommandHistory cmd)
     {
         Circle1.Radius = Circle2.Radius = data.OverlayConfig.RadiusCollisionPoint;
         Anchor.Radius = data.OverlayConfig.RadiusCollisionAnchor;
@@ -86,7 +86,7 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
         return Circle1.Dragging || Circle2.Dragging || Anchor.Dragging;
     }
 
-    public void Draw(OverlayData data)
+    public virtual void Draw(OverlayData data)
     {
         Circle1.Color = Circle2.Color = data.OverlayConfig.ColorCollisionPoint;
         Circle1.UsingColor = Circle2.UsingColor = data.OverlayConfig.UsingColorCollisionPoint;

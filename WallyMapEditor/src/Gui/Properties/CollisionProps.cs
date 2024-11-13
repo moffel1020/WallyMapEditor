@@ -298,7 +298,7 @@ public partial class PropertiesWindow
         return result;
     }
 
-    private static double[] NormalizeFireOffset(int trapPowerCount, double[] offsets, double @default)
+    public static double[] NormalizeFireOffset(int trapPowerCount, double[] offsets, double @default)
     {
         if (offsets.Length == 0)
         {

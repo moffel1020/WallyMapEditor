@@ -28,6 +28,7 @@ public class OverlayManager
     {
         CameraBounds cb => new CameraBoundsOverlay(cb),
         SpawnBotBounds sbb => new SpawnBotBoundsOverlay(sbb),
+        AbstractPressurePlateCollision pac => new PressurePlateCollisionOverlay(pac),
         AbstractCollision ac => new CollisionOverlay(ac),
         Respawn r => new RespawnOverlay(r),
         MovingPlatform mp => new MovingPlatformOverlay(mp),

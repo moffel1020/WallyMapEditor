@@ -18,6 +18,7 @@ public class OverlayConfig : ISerializable, IDeserializable
     public required float RadiusDynamicPosition { get; set; }
     public required float RadiusMovingPlatformPosition { get; set; }
     public required float RadiusKeyFramePosition { get; set; }
+    public required float RadiusFireOffset { get; set; }
 
     public required double SizeOffsetRespawnBox { get; set; }
     public required double SizeOffsetNavNodeBox { get; set; }
@@ -72,115 +73,135 @@ public class OverlayConfig : ISerializable, IDeserializable
     public required RlColor UsingColorKeyFramePosition { get; set; }
     public required RlColor TextColorKeyFrameNum { get; set; }
 
+    public required RlColor ColorFireOffset { get; set; }
+    public required RlColor UsingColorFireOffset { get; set; }
+
     public void Deserialize(XElement e)
     {
         OverlayConfig @default = Default;
-        RadiusCollisionPoint = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusCollisionPoint))) ?? @default.RadiusCollisionPoint;
-        RadiusCollisionAnchor = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusCollisionAnchor))) ?? @default.RadiusCollisionAnchor;
-        RadiusCollisionSnapPoint = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusCollisionSnapPoint))) ?? @default.RadiusCollisionSnapPoint;
-        RadiusItemSpawnCorner = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusItemSpawnCorner))) ?? @default.RadiusItemSpawnCorner;
-        RadiusAssetCorner = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusAssetCorner))) ?? @default.RadiusAssetCorner;
-        RadiusParentAssetPosition = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusParentAssetPosition))) ?? @default.RadiusParentAssetPosition;
-        RadiusVolumeCorner = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusVolumeCorner))) ?? @default.RadiusVolumeCorner;
-        RadiusNavNodePosition = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusNavNodePosition))) ?? @default.RadiusNavNodePosition;
-        RadiusCameraBoundsCorner = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusCameraBoundsCorner))) ?? @default.RadiusCameraBoundsCorner;
-        RadiusSpawnBotBoundsCorner = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusSpawnBotBoundsCorner))) ?? @default.RadiusSpawnBotBoundsCorner;
-        RadiusDynamicPosition = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusDynamicPosition))) ?? @default.RadiusDynamicPosition;
-        RadiusMovingPlatformPosition = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusMovingPlatformPosition))) ?? @default.RadiusMovingPlatformPosition;
-        RadiusKeyFramePosition = Utils.ParseFloatOrNull(e.GetElementValue(nameof(RadiusKeyFramePosition))) ?? @default.RadiusKeyFramePosition;
-        SizeOffsetRespawnBox = Utils.ParseDoubleOrNull(e.GetElementValue(nameof(SizeOffsetRespawnBox))) ?? @default.SizeOffsetRespawnBox;
-        SizeOffsetNavNodeBox = Utils.ParseDoubleOrNull(e.GetElementValue(nameof(SizeOffsetNavNodeBox))) ?? @default.SizeOffsetNavNodeBox;
-        LineWidthParentAssetScale = Utils.ParseDoubleOrNull(e.GetElementValue(nameof(LineWidthParentAssetScale))) ?? @default.LineWidthParentAssetScale;
-        LengthParentAssetScale = Utils.ParseDoubleOrNull(e.GetElementValue(nameof(LengthParentAssetScale))) ?? @default.LengthParentAssetScale;
-        SensitivityParentAssetScale = Utils.ParseDoubleOrNull(e.GetElementValue(nameof(SensitivityParentAssetScale))) ?? @default.SensitivityParentAssetScale;
-        FontSizeKeyFrameNum = Utils.ParseIntOrNull(e.GetElementValue(nameof(FontSizeKeyFrameNum))) ?? @default.FontSizeKeyFrameNum;
-        ColorCollisionPoint = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorCollisionPoint))) ?? @default.ColorCollisionPoint;
-        UsingColorCollisionPoint = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorCollisionPoint))) ?? @default.UsingColorCollisionPoint;
-        ColorCollisionAnchor = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorCollisionAnchor))) ?? @default.ColorCollisionAnchor;
-        UsingColorCollisionAnchor = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorCollisionAnchor))) ?? @default.UsingColorCollisionAnchor;
-        ColorCollisionSnapPoint = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorCollisionSnapPoint))) ?? @default.ColorCollisionSnapPoint;
-        ColorItemSpawnBox = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorItemSpawnBox))) ?? @default.ColorItemSpawnBox;
-        UsingColorItemSpawnBox = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorItemSpawnBox))) ?? @default.UsingColorItemSpawnBox;
-        ColorRespawnBox = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorRespawnBox))) ?? @default.ColorRespawnBox;
-        UsingColorRespawnBox = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorRespawnBox))) ?? @default.UsingColorRespawnBox;
-        ColorNavNodeBox = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorNavNodeBox))) ?? @default.ColorNavNodeBox;
-        UsingColorNavNodeBox = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorNavNodeBox))) ?? @default.UsingColorNavNodeBox;
-        ColorAssetBox = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorAssetBox))) ?? @default.ColorAssetBox;
-        UsingColorAssetBox = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorAssetBox))) ?? @default.UsingColorAssetBox;
-        ColorAssetRotationLine = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorAssetRotationLine))) ?? @default.ColorAssetRotationLine;
-        ColorParentAssetPosition = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorParentAssetPosition))) ?? @default.ColorParentAssetPosition;
-        UsingColorParentAssetPosition = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorParentAssetPosition))) ?? @default.UsingColorParentAssetPosition;
-        ColorParentAssetRotationLine = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorParentAssetRotationLine))) ?? @default.ColorParentAssetRotationLine;
-        ColorParentAssetScale = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorParentAssetScale))) ?? @default.ColorParentAssetScale;
-        UsingColorParentAssetScale = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorParentAssetScale))) ?? @default.UsingColorParentAssetScale;
-        ColorVolumeBox = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorVolumeBox))) ?? @default.ColorVolumeBox;
-        UsingColorVolumeBox = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorVolumeBox))) ?? @default.UsingColorVolumeBox;
-        ColorCameraBoundsBox = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorCameraBoundsBox))) ?? @default.ColorCameraBoundsBox;
-        UsingColorCameraBoundsBox = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorCameraBoundsBox))) ?? @default.UsingColorCameraBoundsBox;
-        ColorSpawnBotBoundsBox = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorSpawnBotBoundsBox))) ?? @default.ColorSpawnBotBoundsBox;
-        UsingColorSpawnBotBoundsBox = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorSpawnBotBoundsBox))) ?? @default.UsingColorSpawnBotBoundsBox;
-        ColorDynamicPosition = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorDynamicPosition))) ?? @default.ColorDynamicPosition;
-        UsingColorDynamicPosition = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorDynamicPosition))) ?? @default.UsingColorDynamicPosition;
-        ColorMovingPlatformPosition = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorMovingPlatformPosition))) ?? @default.ColorMovingPlatformPosition;
-        UsingColorMovingPlatformPosition = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorMovingPlatformPosition))) ?? @default.UsingColorMovingPlatformPosition;
-        ColorKeyFramePosition = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(ColorKeyFramePosition))) ?? @default.ColorKeyFramePosition;
-        UsingColorKeyFramePosition = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(UsingColorKeyFramePosition))) ?? @default.UsingColorKeyFramePosition;
-        TextColorKeyFrameNum = WmeUtils.ParseRlColorOrNull(e.GetElementValue(nameof(TextColorKeyFrameNum))) ?? @default.TextColorKeyFrameNum;
+
+        int getInt(string name, int @default) => e.GetIntElementOrNull(name) ?? @default;
+        uint getUInt(string name, uint @default) => e.GetUIntElementOrNull(name) ?? @default;
+        double getDouble(string name, double @default) => e.GetDoubleElementOrNull(name) ?? @default;
+        float getFloat(string name, float @default) => Utils.ParseFloatOrNull(e.GetElementValue(name)) ?? @default;
+        RlColor getColor(string name, RlColor @default) => WmeUtils.HexToRlColor(getUInt(name, WmeUtils.RlColorToHex(@default)));
+
+        RadiusCollisionPoint = getFloat(nameof(RadiusCollisionPoint), @default.RadiusCollisionPoint);
+        RadiusCollisionAnchor = getFloat(nameof(RadiusCollisionAnchor), @default.RadiusCollisionAnchor);
+        RadiusCollisionSnapPoint = getFloat(nameof(RadiusCollisionSnapPoint), @default.RadiusCollisionSnapPoint);
+        RadiusItemSpawnCorner = getFloat(nameof(RadiusItemSpawnCorner), @default.RadiusItemSpawnCorner);
+        RadiusAssetCorner = getFloat(nameof(RadiusAssetCorner), @default.RadiusAssetCorner);
+        RadiusParentAssetPosition = getFloat(nameof(RadiusParentAssetPosition), @default.RadiusParentAssetPosition);
+        RadiusVolumeCorner = getFloat(nameof(RadiusVolumeCorner), @default.RadiusVolumeCorner);
+        RadiusNavNodePosition = getFloat(nameof(RadiusNavNodePosition), @default.RadiusNavNodePosition);
+        RadiusCameraBoundsCorner = getFloat(nameof(RadiusCameraBoundsCorner), @default.RadiusCameraBoundsCorner);
+        RadiusSpawnBotBoundsCorner = getFloat(nameof(RadiusSpawnBotBoundsCorner), @default.RadiusSpawnBotBoundsCorner);
+        RadiusDynamicPosition = getFloat(nameof(RadiusDynamicPosition), @default.RadiusDynamicPosition);
+        RadiusMovingPlatformPosition = getFloat(nameof(RadiusMovingPlatformPosition), @default.RadiusMovingPlatformPosition);
+        RadiusKeyFramePosition = getFloat(nameof(RadiusKeyFramePosition), @default.RadiusKeyFramePosition);
+        RadiusFireOffset = getFloat(nameof(RadiusFireOffset), @default.RadiusFireOffset);
+
+        SizeOffsetRespawnBox = getDouble(nameof(SizeOffsetRespawnBox), @default.SizeOffsetRespawnBox);
+        SizeOffsetNavNodeBox = getDouble(nameof(SizeOffsetNavNodeBox), @default.SizeOffsetNavNodeBox);
+        LineWidthParentAssetScale = getDouble(nameof(LineWidthParentAssetScale), @default.LineWidthParentAssetScale);
+        LengthParentAssetScale = getDouble(nameof(LengthParentAssetScale), @default.LengthParentAssetScale);
+        SensitivityParentAssetScale = getDouble(nameof(SensitivityParentAssetScale), @default.SensitivityParentAssetScale);
+        FontSizeKeyFrameNum = getInt(nameof(FontSizeKeyFrameNum), @default.FontSizeKeyFrameNum);
+        ColorCollisionPoint = getColor(nameof(ColorCollisionPoint), @default.ColorCollisionPoint);
+        UsingColorCollisionPoint = getColor(nameof(UsingColorCollisionPoint), @default.UsingColorCollisionPoint);
+        ColorCollisionAnchor = getColor(nameof(ColorCollisionAnchor), @default.ColorCollisionAnchor);
+        UsingColorCollisionAnchor = getColor(nameof(UsingColorCollisionAnchor), @default.UsingColorCollisionAnchor);
+        ColorCollisionSnapPoint = getColor(nameof(ColorCollisionSnapPoint), @default.ColorCollisionSnapPoint);
+        ColorItemSpawnBox = getColor(nameof(ColorItemSpawnBox), @default.ColorItemSpawnBox);
+        UsingColorItemSpawnBox = getColor(nameof(UsingColorItemSpawnBox), @default.UsingColorItemSpawnBox);
+        ColorRespawnBox = getColor(nameof(ColorRespawnBox), @default.ColorRespawnBox);
+        UsingColorRespawnBox = getColor(nameof(UsingColorRespawnBox), @default.UsingColorRespawnBox);
+        ColorNavNodeBox = getColor(nameof(ColorNavNodeBox), @default.ColorNavNodeBox);
+        UsingColorNavNodeBox = getColor(nameof(UsingColorNavNodeBox), @default.UsingColorNavNodeBox);
+        ColorAssetBox = getColor(nameof(ColorAssetBox), @default.ColorAssetBox);
+        UsingColorAssetBox = getColor(nameof(UsingColorAssetBox), @default.UsingColorAssetBox);
+        ColorAssetRotationLine = getColor(nameof(ColorAssetRotationLine), @default.ColorAssetRotationLine);
+        ColorParentAssetPosition = getColor(nameof(ColorParentAssetPosition), @default.ColorParentAssetPosition);
+        UsingColorParentAssetPosition = getColor(nameof(UsingColorParentAssetPosition), @default.UsingColorParentAssetPosition);
+        ColorParentAssetRotationLine = getColor(nameof(ColorParentAssetRotationLine), @default.ColorParentAssetRotationLine);
+        ColorParentAssetScale = getColor(nameof(ColorParentAssetScale), @default.ColorParentAssetScale);
+        UsingColorParentAssetScale = getColor(nameof(UsingColorParentAssetScale), @default.UsingColorParentAssetScale);
+        ColorVolumeBox = getColor(nameof(ColorVolumeBox), @default.ColorVolumeBox);
+        UsingColorVolumeBox = getColor(nameof(UsingColorVolumeBox), @default.UsingColorVolumeBox);
+        ColorCameraBoundsBox = getColor(nameof(ColorCameraBoundsBox), @default.ColorCameraBoundsBox);
+        UsingColorCameraBoundsBox = getColor(nameof(UsingColorCameraBoundsBox), @default.UsingColorCameraBoundsBox);
+        ColorSpawnBotBoundsBox = getColor(nameof(ColorSpawnBotBoundsBox), @default.ColorSpawnBotBoundsBox);
+        UsingColorSpawnBotBoundsBox = getColor(nameof(UsingColorSpawnBotBoundsBox), @default.UsingColorSpawnBotBoundsBox);
+        ColorDynamicPosition = getColor(nameof(ColorDynamicPosition), @default.ColorDynamicPosition);
+        UsingColorDynamicPosition = getColor(nameof(UsingColorDynamicPosition), @default.UsingColorDynamicPosition);
+        ColorMovingPlatformPosition = getColor(nameof(ColorMovingPlatformPosition), @default.ColorMovingPlatformPosition);
+        UsingColorMovingPlatformPosition = getColor(nameof(UsingColorMovingPlatformPosition), @default.UsingColorMovingPlatformPosition);
+        ColorKeyFramePosition = getColor(nameof(ColorKeyFramePosition), @default.ColorKeyFramePosition);
+        UsingColorKeyFramePosition = getColor(nameof(UsingColorKeyFramePosition), @default.UsingColorKeyFramePosition);
+        TextColorKeyFrameNum = getColor(nameof(TextColorKeyFrameNum), @default.TextColorKeyFrameNum);
+        ColorFireOffset = getColor(nameof(ColorFireOffset), @default.ColorFireOffset);
+        UsingColorFireOffset = getColor(nameof(UsingColorFireOffset), @default.UsingColorFireOffset);
     }
 
     public void Serialize(XElement e)
     {
-        e.AddChild(nameof(RadiusCollisionPoint), RadiusCollisionPoint);
-        e.AddChild(nameof(RadiusCollisionAnchor), RadiusCollisionAnchor);
-        e.AddChild(nameof(RadiusCollisionSnapPoint), RadiusCollisionSnapPoint);
-        e.AddChild(nameof(RadiusItemSpawnCorner), RadiusItemSpawnCorner);
-        e.AddChild(nameof(RadiusAssetCorner), RadiusAssetCorner);
-        e.AddChild(nameof(RadiusParentAssetPosition), RadiusParentAssetPosition);
-        e.AddChild(nameof(RadiusVolumeCorner), RadiusVolumeCorner);
-        e.AddChild(nameof(RadiusNavNodePosition), RadiusNavNodePosition);
-        e.AddChild(nameof(RadiusCameraBoundsCorner), RadiusCameraBoundsCorner);
-        e.AddChild(nameof(RadiusSpawnBotBoundsCorner), RadiusSpawnBotBoundsCorner);
-        e.AddChild(nameof(RadiusDynamicPosition), RadiusDynamicPosition);
-        e.AddChild(nameof(RadiusMovingPlatformPosition), RadiusMovingPlatformPosition);
-        e.AddChild(nameof(RadiusKeyFramePosition), RadiusKeyFramePosition);
-        e.AddChild(nameof(SizeOffsetRespawnBox), SizeOffsetRespawnBox);
-        e.AddChild(nameof(SizeOffsetNavNodeBox), SizeOffsetNavNodeBox);
-        e.AddChild(nameof(LineWidthParentAssetScale), LineWidthParentAssetScale);
-        e.AddChild(nameof(LengthParentAssetScale), LengthParentAssetScale);
-        e.AddChild(nameof(SensitivityParentAssetScale), SensitivityParentAssetScale);
-        e.AddChild(nameof(FontSizeKeyFrameNum), FontSizeKeyFrameNum);
-        e.AddChild(nameof(ColorCollisionPoint), "0x" + WmeUtils.RlColorToHex(ColorCollisionPoint));
-        e.AddChild(nameof(UsingColorCollisionPoint), "0x" + WmeUtils.RlColorToHex(UsingColorCollisionPoint));
-        e.AddChild(nameof(ColorCollisionAnchor), "0x" + WmeUtils.RlColorToHex(ColorCollisionAnchor));
-        e.AddChild(nameof(UsingColorCollisionAnchor), "0x" + WmeUtils.RlColorToHex(UsingColorCollisionAnchor));
-        e.AddChild(nameof(ColorCollisionSnapPoint), "0x" + WmeUtils.RlColorToHex(ColorCollisionSnapPoint));
-        e.AddChild(nameof(ColorItemSpawnBox), "0x" + WmeUtils.RlColorToHex(ColorItemSpawnBox));
-        e.AddChild(nameof(UsingColorItemSpawnBox), "0x" + WmeUtils.RlColorToHex(UsingColorItemSpawnBox));
-        e.AddChild(nameof(ColorRespawnBox), "0x" + WmeUtils.RlColorToHex(ColorRespawnBox));
-        e.AddChild(nameof(UsingColorRespawnBox), "0x" + WmeUtils.RlColorToHex(UsingColorRespawnBox));
-        e.AddChild(nameof(ColorNavNodeBox), "0x" + WmeUtils.RlColorToHex(ColorNavNodeBox));
-        e.AddChild(nameof(UsingColorNavNodeBox), "0x" + WmeUtils.RlColorToHex(UsingColorNavNodeBox));
-        e.AddChild(nameof(ColorAssetBox), "0x" + WmeUtils.RlColorToHex(ColorAssetBox));
-        e.AddChild(nameof(UsingColorAssetBox), "0x" + WmeUtils.RlColorToHex(UsingColorAssetBox));
-        e.AddChild(nameof(ColorAssetRotationLine), "0x" + WmeUtils.RlColorToHex(ColorAssetRotationLine));
-        e.AddChild(nameof(ColorParentAssetPosition), "0x" + WmeUtils.RlColorToHex(ColorParentAssetPosition));
-        e.AddChild(nameof(UsingColorParentAssetPosition), "0x" + WmeUtils.RlColorToHex(UsingColorParentAssetPosition));
-        e.AddChild(nameof(ColorParentAssetScale), "0x" + WmeUtils.RlColorToHex(ColorParentAssetScale));
-        e.AddChild(nameof(UsingColorParentAssetScale), "0x" + WmeUtils.RlColorToHex(UsingColorParentAssetScale));
-        e.AddChild(nameof(ColorParentAssetRotationLine), "0x" + WmeUtils.RlColorToHex(ColorParentAssetRotationLine));
-        e.AddChild(nameof(ColorVolumeBox), "0x" + WmeUtils.RlColorToHex(ColorVolumeBox));
-        e.AddChild(nameof(UsingColorVolumeBox), "0x" + WmeUtils.RlColorToHex(UsingColorVolumeBox));
-        e.AddChild(nameof(ColorCameraBoundsBox), "0x" + WmeUtils.RlColorToHex(ColorCameraBoundsBox));
-        e.AddChild(nameof(UsingColorCameraBoundsBox), "0x" + WmeUtils.RlColorToHex(UsingColorCameraBoundsBox));
-        e.AddChild(nameof(ColorSpawnBotBoundsBox), "0x" + WmeUtils.RlColorToHex(ColorSpawnBotBoundsBox));
-        e.AddChild(nameof(UsingColorSpawnBotBoundsBox), "0x" + WmeUtils.RlColorToHex(UsingColorSpawnBotBoundsBox));
-        e.AddChild(nameof(ColorDynamicPosition), "0x" + WmeUtils.RlColorToHex(ColorDynamicPosition));
-        e.AddChild(nameof(UsingColorDynamicPosition), "0x" + WmeUtils.RlColorToHex(UsingColorDynamicPosition));
-        e.AddChild(nameof(ColorMovingPlatformPosition), "0x" + WmeUtils.RlColorToHex(ColorMovingPlatformPosition));
-        e.AddChild(nameof(UsingColorMovingPlatformPosition), "0x" + WmeUtils.RlColorToHex(UsingColorMovingPlatformPosition));
-        e.AddChild(nameof(ColorKeyFramePosition), "0x" + WmeUtils.RlColorToHex(ColorKeyFramePosition));
-        e.AddChild(nameof(UsingColorKeyFramePosition), "0x" + WmeUtils.RlColorToHex(UsingColorKeyFramePosition));
-        e.AddChild(nameof(TextColorKeyFrameNum), "0x" + WmeUtils.RlColorToHex(TextColorKeyFrameNum));
+        void addValue(string name, object? value) => e.AddChild(name, value);
+        void addColor(string name, RlColor value) => addValue(name, "0x" + WmeUtils.RlColorToHex(value));
+
+        addValue(nameof(RadiusCollisionPoint), RadiusCollisionPoint);
+        addValue(nameof(RadiusCollisionAnchor), RadiusCollisionAnchor);
+        addValue(nameof(RadiusCollisionSnapPoint), RadiusCollisionSnapPoint);
+        addValue(nameof(RadiusItemSpawnCorner), RadiusItemSpawnCorner);
+        addValue(nameof(RadiusAssetCorner), RadiusAssetCorner);
+        addValue(nameof(RadiusParentAssetPosition), RadiusParentAssetPosition);
+        addValue(nameof(RadiusVolumeCorner), RadiusVolumeCorner);
+        addValue(nameof(RadiusNavNodePosition), RadiusNavNodePosition);
+        addValue(nameof(RadiusCameraBoundsCorner), RadiusCameraBoundsCorner);
+        addValue(nameof(RadiusSpawnBotBoundsCorner), RadiusSpawnBotBoundsCorner);
+        addValue(nameof(RadiusDynamicPosition), RadiusDynamicPosition);
+        addValue(nameof(RadiusMovingPlatformPosition), RadiusMovingPlatformPosition);
+        addValue(nameof(RadiusKeyFramePosition), RadiusKeyFramePosition);
+        addValue(nameof(RadiusFireOffset), RadiusFireOffset);
+        addValue(nameof(SizeOffsetRespawnBox), SizeOffsetRespawnBox);
+        addValue(nameof(SizeOffsetNavNodeBox), SizeOffsetNavNodeBox);
+        addValue(nameof(LineWidthParentAssetScale), LineWidthParentAssetScale);
+        addValue(nameof(LengthParentAssetScale), LengthParentAssetScale);
+        addValue(nameof(SensitivityParentAssetScale), SensitivityParentAssetScale);
+        addValue(nameof(FontSizeKeyFrameNum), FontSizeKeyFrameNum);
+        addColor(nameof(ColorCollisionPoint), ColorCollisionPoint);
+        addColor(nameof(UsingColorCollisionPoint), UsingColorCollisionPoint);
+        addColor(nameof(ColorCollisionAnchor), ColorCollisionAnchor);
+        addColor(nameof(UsingColorCollisionAnchor), UsingColorCollisionAnchor);
+        addColor(nameof(ColorCollisionSnapPoint), ColorCollisionSnapPoint);
+        addColor(nameof(ColorItemSpawnBox), ColorItemSpawnBox);
+        addColor(nameof(UsingColorItemSpawnBox), UsingColorItemSpawnBox);
+        addColor(nameof(ColorRespawnBox), ColorRespawnBox);
+        addColor(nameof(UsingColorRespawnBox), UsingColorRespawnBox);
+        addColor(nameof(ColorNavNodeBox), ColorNavNodeBox);
+        addColor(nameof(UsingColorNavNodeBox), UsingColorNavNodeBox);
+        addColor(nameof(ColorAssetBox), ColorAssetBox);
+        addColor(nameof(UsingColorAssetBox), UsingColorAssetBox);
+        addColor(nameof(ColorAssetRotationLine), ColorAssetRotationLine);
+        addColor(nameof(ColorParentAssetPosition), ColorParentAssetPosition);
+        addColor(nameof(UsingColorParentAssetPosition), UsingColorParentAssetPosition);
+        addColor(nameof(ColorParentAssetScale), ColorParentAssetScale);
+        addColor(nameof(UsingColorParentAssetScale), UsingColorParentAssetScale);
+        addColor(nameof(ColorParentAssetRotationLine), ColorParentAssetRotationLine);
+        addColor(nameof(ColorVolumeBox), ColorVolumeBox);
+        addColor(nameof(UsingColorVolumeBox), UsingColorVolumeBox);
+        addColor(nameof(ColorCameraBoundsBox), ColorCameraBoundsBox);
+        addColor(nameof(UsingColorCameraBoundsBox), UsingColorCameraBoundsBox);
+        addColor(nameof(ColorSpawnBotBoundsBox), ColorSpawnBotBoundsBox);
+        addColor(nameof(UsingColorSpawnBotBoundsBox), UsingColorSpawnBotBoundsBox);
+        addColor(nameof(ColorDynamicPosition), ColorDynamicPosition);
+        addColor(nameof(UsingColorDynamicPosition), UsingColorDynamicPosition);
+        addColor(nameof(ColorMovingPlatformPosition), ColorMovingPlatformPosition);
+        addColor(nameof(UsingColorMovingPlatformPosition), UsingColorMovingPlatformPosition);
+        addColor(nameof(ColorKeyFramePosition), ColorKeyFramePosition);
+        addColor(nameof(UsingColorKeyFramePosition), UsingColorKeyFramePosition);
+        addColor(nameof(TextColorKeyFrameNum), TextColorKeyFrameNum);
+        addColor(nameof(ColorFireOffset), ColorFireOffset);
+        addColor(nameof(UsingColorFireOffset), UsingColorFireOffset);
     }
 
     private const float DEFAULT_RADIUS = 30;
@@ -213,6 +234,7 @@ public class OverlayConfig : ISerializable, IDeserializable
         RadiusDynamicPosition = DEFAULT_MID_RADIUS,
         RadiusMovingPlatformPosition = DEFAULT_MID_RADIUS,
         RadiusKeyFramePosition = DEFAULT_RADIUS,
+        RadiusFireOffset = DEFAULT_RADIUS,
         SizeOffsetNavNodeBox = DEFAULT_SIZE_OFFSET,
         SizeOffsetRespawnBox = DEFAULT_SIZE_OFFSET,
         LineWidthParentAssetScale = 20,
@@ -251,5 +273,7 @@ public class OverlayConfig : ISerializable, IDeserializable
         ColorKeyFramePosition = TransparentYellow,
         UsingColorKeyFramePosition = TransparentOrange,
         TextColorKeyFrameNum = RlColor.White,
+        ColorFireOffset = TransparentOrange,
+        UsingColorFireOffset = TransparentRed,
     };
 }
