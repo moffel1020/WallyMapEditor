@@ -18,7 +18,7 @@ partial class PropertiesWindow
         ImGui.Separator();
 
         ImGui.Text("FileName: " + la.FileName);
-        ImGui.Text($"AnimationName:");
+        ImGui.Text("AnimationName:");
         foreach (string anim in la.AnimationName)
             ImGui.BulletText(anim);
         ImGui.Separator();

@@ -49,10 +49,14 @@ public partial class PropertiesWindow
             _ => int.Parse(t),
         }, [0, 1, 2, 3, 4, 5], cmd);
         propChanged |= ImGuiExt.NullableEnumComboHistory($"Flag##{ac.GetHashCode()}", ac.Flag, val => ac.Flag = val, cmd);
+        ImGuiExt.HintTooltip(Strings.UI_COLLISION_FLAG_TOOLTIP);
         propChanged |= ImGuiExt.NullableEnumComboHistory($"ColorFlag##{ac.GetHashCode()}", ac.ColorFlag, val => ac.ColorFlag = val, cmd);
+        ImGuiExt.HintTooltip(Strings.UI_COLLISION_COLOR_FLAG_TOOLTIP);
         propChanged |= ImGuiExt.InputTextHistory($"TauntEvent##{ac.GetHashCode()}", ac.TauntEvent ?? "", val => ac.TauntEvent = val == "" ? null : val, cmd);
+        ImGuiExt.HintTooltip(Strings.UI_COLLISION_TAUNT_EVENT_TOOLTIP);
 
         ImGui.SeparatorText("Anchor");
+        ImGuiExt.HintTooltip(Strings.UI_COLLISION_ANCHOR_TOOLTIP);
         propChanged |= ImGuiExt.DragNullableDoublePairHistory(
             "anchor",
             $"AnchorX##props{ac.GetHashCode()}", $"AnchorY##props{ac.GetHashCode()}",
@@ -63,6 +67,7 @@ public partial class PropertiesWindow
         );
 
         ImGui.SeparatorText("Normal");
+        ImGuiExt.HintTooltip(Strings.UI_COLLISION_NORMAL_TOOLTIP);
         propChanged |= ImGuiExt.DragDoubleHistory($"NormalX##props{ac.GetHashCode()}", ac.NormalX, val => ac.NormalX = val, cmd, speed: 0.01f, minValue: -1, maxValue: 1);
         propChanged |= ImGuiExt.DragDoubleHistory($"NormalY##props{ac.GetHashCode()}", ac.NormalY, val => ac.NormalY = val, cmd, speed: 0.01f, minValue: -1, maxValue: 1);
 

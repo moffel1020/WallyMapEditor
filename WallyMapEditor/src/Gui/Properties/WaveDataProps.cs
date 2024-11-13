@@ -89,19 +89,23 @@ public partial class PropertiesWindow
     {
         bool propChanged = false;
         ImGui.SeparatorText("Count");
+        ImGuiExt.HintTooltip(Strings.UI_HORDE_GROUP_COUNT_TOOLTIP);
         propChanged |= ImGuiExt.DragNullableUIntHistory("Count", g.Count, 1, val => g.Count = val, cmd);
         propChanged |= ImGuiExt.DragNullableUIntHistory("Count3", g.Count3, g.Count ?? 1, val => g.Count3 = val, cmd);
         propChanged |= ImGuiExt.DragNullableUIntHistory("Count4", g.Count4, g.Count3 ?? g.Count ?? 1, val => g.Count4 = val, cmd);
         ImGui.SeparatorText("Delay");
+        ImGuiExt.HintTooltip(Strings.UI_HORDE_GROUP_DELAY_TOOLTIP);
         propChanged |= ImGuiExt.DragNullableUIntHistory("Delay", g.Delay, 0, val => g.Delay = val, cmd, speed: 100);
         propChanged |= ImGuiExt.DragNullableUIntHistory("Delay3", g.Delay3, g.Delay ?? 0, val => g.Delay3 = val, cmd, speed: 100);
         propChanged |= ImGuiExt.DragNullableUIntHistory("Delay4", g.Delay4, g.Delay3 ?? g.Delay ?? 0, val => g.Delay4 = val, cmd, speed: 100);
         ImGui.SeparatorText("Stagger");
+        ImGuiExt.HintTooltip(Strings.UI_HORDE_GROUP_STAGGER_TOOLTIP);
         propChanged |= ImGuiExt.DragNullableUIntHistory("Stagger", g.Stagger, 500, val => g.Stagger = val, cmd, speed: 100);
         propChanged |= ImGuiExt.DragNullableUIntHistory("Stagger3", g.Stagger3, g.Stagger ?? 500, val => g.Stagger3 = val, cmd, speed: 100);
         propChanged |= ImGuiExt.DragNullableUIntHistory("Stagger4", g.Stagger4, g.Stagger3 ?? g.Stagger ?? 500, val => g.Stagger4 = val, cmd, speed: 100);
-        ImGui.SeparatorText("Demons");
+        ImGui.SeparatorText("Demon movement");
         propChanged |= ImGuiExt.EnumComboHistory("Dir", g.Dir, val => g.Dir = val, cmd);
+        ImGuiExt.HintTooltip(Strings.UI_HORDE_GROUP_DIR_TOOLTIP);
         // Path is either an enum or an int between 0 and 19
         bool isNumericPath = ImGuiExt.Checkbox("Numeric path", MapUtils.IsSharedPath(g.Path));
         if (isNumericPath)
@@ -112,6 +116,7 @@ public partial class PropertiesWindow
                 propChanged = true;
             }
             propChanged |= ImGuiExt.DragIntHistory("Path##numeric", (int)g.Path, val => g.Path = (PathEnum)val, cmd, minValue: 0, maxValue: 19);
+            ImGuiExt.HintTooltip(Strings.UI_HORDE_GROUP_PATH_NUMERIC_TOOLTIP);
         }
         else
         {
@@ -121,14 +126,17 @@ public partial class PropertiesWindow
                 propChanged = true;
             }
             propChanged |= ImGuiExt.EnumComboHistory("Path##enum", g.Path, val => g.Path = val, cmd);
+            ImGuiExt.HintTooltip(Strings.UI_HORDE_GROUP_PATH_TOOLTIP);
         }
         propChanged |= ImGuiExt.GenericStringComboHistory("Behavior", g.Behavior, val => g.Behavior = val, BehaviorToString, ParseBehaviorString, Enum.GetValues<BehaviorEnum>(), cmd);
         bool realIsShared = MapUtils.IsSharedDir(g.Dir) || g.Shared;
         using (ImGuiExt.DisabledIf(MapUtils.IsSharedDir(g.Dir)))
             propChanged |= ImGuiExt.CheckboxHistory("Shared", realIsShared, val => g.Shared = val, cmd);
+        ImGuiExt.HintTooltip(Strings.UI_HORDE_GROUP_SHARED_TOOLTIP);
         bool realIsSharedPath = MapUtils.IsSharedPath(g.Path) || g.SharedPath;
         using (ImGuiExt.DisabledIf(MapUtils.IsSharedPath(g.Path)))
             propChanged |= ImGuiExt.CheckboxHistory("SharedPath", realIsSharedPath, val => g.SharedPath = val, cmd);
+        ImGuiExt.HintTooltip(Strings.UI_HORDE_GROUP_SHARED_PATH_TOOLTIP);
         return propChanged;
     }
 

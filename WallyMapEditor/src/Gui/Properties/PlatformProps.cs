@@ -32,6 +32,7 @@ partial class PropertiesWindow
                 "simple" or "animated" => s,
                 _ => null,
             }, [null, "simple", "animated"], cmd);
+            ImGuiExt.HintTooltip(Strings.UI_PLATFORM_ASSET_SWAP_TOOLTIP);
         }
 
         ImGui.Separator();

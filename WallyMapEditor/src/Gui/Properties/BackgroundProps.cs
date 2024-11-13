@@ -100,6 +100,8 @@ public partial class PropertiesWindow
                     _warningText = null;
             }
         }
+        ImGuiExt.HintTooltip(Strings.UI_BG_ANIMATED_ASSET_TOOLTIP);
+
         ImGui.Text("W: " + b.W);
         ImGui.Text("H: " + b.H);
         propChanged |= ImGuiExt.CheckboxHistory("HasSkulls", b.HasSkulls, val => b.HasSkulls = val, cmd);

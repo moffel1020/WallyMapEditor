@@ -27,4 +27,19 @@ public static class Strings
     public const string UI_EASE_POWER_TOOLTIP = "Controls how aggressive the speed curve is.";
     public const string UI_CENTER_TOOLTIP = "Defines a position to do an elliptical orbit around. Must have the same X or Y as one of the keyframes or it won't work correctly.";
     public const string UI_RESPAWN_OFF_TOOLTIP = "If true, DynamicRespawns animated by the moving platform won't get used for respawning while interpolating from this keyframe.";
+    public const string UI_BG_ANIMATED_ASSET_TOOLTIP = "An alternative background to use when animated backgrounds are enabled";
+    public const string UI_COLLISION_FLAG_TOOLTIP = "Affects bouncing sound. Sand is used in Vollybrawl. Might not work.";
+    public const string UI_COLLISION_COLOR_FLAG_TOOLTIP = "Unused.";
+    public const string UI_COLLISION_TAUNT_EVENT_TOOLTIP = "Used for battlepass missions like taunting on an island.";
+    public const string UI_COLLISION_ANCHOR_TOOLTIP = "Turns the collision into a quadratic bezier.";
+    public const string UI_COLLISION_NORMAL_TOOLTIP = "Overrides the default collision normal. Useful when moving platforms move through collision.";
+    public const string UI_PLATFORM_ASSET_SWAP_TOOLTIP = "Set if the platform always shows up, only shows up when animated backgrounds are off, or only shows up when animated backgrounds are on.";
+    public const string UI_HORDE_GROUP_COUNT_TOOLTIP = "The number of demons that spawn.";
+    public const string UI_HORDE_GROUP_DELAY_TOOLTIP = "The delay until this group spawns.";
+    public const string UI_HORDE_GROUP_STAGGER_TOOLTIP = "The delay between demons spawning from the group.";
+    public const string UI_HORDE_GROUP_DIR_TOOLTIP = "Controls where the demons will come from.";
+    public const string UI_HORDE_GROUP_PATH_TOOLTIP = "Controls what door the demons will go to.";
+    public const string UI_HORDE_GROUP_PATH_NUMERIC_TOOLTIP = "Controls the path the demons will take.";
+    public const string UI_HORDE_GROUP_SHARED_TOOLTIP = "If true, Dir will be relative to previous group and not previous demon.";
+    public const string UI_HORDE_GROUP_SHARED_PATH_TOOLTIP = "If true, all demons will take the same path, instead of randomizing.";
 }
