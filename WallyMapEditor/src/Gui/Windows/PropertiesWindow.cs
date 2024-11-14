@@ -14,7 +14,7 @@ public partial class PropertiesWindow
 
     public void Show(object o, CommandHistory cmd, PropertiesWindowData data)
     {
-        ImGui.Begin($"Properties - {o.GetType().Name}###properties{o.GetHashCode()}", ref _open);
+        ImGui.Begin($"Properties - {o.GetType().Name}###properties", ref _open);
 
         if (_propChanged && Rl.IsMouseButtonReleased(MouseButton.Left))
         {
