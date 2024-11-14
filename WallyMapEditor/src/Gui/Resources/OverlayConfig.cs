@@ -19,6 +19,7 @@ public class OverlayConfig : ISerializable, IDeserializable
     public required float RadiusMovingPlatformPosition { get; set; }
     public required float RadiusKeyFramePosition { get; set; }
     public required float RadiusFireOffset { get; set; }
+    public required float RadiusPathPoint { get; set; }
 
     public required double SizeOffsetRespawnBox { get; set; }
     public required double SizeOffsetNavNodeBox { get; set; }
@@ -28,6 +29,7 @@ public class OverlayConfig : ISerializable, IDeserializable
     public required double SensitivityParentAssetScale { get; set; }
 
     public required int FontSizeKeyFrameNum { get; set; }
+    public required int FontSizePathPointNum { get; set; }
 
     public required RlColor ColorCollisionPoint { get; set; }
     public required RlColor UsingColorCollisionPoint { get; set; }
@@ -76,6 +78,10 @@ public class OverlayConfig : ISerializable, IDeserializable
     public required RlColor ColorFireOffset { get; set; }
     public required RlColor UsingColorFireOffset { get; set; }
 
+    public required RlColor ColorPathPoint { get; set; }
+    public required RlColor UsingColorPathPoint { get; set; }
+    public required RlColor TextColorPathPointNum { get; set; }
+
     public void Deserialize(XElement e)
     {
         OverlayConfig @default = Default;
@@ -100,6 +106,7 @@ public class OverlayConfig : ISerializable, IDeserializable
         RadiusMovingPlatformPosition = getFloat(nameof(RadiusMovingPlatformPosition), @default.RadiusMovingPlatformPosition);
         RadiusKeyFramePosition = getFloat(nameof(RadiusKeyFramePosition), @default.RadiusKeyFramePosition);
         RadiusFireOffset = getFloat(nameof(RadiusFireOffset), @default.RadiusFireOffset);
+        RadiusPathPoint = getFloat(nameof(RadiusPathPoint), @default.RadiusPathPoint);
 
         SizeOffsetRespawnBox = getDouble(nameof(SizeOffsetRespawnBox), @default.SizeOffsetRespawnBox);
         SizeOffsetNavNodeBox = getDouble(nameof(SizeOffsetNavNodeBox), @default.SizeOffsetNavNodeBox);
@@ -107,6 +114,8 @@ public class OverlayConfig : ISerializable, IDeserializable
         LengthParentAssetScale = getDouble(nameof(LengthParentAssetScale), @default.LengthParentAssetScale);
         SensitivityParentAssetScale = getDouble(nameof(SensitivityParentAssetScale), @default.SensitivityParentAssetScale);
         FontSizeKeyFrameNum = getInt(nameof(FontSizeKeyFrameNum), @default.FontSizeKeyFrameNum);
+        FontSizePathPointNum = getInt(nameof(FontSizePathPointNum), @default.FontSizePathPointNum);
+
         ColorCollisionPoint = getColor(nameof(ColorCollisionPoint), @default.ColorCollisionPoint);
         UsingColorCollisionPoint = getColor(nameof(UsingColorCollisionPoint), @default.UsingColorCollisionPoint);
         ColorCollisionAnchor = getColor(nameof(ColorCollisionAnchor), @default.ColorCollisionAnchor);
@@ -141,6 +150,9 @@ public class OverlayConfig : ISerializable, IDeserializable
         TextColorKeyFrameNum = getColor(nameof(TextColorKeyFrameNum), @default.TextColorKeyFrameNum);
         ColorFireOffset = getColor(nameof(ColorFireOffset), @default.ColorFireOffset);
         UsingColorFireOffset = getColor(nameof(UsingColorFireOffset), @default.UsingColorFireOffset);
+        ColorPathPoint = getColor(nameof(ColorPathPoint), @default.ColorPathPoint);
+        UsingColorPathPoint = getColor(nameof(UsingColorPathPoint), @default.UsingColorPathPoint);
+        TextColorPathPointNum = getColor(nameof(TextColorPathPointNum), @default.TextColorPathPointNum);
     }
 
     public void Serialize(XElement e)
@@ -162,6 +174,7 @@ public class OverlayConfig : ISerializable, IDeserializable
         addValue(nameof(RadiusMovingPlatformPosition), RadiusMovingPlatformPosition);
         addValue(nameof(RadiusKeyFramePosition), RadiusKeyFramePosition);
         addValue(nameof(RadiusFireOffset), RadiusFireOffset);
+        addValue(nameof(RadiusPathPoint), RadiusPathPoint);
         addValue(nameof(SizeOffsetRespawnBox), SizeOffsetRespawnBox);
         addValue(nameof(SizeOffsetNavNodeBox), SizeOffsetNavNodeBox);
         addValue(nameof(LineWidthParentAssetScale), LineWidthParentAssetScale);
@@ -202,6 +215,9 @@ public class OverlayConfig : ISerializable, IDeserializable
         addColor(nameof(TextColorKeyFrameNum), TextColorKeyFrameNum);
         addColor(nameof(ColorFireOffset), ColorFireOffset);
         addColor(nameof(UsingColorFireOffset), UsingColorFireOffset);
+        addColor(nameof(ColorPathPoint), ColorPathPoint);
+        addColor(nameof(UsingColorPathPoint), UsingColorPathPoint);
+        addColor(nameof(TextColorPathPointNum), TextColorPathPointNum);
     }
 
     private const float DEFAULT_RADIUS = 30;
@@ -235,12 +251,14 @@ public class OverlayConfig : ISerializable, IDeserializable
         RadiusMovingPlatformPosition = DEFAULT_MID_RADIUS,
         RadiusKeyFramePosition = DEFAULT_RADIUS,
         RadiusFireOffset = DEFAULT_RADIUS,
+        RadiusPathPoint = DEFAULT_RADIUS,
         SizeOffsetNavNodeBox = DEFAULT_SIZE_OFFSET,
         SizeOffsetRespawnBox = DEFAULT_SIZE_OFFSET,
         LineWidthParentAssetScale = 20,
         LengthParentAssetScale = 250,
         SensitivityParentAssetScale = 0.1,
         FontSizeKeyFrameNum = DEFAULT_FONT_SIZE,
+        FontSizePathPointNum = DEFAULT_FONT_SIZE,
         ColorCollisionPoint = TransparentGray,
         UsingColorCollisionPoint = TransparentWhite,
         ColorCollisionAnchor = TransparentDarkGreen,
@@ -275,5 +293,8 @@ public class OverlayConfig : ISerializable, IDeserializable
         TextColorKeyFrameNum = RlColor.White,
         ColorFireOffset = TransparentOrange,
         UsingColorFireOffset = TransparentRed,
+        ColorPathPoint = TransparentPink,
+        UsingColorPathPoint = TransparentRed,
+        TextColorPathPointNum = RlColor.White,
     };
 }

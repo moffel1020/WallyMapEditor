@@ -111,4 +111,11 @@ public static partial class WmeUtils
         AbstractKeyFrame k => parent == k.Parent || IsObjectChildOf(k.Parent, parent),
         _ => false,
     };
+
+    public static IEnumerable<(T, int)> Indexed<T>(this IEnumerable<T> e)
+    {
+        int i = 0;
+        foreach (T t in e)
+            yield return (t, i++);
+    }
 }

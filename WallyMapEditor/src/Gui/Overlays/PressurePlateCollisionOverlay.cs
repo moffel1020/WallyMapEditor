@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using WallyMapEditor;
 using WallyMapSpinzor2;
 
 /*
@@ -10,6 +9,8 @@ this means we need to somehow temporarily override the render config when openin
 
 we don't want to fully disable fire offset rendering from the library, since it could be useful to look at all the pressure plates in the map
 */
+
+namespace WallyMapEditor;
 
 public class PressurePlateCollisionOverlay(AbstractPressurePlateCollision col) : CollisionOverlay(col)
 {

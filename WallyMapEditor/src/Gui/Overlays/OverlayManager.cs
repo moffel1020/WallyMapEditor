@@ -41,6 +41,7 @@ public class OverlayManager
         DynamicItemSpawn dis => new AbstractDynamicOverlay<AbstractItemSpawn>(dis),
         DynamicRespawn dr => new AbstractDynamicOverlay<Respawn>(dr),
         DynamicNavNode dn => new AbstractDynamicOverlay<NavNode>(dn),
+        CustomPath cp => new CustomPathOverlay(cp),
         _ => null
     };
 }
