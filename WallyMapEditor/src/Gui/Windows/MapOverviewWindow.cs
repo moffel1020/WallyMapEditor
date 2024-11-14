@@ -291,7 +291,7 @@ public class MapOverviewWindow
         ImGuiExt.HeaderWithWidget("Assets##overview", () =>
         {
             TeamScoreboard? ts = l.Desc.TeamScoreboard;
-            if (ts is not null && ImGui.Selectable($"{ts.GetType().Name} {GetExtraObjectInfo(ts)}##selectable{ts.GetHashCode()}", selection.Object == ts))
+            if (ts is not null && ImGui.Selectable($"{ts.GetType().Name} {GetExtraObjectInfo(ts)}###selectable{ts.GetHashCode()}", selection.Object == ts))
             {
                 selection.Object = ts;
             }
@@ -398,7 +398,7 @@ public class MapOverviewWindow
                 ImGui.SameLine();
             }
 
-            if (ImGui.Selectable($"{o.GetType().Name} {GetExtraObjectInfo(o)}##selectable{o.GetHashCode()}", selection.Object == o))
+            if (ImGui.Selectable($"{o.GetType().Name} {GetExtraObjectInfo(o)}###selectable{o.GetHashCode()}", selection.Object == o))
                 selection.Object = o;
         }
     }

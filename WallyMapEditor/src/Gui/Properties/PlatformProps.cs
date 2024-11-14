@@ -49,7 +49,7 @@ partial class PropertiesWindow
                     ImGui.Separator();
                 AbstractAsset child = p.AssetChildren![index];
                 bool changed = false;
-                if (ImGui.TreeNode($"{child.GetType().Name}##{child.GetHashCode()}"))
+                if (ImGui.TreeNode($"{child.GetType().Name}###{child.GetHashCode()}"))
                 {
                     changed |= ShowProperties(child, cmd, data);
                     ImGui.TreePop();

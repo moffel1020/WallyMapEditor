@@ -72,7 +72,7 @@ public partial class PropertiesWindow
             {
                 foreach (NavNode node in EnumerateNavNodes(data.Level.Desc).Where(nav => !n.Path.Select(p => p.Item1).Contains(nav.NavID)).OrderBy(n => n.NavID))
                 {
-                    if (node.NavID != n.NavID && ImGui.Selectable($"{node.NavID}##pathselect"))
+                    if (node.NavID != n.NavID && ImGui.Selectable($"{node.NavID}###pathselect{node.GetHashCode()}"))
                     {
                         cmd.Add(new PropChangeCommand<(uint, NavNodeTypeEnum)[]>(val => n.Path = val, n.Path, [.. n.Path, (node.NavID, node.Type)]));
                         cmd.SetAllowMerge(false);
