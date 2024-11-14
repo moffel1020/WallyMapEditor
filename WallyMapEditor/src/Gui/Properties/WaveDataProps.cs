@@ -33,6 +33,10 @@ public partial class PropertiesWindow
                     changed |= ShowProperties(cp, cmd, data);
                     ImGui.TreePop();
                 }
+
+                if (ImGui.Button($"Select##select{cp.GetHashCode()}")) data.Selection.Object = cp;
+                ImGui.SameLine();
+
                 return changed;
             }, cmd);
         }
@@ -58,22 +62,19 @@ public partial class PropertiesWindow
     public static bool ShowCustomPathProps(CustomPath cp, CommandHistory cmd, PropertiesWindowData data)
     {
         bool propChanged = false;
-        if (ImGui.CollapsingHeader($"Points##props{cp.GetHashCode()}"))
+        propChanged |= ImGuiExt.EditArrayHistory($"##custompathPoints{cp.GetHashCode()}", cp.Points, val => cp.Points = val,
+        () => CreateNewPoint(cp),
+        (int index) =>
         {
-            propChanged |= ImGuiExt.EditArrayHistory($"##custompathPoints{cp.GetHashCode()}", cp.Points, val => cp.Points = val,
-            () => CreateNewPoint(cp),
-            (int index) =>
+            bool changed = false;
+            Point p = cp.Points[index];
+            if (ImGui.TreeNode($"Point {MapOverviewWindow.GetExtraObjectInfo(p)}###points{p.GetHashCode()}"))
             {
-                bool changed = false;
-                Point p = cp.Points[index];
-                if (ImGui.TreeNode($"Point {MapOverviewWindow.GetExtraObjectInfo(p)}###points{p.GetHashCode()}"))
-                {
-                    changed |= ShowProperties(p, cmd, data);
-                    ImGui.TreePop();
-                }
-                return changed;
-            }, cmd);
-        }
+                changed |= ShowProperties(p, cmd, data);
+                ImGui.TreePop();
+            }
+            return changed;
+        }, cmd);
         return propChanged;
     }
 
