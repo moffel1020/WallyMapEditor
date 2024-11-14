@@ -61,24 +61,27 @@ public readonly struct Maybe<T>
         ? (U)(object)_value!
         : Maybe<U>.None;
 
-    public void Do(Action<T> ifSome, Action ifNone)
+    public Maybe<T> Do(Action<T> ifSome, Action ifNone)
     {
         if (_hasValue)
             ifSome(_value);
         else
             ifNone();
+        return this;
     }
 
-    public void DoIfSome(Action<T> ifSome)
+    public Maybe<T> DoIfSome(Action<T> ifSome)
     {
         if (_hasValue)
             ifSome(_value);
+        return this;
     }
 
-    public void DoIfNone(Action ifNone)
+    public Maybe<T> DoIfNone(Action ifNone)
     {
         if (!_hasValue)
             ifNone();
+        return this;
     }
 
     public Maybe<T> NoneIf(Predicate<T> predicate) => _hasValue && !predicate(_value) ? _value : Maybe<T>.None;

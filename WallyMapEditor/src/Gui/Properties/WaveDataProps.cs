@@ -23,7 +23,7 @@ public partial class PropertiesWindow
         if (ImGui.CollapsingHeader($"CustomPaths##props{w.GetHashCode()}"))
         {
             propChanged |= ImGuiExt.EditArrayHistory("##custompathslist", w.CustomPaths, val => w.CustomPaths = val,
-            CreateNewCustomPath,
+            () => CreateNewCustomPath(w),
             (int index) =>
             {
                 bool changed = false;
@@ -39,7 +39,7 @@ public partial class PropertiesWindow
         if (ImGui.CollapsingHeader($"Groups##props{w.GetHashCode()}"))
         {
             propChanged |= ImGuiExt.EditArrayHistory("##groupslist", w.Groups, val => w.Groups = val,
-            CreateNewGroup,
+            () => CreateNewGroup(w),
             (int index) =>
             {
                 bool changed = false;
@@ -61,7 +61,7 @@ public partial class PropertiesWindow
         if (ImGui.CollapsingHeader($"Points##props{cp.GetHashCode()}"))
         {
             propChanged |= ImGuiExt.EditArrayHistory($"##custompathPoints{cp.GetHashCode()}", cp.Points, val => cp.Points = val,
-            CreateNewPoint,
+            () => CreateNewPoint(cp),
             (int index) =>
             {
                 bool changed = false;
@@ -165,36 +165,36 @@ public partial class PropertiesWindow
         Groups = [],
     };
 
-    private static Maybe<Point> CreateNewPoint()
+    private static Maybe<Point> CreateNewPoint(CustomPath cp)
     {
         Maybe<Point> result = new();
         if (ImGui.Button("Add new point##custompath"))
         {
             result = DefaultPoint;
         }
-        return result;
+        return result.DoIfSome(p => p.Parent = cp);
     }
     public static Point DefaultPoint => new() { X = 0, Y = 0 };
 
-    private static Maybe<CustomPath> CreateNewCustomPath()
+    private static Maybe<CustomPath> CreateNewCustomPath(WaveData w)
     {
         Maybe<CustomPath> result = new();
         if (ImGui.Button("Add new custom path##wave"))
         {
             result = DefaultCustomPath;
         }
-        return result;
+        return result.DoIfSome(cp => cp.Parent = w);
     }
     public static CustomPath DefaultCustomPath => new() { Points = [] };
 
-    private static Maybe<Group> CreateNewGroup()
+    private static Maybe<Group> CreateNewGroup(WaveData w)
     {
         Maybe<Group> result = new();
         if (ImGui.Button("Add new group##wave"))
         {
             result = DefaultGroup;
         }
-        return result;
+        return result.DoIfSome(g => g.Parent = w);
     }
     public static Group DefaultGroup => new()
     {
