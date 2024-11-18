@@ -5,25 +5,25 @@ using WallyAnmSpinzor;
 
 namespace WallyMapEditor;
 
-public class AssetLoader
+public class AssetLoader(string brawlPath, BoneTypes boneTypes)
 {
-    private readonly string brawlPath;
-    public BoneTypes BoneTypes { get; set; }
+    public string BrawlPath
+    {
+        get => brawlPath;
+        set
+        {
+            brawlPath = value;
+            ClearCache();
+            ReloadAnmCache();
+        }
+    }
+    public BoneTypes BoneTypes { get; set; } = boneTypes;
 
     public TextureCache TextureCache { get; } = new();
     public SwfFileCache SwfFileCache { get; } = new();
     public SwfShapeCache SwfShapeCache { get; } = new();
     public SwfSpriteCache SwfSpriteCache { get; } = new();
     public ConcurrentDictionary<string, AnmClass> AnmClasses { get; set; } = [];
-
-    public AssetLoader(string brawlPath, BoneTypes boneTypes)
-    {
-        this.brawlPath = brawlPath;
-        BoneTypes = boneTypes;
-        LoadAnmInThread("MapArtAnims");
-        LoadAnmInThread("ATLA_MapArtAnims");
-        LoadAnmInThread("GameModes");
-    }
 
     private void LoadAnmInThread(string name)
     {
@@ -106,5 +106,13 @@ public class AssetLoader
         SwfShapeCache.Clear();
         SwfSpriteCache.Clear();
         SwfFileCache.Clear();
+    }
+
+    public void ReloadAnmCache()
+    {
+        AnmClasses.Clear();
+        LoadAnmInThread("MapArtAnims");
+        LoadAnmInThread("ATLA_MapArtAnims");
+        LoadAnmInThread("GameModes");
     }
 }
