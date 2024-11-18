@@ -38,7 +38,7 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
         TopLeft.Radius = TopRight.Radius = BotLeft.Radius = BotRight.Radius = data.OverlayConfig.RadiusAssetCorner;
 
         WmsTransform trans = FullTransform(asset, data.Context);
-        WmsTransform inv = Transform.CreateInverse(trans);
+        WmsTransform inv = WmsTransform.CreateInverse(trans);
 
         (TopLeft.X, TopLeft.Y) = (trans.TranslateX, trans.TranslateY);
         (TopRight.X, TopRight.Y) = trans * (asset.W!.Value, 0);
@@ -84,7 +84,7 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
         return dragging || MoveRect.Dragging || RotatePoint.Active;
     }
 
-    private bool UpdateCircles(OverlayData data, Transform trans, Transform invTrans)
+    private bool UpdateCircles(OverlayData data, WmsTransform trans, WmsTransform invTrans)
     {
         TopLeft.Update(data, !RotatePoint.Active);
         bool dragging = TopLeft.Dragging;
@@ -121,19 +121,19 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
         return dragging;
     }
 
-    public static Transform FullTransform(AbstractAsset? a, RenderContext context) => a switch
+    public static WmsTransform FullTransform(AbstractAsset? a, RenderContext context) => a switch
     {
         MovingPlatform m => GetMovingPlatformTransform(m, context),
         AbstractAsset => FullTransform(a.Parent, context) * a.Transform,
-        null => Transform.IDENTITY
+        null => WmsTransform.IDENTITY
     };
 
-    private static Transform GetMovingPlatformTransform(MovingPlatform m, RenderContext context)
+    private static WmsTransform GetMovingPlatformTransform(MovingPlatform m, RenderContext context)
     {
-        return context.PlatIDMovingPlatformTransform.GetValueOrDefault(m.PlatID, Transform.IDENTITY);
+        return context.PlatIDMovingPlatformTransform.GetValueOrDefault(m.PlatID, WmsTransform.IDENTITY);
     }
 
-    private void TransfromDragCircles(Transform trans)
+    private void TransfromDragCircles(WmsTransform trans)
     {
         (TopLeft.X, TopLeft.Y) = trans * TopLeft.Position;
         (TopRight.X, TopRight.Y) = trans * TopRight.Position;
