@@ -48,6 +48,17 @@ partial class PropertiesWindow
                 {
                     Texture2DWrapper texture = data.Loader.LoadTextureFromPath(Path.Combine(assetDir, a.AssetName));
                     rlImGui.ImageSize(texture.Texture, new Vector2(60 * (float)(texture.Width / texture.Height), 60));
+
+                    if (ImGui.Button("Reset width/height"))
+                    {
+                        if (data.Loader.TextureCache.Cache.TryGetValue(Path.Combine(assetDir, a.AssetName), out Texture2DWrapper? tex))
+                        {
+                            cmd.Add(new PropChangeCommand<(double, double)>(
+                                val => (a.W, a.H) = val,
+                                (a.W!.Value, a.H!.Value),
+                                (tex.Width, tex.Height)));
+                        }
+                    }
                 }
             }
             propChanged |= ImGuiExt.DragDoubleHistory("X", a.X, val => a.X = val, cmd);
@@ -95,25 +106,7 @@ partial class PropertiesWindow
                     return;
                 }
 
-                double newW = a.W!.Value;
-                double newH = a.H!.Value;
-
-                if (data.Loader is not null)
-                {
-                    // load the image from disk ahead of time so we can get the width and height
-                    RlImage image = WmeUtils.LoadRlImage(path);
-                    Rl.ImageAlphaPremultiply(ref image);
-                    data.Loader.TextureCache.InsertIntermediate(path, image);
-
-                    newW = image.Width;
-                    newH = image.Height;
-                }
-
-                cmd.Add(new PropChangeCommand<(string, double, double)>(
-                    val => (a.AssetName, a.W, a.H) = val,
-                    (a.AssetName!, a.W.Value, a.H.Value),
-                    (newAssetName, newW, newH)));
-
+                cmd.Add(new PropChangeCommand<string>(val => a.AssetName = val, a.AssetName!, newAssetName));
                 _assetErrorText = null;
             }
         });
