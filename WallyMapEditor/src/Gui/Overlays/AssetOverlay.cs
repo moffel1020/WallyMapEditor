@@ -84,7 +84,7 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
         if (dragging)
         {
             // update MoveRect for drawing
-            MoveRect.Transform = trans * Transform.CreateTranslate(offX, offY);
+            MoveRect.Transform = trans * WmsTransform.CreateTranslate(offX, offY);
             (MoveRect.X, MoveRect.Y) = (0, 0);
             (MoveRect.W, MoveRect.H) = (newW, newH);
 
@@ -100,7 +100,7 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
         {
             // update circles for drawing
             // TODO: can this somehow be unified with the update above?
-            WmsTransform newTransform = trans * Transform.CreateTranslate(MoveRect.X, MoveRect.Y);
+            WmsTransform newTransform = trans * WmsTransform.CreateTranslate(MoveRect.X, MoveRect.Y);
             (TopLeft.X, TopLeft.Y) = newTransform * (0, 0);
             (TopRight.X, TopRight.Y) = newTransform * (w, 0);
             (BotLeft.X, BotLeft.Y) = newTransform * (0, h);
@@ -121,6 +121,11 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
 
     private bool UpdateCircles(OverlayData data, WmsTransform trans, WmsTransform invTrans)
     {
+        double x = 0;
+        double y = 0;
+        double w = asset.W!.Value;
+        double h = asset.H!.Value;
+
         bool dragging = false;
         foreach (DragCircle circle in GetCircles())
         {
@@ -129,58 +134,76 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
         }
 
         TransfromDragCircles(invTrans);
+
         if (TopLeft.Dragging)
         {
-            LeftEdge.X = BotLeft.X = TopLeft.X;
-            TopEdge.Y = TopRight.Y = TopLeft.Y;
-            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
-            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+            x = TopLeft.X;
+            y = TopLeft.Y;
+            w = TopRight.X - TopLeft.X;
+            h = BotLeft.Y - TopLeft.Y;
         }
         else if (TopRight.Dragging)
         {
-            RightEdge.X = BotRight.X = TopRight.X;
-            TopEdge.Y = TopLeft.Y = TopRight.Y;
-            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
-            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+            // x is unchanged
+            y = TopRight.Y;
+            w = TopRight.X - TopLeft.X;
+            h = BotRight.Y - TopRight.Y;
         }
         else if (BotLeft.Dragging)
         {
-            LeftEdge.X = TopLeft.X = BotLeft.X;
-            BottomEdge.Y = BotRight.Y = BotLeft.Y;
-            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
-            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+            x = BotLeft.X;
+            // y in unchanged
+            w = BotRight.X - BotLeft.X;
+            h = BotLeft.Y - TopLeft.Y;
         }
         else if (BotRight.Dragging)
         {
-            RightEdge.X = TopRight.X = BotRight.X;
-            BottomEdge.Y = BotLeft.Y = BotRight.Y;
-            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
-            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+            // x is unchanged
+            // y is unchanged
+            w = BotRight.X - BotLeft.X;
+            h = BotRight.Y - TopRight.Y;
         }
         else if (LeftEdge.Dragging)
         {
-            TopLeft.X = BotLeft.X = LeftEdge.X;
-            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
-            LeftEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+            x = LeftEdge.X;
+            // y is unchanged
+            w = RightEdge.X - LeftEdge.X;
+            // h is unchanged
         }
         else if (RightEdge.Dragging)
         {
-            TopRight.X = BotRight.X = RightEdge.X;
-            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
-            RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+            // x is unchanged
+            // y is unchanged
+            w = RightEdge.X - LeftEdge.X;
+            // h is unchanged
         }
         else if (TopEdge.Dragging)
         {
-            TopLeft.Y = TopRight.Y = TopEdge.Y;
-            TopEdge.X = (TopRight.X + TopLeft.X) / 2;
-            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+            // x is unchanged
+            y = TopEdge.Y;
+            // w is unchanged
+            h = BottomEdge.Y - TopEdge.Y;
         }
         else if (BottomEdge.Dragging)
         {
-            BotLeft.Y = BotRight.Y = BottomEdge.Y;
-            BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
-            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+            // x is unchanged
+            // y is unchanged
+            // w is unchanged
+            h = BottomEdge.Y - TopEdge.Y;
         }
+
+        if (dragging)
+        {
+            (TopLeft.X, TopLeft.Y) = (x, y);
+            (TopRight.X, TopRight.Y) = (x + w, y);
+            (BotLeft.X, BotLeft.Y) = (x, y + h);
+            (BotRight.X, BotRight.Y) = (x + w, y + h);
+            (LeftEdge.X, LeftEdge.Y) = (x, y + h / 2);
+            (RightEdge.X, RightEdge.Y) = (x + w, y + h / 2);
+            (TopEdge.X, TopEdge.Y) = (x + w / 2, y);
+            (BottomEdge.X, BottomEdge.Y) = (x + w / 2, y + h);
+        }
+
         TransfromDragCircles(trans);
 
         return dragging;

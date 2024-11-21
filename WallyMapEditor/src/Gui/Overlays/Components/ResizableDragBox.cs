@@ -88,59 +88,62 @@ public class ResizableDragBox(double x, double y, double w, double h)
 
         if (TopLeft.Dragging)
         {
-            LeftEdge.X = BotLeft.X = TopLeft.X;
-            TopEdge.Y = TopRight.Y = TopLeft.Y;
-            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
-            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+            x = TopLeft.X;
+            y = TopLeft.Y;
+            w = TopRight.X - TopLeft.X;
+            h = BotLeft.Y - TopLeft.Y;
         }
         else if (TopRight.Dragging)
         {
-            RightEdge.X = BotRight.X = TopRight.X;
-            TopEdge.Y = TopLeft.Y = TopRight.Y;
-            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
-            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+            // x is unchanged
+            y = TopRight.Y;
+            w = TopRight.X - TopLeft.X;
+            h = BotRight.Y - TopRight.Y;
         }
         else if (BotLeft.Dragging)
         {
-            LeftEdge.X = TopLeft.X = BotLeft.X;
-            BottomEdge.Y = BotRight.Y = BotLeft.Y;
-            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
-            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+            x = BotLeft.X;
+            // y in unchanged
+            w = BotRight.X - BotLeft.X;
+            h = BotLeft.Y - TopLeft.Y;
         }
         else if (BotRight.Dragging)
         {
-            RightEdge.X = TopRight.X = BotRight.X;
-            BottomEdge.Y = BotLeft.Y = BotRight.Y;
-            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
-            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+            // x is unchanged
+            // y is unchanged
+            w = BotRight.X - BotLeft.X;
+            h = BotRight.Y - TopRight.Y;
         }
         else if (LeftEdge.Dragging)
         {
-            TopLeft.X = BotLeft.X = LeftEdge.X;
-            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
-            LeftEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+            x = LeftEdge.X;
+            // y is unchanged
+            w = RightEdge.X - LeftEdge.X;
+            // h is unchanged
         }
         else if (RightEdge.Dragging)
         {
-            TopRight.X = BotRight.X = RightEdge.X;
-            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
-            RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+            // x is unchanged
+            // y is unchanged
+            w = RightEdge.X - LeftEdge.X;
+            // h is unchanged
         }
         else if (TopEdge.Dragging)
         {
-            TopLeft.Y = TopRight.Y = TopEdge.Y;
-            TopEdge.X = (TopRight.X + TopLeft.X) / 2;
-            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+            // x is unchanged
+            y = TopEdge.Y;
+            // w is unchanged
+            h = BottomEdge.Y - TopEdge.Y;
         }
         else if (BottomEdge.Dragging)
         {
-            BotLeft.Y = BotRight.Y = BottomEdge.Y;
-            BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
-            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+            // x is unchanged
+            // y is unchanged
+            // w is unchanged
+            h = BottomEdge.Y - TopEdge.Y;
         }
 
-        // update MoveRect so it displays correctly when drawing
-        if (Resizing) (MoveRect.X, MoveRect.Y, MoveRect.W, MoveRect.H) = Bounds;
+        if (Resizing) Bounds = (x, y, w, h);
 
         MoveRect.Update(data, !Resizing);
         Moving = MoveRect.Dragging;
