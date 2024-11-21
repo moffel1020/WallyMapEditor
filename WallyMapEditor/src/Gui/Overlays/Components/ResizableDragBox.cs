@@ -1,33 +1,52 @@
+using System.Collections.Generic;
+
 namespace WallyMapEditor;
 
+// TODO: this should somehow be unified with the AssetOverlay stuff
 public class ResizableDragBox(double x, double y, double w, double h)
 {
-    public DragCircle TopLeft { get; private set; } = new(x, y);
-    public DragCircle TopRight { get; private set; } = new(x + w, y);
-    public DragCircle BotLeft { get; private set; } = new(y, y + h);
-    public DragCircle BotRight { get; private set; } = new(x + w, y + h);
+    public DragCircle TopLeft { get; } = new(x, y);
+    public DragCircle TopRight { get; } = new(x + w, y);
+    public DragCircle BotLeft { get; } = new(y, y + h);
+    public DragCircle BotRight { get; } = new(x + w, y + h);
+    public DragCircle LeftEdge { get; } = new(x, y + h / 2);
+    public DragCircle RightEdge { get; } = new(x + w, y + h / 2);
+    public DragCircle TopEdge { get; } = new(x + w / 2, y);
+    public DragCircle BottomEdge { get; } = new(x + w / 2, y + h);
 
-    public DragBox MoveRect { get; private set; } = new(x, y, w, h);
+    public DragBox MoveRect { get; } = new(x, y, w, h);
 
     public bool Resizing { get; private set; }
     public bool Moving { get; private set; }
 
+    private IEnumerable<DragCircle> GetCircles()
+    {
+        yield return TopLeft;
+        yield return TopRight;
+        yield return BotLeft;
+        yield return BotRight;
+        yield return LeftEdge;
+        yield return RightEdge;
+        yield return TopEdge;
+        yield return BottomEdge;
+    }
+
     public float CircleRadius
     {
         get => TopLeft.Radius;
-        set => TopLeft.Radius = TopRight.Radius = BotLeft.Radius = BotRight.Radius = value;
+        set { foreach (DragCircle circle in GetCircles()) circle.Radius = value; }
     }
 
     public RlColor Color
     {
         get => TopLeft.Color;
-        set => MoveRect.Color = TopLeft.Color = TopRight.Color = BotLeft.Color = BotRight.Color = value;
+        set { foreach (DragCircle circle in GetCircles()) circle.Color = value; }
     }
 
     public RlColor UsingColor
     {
         get => TopLeft.UsingColor;
-        set => MoveRect.UsingColor = TopLeft.UsingColor = TopRight.UsingColor = BotLeft.UsingColor = BotRight.UsingColor = value;
+        set { foreach (DragCircle circle in GetCircles()) circle.UsingColor = value; }
     }
 
     public (double, double, double, double) Bounds
@@ -40,16 +59,17 @@ public class ResizableDragBox(double x, double y, double w, double h)
             (TopRight.X, TopRight.Y) = (x + w, y);
             (BotLeft.X, BotLeft.Y) = (x, y + h);
             (BotRight.X, BotRight.Y) = (x + w, y + h);
+            (LeftEdge.X, LeftEdge.Y) = (x, y + h / 2);
+            (RightEdge.X, RightEdge.Y) = (x + w, y + h / 2);
+            (TopEdge.X, TopEdge.Y) = (x + w / 2, y);
+            (BottomEdge.X, BottomEdge.Y) = (x + w / 2, y + h);
             (MoveRect.X, MoveRect.Y, MoveRect.W, MoveRect.H) = (x, y, w, h);
         }
     }
 
     public void Draw(OverlayData data)
     {
-        TopLeft.Draw(data);
-        TopRight.Draw(data);
-        BotLeft.Draw(data);
-        BotRight.Draw(data);
+        foreach (DragCircle circle in GetCircles()) circle.Draw(data);
         MoveRect.Draw(data);
     }
 
@@ -60,38 +80,71 @@ public class ResizableDragBox(double x, double y, double w, double h)
         Moving = false;
         Resizing = false;
 
-        TopLeft.Update(data, true);
-        Resizing = TopLeft.Dragging;
-        TopRight.Update(data, !Resizing);
-        Resizing |= TopRight.Dragging;
-        BotLeft.Update(data, !Resizing);
-        Resizing |= BotLeft.Dragging;
-        BotRight.Update(data, !Resizing);
-        Resizing |= BotRight.Dragging;
+        foreach (DragCircle circle in GetCircles())
+        {
+            circle.Update(data, !Resizing);
+            Resizing |= circle.Dragging;
+        }
 
         if (TopLeft.Dragging)
         {
-            BotLeft.X = TopLeft.X;
-            TopRight.Y = TopLeft.Y;
+            LeftEdge.X = BotLeft.X = TopLeft.X;
+            TopEdge.Y = TopRight.Y = TopLeft.Y;
+            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
+            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
         }
         else if (TopRight.Dragging)
         {
-            BotRight.X = TopRight.X;
-            TopLeft.Y = TopRight.Y;
+            RightEdge.X = BotRight.X = TopRight.X;
+            TopEdge.Y = TopLeft.Y = TopRight.Y;
+            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
+            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
         }
         else if (BotLeft.Dragging)
         {
-            TopLeft.X = BotLeft.X;
-            BotRight.Y = BotLeft.Y;
+            LeftEdge.X = TopLeft.X = BotLeft.X;
+            BottomEdge.Y = BotRight.Y = BotLeft.Y;
+            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
+            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
         }
         else if (BotRight.Dragging)
         {
-            TopRight.X = BotRight.X;
-            BotLeft.Y = BotRight.Y;
+            RightEdge.X = TopRight.X = BotRight.X;
+            BottomEdge.Y = BotLeft.Y = BotRight.Y;
+            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
+            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
         }
+        else if (LeftEdge.Dragging)
+        {
+            TopLeft.X = BotLeft.X = LeftEdge.X;
+            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
+            LeftEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+        }
+        else if (RightEdge.Dragging)
+        {
+            TopRight.X = BotRight.X = RightEdge.X;
+            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
+            RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+        }
+        else if (TopEdge.Dragging)
+        {
+            TopLeft.Y = TopRight.Y = TopEdge.Y;
+            TopEdge.X = (TopRight.X + TopLeft.X) / 2;
+            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+        }
+        else if (BottomEdge.Dragging)
+        {
+            BotLeft.Y = BotRight.Y = BottomEdge.Y;
+            BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
+            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+        }
+
+        // update MoveRect so it displays correctly when drawing
+        if (Resizing) (MoveRect.X, MoveRect.Y, MoveRect.W, MoveRect.H) = Bounds;
 
         MoveRect.Update(data, !Resizing);
         Moving = MoveRect.Dragging;
+        // this will also update the points
         if (Moving) Bounds = (MoveRect.X, MoveRect.Y, MoveRect.W, MoveRect.H);
     }
 }

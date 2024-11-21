@@ -10,21 +10,29 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
     public DragCircle TopRight { get; set; } = new(0, 0);
     public DragCircle BotLeft { get; set; } = new(0, 0);
     public DragCircle BotRight { get; set; } = new(0, 0);
+    public DragCircle LeftEdge { get; set; } = new(0, 0);
+    public DragCircle RightEdge { get; set; } = new(0, 0);
+    public DragCircle TopEdge { get; set; } = new(0, 0);
+    public DragCircle BottomEdge { get; set; } = new(0, 0);
+
     public DragBox MoveRect { get; set; } = new(0, 0, 0, 0);
     public RotatePoint RotatePoint { get; set; } = new(0, 0);
 
     public void Draw(OverlayData data)
     {
-        MoveRect.Color = TopLeft.Color = TopRight.Color = BotLeft.Color = BotRight.Color = data.OverlayConfig.ColorAssetBox;
-        MoveRect.UsingColor = TopLeft.UsingColor = TopRight.UsingColor = BotLeft.UsingColor = BotRight.UsingColor = data.OverlayConfig.UsingColorAssetBox;
+        foreach (DragCircle circle in GetCircles())
+        {
+            circle.Color = data.OverlayConfig.ColorAssetBox;
+            circle.UsingColor = data.OverlayConfig.UsingColorAssetBox;
+        }
+        MoveRect.Color = data.OverlayConfig.ColorAssetBox;
+        MoveRect.UsingColor = data.OverlayConfig.UsingColorAssetBox;
         RotatePoint.LineColor = data.OverlayConfig.ColorAssetRotationLine;
 
         if (!RotatePoint.Active)
         {
-            TopLeft.Draw(data);
-            TopRight.Draw(data);
-            BotLeft.Draw(data);
-            BotRight.Draw(data);
+            foreach (DragCircle circle in GetCircles())
+                circle.Draw(data);
         }
 
         MoveRect.Draw(data);
@@ -35,19 +43,27 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
     {
         if (asset.AssetName is null) throw new ArgumentException("AssetOverlay used on asset without AssetName");
 
-        TopLeft.Radius = TopRight.Radius = BotLeft.Radius = BotRight.Radius = data.OverlayConfig.RadiusAssetCorner;
+        foreach (DragCircle circle in GetCircles())
+            circle.Radius = data.OverlayConfig.RadiusAssetCorner;
 
         WmsTransform trans = FullTransform(asset, data.Context);
         WmsTransform inv = WmsTransform.CreateInverse(trans);
 
-        (TopLeft.X, TopLeft.Y) = (trans.TranslateX, trans.TranslateY);
-        (TopRight.X, TopRight.Y) = trans * (asset.W!.Value, 0);
-        (BotLeft.X, BotLeft.Y) = trans * (0, asset.H!.Value);
-        (BotRight.X, BotRight.Y) = trans * (asset.W!.Value, asset.H!.Value);
+        double w = asset.W!.Value;
+        double h = asset.H!.Value;
+
+        (TopLeft.X, TopLeft.Y) = trans * (0, 0);
+        (TopRight.X, TopRight.Y) = trans * (w, 0);
+        (BotLeft.X, BotLeft.Y) = trans * (0, h);
+        (BotRight.X, BotRight.Y) = trans * (w, h);
+        (LeftEdge.X, LeftEdge.Y) = trans * (0, h / 2);
+        (RightEdge.X, RightEdge.Y) = trans * (w, h / 2);
+        (TopEdge.X, TopEdge.Y) = trans * (w / 2, 0);
+        (BottomEdge.X, BottomEdge.Y) = trans * (w / 2, h);
 
         MoveRect.Transform = trans;
         (MoveRect.X, MoveRect.Y) = (0, 0);
-        (MoveRect.W, MoveRect.H) = (asset.W.Value, asset.H.Value);
+        (MoveRect.W, MoveRect.H) = (w, h);
 
         (RotatePoint.X, RotatePoint.Y) = (trans.TranslateX, trans.TranslateY);
         RotatePoint.Update(data, true, asset.Rotation * Math.PI / 180);
@@ -57,14 +73,21 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
         }
 
         bool dragging = UpdateCircles(data, trans, inv);
-
+        // POSSIBLE OPTIMIZATION: at the end of UpdateCircles we transform by trans, and here we undo that
+        // so we can save two transforms here
         TransfromDragCircles(inv);
         (double newW, double newH) = (TopRight.X - TopLeft.X, BotLeft.Y - TopLeft.Y);
         (double newX, double newY) = asset.Transform * TopLeft.Position;
+        (double offX, double offY) = TopLeft.Position;
         TransfromDragCircles(trans);
 
         if (dragging)
         {
+            // update MoveRect for drawing
+            MoveRect.Transform = trans * Transform.CreateTranslate(offX, offY);
+            (MoveRect.X, MoveRect.Y) = (0, 0);
+            (MoveRect.W, MoveRect.H) = (newW, newH);
+
             cmd.Add(new PropChangeCommand<(double, double, double, double)>(
                 val => (asset.X, asset.Y, asset.W, asset.H) = val,
                 (asset.X, asset.Y, asset.W.Value, asset.H.Value),
@@ -75,6 +98,18 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
 
         if (MoveRect.Dragging)
         {
+            // update circles for drawing
+            // TODO: can this somehow be unified with the update above?
+            WmsTransform newTransform = trans * Transform.CreateTranslate(MoveRect.X, MoveRect.Y);
+            (TopLeft.X, TopLeft.Y) = newTransform * (0, 0);
+            (TopRight.X, TopRight.Y) = newTransform * (w, 0);
+            (BotLeft.X, BotLeft.Y) = newTransform * (0, h);
+            (BotRight.X, BotRight.Y) = newTransform * (w, h);
+            (LeftEdge.X, LeftEdge.Y) = newTransform * (0, h / 2);
+            (RightEdge.X, RightEdge.Y) = newTransform * (w, h / 2);
+            (TopEdge.X, TopEdge.Y) = newTransform * (w / 2, 0);
+            (BottomEdge.X, BottomEdge.Y) = newTransform * (w / 2, h);
+
             cmd.Add(new PropChangeCommand<(double, double)>(
                 val => (asset.X, asset.Y) = val,
                 (asset.X, asset.Y),
@@ -86,35 +121,65 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
 
     private bool UpdateCircles(OverlayData data, WmsTransform trans, WmsTransform invTrans)
     {
-        TopLeft.Update(data, !RotatePoint.Active);
-        bool dragging = TopLeft.Dragging;
-        TopRight.Update(data, !dragging && !RotatePoint.Active);
-        dragging |= TopRight.Dragging;
-        BotLeft.Update(data, !dragging && !RotatePoint.Active);
-        dragging |= BotLeft.Dragging;
-        BotRight.Update(data, !dragging && !RotatePoint.Active);
-        dragging |= BotRight.Dragging;
+        bool dragging = false;
+        foreach (DragCircle circle in GetCircles())
+        {
+            circle.Update(data, !dragging && !RotatePoint.Active);
+            dragging |= circle.Dragging;
+        }
 
         TransfromDragCircles(invTrans);
         if (TopLeft.Dragging)
         {
-            BotLeft.X = TopLeft.X;
-            TopRight.Y = TopLeft.Y;
+            LeftEdge.X = BotLeft.X = TopLeft.X;
+            TopEdge.Y = TopRight.Y = TopLeft.Y;
+            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
+            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
         }
         else if (TopRight.Dragging)
         {
-            BotRight.X = TopRight.X;
-            TopLeft.Y = TopRight.Y;
+            RightEdge.X = BotRight.X = TopRight.X;
+            TopEdge.Y = TopLeft.Y = TopRight.Y;
+            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
+            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
         }
         else if (BotLeft.Dragging)
         {
-            TopLeft.X = BotLeft.X;
-            BotRight.Y = BotLeft.Y;
+            LeftEdge.X = TopLeft.X = BotLeft.X;
+            BottomEdge.Y = BotRight.Y = BotLeft.Y;
+            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
+            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
         }
         else if (BotRight.Dragging)
         {
-            TopRight.X = BotRight.X;
-            BotLeft.Y = BotRight.Y;
+            RightEdge.X = TopRight.X = BotRight.X;
+            BottomEdge.Y = BotLeft.Y = BotRight.Y;
+            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
+            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+        }
+        else if (LeftEdge.Dragging)
+        {
+            TopLeft.X = BotLeft.X = LeftEdge.X;
+            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
+            LeftEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+        }
+        else if (RightEdge.Dragging)
+        {
+            TopRight.X = BotRight.X = RightEdge.X;
+            TopEdge.X = BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
+            RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+        }
+        else if (TopEdge.Dragging)
+        {
+            TopLeft.Y = TopRight.Y = TopEdge.Y;
+            TopEdge.X = (TopRight.X + TopLeft.X) / 2;
+            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
+        }
+        else if (BottomEdge.Dragging)
+        {
+            BotLeft.Y = BotRight.Y = BottomEdge.Y;
+            BottomEdge.X = (TopRight.X + TopLeft.X) / 2;
+            LeftEdge.Y = RightEdge.Y = (BotLeft.Y + TopLeft.Y) / 2;
         }
         TransfromDragCircles(trans);
 
@@ -135,9 +200,21 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
 
     private void TransfromDragCircles(WmsTransform trans)
     {
-        (TopLeft.X, TopLeft.Y) = trans * TopLeft.Position;
-        (TopRight.X, TopRight.Y) = trans * TopRight.Position;
-        (BotLeft.X, BotLeft.Y) = trans * BotLeft.Position;
-        (BotRight.X, BotRight.Y) = trans * BotRight.Position;
+        foreach (DragCircle circle in GetCircles())
+        {
+            (circle.X, circle.Y) = trans * circle.Position;
+        }
+    }
+
+    private IEnumerable<DragCircle> GetCircles()
+    {
+        yield return TopLeft;
+        yield return TopRight;
+        yield return BotLeft;
+        yield return BotRight;
+        yield return LeftEdge;
+        yield return RightEdge;
+        yield return TopEdge;
+        yield return BottomEdge;
     }
 }
