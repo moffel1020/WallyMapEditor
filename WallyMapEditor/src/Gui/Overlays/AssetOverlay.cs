@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Raylib_cs;
 using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
@@ -126,6 +127,13 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
         double w = asset.W!.Value;
         double h = asset.H!.Value;
 
+        double oldX = x;
+        double oldY = y;
+        double oldW = w;
+        double oldH = h;
+
+        bool mirrorDrag = Rl.IsKeyDown(KeyboardKey.LeftAlt);
+
         bool dragging = false;
         foreach (DragCircle circle in GetCircles())
         {
@@ -141,6 +149,14 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             y = TopLeft.Y;
             w = TopRight.X - TopLeft.X;
             h = BotLeft.Y - TopLeft.Y;
+
+            if (mirrorDrag)
+            {
+                double offX = x - oldX;
+                double offY = y - oldY;
+                w -= offX;
+                h -= offY;
+            }
         }
         else if (TopRight.Dragging)
         {
@@ -148,6 +164,15 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             y = TopRight.Y;
             w = TopRight.X - TopLeft.X;
             h = BotRight.Y - TopRight.Y;
+
+            if (mirrorDrag)
+            {
+                double offW = w - oldW;
+                double offY = y - oldY;
+                x -= offW;
+                w += offW;
+                h -= offY;
+            }
         }
         else if (BotLeft.Dragging)
         {
@@ -155,6 +180,15 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             // y in unchanged
             w = BotRight.X - BotLeft.X;
             h = BotLeft.Y - TopLeft.Y;
+
+            if (mirrorDrag)
+            {
+                double offX = x - oldX;
+                double offH = h - oldH;
+                w -= offX;
+                y -= offH;
+                h += offH;
+            }
         }
         else if (BotRight.Dragging)
         {
@@ -162,6 +196,16 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             // y is unchanged
             w = BotRight.X - BotLeft.X;
             h = BotRight.Y - TopRight.Y;
+
+            if (mirrorDrag)
+            {
+                double offW = w - oldW;
+                double offH = h - oldH;
+                x -= offW;
+                w += offW;
+                y -= offH;
+                h += offH;
+            }
         }
         else if (LeftEdge.Dragging)
         {
@@ -169,6 +213,12 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             // y is unchanged
             w = RightEdge.X - LeftEdge.X;
             // h is unchanged
+
+            if (mirrorDrag)
+            {
+                double offX = x - oldX;
+                w -= offX;
+            }
         }
         else if (RightEdge.Dragging)
         {
@@ -176,6 +226,13 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             // y is unchanged
             w = RightEdge.X - LeftEdge.X;
             // h is unchanged
+
+            if (mirrorDrag)
+            {
+                double offW = w - oldW;
+                x -= offW;
+                w += offW;
+            }
         }
         else if (TopEdge.Dragging)
         {
@@ -183,6 +240,12 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             y = TopEdge.Y;
             // w is unchanged
             h = BottomEdge.Y - TopEdge.Y;
+
+            if (mirrorDrag)
+            {
+                double offY = y - oldY;
+                h -= offY;
+            }
         }
         else if (BottomEdge.Dragging)
         {
@@ -190,6 +253,13 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             // y is unchanged
             // w is unchanged
             h = BottomEdge.Y - TopEdge.Y;
+
+            if (mirrorDrag)
+            {
+                double offH = h - oldH;
+                y -= offH;
+                h += offH;
+            }
         }
 
         if (dragging)
