@@ -132,7 +132,11 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
         double oldW = w;
         double oldH = h;
 
+        double ratioH = oldH / oldW;
+        double ratioW = oldW / oldH;
+
         bool mirrorDrag = Rl.IsKeyDown(KeyboardKey.LeftAlt);
+        bool scaleDrag = Rl.IsKeyDown(KeyboardKey.LeftShift);
 
         bool dragging = false;
         foreach (DragCircle circle in GetCircles())
@@ -150,6 +154,20 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             w = TopRight.X - TopLeft.X;
             h = BotLeft.Y - TopLeft.Y;
 
+            if (scaleDrag)
+            {
+                if (TopLeft.X - oldX < TopLeft.Y - oldY)
+                {
+                    w = h * ratioW;
+                    x = oldX - w + oldW;
+                }
+                else
+                {
+                    h = w * ratioH;
+                    y = oldY - h + oldH;
+                }
+            }
+
             if (mirrorDrag)
             {
                 double offX = x - oldX;
@@ -164,6 +182,19 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             y = TopRight.Y;
             w = TopRight.X - TopLeft.X;
             h = BotRight.Y - TopRight.Y;
+
+            if (scaleDrag)
+            {
+                if (oldX + oldW - TopRight.X < TopRight.Y - oldY)
+                {
+                    w = h * ratioW;
+                }
+                else
+                {
+                    h = w * ratioH;
+                    y = oldY - h + oldH;
+                }
+            }
 
             if (mirrorDrag)
             {
@@ -181,6 +212,19 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             w = BotRight.X - BotLeft.X;
             h = BotLeft.Y - TopLeft.Y;
 
+            if (scaleDrag)
+            {
+                if (BotLeft.X - oldX < oldY + oldH - BotLeft.Y)
+                {
+                    w = h * ratioW;
+                    x = oldX - w + oldW;
+                }
+                else
+                {
+                    h = w * ratioH;
+                }
+            }
+
             if (mirrorDrag)
             {
                 double offX = x - oldX;
@@ -196,6 +240,19 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             // y is unchanged
             w = BotRight.X - BotLeft.X;
             h = BotRight.Y - TopRight.Y;
+
+            if (scaleDrag)
+            {
+
+                if (oldX + oldW - BotRight.X < oldY + oldH - BotRight.Y)
+                {
+                    w = h * ratioW;
+                }
+                else
+                {
+                    h = w * ratioH;
+                }
+            }
 
             if (mirrorDrag)
             {
@@ -214,6 +271,11 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             w = RightEdge.X - LeftEdge.X;
             // h is unchanged
 
+            if (scaleDrag)
+            {
+                h = w * ratioH;
+            }
+
             if (mirrorDrag)
             {
                 double offX = x - oldX;
@@ -226,6 +288,11 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             // y is unchanged
             w = RightEdge.X - LeftEdge.X;
             // h is unchanged
+
+            if (scaleDrag)
+            {
+                h = w * ratioH;
+            }
 
             if (mirrorDrag)
             {
@@ -241,6 +308,11 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             // w is unchanged
             h = BottomEdge.Y - TopEdge.Y;
 
+            if (scaleDrag)
+            {
+                w = h * ratioW;
+            }
+
             if (mirrorDrag)
             {
                 double offY = y - oldY;
@@ -253,6 +325,11 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             // y is unchanged
             // w is unchanged
             h = BottomEdge.Y - TopEdge.Y;
+
+            if (scaleDrag)
+            {
+                w = h * ratioW;
+            }
 
             if (mirrorDrag)
             {
