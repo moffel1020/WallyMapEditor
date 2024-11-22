@@ -167,14 +167,6 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
                     y = oldY - h + oldH;
                 }
             }
-
-            if (mirrorDrag)
-            {
-                double offX = x - oldX;
-                double offY = y - oldY;
-                w -= offX;
-                h -= offY;
-            }
         }
         else if (TopRight.Dragging)
         {
@@ -194,15 +186,6 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
                     h = w * ratioH;
                     y = oldY - h + oldH;
                 }
-            }
-
-            if (mirrorDrag)
-            {
-                double offW = w - oldW;
-                double offY = y - oldY;
-                x -= offW;
-                w += offW;
-                h -= offY;
             }
         }
         else if (BotLeft.Dragging)
@@ -224,15 +207,6 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
                     h = w * ratioH;
                 }
             }
-
-            if (mirrorDrag)
-            {
-                double offX = x - oldX;
-                double offH = h - oldH;
-                w -= offX;
-                y -= offH;
-                h += offH;
-            }
         }
         else if (BotRight.Dragging)
         {
@@ -253,16 +227,6 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
                     h = w * ratioH;
                 }
             }
-
-            if (mirrorDrag)
-            {
-                double offW = w - oldW;
-                double offH = h - oldH;
-                x -= offW;
-                w += offW;
-                y -= offH;
-                h += offH;
-            }
         }
         else if (LeftEdge.Dragging)
         {
@@ -274,12 +238,6 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             if (scaleDrag)
             {
                 h = w * ratioH;
-            }
-
-            if (mirrorDrag)
-            {
-                double offX = x - oldX;
-                w -= offX;
             }
         }
         else if (RightEdge.Dragging)
@@ -293,13 +251,6 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             {
                 h = w * ratioH;
             }
-
-            if (mirrorDrag)
-            {
-                double offW = w - oldW;
-                x -= offW;
-                w += offW;
-            }
         }
         else if (TopEdge.Dragging)
         {
@@ -311,12 +262,6 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             if (scaleDrag)
             {
                 w = h * ratioW;
-            }
-
-            if (mirrorDrag)
-            {
-                double offY = y - oldY;
-                h -= offY;
             }
         }
         else if (BottomEdge.Dragging)
@@ -330,13 +275,18 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             {
                 w = h * ratioW;
             }
+        }
 
-            if (mirrorDrag)
-            {
-                double offH = h - oldH;
-                y -= offH;
-                h += offH;
-            }
+        if (mirrorDrag)
+        {
+            double offX = x - oldX;
+            double offY = y - oldY;
+            double offW = w - oldW;
+            double offH = h - oldH;
+            x -= offW;
+            y -= offH;
+            w += offW - offX;
+            h += offH - offY;
         }
 
         if (dragging)
