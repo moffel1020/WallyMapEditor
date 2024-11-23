@@ -33,12 +33,19 @@ public class ImportWindow(PathPreferences prefs)
     private string? _loadingStatus;
 
     private ModFileLoad? _modFileLoad;
+    private bool _bhPathEventSubbed = false;
 
     private bool _open;
     public bool Open { get => _open; set => _open = value; }
 
     public void Show(LevelLoader loader)
     {
+        if (!_bhPathEventSubbed)
+        {
+            prefs.BrawlhallaPathChanged += (_, path) => UpdateModFileBrawlPath(path);
+            _bhPathEventSubbed = true;
+        }
+
         ImGui.SetNextWindowSizeConstraints(new(500, 400), new(int.MaxValue));
         ImGui.Begin("Import", ref _open, ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoCollapse);
 
@@ -91,10 +98,7 @@ public class ImportWindow(PathPreferences prefs)
             {
                 DialogResult result = Dialog.FolderPicker(prefs.BrawlhallaPath);
                 if (result.IsOk)
-                {
                     prefs.BrawlhallaPath = result.Path;
-                    UpdateModFileBrawlPath(result.Path);
-                }
             });
         }
         ImGui.Text($"Path: {prefs.BrawlhallaPath}");
@@ -340,10 +344,7 @@ public class ImportWindow(PathPreferences prefs)
             {
                 DialogResult result = Dialog.FolderPicker(prefs.BrawlhallaPath);
                 if (result.IsOk)
-                {
                     prefs.BrawlhallaPath = result.Path;
-                    UpdateModFileBrawlPath(result.Path);
-                }
             });
         }
         ImGui.Text($"Path: {prefs.BrawlhallaPath}");

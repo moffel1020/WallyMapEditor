@@ -9,6 +9,8 @@ public class LevelLoader(Editor editor)
     private readonly Editor _editor = editor;
 
     public string[]? PowerNames { get; set; }
+
+    public event EventHandler<BoneTypes>? BoneTypesChanged;
     private BoneTypes? _boneTypes;
     public BoneTypes? BoneTypes
     {
@@ -16,7 +18,8 @@ public class LevelLoader(Editor editor)
         set
         {
             _boneTypes = value;
-            if (_editor.Canvas is not null && value is not null) _editor.Canvas.Loader.BoneTypes = value;
+            if (value is not null)
+                BoneTypesChanged?.Invoke(this, value);
         }
     }
 

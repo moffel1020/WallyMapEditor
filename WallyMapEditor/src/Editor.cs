@@ -130,6 +130,18 @@ public class Editor
             if (TitleBar.OpenLevelFile is not null)
                 TitleBar.SetTitle(TitleBar.OpenLevelFile, true);
         };
+
+        PathPrefs.BrawlhallaPathChanged += (_, path) =>
+        {
+            if (AssetLoader is not null)
+                AssetLoader.BrawlPath = path;
+        };
+
+        LevelLoader.BoneTypesChanged += (_, boneTypes) =>
+        {
+            if (AssetLoader is not null)
+                AssetLoader.BoneTypes = boneTypes;
+        };
     }
 
     private void Draw()
