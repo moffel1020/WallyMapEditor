@@ -11,7 +11,7 @@ using NativeFileDialogSharp;
 
 namespace WallyMapEditor;
 
-public class ImportWindow(PathPreferences prefs)
+public class ImportWindow
 {
     public const int MAX_KEY_LENGTH = 9;
 
@@ -22,7 +22,7 @@ public class ImportWindow(PathPreferences prefs)
     private string? _savedBtPath;
     private string? _savedPtPath;
     private string? _savedModPath;
-    private string _keyInput = prefs.DecryptionKey ?? "";
+    private string _keyInput = "";
 
     private bool _searchingDescNames = false;
     private bool _shouldCloseDescPopup = false;
@@ -33,19 +33,21 @@ public class ImportWindow(PathPreferences prefs)
     private string? _loadingStatus;
 
     private ModFileLoad? _modFileLoad;
-    private bool _bhPathEventSubbed = false;
 
     private bool _open;
     public bool Open { get => _open; set => _open = value; }
 
+    public PathPreferences Prefs { get; set; }
+
+    public ImportWindow(PathPreferences prefs)
+    {
+        Prefs = prefs;
+        _keyInput = prefs.DecryptionKey ?? "";
+        Prefs.BrawlhallaPathChanged += (_, path) => UpdateModFileBrawlPath(path);
+    }
+
     public void Show(LevelLoader loader)
     {
-        if (!_bhPathEventSubbed)
-        {
-            prefs.BrawlhallaPathChanged += (_, path) => UpdateModFileBrawlPath(path);
-            _bhPathEventSubbed = true;
-        }
-
         ImGui.SetNextWindowSizeConstraints(new(500, 400), new(int.MaxValue));
         ImGui.Begin("Import", ref _open, ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoCollapse);
 
@@ -96,38 +98,38 @@ public class ImportWindow(PathPreferences prefs)
         {
             Task.Run(() =>
             {
-                DialogResult result = Dialog.FolderPicker(prefs.BrawlhallaPath);
+                DialogResult result = Dialog.FolderPicker(Prefs.BrawlhallaPath);
                 if (result.IsOk)
-                    prefs.BrawlhallaPath = result.Path;
+                    Prefs.BrawlhallaPath = result.Path;
             });
         }
-        ImGui.Text($"Path: {prefs.BrawlhallaPath}");
+        ImGui.Text($"Path: {Prefs.BrawlhallaPath}");
         ImGui.Separator();
 
-        if (ImGuiExt.ButtonDisabledIf(!WmeUtils.IsValidBrawlPath(prefs.BrawlhallaPath), "Select mod file"))
+        if (ImGuiExt.ButtonDisabledIf(!WmeUtils.IsValidBrawlPath(Prefs.BrawlhallaPath), "Select mod file"))
         {
             Task.Run(() =>
             {
-                DialogResult result = Dialog.FileOpen(ModFile.EXTENSION, Path.GetDirectoryName(prefs.ModFilePath));
+                DialogResult result = Dialog.FileOpen(ModFile.EXTENSION, Path.GetDirectoryName(Prefs.ModFilePath));
                 if (result.IsOk)
                 {
                     _savedModPath = result.Path;
-                    CreateModFileLoad(_savedModPath, prefs);
+                    CreateModFileLoad(_savedModPath, Prefs);
                 }
             });
         }
-        if (prefs.ModFilePath is not null)
+        if (Prefs.ModFilePath is not null)
         {
             ImGui.SameLine();
             ImGui.Text("or");
             ImGui.SameLine();
             if (ImGui.Button("Use last path"))
             {
-                _savedModPath = prefs.ModFilePath;
-                CreateModFileLoad(_savedModPath, prefs);
+                _savedModPath = Prefs.ModFilePath;
+                CreateModFileLoad(_savedModPath, Prefs);
             }
             ImGui.SameLine();
-            ImGui.Text(prefs.ModFilePath);
+            ImGui.Text(Prefs.ModFilePath);
         }
         ImGui.Text($"Path: {_savedModPath}");
 
@@ -228,7 +230,7 @@ public class ImportWindow(PathPreferences prefs)
         ShowFileImportSection(
             "LevelDesc", "xml",
             _savedLdPath, path => _savedLdPath = path,
-            prefs.LevelDescPath,
+            Prefs.LevelDescPath,
             canLoadFromSwz: false
         );
         ImGui.SameLine();
@@ -248,7 +250,7 @@ public class ImportWindow(PathPreferences prefs)
                 ImGui.CloseCurrentPopup();
             }
 
-            if (!_searchingDescNames && prefs.BrawlhallaPath is not null && levelDescNames.Length == 0)
+            if (!_searchingDescNames && Prefs.BrawlhallaPath is not null && levelDescNames.Length == 0)
             {
                 _searchingDescNames = true;
                 Task.Run(() =>
@@ -257,8 +259,8 @@ public class ImportWindow(PathPreferences prefs)
                     {
                         _loadingError = null;
                         uint key = uint.Parse(_keyInput);
-                        levelDescNames = FindLevelDescNames(prefs.BrawlhallaPath, key);
-                        prefs.DecryptionKey = _keyInput;
+                        levelDescNames = FindLevelDescNames(Prefs.BrawlhallaPath, key);
+                        Prefs.DecryptionKey = _keyInput;
                         _searchingDescNames = false;
                     }
                     catch (Exception e)
@@ -298,7 +300,7 @@ public class ImportWindow(PathPreferences prefs)
         ShowFileImportSection(
             "LevelTypes", "xml",
             _savedLtPath, path => _savedLtPath = path,
-            prefs.LevelTypesPath
+            Prefs.LevelTypesPath
         );
     }
 
@@ -307,7 +309,7 @@ public class ImportWindow(PathPreferences prefs)
         ShowFileImportSection(
             "LevelSetTypes", "xml",
             _savedLstPath, path => _savedLstPath = path,
-            prefs.LevelSetTypesPath
+            Prefs.LevelSetTypesPath
         );
     }
 
@@ -316,7 +318,7 @@ public class ImportWindow(PathPreferences prefs)
         ShowFileImportSection(
             "BoneTypes", "xml",
             _savedBtPath, path => _savedBtPath = path,
-            prefs.BoneTypesPath
+            Prefs.BoneTypesPath
         );
     }
 
@@ -325,7 +327,7 @@ public class ImportWindow(PathPreferences prefs)
         ShowFileImportSection(
             "PowerNames", "csv",
             _savedPtPath, path => _savedPtPath = path,
-            prefs.PowerTypesPath
+            Prefs.PowerTypesPath
         );
     }
 
@@ -342,16 +344,16 @@ public class ImportWindow(PathPreferences prefs)
         {
             Task.Run(() =>
             {
-                DialogResult result = Dialog.FolderPicker(prefs.BrawlhallaPath);
+                DialogResult result = Dialog.FolderPicker(Prefs.BrawlhallaPath);
                 if (result.IsOk)
-                    prefs.BrawlhallaPath = result.Path;
+                    Prefs.BrawlhallaPath = result.Path;
             });
         }
-        ImGui.Text($"Path: {prefs.BrawlhallaPath}");
+        ImGui.Text($"Path: {Prefs.BrawlhallaPath}");
         ImGui.Separator();
 
         ImGui.InputText("Decryption key", ref _keyInput, 9, ImGuiInputTextFlags.CharsDecimal);
-        if (prefs.BrawlhallaPath is not null && ImGui.Button("Find key"))
+        if (Prefs.BrawlhallaPath is not null && ImGui.Button("Find key"))
         {
             Task.Run(() =>
             {
@@ -359,7 +361,7 @@ public class ImportWindow(PathPreferences prefs)
                 {
                     _loadingError = null;
                     _loadingStatus = "searching key...";
-                    _keyInput = WmeUtils.FindDecryptionKeyFromPath(Path.Combine(prefs.BrawlhallaPath, "BrawlhallaAir.swf"))?.ToString() ?? "";
+                    _keyInput = WmeUtils.FindDecryptionKeyFromPath(Path.Combine(Prefs.BrawlhallaPath, "BrawlhallaAir.swf"))?.ToString() ?? "";
                 }
                 catch (Exception e)
                 {
@@ -397,12 +399,12 @@ public class ImportWindow(PathPreferences prefs)
 
 #if DEBUG
         // secret stress testing option :3
-        if (prefs.BrawlhallaPath is not null && uint.TryParse(_keyInput, out uint decryptionKey))
+        if (Prefs.BrawlhallaPath is not null && uint.TryParse(_keyInput, out uint decryptionKey))
         {
             ImGui.Separator();
             if (ImGui.Button("stress test"))
             {
-                _loadingError = LoadStressTester.StressTest(prefs.BrawlhallaPath, decryptionKey);
+                _loadingError = LoadStressTester.StressTest(Prefs.BrawlhallaPath, decryptionKey);
             }
         }
 #endif
@@ -411,7 +413,7 @@ public class ImportWindow(PathPreferences prefs)
     private void LoadButton(LevelLoader loader)
     {
         if (ImGuiExt.ButtonDisabledIf(!uint.TryParse(_keyInput, out uint decryptionKey)
-            && !WmeUtils.IsValidBrawlPath(prefs.BrawlhallaPath) || (_savedLdPath is null && _swzDescName is null), "Load map"))
+            && !WmeUtils.IsValidBrawlPath(Prefs.BrawlhallaPath) || (_savedLdPath is null && _swzDescName is null), "Load map"))
         {
             Task.Run(() =>
             {
@@ -419,7 +421,7 @@ public class ImportWindow(PathPreferences prefs)
                 {
                     ILoadMethod loadMethod = new OverridableGameLoad
                     (
-                        brawlPath: prefs.BrawlhallaPath!,
+                        brawlPath: Prefs.BrawlhallaPath!,
                         swzLevelName: _savedLdPath is null ? _swzDescName : null,
                         key: decryptionKey,
                         descPath: _savedLdPath,
@@ -432,12 +434,12 @@ public class ImportWindow(PathPreferences prefs)
                     _loadingError = null;
                     loader.LoadMap(loadMethod);
 
-                    prefs.DecryptionKey = _keyInput;
-                    prefs.LevelDescPath = _savedLdPath ?? prefs.LevelDescPath;
-                    prefs.LevelTypesPath = _savedLtPath ?? prefs.LevelTypesPath;
-                    prefs.LevelSetTypesPath = _savedLstPath ?? prefs.LevelSetTypesPath;
-                    prefs.BoneTypesPath = _savedBtPath ?? prefs.BoneTypesPath;
-                    prefs.PowerTypesPath = _savedPtPath ?? prefs.PowerTypesPath;
+                    Prefs.DecryptionKey = _keyInput;
+                    Prefs.LevelDescPath = _savedLdPath ?? Prefs.LevelDescPath;
+                    Prefs.LevelTypesPath = _savedLtPath ?? Prefs.LevelTypesPath;
+                    Prefs.LevelSetTypesPath = _savedLstPath ?? Prefs.LevelSetTypesPath;
+                    Prefs.BoneTypesPath = _savedBtPath ?? Prefs.BoneTypesPath;
+                    Prefs.PowerTypesPath = _savedPtPath ?? Prefs.PowerTypesPath;
                 }
                 catch (Exception e)
                 {
@@ -453,7 +455,7 @@ public class ImportWindow(PathPreferences prefs)
 
     private void RequiredFilesLoadButton(LevelLoader loader)
     {
-        if (ImGuiExt.ButtonDisabledIf(prefs.BrawlhallaPath is null, "Load required files only"))
+        if (ImGuiExt.ButtonDisabledIf(Prefs.BrawlhallaPath is null, "Load required files only"))
         {
             Task.Run(() =>
             {
@@ -461,7 +463,7 @@ public class ImportWindow(PathPreferences prefs)
                 {
                     _loadingStatus = "loading...";
                     _loadingError = null;
-                    LoadRequiredFilesOnly(loader, prefs.BrawlhallaPath!);
+                    LoadRequiredFilesOnly(loader, Prefs.BrawlhallaPath!);
                 }
                 catch (Exception e)
                 {
