@@ -10,6 +10,8 @@ public class PathPreferences : IDeserializable, ISerializable
     public const string APPDATA_DIR_NAME = "WallyMapEditor";
     public const string FILE_NAME = "PathPreferences.xml";
 
+    public event EventHandler<string>? BrawlhallaPathChanged;
+
     private string? _brawlhallaPath;
     public string? BrawlhallaPath { get => _brawlhallaPath; set => SetBrawlhallaPath(value); }
     public string? BrawlhallaAirPath { get; set; }
@@ -62,7 +64,7 @@ public class PathPreferences : IDeserializable, ISerializable
 
     public void Deserialize(XElement e)
     {
-        BrawlhallaPath = e.GetElementValue(nameof(BrawlhallaPath));
+        _brawlhallaPath = e.GetElementValue(nameof(BrawlhallaPath)); // don't trigger setter!
         BrawlhallaAirPath = e.GetElementValue(nameof(BrawlhallaAirPath));
         LevelDescPath = e.GetElementValue(nameof(LevelDescPath));
         LevelTypePath = e.GetElementValue(nameof(LevelTypePath));
@@ -112,6 +114,7 @@ public class PathPreferences : IDeserializable, ISerializable
 
         _brawlhallaPath = path;
         BrawlhallaAirPath ??= Path.Combine(_brawlhallaPath, "BrawlhallaAir.swf");
+        BrawlhallaPathChanged?.Invoke(this, _brawlhallaPath);
     }
 
     public void ApplyCmdlineOverrides(CommandLineArgs args)

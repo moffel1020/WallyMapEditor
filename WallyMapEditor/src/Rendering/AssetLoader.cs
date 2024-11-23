@@ -17,6 +17,7 @@ public class AssetLoader(string brawlPath, BoneTypes boneTypes)
             ReloadAnmCache();
         }
     }
+
     public BoneTypes BoneTypes { get; set; } = boneTypes;
 
     public TextureCache TextureCache { get; } = new();
