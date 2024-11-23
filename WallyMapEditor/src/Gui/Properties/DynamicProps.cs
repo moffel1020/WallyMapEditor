@@ -30,7 +30,7 @@ public partial class PropertiesWindow
                 bool changed = false;
                 if (index >= ad.Children.Length) return false;
                 T child = ad.Children[index];
-                if (ImGui.TreeNode($"{child.GetType().Name} {MapOverviewWindow.GetExtraObjectInfo(child)}####dynamicChild{child.GetHashCode()}"))
+                if (ImGui.TreeNode($"{child.GetType().Name} {MapOverviewWindow.GetExtraObjectInfo(child)}###dynamicChild{child.GetHashCode()}"))
                 {
                     changed |= ShowProperties(child, cmd, data);
                     ImGui.TreePop();

@@ -92,4 +92,13 @@ public abstract class UploadCache<K, I, V> where K : notnull
             }
         }
     }
+
+    public void InsertIntermediate(K k, I i)
+    {
+        if (_queueSet.Contains(k) || Cache.ContainsKey(k))
+            return;
+
+        _queueSet.Add(k);
+        lock (_queue) _queue.Enqueue((k, i));
+    }
 }

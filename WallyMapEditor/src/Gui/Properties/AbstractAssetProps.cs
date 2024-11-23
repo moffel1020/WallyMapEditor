@@ -37,40 +37,28 @@ partial class PropertiesWindow
             {
                 string assetDir = Path.Combine(data.PathPrefs.BrawlhallaPath, "mapArt", data.Level.Desc.AssetDir);
                 ImGui.SameLine();
-                if (ImGui.Button("Select##AssetName"))
-                {
-                    Task.Run(() =>
-                    {
-                        DialogResult dialogResult = Dialog.FileOpen("png,jpg", assetDir);
-                        if (dialogResult.IsOk)
-                        {
-                            string path = dialogResult.Path;
-                            string newAssetName = Path.GetRelativePath(assetDir, path).Replace("\\", "/");
-                            if (!WmeUtils.IsInDirectory(data.PathPrefs.BrawlhallaPath, path))
-                            {
-                                _assetErrorText = "Asset has to be inside brawlhalla directory";
-                            }
-                            else if (newAssetName != a.AssetName)
-                            {
-                                cmd.Add(new PropChangeCommand<string>(val => a.AssetName = val, a.AssetName, newAssetName));
-                                propChanged = true;
-                                _assetErrorText = null;
-                            }
-                        }
-                    });
-                }
+                ShowSelectAssetButton(a, cmd, data, assetDir);
 
                 if (_assetErrorText is not null)
                 {
-                    ImGui.PushTextWrapPos();
-                    ImGui.Text("[Error]: " + _assetErrorText);
-                    ImGui.PopTextWrapPos();
+                    ImGui.TextWrapped("[Error]: " + _assetErrorText);
                 }
 
                 if (data.Loader is not null)
                 {
                     Texture2DWrapper texture = data.Loader.LoadTextureFromPath(Path.Combine(assetDir, a.AssetName));
                     rlImGui.ImageSize(texture.Texture, new Vector2(60 * (float)(texture.Width / texture.Height), 60));
+
+                    if (ImGui.Button("Reset width/height"))
+                    {
+                        if (data.Loader.TextureCache.Cache.TryGetValue(Path.Combine(assetDir, a.AssetName), out Texture2DWrapper? tex))
+                        {
+                            cmd.Add(new PropChangeCommand<(double, double)>(
+                                val => (a.W, a.H) = val,
+                                (a.W!.Value, a.H!.Value),
+                                (tex.Width, tex.Height)));
+                        }
+                    }
                 }
             }
             propChanged |= ImGuiExt.DragDoubleHistory("X", a.X, val => a.X = val, cmd);
@@ -93,6 +81,35 @@ partial class PropertiesWindow
             propChanged |= ImGuiExt.DragDoubleHistory("Rotation", a.Rotation, val => a.Rotation = BrawlhallaMath.SafeMod(val, 360.0), cmd, speed: 0.1f);
         }
         return propChanged;
+    }
+
+    private static void ShowSelectAssetButton(AbstractAsset a, CommandHistory cmd, PropertiesWindowData data, string assetDir)
+    {
+        if (data.Level is null || data.PathPrefs.BrawlhallaPath is null || !ImGui.Button("Select##AssetName")) return;
+
+        Task.Run(() =>
+        {
+            DialogResult dialogResult = Dialog.FileOpen("png,jpg", assetDir);
+            if (dialogResult.IsOk)
+            {
+                string path = dialogResult.Path;
+                string newAssetName = Path.GetRelativePath(assetDir, path).Replace("\\", "/");
+                if (!WmeUtils.IsInDirectory(data.PathPrefs.BrawlhallaPath, path))
+                {
+                    _assetErrorText = "Asset has to be inside brawlhalla directory";
+                    return;
+                }
+
+                if (newAssetName == a.AssetName)
+                {
+                    _assetErrorText = null;
+                    return;
+                }
+
+                cmd.Add(new PropChangeCommand<string>(val => a.AssetName = val, a.AssetName!, newAssetName));
+                _assetErrorText = null;
+            }
+        });
     }
 
     public static Asset DefaultAsset(double posX, double posY) => new()
