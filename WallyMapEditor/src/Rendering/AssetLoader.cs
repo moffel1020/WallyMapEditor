@@ -5,20 +5,28 @@ using WallyAnmSpinzor;
 
 namespace WallyMapEditor;
 
-public class AssetLoader(string brawlPath, BoneTypes boneTypes)
+public class AssetLoader
 {
+    private string _brawlPath;
     public string BrawlPath
     {
-        get => brawlPath;
+        get => _brawlPath;
         set
         {
-            brawlPath = value;
+            _brawlPath = value;
             ClearCache();
             ReloadAnmCache();
         }
     }
 
-    public BoneTypes BoneTypes { get; set; } = boneTypes;
+    public BoneTypes BoneTypes { get; set; }
+
+    public AssetLoader(string brawlPath, BoneTypes boneTypes)
+    {
+        _brawlPath = brawlPath;
+        BoneTypes = boneTypes;
+        ReloadAnmCache();
+    }
 
     public TextureCache TextureCache { get; } = new();
     public SwfFileCache SwfFileCache { get; } = new();
@@ -30,7 +38,7 @@ public class AssetLoader(string brawlPath, BoneTypes boneTypes)
     {
         Task.Run(() =>
         {
-            string anmPath = Path.Combine(brawlPath, "anims", $"Animation_{name}.anm");
+            string anmPath = Path.Combine(_brawlPath, "anims", $"Animation_{name}.anm");
             AnmFile anm;
             using (FileStream file = new(anmPath, FileMode.Open, FileAccess.Read))
                 anm = AnmFile.CreateFrom(file);
@@ -43,7 +51,7 @@ public class AssetLoader(string brawlPath, BoneTypes boneTypes)
 
     public Texture2DWrapper LoadTextureFromPath(string path)
     {
-        string finalPath = Path.Combine(brawlPath, "mapArt", path);
+        string finalPath = Path.Combine(_brawlPath, "mapArt", path);
         TextureCache.Cache.TryGetValue(finalPath, out Texture2DWrapper? texture);
         if (texture is not null)
             return texture;
@@ -61,7 +69,7 @@ public class AssetLoader(string brawlPath, BoneTypes boneTypes)
 
     public SwfFileData? LoadSwf(string filePath)
     {
-        string finalPath = Path.Combine(brawlPath, GetRealSwfPath(filePath));
+        string finalPath = Path.Combine(_brawlPath, GetRealSwfPath(filePath));
         SwfFileCache.Cache.TryGetValue(finalPath, out SwfFileData? swf);
         if (swf is not null)
             return swf;
@@ -112,6 +120,11 @@ public class AssetLoader(string brawlPath, BoneTypes boneTypes)
     public void ReloadAnmCache()
     {
         AnmClasses.Clear();
+        LoadAnms();
+    }
+
+    public void LoadAnms()
+    {
         LoadAnmInThread("MapArtAnims");
         LoadAnmInThread("ATLA_MapArtAnims");
         LoadAnmInThread("GameModes");
