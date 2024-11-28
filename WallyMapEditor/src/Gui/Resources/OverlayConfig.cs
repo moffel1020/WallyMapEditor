@@ -28,6 +28,10 @@ public class OverlayConfig : ISerializable, IDeserializable
     public required double LengthParentAssetScale { get; set; }
     public required double SensitivityParentAssetScale { get; set; }
 
+    public required double LengthFireDirectionArrow { get; set; }
+    public required double OffsetFireDirectionArrowBack { get; set; }
+    public required double OffsetFireDirectionArrowSide { get; set; }
+
     public required int FontSizeKeyFrameNum { get; set; }
     public required int FontSizePathPointNum { get; set; }
 
@@ -77,6 +81,8 @@ public class OverlayConfig : ISerializable, IDeserializable
 
     public required RlColor ColorFireOffset { get; set; }
     public required RlColor UsingColorFireOffset { get; set; }
+    public required RlColor ColorFireOffsetLine { get; set; }
+    public required RlColor ColorFireDirectionArrow { get; set; }
 
     public required RlColor ColorPathPoint { get; set; }
     public required RlColor UsingColorPathPoint { get; set; }
@@ -113,6 +119,9 @@ public class OverlayConfig : ISerializable, IDeserializable
         LineWidthParentAssetScale = getDouble(nameof(LineWidthParentAssetScale), @default.LineWidthParentAssetScale);
         LengthParentAssetScale = getDouble(nameof(LengthParentAssetScale), @default.LengthParentAssetScale);
         SensitivityParentAssetScale = getDouble(nameof(SensitivityParentAssetScale), @default.SensitivityParentAssetScale);
+        LengthFireDirectionArrow = getDouble(nameof(LengthFireDirectionArrow), @default.LengthFireDirectionArrow);
+        OffsetFireDirectionArrowBack = getDouble(nameof(OffsetFireDirectionArrowBack), @default.OffsetFireDirectionArrowBack);
+        OffsetFireDirectionArrowSide = getDouble(nameof(OffsetFireDirectionArrowSide), @default.OffsetFireDirectionArrowSide);
         FontSizeKeyFrameNum = getInt(nameof(FontSizeKeyFrameNum), @default.FontSizeKeyFrameNum);
         FontSizePathPointNum = getInt(nameof(FontSizePathPointNum), @default.FontSizePathPointNum);
 
@@ -150,6 +159,8 @@ public class OverlayConfig : ISerializable, IDeserializable
         TextColorKeyFrameNum = getColor(nameof(TextColorKeyFrameNum), @default.TextColorKeyFrameNum);
         ColorFireOffset = getColor(nameof(ColorFireOffset), @default.ColorFireOffset);
         UsingColorFireOffset = getColor(nameof(UsingColorFireOffset), @default.UsingColorFireOffset);
+        ColorFireOffsetLine = getColor(nameof(ColorFireOffsetLine), @default.ColorFireOffsetLine);
+        ColorFireDirectionArrow = getColor(nameof(ColorFireDirectionArrow), @default.ColorFireDirectionArrow);
         ColorPathPoint = getColor(nameof(ColorPathPoint), @default.ColorPathPoint);
         UsingColorPathPoint = getColor(nameof(UsingColorPathPoint), @default.UsingColorPathPoint);
         TextColorPathPointNum = getColor(nameof(TextColorPathPointNum), @default.TextColorPathPointNum);
@@ -180,7 +191,11 @@ public class OverlayConfig : ISerializable, IDeserializable
         addValue(nameof(LineWidthParentAssetScale), LineWidthParentAssetScale);
         addValue(nameof(LengthParentAssetScale), LengthParentAssetScale);
         addValue(nameof(SensitivityParentAssetScale), SensitivityParentAssetScale);
+        addValue(nameof(LengthFireDirectionArrow), LengthFireDirectionArrow);
+        addValue(nameof(OffsetFireDirectionArrowBack), OffsetFireDirectionArrowBack);
+        addValue(nameof(OffsetFireDirectionArrowSide), OffsetFireDirectionArrowSide);
         addValue(nameof(FontSizeKeyFrameNum), FontSizeKeyFrameNum);
+        addValue(nameof(FontSizePathPointNum), FontSizePathPointNum);
         addColor(nameof(ColorCollisionPoint), ColorCollisionPoint);
         addColor(nameof(UsingColorCollisionPoint), UsingColorCollisionPoint);
         addColor(nameof(ColorCollisionAnchor), ColorCollisionAnchor);
@@ -215,6 +230,8 @@ public class OverlayConfig : ISerializable, IDeserializable
         addColor(nameof(TextColorKeyFrameNum), TextColorKeyFrameNum);
         addColor(nameof(ColorFireOffset), ColorFireOffset);
         addColor(nameof(UsingColorFireOffset), UsingColorFireOffset);
+        addColor(nameof(ColorFireOffsetLine), ColorFireOffsetLine);
+        addColor(nameof(ColorFireDirectionArrow), ColorFireDirectionArrow);
         addColor(nameof(ColorPathPoint), ColorPathPoint);
         addColor(nameof(UsingColorPathPoint), UsingColorPathPoint);
         addColor(nameof(TextColorPathPointNum), TextColorPathPointNum);
@@ -257,6 +274,9 @@ public class OverlayConfig : ISerializable, IDeserializable
         LineWidthParentAssetScale = 20,
         LengthParentAssetScale = 250,
         SensitivityParentAssetScale = 0.1,
+        LengthFireDirectionArrow = 70,
+        OffsetFireDirectionArrowSide = 9,
+        OffsetFireDirectionArrowBack = 14,
         FontSizeKeyFrameNum = DEFAULT_FONT_SIZE,
         FontSizePathPointNum = DEFAULT_FONT_SIZE,
         ColorCollisionPoint = TransparentGray,
@@ -293,6 +313,8 @@ public class OverlayConfig : ISerializable, IDeserializable
         TextColorKeyFrameNum = RlColor.White,
         ColorFireOffset = TransparentOrange,
         UsingColorFireOffset = TransparentRed,
+        ColorFireOffsetLine = TransparentYellow,
+        ColorFireDirectionArrow = TransparentPink,
         ColorPathPoint = TransparentPink,
         UsingColorPathPoint = TransparentRed,
         TextColorPathPointNum = RlColor.White,

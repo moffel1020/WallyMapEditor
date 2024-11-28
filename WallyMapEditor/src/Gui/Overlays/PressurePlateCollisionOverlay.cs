@@ -2,14 +2,6 @@ using System;
 using System.Collections.Generic;
 using WallyMapSpinzor2;
 
-/*
-TODO:
-editing the fire offset is much better when you see the line from the collision to the fire offset
-this means we need to somehow temporarily override the render config when opening the overlay...
-
-we don't want to fully disable fire offset rendering from the library, since it could be useful to look at all the pressure plates in the map
-*/
-
 namespace WallyMapEditor;
 
 public class PressurePlateCollisionOverlay(AbstractPressurePlateCollision col) : CollisionOverlay(col)
@@ -74,11 +66,22 @@ public class PressurePlateCollisionOverlay(AbstractPressurePlateCollision col) :
     {
         base.Draw(data);
 
+        (double offsetX, double offsetY) = (0, 0);
+        if (col.Parent is not null)
+        {
+            (double dynOffsetX, double dynOffsetY) = col.Parent.GetOffset(data.Context);
+            (offsetX, offsetY) = (dynOffsetX + col.Parent.X, dynOffsetY + col.Parent.Y);
+        }
+
         foreach (DragCircle circle in OffsetCircles)
         {
             circle.Color = data.OverlayConfig.ColorFireOffset;
             circle.UsingColor = data.OverlayConfig.UsingColorFireOffset;
             circle.Draw(data);
+            (double midX, double midY) = ((col.X1 + col.X2) / 2 + offsetX, (col.Y1 + col.Y2) / 2 + offsetY);
+            Rl.DrawLineV(new((float)midX, (float)midY), new((float)circle.X, (float)circle.Y), data.OverlayConfig.ColorFireOffsetLine);
+            (double arrowEndX, double arrowEndY) = (circle.X + (col.FaceLeft ? -1 : 1) * data.OverlayConfig.LengthFireDirectionArrow, circle.Y);
+            WmeUtils.DrawArrow(circle.X, circle.Y, arrowEndX, arrowEndY, data.OverlayConfig.OffsetFireDirectionArrowSide, data.OverlayConfig.OffsetFireDirectionArrowBack, data.OverlayConfig.ColorFireDirectionArrow);
         }
     }
 }
