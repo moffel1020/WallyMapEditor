@@ -28,6 +28,7 @@ public class OverlayManager
     {
         CameraBounds cb => new CameraBoundsOverlay(cb),
         SpawnBotBounds sbb => new SpawnBotBoundsOverlay(sbb),
+        AbstractPressurePlateCollision pac => new PressurePlateCollisionOverlay(pac),
         AbstractCollision ac => new CollisionOverlay(ac),
         Respawn r => new RespawnOverlay(r),
         MovingPlatform mp => new MovingPlatformOverlay(mp),
@@ -40,6 +41,7 @@ public class OverlayManager
         DynamicItemSpawn dis => new AbstractDynamicOverlay<AbstractItemSpawn>(dis),
         DynamicRespawn dr => new AbstractDynamicOverlay<Respawn>(dr),
         DynamicNavNode dn => new AbstractDynamicOverlay<NavNode>(dn),
+        CustomPath cp => new CustomPathOverlay(cp),
         _ => null
     };
 }

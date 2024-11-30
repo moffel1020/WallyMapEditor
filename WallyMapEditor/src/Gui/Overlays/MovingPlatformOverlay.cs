@@ -33,19 +33,15 @@ public class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
         // this gives higher framenum keyframes priority
         foreach ((KeyFrame kf, int num) in EnumerateKeyFrames(plat.Animation.KeyFrames).Reverse())
         {
-            currentKeyFrames.Add(kf);
+            if (!KeyFrameCircles.TryGetValue(kf, out KeyFrameOverlay? kfo))
+                kfo = KeyFrameCircles[kf] = new(kf);
 
-            if (!KeyFrameCircles.ContainsKey(kf))
-                KeyFrameCircles[kf] = new(kf);
-
-            KeyFrameOverlay kfo = KeyFrameCircles[kf];
             kfo.PlatOffset = (plat.X, plat.Y);
             kfo.AllowDragging = !dragging;
             kfo.FrameNumOverride = num;
             dragging |= kfo.Update(data, cmd);
         }
-
-        // temporary hack to remove deleted keyframes
+        // remove deleted keyframes
         foreach (KeyFrame kf in KeyFrameCircles.Keys)
         {
             if (!currentKeyFrames.Contains(kf))
