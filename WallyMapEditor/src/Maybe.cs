@@ -27,7 +27,7 @@ public readonly struct Maybe<T>
     public T ValueOrThrow(Exception e) => _hasValue ? _value : throw e;
     public unsafe T ValueUnsafe => _value; // rust style shit
 
-    public bool TryGetValue([NotNullWhen(true)] out T? t)
+    public bool TryGetValue([MaybeNullWhen(false)] out T t)
     {
         t = _hasValue ? _value : default;
         return _hasValue;
