@@ -33,9 +33,9 @@ public class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
         // this gives higher framenum keyframes priority
         foreach ((KeyFrame kf, int num) in EnumerateKeyFrames(plat.Animation.KeyFrames).Reverse())
         {
+            currentKeyFrames.Add(kf);
             if (!KeyFrameCircles.TryGetValue(kf, out KeyFrameOverlay? kfo))
                 kfo = KeyFrameCircles[kf] = new(kf);
-
             kfo.PlatOffset = (plat.X, plat.Y);
             kfo.AllowDragging = !dragging;
             kfo.FrameNumOverride = num;
