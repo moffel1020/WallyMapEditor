@@ -477,6 +477,7 @@ public class Editor
         {
             try
             {
+                _renderConfig.Time = TimeSpan.FromTicks(0); // reset time
                 LevelLoader.ReImport();
                 if (LevelLoader.ReloadMethod is LevelPathLoad lpLoad)
                     TitleBar.SetTitle(lpLoad.Path, false);

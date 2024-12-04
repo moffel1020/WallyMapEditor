@@ -26,6 +26,8 @@ partial class PropertiesWindow
         propChanged |= ImGuiExt.DragIntHistory("FrameOffset", ab.FrameOffset, val => ab.FrameOffset = val, cmd);
         propChanged |= ImGuiExt.CheckboxHistory("ForceDraw", ab.ForceDraw, val => ab.ForceDraw = val, cmd);
         ImGuiExt.HintTooltip(Strings.UI_FORCE_DRAW_TOOLTIP);
+        // do nullable editing because 0 = infinity
+        propChanged |= ImGuiExt.DragNullableUIntHistory("Loops", ab.Loops == 0 ? null : ab.Loops, 1, val => ab.Loops = val ?? 0, cmd, minValue: 1);
         return propChanged;
     }
 

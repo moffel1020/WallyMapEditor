@@ -15,8 +15,10 @@ public partial class PropertiesWindow
         ImGui.Text("SoundEventName: " + ls.SoundEventName);
         propChanged |= ImGuiExt.DragUIntHistory("Interval", ls.Interval, val => ls.Interval = val, cmd, speed: 16);
         propChanged |= ImGuiExt.DragUIntHistory("Delay", ls.Delay, val => ls.Delay = val, cmd, speed: 16);
+        propChanged |= ImGuiExt.DragIntHistory("OnlineDelayDiff", ls.OnlineDelayDiff, val => ls.OnlineDelayDiff = val, cmd, speed: 16);
         // do nullable editing because 0 = infinity
         propChanged |= ImGuiExt.DragNullableIntHistory("TotalLoops", ls.TotalLoops == 0 ? null : ls.TotalLoops, 1, val => ls.TotalLoops = val ?? 0, cmd, minValue: 1);
+
         return propChanged;
     }
 }
