@@ -92,10 +92,10 @@ public class OverlayConfig : ISerializable, IDeserializable
     {
         OverlayConfig @default = Default;
 
-        int getInt(string name, int @default) => e.GetIntElementOrNull(name) ?? @default;
-        uint getUInt(string name, uint @default) => e.GetUIntElementOrNull(name) ?? @default;
-        double getDouble(string name, double @default) => e.GetDoubleElementOrNull(name) ?? @default;
-        float getFloat(string name, float @default) => Utils.ParseFloatOrNull(e.GetElementValue(name)) ?? @default;
+        int getInt(string name, int @default) => e.GetIntElement(name, @default);
+        uint getUInt(string name, uint @default) => e.GetUIntElement(name, @default);
+        double getDouble(string name, double @default) => e.GetDoubleElement(name, @default);
+        float getFloat(string name, float @default) => Utils.ParseFloatOrNull(e.GetElementOrNull(name)) ?? @default;
         RlColor getColor(string name, RlColor @default) => WmeUtils.HexToRlColor(getUInt(name, WmeUtils.RlColorToHex(@default)));
 
         RadiusCollisionPoint = getFloat(nameof(RadiusCollisionPoint), @default.RadiusCollisionPoint);

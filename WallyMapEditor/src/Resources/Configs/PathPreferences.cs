@@ -64,23 +64,23 @@ public class PathPreferences : IDeserializable, ISerializable
 
     public void Deserialize(XElement e)
     {
-        _brawlhallaPath = e.GetElementValue(nameof(BrawlhallaPath)); // don't trigger setter!
-        BrawlhallaAirPath = e.GetElementValue(nameof(BrawlhallaAirPath));
-        LevelDescPath = e.GetElementValue(nameof(LevelDescPath));
-        LevelTypePath = e.GetElementValue(nameof(LevelTypePath));
-        LevelTypesPath = e.GetElementValue(nameof(LevelTypesPath));
-        LevelSetTypesPath = e.GetElementValue(nameof(LevelSetTypesPath));
-        LevelPath = e.GetElementValue(nameof(LevelPath));
-        BoneTypesPath = e.GetElementValue(nameof(BoneTypesPath));
-        PowerTypesPath = e.GetElementValue(nameof(PowerTypesPath));
-        DecryptionKey = e.GetElementValue(nameof(DecryptionKey));
-        ConfigFolderPath = e.GetElementValue(nameof(ConfigFolderPath));
-        ModFilePath = e.GetElementValue(nameof(ModFilePath));
-        ModName = e.GetElementValue(nameof(ModName));
-        GameVersionInfo = e.GetElementValue(nameof(GameVersionInfo));
-        ModVersionInfo = e.GetElementValue(nameof(ModVersionInfo));
-        ModDescription = e.GetElementValue(nameof(ModDescription));
-        ModAuthor = e.GetElementValue(nameof(ModAuthor));
+        _brawlhallaPath = e.GetElementOrNull(nameof(BrawlhallaPath)); // don't trigger setter!
+        BrawlhallaAirPath = e.GetElementOrNull(nameof(BrawlhallaAirPath));
+        LevelDescPath = e.GetElementOrNull(nameof(LevelDescPath));
+        LevelTypePath = e.GetElementOrNull(nameof(LevelTypePath));
+        LevelTypesPath = e.GetElementOrNull(nameof(LevelTypesPath));
+        LevelSetTypesPath = e.GetElementOrNull(nameof(LevelSetTypesPath));
+        LevelPath = e.GetElementOrNull(nameof(LevelPath));
+        BoneTypesPath = e.GetElementOrNull(nameof(BoneTypesPath));
+        PowerTypesPath = e.GetElementOrNull(nameof(PowerTypesPath));
+        DecryptionKey = e.GetElementOrNull(nameof(DecryptionKey));
+        ConfigFolderPath = e.GetElementOrNull(nameof(ConfigFolderPath));
+        ModFilePath = e.GetElementOrNull(nameof(ModFilePath));
+        ModName = e.GetElementOrNull(nameof(ModName));
+        GameVersionInfo = e.GetElementOrNull(nameof(GameVersionInfo));
+        ModVersionInfo = e.GetElementOrNull(nameof(ModVersionInfo));
+        ModDescription = e.GetElementOrNull(nameof(ModDescription));
+        ModAuthor = e.GetElementOrNull(nameof(ModAuthor));
     }
 
     public void Serialize(XElement e)
