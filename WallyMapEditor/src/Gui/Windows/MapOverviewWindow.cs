@@ -139,9 +139,17 @@ public class MapOverviewWindow
                             }
                             else if (newThumnailPNGFile != l.Type.ThumbnailPNGFile)
                             {
-                                cmd.Add(new PropChangeCommand<string?>(val => l.Type.ThumbnailPNGFile = val, l.Type.ThumbnailPNGFile, newThumnailPNGFile));
-                                _propChanged = true;
-                                _thumbnailSelectError = null;
+                                string? extension = Path.GetExtension(newThumnailPNGFile);
+                                if (extension != ".png" && extension != ".jpg")
+                                {
+                                    _thumbnailSelectError = "Thumbnail file must be .png or .jpg";
+                                }
+                                else
+                                {
+                                    cmd.Add(new PropChangeCommand<string?>(val => l.Type.ThumbnailPNGFile = val, l.Type.ThumbnailPNGFile, newThumnailPNGFile));
+                                    _propChanged = true;
+                                    _thumbnailSelectError = null;
+                                }
                             }
                         }
                     });

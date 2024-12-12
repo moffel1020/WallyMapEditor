@@ -5,6 +5,7 @@ using WallyMapSpinzor2;
 using ImGuiNET;
 using rlImGui_cs;
 using NativeFileDialogSharp;
+using System;
 
 namespace WallyMapEditor;
 
@@ -27,28 +28,7 @@ public partial class PropertiesWindow
         if (backgroundDir is not null)
         {
             ImGui.SameLine();
-            if (ImGui.Button("Select##AssetName"))
-            {
-                Task.Run(() =>
-                {
-                    DialogResult dialogResult = Dialog.FileOpen("png,jpg", backgroundDir);
-                    if (dialogResult.IsOk)
-                    {
-                        string path = dialogResult.Path;
-                        string newAssetName = Path.GetRelativePath(backgroundDir, path).Replace("\\", "/");
-                        if (!WmeUtils.IsInDirectory(data.PathPrefs.BrawlhallaPath, path))
-                        {
-                            _backgroundErrorText = "Asset has to be inside the brawlhalla directory";
-                        }
-                        else if (newAssetName != b.AssetName)
-                        {
-                            cmd.Add(new PropChangeCommand<string>(val => b.AssetName = val, b.AssetName, newAssetName));
-                            propChanged = true;
-                            _backgroundErrorText = null;
-                        }
-                    }
-                });
-            }
+            ShowSelectBackgroundButton("AssetName", b.AssetName, val => b.AssetName = val!, cmd, data, backgroundDir);
             if (data.Loader is not null)
             {
                 Texture2DWrapper texture = data.Loader.LoadTextureFromPath(Path.Combine(backgroundDir, b.AssetName));
@@ -60,27 +40,7 @@ public partial class PropertiesWindow
         if (backgroundDir is not null)
         {
             ImGui.SameLine();
-            if (ImGui.Button("Select##AnimatedAssetName"))
-            {
-                Task.Run(() =>
-                {
-                    DialogResult dialogResult = Dialog.FileOpen("png,jpg", backgroundDir);
-                    if (dialogResult.IsOk)
-                    {
-                        string path = dialogResult.Path;
-                        string newAnimatedAssetName = Path.GetRelativePath(backgroundDir, path).Replace("\\", "/");
-                        if (!WmeUtils.IsInDirectory(data.PathPrefs.BrawlhallaPath, path))
-                        {
-                            _backgroundErrorText = "Asset has to be inside the brawlhalla directory";
-                        }
-                        else if (newAnimatedAssetName != b.AnimatedAssetName)
-                        {
-                            cmd.Add(new PropChangeCommand<string?>(val => b.AnimatedAssetName = val, b.AnimatedAssetName, newAnimatedAssetName));
-                            propChanged = true;
-                        }
-                    }
-                });
-            }
+            ShowSelectBackgroundButton("AnimatedAssetName", b.AnimatedAssetName, val => b.AnimatedAssetName = val, cmd, data, backgroundDir);
             ImGui.SameLine();
             if (ImGuiExt.ButtonDisabledIf(b.AnimatedAssetName is null, "Remove##AnimatedAssetName"))
             {
@@ -124,5 +84,41 @@ public partial class PropertiesWindow
         ImGui.PopTextWrapPos();
 
         return propChanged;
+    }
+
+    private static void ShowSelectBackgroundButton(string key, string? assetName, Action<string?> setAssetName, CommandHistory cmd, PropertiesWindowData data, string backgroundDir)
+    {
+        if (data.Level is null || data.PathPrefs.BrawlhallaPath is null || !ImGui.Button($"Select##{key}")) return;
+
+        Task.Run(() =>
+        {
+            DialogResult dialogResult = Dialog.FileOpen("png,jpg", backgroundDir);
+            if (dialogResult.IsOk)
+            {
+                string path = dialogResult.Path;
+                string newAssetName = Path.GetRelativePath(backgroundDir, path).Replace("\\", "/");
+                if (!WmeUtils.IsInDirectory(data.PathPrefs.BrawlhallaPath, path))
+                {
+                    _backgroundErrorText = "Asset has to be inside brawlhalla directory";
+                    return;
+                }
+
+                if (newAssetName == assetName)
+                {
+                    _backgroundErrorText = null;
+                    return;
+                }
+
+                string? extension = Path.GetExtension(newAssetName);
+                if (extension != ".png" && extension != ".jpg")
+                {
+                    _backgroundErrorText = "Background file must be .png or .jpg";
+                    return;
+                }
+
+                cmd.Add(new PropChangeCommand<string?>(setAssetName, assetName, newAssetName));
+                _backgroundErrorText = null;
+            }
+        });
     }
 }

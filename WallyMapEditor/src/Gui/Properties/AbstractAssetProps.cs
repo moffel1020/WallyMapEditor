@@ -106,6 +106,13 @@ partial class PropertiesWindow
                     return;
                 }
 
+                string? extension = Path.GetExtension(newAssetName);
+                if (extension != ".png" && extension != ".jpg")
+                {
+                    _assetErrorText = "Asset file must be .png or .jpg";
+                    return;
+                }
+
                 cmd.Add(new PropChangeCommand<string>(val => a.AssetName = val, a.AssetName!, newAssetName));
                 _assetErrorText = null;
             }
