@@ -154,7 +154,7 @@ public partial class PropertiesWindow
         if (ImGui.Button("Add new respawn"))
         {
             result = DefaultRespawn(0, 0);
-            result.Value.Parent = parent;
+            result.ValueUnsafe.Parent = parent;
         }
         return result;
     }
@@ -165,7 +165,7 @@ public partial class PropertiesWindow
         if (ImGui.Button("Add new navnode"))
         {
             result = DefaultNavNode(0, 0, desc);
-            result.Value.Parent = parent;
+            result.ValueUnsafe.Parent = parent;
         }
         return result;
     }

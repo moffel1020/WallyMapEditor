@@ -25,7 +25,7 @@ public readonly struct Maybe<T>
 
     public T Value => _hasValue ? _value : throw new InvalidOperationException("Attempt to get value of none type");
     public T ValueOrThrow(Exception e) => _hasValue ? _value : throw e;
-    public unsafe T ValueUnsafe => _value; // rust style shit
+    public T ValueUnsafe => _value;
 
     public bool TryGetValue([MaybeNullWhen(false)] out T t)
     {
@@ -58,7 +58,7 @@ public readonly struct Maybe<T>
 
     public Maybe<U> Cast<U>() =>
     _hasValue
-        ? (U)(object)_value!
+        ? (U)(object?)_value!
         : Maybe<U>.None;
 
     public Maybe<T> Do(Action<T> ifSome, Action ifNone)
