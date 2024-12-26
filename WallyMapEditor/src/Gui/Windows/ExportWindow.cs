@@ -230,7 +230,7 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
                     _exportError = null;
                     _exportStatus = "select file";
                     ModFile mod = CreateModFile(l, prefs.BrawlhallaPath!, header);
-                    DialogResult result = Dialog.FileSave(ModFile.EXTENSION, Path.GetDirectoryName(prefs.ModFilePath));  // TODO: decide on extension name
+                    DialogResult result = Dialog.FileSave(ModFile.EXTENSION, Path.GetDirectoryName(prefs.ModFilePath));
                     if (result.IsOk)
                     {
                         _exportStatus = "exporting...";

@@ -41,6 +41,7 @@ public class Editor
     public ExportWindow ExportDialog { get; set; }
     public ImportWindow ImportDialog { get; set; }
     public BackupsWindow BackupsDialog { get; set; }
+    public ModCreatorWindow ModCreatorDialog { get; set; }
 
     public OverlayManager OverlayManager { get; set; } = new();
     public SelectionContext Selection { get; set; } = new();
@@ -66,6 +67,7 @@ public class Editor
         ExportDialog = new(pathPrefs, _backupsList);
         ImportDialog = new(pathPrefs);
         BackupsDialog = new(pathPrefs, _backupsList);
+        ModCreatorDialog = new(pathPrefs);
         LevelLoader = new(this);
     }
 
@@ -219,6 +221,8 @@ public class Editor
             ImportDialog.Show(LevelLoader);
         if (BackupsDialog.Open)
             BackupsDialog.Show();
+        if (ModCreatorDialog.Open)
+            ModCreatorDialog.Show();
 
         if (ViewportWindow.Hovered && (Rl.IsKeyPressed(KeyboardKey.Space) || Rl.IsMouseButtonPressed(MouseButton.Middle)))
         {
@@ -289,6 +293,12 @@ public class Editor
             if (ImGui.MenuItem("Clear Cache")) Canvas?.ClearTextureCache();
             if (ImGui.MenuItem("Find swz key", null, KeyFinderPanel.Open)) KeyFinderPanel.Open = !KeyFinderPanel.Open;
             if (ImGui.MenuItem("Manage swz backups", null, BackupsDialog.Open)) BackupsDialog.Open = !BackupsDialog.Open;
+            ImGui.EndMenu();
+        }
+        if (ImGui.BeginMenu("Mods"))
+        {
+            if (ImGui.MenuItem("Create mod", null, ModCreatorDialog.Open)) ModCreatorDialog.Open = !ModCreatorDialog.Open;
+            if (ImGui.MenuItem("Load mod")) ;
             ImGui.EndMenu();
         }
 
