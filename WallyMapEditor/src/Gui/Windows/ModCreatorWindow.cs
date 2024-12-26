@@ -21,7 +21,8 @@ public class ModCreatorWindow(PathPreferences prefs)
     public bool Open { get => _open; set => _open = value; }
 
     private readonly List<ModLevel> _levels = [];
-    private readonly HashSet<string> _includedPaths = [];
+    // easier to maintain excluded than included
+    private readonly HashSet<string> _excludedPaths = [];
 
     private string? _exportError = null;
     private string? _exportStatus = null;
@@ -52,11 +53,13 @@ public class ModCreatorWindow(PathPreferences prefs)
         AddLevelFileButton();
 
         ImGuiExt.BeginStyledChild("");
-        foreach (ModLevel ml in _levels)
+        /*foreach (ModLevel ml in _levels)
         {
             Level l = ml.level;
             ImGui.BulletText(l.Desc.LevelName);
-        }
+        }*/
+        foreach (string excluded in _excludedPaths)
+            ImGui.BulletText(excluded);
         ImGuiExt.EndStyledChild();
 
         ImGuiExt.HeaderWithWidget("Files to include", () =>
@@ -70,19 +73,19 @@ public class ModCreatorWindow(PathPreferences prefs)
                     LevelFileList files = ml.files;
                     string? thumbnail = files.thumbnail;
                     if (thumbnail is not null)
-                        FileCheckbox("Thumbnail: " + thumbnail, thumbnail);
+                        FileCheckbox("Thumbnail: " + thumbnail, MakeGlobal(Path.Combine("images", "thumbnails", thumbnail)));
                     string[] backgrounds = files.backgrounds;
                     if (backgrounds.Length != 0 && ImGui.TreeNode("Backgrounds"))
                     {
                         foreach (string file in backgrounds)
-                            FileCheckbox(file, file);
+                            FileCheckbox(file, MakeGlobal(Path.Combine("mapArt", "Background", file)));
                         ImGui.TreePop();
                     }
                     string[] assets = files.assets;
                     if (assets.Length != 0 && ImGui.TreeNode($"Assets ({l.Desc.AssetDir})"))
                     {
                         foreach (string file in assets)
-                            FileCheckbox(file, file);
+                            FileCheckbox(file, MakeGlobal(Path.Combine("mapArt", l.Desc.AssetDir, file)));
                         ImGui.TreePop();
                     }
                     ImGui.TreePop();
@@ -125,10 +128,10 @@ public class ModCreatorWindow(PathPreferences prefs)
 
     private void FileCheckbox(string text, string path)
     {
-        bool fileAdded = _includedPaths.Contains(path);
+        bool fileAdded = !_excludedPaths.Contains(path);
         bool shouldBeAdded = ImGuiExt.Checkbox(text, fileAdded);
-        if (shouldBeAdded) _includedPaths.Add(path);
-        else _includedPaths.Remove(path);
+        if (shouldBeAdded) _excludedPaths.Remove(path);
+        else _excludedPaths.Add(path);
     }
 
     private void ModFileExportButton()
@@ -223,7 +226,7 @@ public class ModCreatorWindow(PathPreferences prefs)
             builder.AddLevel(l);
             LevelFileList files = ml.files;
 
-            bool shouldAddFile(string path) => !_addedPaths.Add(path) && _includedPaths.Contains(path);
+            bool shouldAddFile(string path) => !_addedPaths.Add(path) && !_excludedPaths.Contains(path);
             foreach (string asset in files.assets)
             {
                 if (shouldAddFile(asset))
@@ -272,7 +275,10 @@ public class ModCreatorWindow(PathPreferences prefs)
 
     // removes '../baseDir/' from file paths if they are inside baseDir to make sure they are truly unique
     private static string NormalizePartialPath(string baseDir, string path) =>
-        Path.GetRelativePath(baseDir, Path.Combine(baseDir, path));
+        Path.GetRelativePath(baseDir, Path.Combine(baseDir, path)).Replace('\\', '/');
+
+    // use an impossible base path. this is just for the hashset so it's not exposed to the user.
+    private static string MakeGlobal(string path) => Path.GetFullPath(path, "Z:/BRAWL/").Replace('\\', '/');
 
     private static IEnumerable<string> FindChildAssetNames(AbstractAsset a) => a switch
     {
