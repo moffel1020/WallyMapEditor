@@ -46,6 +46,7 @@ public class Editor
     public SelectionContext Selection { get; set; } = new();
     public CommandHistory CommandHistory { get; set; }
 
+    private bool _renderPaused = false;
     private readonly RenderConfig _renderConfig = RenderConfig.Default;
     private readonly OverlayConfig _overlayConfig = OverlayConfig.Default;
     private readonly RenderState _state = new();
@@ -96,7 +97,8 @@ public class Editor
         while (!Rl.WindowShouldClose())
         {
             float delta = Rl.GetFrameTime();
-            _renderConfig.Time += TimeSpan.FromSeconds(_renderConfig.RenderSpeed * delta);
+            if (!_renderPaused)
+                _renderConfig.Time += TimeSpan.FromSeconds(_renderConfig.RenderSpeed * delta);
             Time += TimeSpan.FromSeconds(delta);
             Draw();
             Update();
@@ -141,6 +143,11 @@ public class Editor
         {
             if (AssetLoader is not null)
                 AssetLoader.BoneTypes = boneTypes;
+        };
+
+        RenderConfigWindow.MoveFrames += (_, frames) =>
+        {
+            _renderConfig.Time += TimeSpan.FromSeconds(frames / 60.0);
         };
     }
 
@@ -188,7 +195,7 @@ public class Editor
         if (ViewportWindow.Open)
             ViewportWindow.Show();
         if (RenderConfigWindow.Open)
-            RenderConfigWindow.Show(_renderConfig, ConfigDefault, PathPrefs);
+            RenderConfigWindow.Show(_renderConfig, ConfigDefault, PathPrefs, ref _renderPaused);
         if (MapOverviewWindow.Open && Level is not null)
             MapOverviewWindow.Show(Level, CommandHistory, PathPrefs, AssetLoader, Selection);
 

@@ -16,6 +16,10 @@ public class RenderConfigWindow
     private bool _open = false;
     public bool Open { get => _open; set => _open = value; }
 
+    public event EventHandler<int>? MoveFrames;
+
+    private int _advanceFrames;
+
     private static void LoadConfig(RenderConfig config, string path)
     {
         XElement element;
@@ -29,7 +33,7 @@ public class RenderConfigWindow
         WmeUtils.SerializeToPath(config, path);
     }
 
-    public void Show(RenderConfig config, RenderConfigDefault configDefault, PathPreferences prefs)
+    public void Show(RenderConfig config, RenderConfigDefault configDefault, PathPreferences prefs, ref bool paused)
     {
         ImGui.Begin("Render Config", ref _open);
 
@@ -95,10 +99,19 @@ public class RenderConfigWindow
             configDefault.Deserialize(config.SerializeToXElement());
         }
 
-        ImGui.SeparatorText("General##config");
+        ImGui.SeparatorText("Rendering##config");
+        ImGui.Text($"Frame {Math.Floor(config.Time.TotalSeconds * 60)}");
         config.RenderSpeed = ImGuiExt.DragDouble("Render speed##config", config.RenderSpeed, speed: 0.1f);
+        if (ImGui.Button(paused ? "Unpause###pause" : "Pause###pause"))
+            paused = !paused;
         if (ImGui.Button("Reset time##config"))
             config.Time = TimeSpan.FromSeconds(0);
+        if (ImGui.Button("Prev frame")) MoveFrames?.Invoke(this, -1);
+        ImGui.SameLine();
+        if (ImGui.Button("Next frame")) MoveFrames?.Invoke(this, 1);
+        ImGui.InputInt("", ref _advanceFrames, 0, 0);
+        ImGui.SameLine();
+        if (ImGui.Button("Advance frames")) MoveFrames?.Invoke(this, _advanceFrames);
 
         ImGui.SeparatorText("Bounds##config");
         config.ShowCameraBounds = ImGuiExt.Checkbox("Camera bounds##config", config.ShowCameraBounds);
