@@ -185,7 +185,12 @@ public static class AddObjectPopup
                 Assets = [],
                 ScaleX = 1,
                 ScaleY = 1,
-                Animation = new() { NumFrames = 1, KeyFrames = [new KeyFrame() { X = 0, Y = 0, FrameNum = 1 }] }
+                Animation = new()
+                {
+                    NumFrames = 1,
+                    KeyFrames = [new KeyFrame() { X = 0, Y = 0, FrameNum = 1 }],
+                    EasePower = 2,
+                },
             };
         }
 

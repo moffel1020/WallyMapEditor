@@ -88,6 +88,8 @@ partial class PropertiesWindow
         Y = posY,
         W = 750,
         H = 175,
+        ScaleX = 1,
+        ScaleY = 1,
     };
 
     public static Platform DefaultPlatformWithoutAssetName(double posX, double posY) => new()
