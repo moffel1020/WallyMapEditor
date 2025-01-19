@@ -39,7 +39,7 @@ The program allows overriding any relevant brawlhalla file with a custom one, bu
 
 - BrawlhallaSwz - C# library for encrypting and decrypting Brawlhalla .swz files.
 
-- SwiffCheese - C# library for exporting flash vector graphics.
+- SwiffCheese - C# library for converting flash vector graphics into svg.
 
 - AbcDisassembler - C# library for parsing actionscript bytecode. Used to find the swz decryption key.
 
@@ -47,7 +47,7 @@ The program allows overriding any relevant brawlhalla file with a custom one, bu
 
 This list includes the dependencies from submodules.
 
-- SixLabors.ImageSharp (3.1.5) + SixLabors.ImageSharp.Drawing (2.1.4) - Image manipulation library. Used for flash vector graphics exporting.
+- Svg.Skia (2.0.0.4) - Library based on SkiaSharp (2.88.8) for Svg rendering.
 
 - NativeFileDialogSharp (0.5.0) - C# bindings for nativefiledialog, a C library for opening the platform's default file explorer dialog.
 
