@@ -34,8 +34,17 @@ public abstract class UploadCache<K, I, V> where K : notnull
 
         Task.Run(() =>
         {
-            I i = LoadIntermediate(k);
-            lock (_queue) _queue.Enqueue((k, i));
+            try
+            {
+                I i = LoadIntermediate(k);
+                lock (_queue) _queue.Enqueue((k, i));
+            }
+            catch (Exception e)
+            {
+                Rl.TraceLog(Raylib_cs.TraceLogLevel.Error, e.Message);
+                Rl.TraceLog(Raylib_cs.TraceLogLevel.Trace, e.StackTrace);
+                throw;
+            }
         });
     }
 

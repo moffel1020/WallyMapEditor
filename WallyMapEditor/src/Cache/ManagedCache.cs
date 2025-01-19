@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -32,10 +33,16 @@ public abstract class ManagedCache<K, V> where K : notnull
 
         Task.Run(() =>
         {
-            Load(k);
-            lock (_loading)
+            try
             {
-                _loading.Remove(k);
+                Load(k);
+                lock (_loading) _loading.Remove(k);
+            }
+            catch (Exception e)
+            {
+                Rl.TraceLog(Raylib_cs.TraceLogLevel.Error, e.Message);
+                Rl.TraceLog(Raylib_cs.TraceLogLevel.Trace, e.StackTrace);
+                throw;
             }
         });
     }

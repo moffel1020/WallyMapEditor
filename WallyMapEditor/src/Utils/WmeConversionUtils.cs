@@ -1,7 +1,6 @@
 using System;
 using System.Numerics;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+using SkiaSharp;
 using SwfLib.Data;
 
 namespace WallyMapEditor;
@@ -23,27 +22,29 @@ public static partial class WmeUtils
 
     public static RlColor WmsColorToRlColor(WmsColor c) => new(c.R, c.G, c.B, c.A);
 
-    public static RlImage ImgSharpImageToRlImage(Image<Rgba32> image)
+    public static RlImage SKBitmapToRlImage(SKBitmap bitmap)
     {
+        if (bitmap.ColorType != SKColorType.Rgba8888)
+        {
+            throw new ArgumentException($"{nameof(SKBitmapToRlImage)} only supports Rgba8888, but got {bitmap.ColorType}");
+        }
+
         RlImage img;
         unsafe
         {
-            long bufferSize = (long)image.Width * image.Height * image.PixelType.BitsPerPixel / 8;
-            if (bufferSize > int.MaxValue)
-            {
-                Rl.TraceLog(Raylib_cs.TraceLogLevel.Fatal, $"Image exceeded {int.MaxValue} bytes");
-                return default;
-            }
+
             // use Rl alloc so GC doesn't free the memory
-            void* bufferPtr = Rl.MemAlloc((uint)bufferSize);
-            // create span so ImageSharp can write to the memory
-            Span<byte> buffer = new(bufferPtr, (int)bufferSize);
-            image.CopyPixelDataTo(buffer);
+            void* bufferPtr = Rl.MemAlloc((uint)bitmap.ByteCount);
+            // create a Span from the unmanaged memory
+            Span<byte> buffer = new(bufferPtr, bitmap.ByteCount);
+            // copy the bitmap bytes to the span
+            bitmap.Bytes.CopyTo(buffer);
+
             img = new()
             {
                 Data = bufferPtr,
-                Width = image.Width,
-                Height = image.Height,
+                Width = bitmap.Width,
+                Height = bitmap.Height,
                 Mipmaps = 1,
                 Format = Raylib_cs.PixelFormat.UncompressedR8G8B8A8,
             };
