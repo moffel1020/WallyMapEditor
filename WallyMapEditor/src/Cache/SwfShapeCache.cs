@@ -1,7 +1,5 @@
 using System;
-using System.Numerics;
 using System.Xml;
-using System.IO;
 
 using SwiffCheese.Shapes;
 using SwiffCheese.Wrappers;
@@ -17,7 +15,6 @@ namespace WallyMapEditor;
 
 public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCache.ShapeData, Texture2DWrapper>
 {
-    private const int RASTER_SCALE = 1;
     private const int SWF_UNIT_DIVISOR = 20;
     private const double ANIM_SCALE_MULTIPLIER = 1.2;
 
