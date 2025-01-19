@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 using BrawlhallaSwz;
+using SkiaSharp;
 
 namespace WallyMapEditor;
 
@@ -15,8 +14,13 @@ public static partial class WmeUtils
         RlImage img;
         if (Path.GetExtension(path) == ".jpg")
         {
-            using Image<Rgba32> image = Image.Load<Rgba32>(path);
-            img = ImgSharpImageToRlImage(image);
+            SKImageInfo info;
+            using (SKCodec codec = SKCodec.Create(path))
+                info = codec.Info;
+            SKImageInfo desiredInfo = info.WithColorType(SKColorType.Rgba8888);
+            using SKBitmap bitmap = SKBitmap.Decode(path, desiredInfo);
+
+            img = SKBitmapToRlImage(bitmap);
         }
         else
         {
