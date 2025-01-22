@@ -55,12 +55,13 @@ public static partial class ImGuiExt
     public static bool MenuItemDisabledIf(bool disabled, string label, string? hotkey = null)
     {
         using (DisabledIf(disabled))
-            return hotkey is null
-               ? ImGui.MenuItem(label)
-               : ImGui.MenuItem(label, hotkey);
+        {
+            if (hotkey is null) return ImGui.MenuItem(label);
+            return ImGui.MenuItem(label, hotkey);
+        }
     }
 
-    public static void Animation(RaylibCanvas canvas, Gfx gfx, string animName, int frame)
+    public static void Animation(RaylibCanvas canvas, Gfx gfx, string animName, long frame)
     {
         Texture2D? texture_ = canvas.Animator.AnimToTexture(gfx, animName, frame);
         if (texture_ is null)

@@ -27,7 +27,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         public required bool Visible { get; set; }
     }
 
-    public void DrawAnim(Gfx gfx, string animName, int frame, WmsTransform trans, DrawPriorityEnum priority, object? caller, uint? loopLimit = null)
+    public void DrawAnim(Gfx gfx, string animName, long frame, WmsTransform trans, DrawPriorityEnum priority, object? caller, uint? loopLimit = null)
     {
         BoneSprite[] bones = BuildAnim(gfx, animName, frame, trans, loopLimit);
         foreach (BoneSprite bone in bones)
@@ -100,6 +100,17 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
                 if (xca.Name != yca.Name)
                     return false;
             }
+            if (xg.ColorSwaps.Length != yg.ColorSwaps.Length)
+                return false;
+            for (int i = 0; i < xg.ColorSwaps.Length; ++i)
+            {
+                ColorSwap xcs = xg.ColorSwaps[i];
+                ColorSwap ycs = yg.ColorSwaps[i];
+                if (xcs.OldColor != ycs.OldColor)
+                    return false;
+                if (xcs.NewColor != ycs.NewColor)
+                    return false;
+            }
             uint xgflags = 0;
             foreach (Gfx.AsymmetrySwapFlagEnum flag in xg.AsymmetrySwapFlags)
                 xgflags |= 1u << (int)flag;
@@ -108,7 +119,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
                 ygflags |= 1u << (int)flag;
             if (xgflags != ygflags)
                 return false;
-            if (xg.UseRightTorso != yg.UseRightTorso)
+            /*if (xg.UseRightTorso != yg.UseRightTorso)
                 return false;
             if (xg.UseRightJaw != yg.UseRightJaw)
                 return false;
@@ -131,7 +142,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
             if (xg.UseRightLeg1 != yg.UseRightLeg1)
                 return false;
             if (xg.UseRightShin != yg.UseRightShin)
-                return false;
+                return false;*/
             if (xg.BoneOverrides.Count != yg.BoneOverrides.Count)
                 return false;
             foreach ((string k, string v) in xg.BoneOverrides)
@@ -140,14 +151,11 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
             foreach ((string k, string v) in yg.BoneOverrides)
                 if (!xg.BoneOverrides.TryGetValue(k, out string? v_) || v != v_)
                     return false;
-            // TODO: compare ColorSwap
             return true;
         }
 
         public int GetHashCode((Gfx, string) obj)
         {
-            // why are we not including the UseRightX things here?
-
             (Gfx gfx, string anim) = obj;
             uint flags = 0;
             foreach (Gfx.AsymmetrySwapFlagEnum flag in gfx.AsymmetrySwapFlags)
@@ -156,15 +164,23 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
             code.Add((anim, gfx.AnimClass, gfx.AnimFile, gfx.AnimScale, flags));
             foreach (CustomArt ca in gfx.CustomArts)
                 code.Add((ca.Right, ca.Type, ca.FileName, ca.Name));
-            // use sorted dictionary for consistent pair order (is there a better way to do this?)
-            foreach ((string k, string v) in new SortedDictionary<string, string>(gfx.BoneOverrides))
+            foreach (ColorSwap cs in gfx.ColorSwaps)
+                code.Add((cs.OldColor, cs.NewColor));
+
+            // sort keys for consistent pair order
+            List<string> boneKeys = [.. gfx.BoneOverrides.Keys];
+            boneKeys.Sort();
+            foreach (string k in boneKeys)
+            {
+                string v = gfx.BoneOverrides[k];
                 code.Add((k, v));
-            // TODO: hash ColorSwap
+            }
+
             return code.ToHashCode();
         }
     }
 
-    public Texture2D? AnimToTexture(Gfx gfx, string animName, int frame, bool withDebug = false)
+    public Texture2D? AnimToTexture(Gfx gfx, string animName, long frame, bool withDebug = false)
     {
         (double, double, double, double)? bounds = CalculateAnimBounds(gfx, animName, frame, WmsTransform.IDENTITY);
         if (bounds is null)
@@ -194,7 +210,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         return rect.RenderTexture.Texture;
     }
 
-    private (double x, double y, double w, double h)? CalculateAnimBounds(Gfx gfx, string animName, int frame, WmsTransform trans, uint? loopLimit = null)
+    private (double x, double y, double w, double h)? CalculateAnimBounds(Gfx gfx, string animName, long frame, WmsTransform trans, uint? loopLimit = null)
     {
         BoneSprite[] bones = BuildAnim(gfx, animName, frame, trans, loopLimit);
         double xMin = double.MaxValue, xMax = double.MinValue, yMin = double.MaxValue, yMax = double.MinValue;
@@ -231,7 +247,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
 
 
     #region building
-    private BoneSprite[] BuildAnim(Gfx gfx, string animName, int frame, WmsTransform trans, uint? loopLimit = null)
+    private BoneSprite[] BuildAnim(Gfx gfx, string animName, long frame, WmsTransform trans, uint? loopLimit = null)
     {
         trans *= WmsTransform.CreateScale(gfx.AnimScale, gfx.AnimScale);
 
@@ -254,7 +270,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
 
             if (loopLimit is not null && Math.Abs(frame) >= loopLimit.Value * animation.Frames.Length)
                 return [];
-            AnmFrame anmFrame = animation.Frames[BrawlhallaMath.SafeMod(frame, animation.Frames.Length)];
+            AnmFrame anmFrame = animation.Frames[BrawlhallaMath.SafeMod(frame, (long)animation.Frames.Length)];
 
             List<BoneInstance> bones = GetBoneInstances(anmFrame.Bones, gfx);
             SetAsymBonesVisibility(bones, gfx, trans.ScaleX * trans.ScaleY < 0);
@@ -505,7 +521,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         return null;
     }
 
-    private BoneSprite[] BuildSwfSprite(string filePath, ushort spriteId, int frame, double animScale, uint tint, double opacity, WmsTransform trans, uint? loopLimit = null)
+    private BoneSprite[] BuildSwfSprite(string filePath, ushort spriteId, long frame, double animScale, uint tint, double opacity, WmsTransform trans, uint? loopLimit = null)
     {
         SwfFileData? file = loader.LoadSwf(filePath);
         if (file is null) return [];
@@ -515,7 +531,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         if (loopLimit != -1 && Math.Abs(frame) >= loopLimit * sprite.Frames.Length)
             return [];
         List<BoneSprite> result = [];
-        SwfSpriteFrame spriteFrame = sprite.Frames[BrawlhallaMath.SafeMod(frame, sprite.Frames.Length)];
+        SwfSpriteFrame spriteFrame = sprite.Frames[BrawlhallaMath.SafeMod(frame, (long)sprite.Frames.Length)];
         foreach ((_, SwfSpriteFrameLayer layer) in spriteFrame.Layers)
         {
             // is a shape
