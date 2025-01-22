@@ -4,7 +4,6 @@ using System.Xml;
 using SwiffCheese.Shapes;
 using SwiffCheese.Wrappers;
 using SwiffCheese.Exporting.Svg;
-using SwiffCheese.Math;
 
 using Raylib_cs;
 
@@ -19,7 +18,7 @@ public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCach
     private const double ANIM_SCALE_MULTIPLIER = 1.2;
 
     public readonly record struct TextureInfo(SwfFileData Swf, ushort ShapeId, double AnimScale);
-    public readonly record struct ShapeData(RlImage Img, int OffsetX, int OffsetY);
+    public readonly record struct ShapeData(RlImage Img, WmsTransform Transform);
 
     protected override ShapeData LoadIntermediate(TextureInfo textureInfo)
     {
@@ -37,14 +36,21 @@ public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCach
         double y = shapeY * 1.0 / SWF_UNIT_DIVISOR;
         double w = shapeW * animScale / SWF_UNIT_DIVISOR;
         double h = shapeH * animScale / SWF_UNIT_DIVISOR;
-        int offsetX = (int)Math.Floor(x);
-        int offsetY = (int)Math.Floor(y);
+        /*
+        this -1 deviates from the game.
+        it prevents bilinear filtering from creating a noticeable border at the top of the texture.
+        shouldn't affect how things look.
+        */
+        int offsetX = (int)Math.Floor(x) - 1;
+        int offsetY = (int)Math.Floor(y) - 1;
         int imageW = (int)Math.Floor(w + (x - offsetX) + animScale) + 2;
         int imageH = (int)Math.Floor(h + (y - offsetY) + animScale) + 2;
 
-        Vector2I position = new(offsetX, offsetY);
-        Vector2I size = new(imageW, imageH);
-        SvgShapeExporter exporter = new(position * SWF_UNIT_DIVISOR, size * SWF_UNIT_DIVISOR, SWF_UNIT_DIVISOR);
+        WmsTransform transform = WmsTransform.CreateScale(animScale, animScale) * WmsTransform.CreateTranslate(-offsetX, -offsetY);
+
+        SvgSize size = new(imageW, imageH);
+        SvgMatrix matrix = new(transform.ScaleX, transform.SkewY, transform.SkewX, transform.ScaleY, transform.TranslateX, transform.TranslateY);
+        SvgShapeExporter exporter = new(size, matrix);
         compiledShape.Export(exporter);
         exporter.Document.Root?.SetAttributeValue("shape-rendering", "crispEdges");
 
@@ -60,15 +66,16 @@ public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCach
 
         // no need for alpha premult since we specify it in the ToBitmap
 
-        return new ShapeData(img, offsetX, offsetY);
+        WmsTransform inv = WmsTransform.CreateInverse(transform);
+        return new ShapeData(img, inv);
     }
 
     protected override Texture2DWrapper IntermediateToValue(ShapeData shapeData)
     {
-        (RlImage img, int offsetX, int offsetY) = shapeData;
+        (RlImage img, WmsTransform trans) = shapeData;
         Texture2D texture = Rl.LoadTextureFromImage(img);
         Rl.SetTextureFilter(texture, TextureFilter.Bilinear);
-        return new(texture, offsetX, offsetY);
+        return new(texture, trans);
     }
 
     protected override void UnloadIntermediate(ShapeData shapeData)

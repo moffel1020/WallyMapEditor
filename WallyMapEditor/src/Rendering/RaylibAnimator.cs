@@ -40,7 +40,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
             float tintA = (float)bone.Opacity;
             canvas.DrawingQueue.Push((caller, () =>
             {
-                RaylibCanvas.DrawTextureWithTransform(texture.Texture, 0, 0, texture.W, texture.H, bone.Transform, tintR: tintR, tintG: tintG, tintB: tintB, tintA: tintA);
+                RaylibCanvas.DrawTextureWithTransform(texture.Texture, 0, 0, texture.Width, texture.Height, bone.Transform, tintR: tintR, tintG: tintG, tintB: tintB, tintA: tintA);
             }
             ), (int)priority);
         }
@@ -234,6 +234,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
     private BoneSprite[] BuildAnim(Gfx gfx, string animName, int frame, WmsTransform trans, uint? loopLimit = null)
     {
         trans *= WmsTransform.CreateScale(gfx.AnimScale, gfx.AnimScale);
+
         // TODO: check how the game does this
         // swf animation
         if (gfx.AnimFile.StartsWith("SFX_"))
@@ -542,7 +543,7 @@ public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
         return [new()
         {
             Texture = texture,
-            Transform = trans * WmsTransform.CreateTranslate(texture.XOff, texture.YOff),
+            Transform = trans * texture.Transform,
             Tint = tint,
             Opacity = opacity,
         }];

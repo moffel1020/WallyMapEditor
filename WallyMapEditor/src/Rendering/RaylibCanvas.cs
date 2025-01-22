@@ -102,7 +102,7 @@ public class RaylibCanvas : ICanvas
         Texture2DWrapper texture = Loader.LoadTextureFromPath(path);
         DrawingQueue.Push((caller, () =>
         {
-            DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, texture.W, texture.H, trans);
+            DrawTextureWithTransform(texture.Texture, x, y, texture.Width, texture.Height, trans * texture.Transform);
         }
         ), (int)priority);
     }
@@ -114,7 +114,7 @@ public class RaylibCanvas : ICanvas
         h ??= texture.Texture.Height;
         DrawingQueue.Push((caller, () =>
         {
-            DrawTextureWithTransform(texture.Texture, x + texture.XOff, y + texture.YOff, w.Value, h.Value, trans);
+            DrawTextureWithTransform(texture.Texture, x, y, w.Value, h.Value, trans * texture.Transform);
         }
         ), (int)priority);
     }

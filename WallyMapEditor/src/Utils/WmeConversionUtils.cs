@@ -29,10 +29,8 @@ public static partial class WmeUtils
             throw new ArgumentException($"{nameof(SKBitmapToRlImage)} only supports Rgba8888, but got {bitmap.ColorType}");
         }
 
-        RlImage img;
         unsafe
         {
-
             // use Rl alloc so GC doesn't free the memory
             void* bufferPtr = Rl.MemAlloc((uint)bitmap.ByteCount);
             // create a Span from the unmanaged memory
@@ -40,7 +38,7 @@ public static partial class WmeUtils
             // copy the bitmap bytes to the span
             bitmap.Bytes.CopyTo(buffer);
 
-            img = new()
+            return new()
             {
                 Data = bufferPtr,
                 Width = bitmap.Width,
@@ -49,7 +47,6 @@ public static partial class WmeUtils
                 Format = Raylib_cs.PixelFormat.UncompressedR8G8B8A8,
             };
         }
-        return img;
     }
 
     public static uint RlColorToHex(RlColor color) => (uint)((color.R << 24) | (color.G << 16) | (color.B << 8) | color.A);

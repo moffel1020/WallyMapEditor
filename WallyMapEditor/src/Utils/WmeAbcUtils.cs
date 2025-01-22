@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using AbcDisassembler;
 using SwfLib;
-using SwfLib.Tags;
 using SwfLib.Tags.ActionsTags;
 
 namespace WallyMapEditor;
@@ -44,24 +43,21 @@ public static partial class WmeUtils
 
     public static DoABCDefineTag? GetDoABCDefineTag(string swfPath)
     {
-        SwfFile? swf;
+        SwfFile swf;
         using (FileStream stream = new(swfPath, FileMode.Open, FileAccess.Read))
             swf = SwfFile.ReadFrom(stream);
-
-        if (swf is not null)
-        {
-            foreach (SwfTagBase tag in swf.Tags)
-            {
-                if (tag is DoABCDefineTag abcTag)
-                    return abcTag;
-            }
-        }
-
-        return null;
+        return swf.Tags.OfType<DoABCDefineTag>().FirstOrDefault();
     }
 
-    public static uint? FindDecryptionKeyFromPath(string bhairPath) =>
-        GetDoABCDefineTag(bhairPath) is DoABCDefineTag tag
-            ? FindDecryptionKey(AbcFile.Read(new MemoryStream(tag.ABCData)))
-            : null;
+    public static uint? FindDecryptionKeyFromPath(string bhairPath)
+    {
+        DoABCDefineTag? tag = GetDoABCDefineTag(bhairPath);
+        if (tag is null) return null;
+
+        AbcFile abc;
+        using (MemoryStream ms = new(tag.ABCData))
+            abc = AbcFile.Read(ms);
+
+        return FindDecryptionKey(abc);
+    }
 }

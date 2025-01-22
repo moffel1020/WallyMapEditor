@@ -54,7 +54,7 @@ public partial class PropertiesWindow
             {
                 Texture2DWrapper texture = data.Loader.LoadTextureFromPath(Path.Combine(backgroundDir, b.AnimatedAssetName));
                 rlImGui.ImageSize(texture.Texture, new Vector2(200 * (float)(texture.Width / texture.Height), 200));
-                if (texture.W != b.W || texture.H != b.H)
+                if (texture.Width != b.W || texture.Height != b.H)
                     _warningText = "AnimatedAssetName image is not the same size as the AssetName image. This can lead to the image displaying incorrectly";
                 else
                     _warningText = null;
