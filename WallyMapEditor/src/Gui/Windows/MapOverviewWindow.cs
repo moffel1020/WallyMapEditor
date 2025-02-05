@@ -209,6 +209,8 @@ public class MapOverviewWindow
             {
                 _propChanged |= ImGuiExt.CheckboxHistory("FixedCamera", l.Type.FixedCamera ?? false, val => l.Type.FixedCamera = val ? val : null, cmd);
                 _propChanged |= ImGuiExt.CheckboxHistory("FixedWidth", l.Type.FixedWidth ?? false, val => l.Type.FixedWidth = val ? val : null, cmd);
+                using (ImGuiExt.DisabledIf(l.Type.FixedWidth != true))
+                    _propChanged |= ImGuiExt.DragIntHistory("FixedWidthYOffset", l.Type.FixedWidthYOffset, val => l.Type.FixedWidthYOffset = val, cmd);
                 _propChanged |= ImGuiExt.CheckboxHistory("ShowPlatsDuringMove", l.Type.ShowPlatsDuringMove ?? false, val => l.Type.ShowPlatsDuringMove = val ? val : null, cmd);
                 using (ImGuiExt.DisabledIf(l.Type.ShowPlatsDuringMove == true))
                     _propChanged |= ImGuiExt.CheckboxHistory("ShowLavaLevelDuringMove", l.Type.ShowLavaLevelDuringMove ?? false, val => l.Type.ShowLavaLevelDuringMove = val ? val : null, cmd);

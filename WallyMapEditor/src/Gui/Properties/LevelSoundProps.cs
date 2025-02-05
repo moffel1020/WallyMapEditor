@@ -18,6 +18,8 @@ public partial class PropertiesWindow
         propChanged |= ImGuiExt.DragIntHistory("OnlineDelayDiff", ls.OnlineDelayDiff, val => ls.OnlineDelayDiff = val, cmd, speed: 16);
         // do nullable editing because 0 = infinity
         propChanged |= ImGuiExt.DragNullableIntHistory("TotalLoops", ls.TotalLoops == 0 ? null : ls.TotalLoops, 1, val => ls.TotalLoops = val ?? 0, cmd, minValue: 1);
+        // badly named prop. is actually "play even if animated backgrounds are off".
+        propChanged |= ImGuiExt.CheckboxHistory("IgnoreOnBlurBG", ls.IgnoreOnBlurBG, val => ls.IgnoreOnBlurBG = val, cmd);
 
         return propChanged;
     }
