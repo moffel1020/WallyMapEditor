@@ -36,13 +36,9 @@ public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCach
         double y = shapeY * 1.0 / SWF_UNIT_DIVISOR;
         double w = shapeW * animScale / SWF_UNIT_DIVISOR;
         double h = shapeH * animScale / SWF_UNIT_DIVISOR;
-        /*
-        this -1 deviates from the game.
-        it prevents bilinear filtering from creating a noticeable border at the top of the texture.
-        shouldn't affect how things look.
-        */
-        int offsetX = (int)Math.Floor(x) - 1;
-        int offsetY = (int)Math.Floor(y) - 1;
+
+        int offsetX = (int)Math.Floor(x);
+        int offsetY = (int)Math.Floor(y);
         int imageW = (int)Math.Floor(w + (x - offsetX) + animScale) + 2;
         int imageH = (int)Math.Floor(h + (y - offsetY) + animScale) + 2;
 
@@ -52,17 +48,17 @@ public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCach
         SvgMatrix matrix = new(transform.ScaleX, transform.SkewY, transform.SkewX, transform.ScaleY, transform.TranslateX, transform.TranslateY);
         SvgShapeExporter exporter = new(size, matrix);
         compiledShape.Export(exporter);
-        exporter.Document.Root?.SetAttributeValue("shape-rendering", "crispEdges");
 
         using XmlReader reader = exporter.Document.CreateReader();
         using SKSvg svg = SKSvg.CreateFromXmlReader(reader);
         reader.Dispose();
-
-        using SKBitmap bitmap = svg.Picture!.ToBitmap(SKColors.Transparent, 1, 1, SKColorType.Rgba8888, SKAlphaType.Premul, SKColorSpace.CreateSrgb())!;
+        using SKBitmap bitmap1 = svg.Picture!.ToBitmap(SKColors.Transparent, 20, 20, SKColorType.Rgba8888, SKAlphaType.Premul, SKColorSpace.CreateSrgb())!;
         svg.Dispose();
-
-        RlImage img = WmeUtils.SKBitmapToRlImage(bitmap);
-        bitmap.Dispose();
+        // Medium and High work the same for downscaling
+        using SKBitmap bitmap2 = bitmap1.Resize(new SKSizeI(imageW, imageH), SKFilterQuality.Medium);
+        bitmap1.Dispose();
+        RlImage img = WmeUtils.SKBitmapToRlImage(bitmap2);
+        bitmap2.Dispose();
 
         // no need for alpha premult since we specify it in the ToBitmap
 
@@ -74,7 +70,6 @@ public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCach
     {
         (RlImage img, WmsTransform trans) = shapeData;
         Texture2D texture = Rl.LoadTextureFromImage(img);
-        Rl.SetTextureFilter(texture, TextureFilter.Bilinear);
         return new(texture, trans);
     }
 

@@ -36,7 +36,7 @@ public static partial class WmeUtils
             // create a Span from the unmanaged memory
             Span<byte> buffer = new(bufferPtr, bitmap.ByteCount);
             // copy the bitmap bytes to the span
-            bitmap.Bytes.CopyTo(buffer);
+            bitmap.GetPixelSpan().CopyTo(buffer);
 
             return new()
             {
