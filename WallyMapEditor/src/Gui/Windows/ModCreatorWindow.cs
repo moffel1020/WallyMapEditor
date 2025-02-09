@@ -23,6 +23,7 @@ public class ModCreatorWindow(PathPreferences prefs)
     private readonly List<ModLevel> _levels = [];
     // easier to maintain excluded than included
     private readonly HashSet<string> _excludedPaths = [];
+    private readonly HashSet<string> _extraFiles = [];
 
     private string? _exportError = null;
     private string? _exportStatus = null;
@@ -56,10 +57,8 @@ public class ModCreatorWindow(PathPreferences prefs)
             ShowLevelList();
         }
 
-        // ImGuiExt.BeginStyledChild("");
-        // foreach (string excluded in _excludedPaths)
-        //     ImGui.BulletText(excluded);
-        // ImGuiExt.EndStyledChild();
+        ImGui.Spacing();
+        ShowExtraFileSection();
 
         ImGui.Separator();
         ModFileExportButton();
@@ -187,6 +186,9 @@ public class ModCreatorWindow(PathPreferences prefs)
         ImGuiExt.BeginStyledChild("files");
         foreach (ModLevel ml in _levels)
         {
+            if (ImGui.Button($"x##{ml.GetHashCode()}")) toRemove.Add(ml);
+            ImGui.SameLine();
+
             Level l = ml.Level;
             if (ImGui.TreeNode($"{l.Desc.LevelName}###{l.GetHashCode()}"))
             {
@@ -210,14 +212,41 @@ public class ModCreatorWindow(PathPreferences prefs)
                 }
                 ImGui.TreePop();
             }
-
-            if (ImGui.Button($"Remove##{ml.GetHashCode()}"))
-                toRemove.Add(ml);
         }
         ImGuiExt.EndStyledChild();
 
         foreach (ModLevel ml in toRemove)
             _levels.Remove(ml);
+    }
+
+    private void ShowExtraFileSection()
+    {
+        if (!ImGui.CollapsingHeader("Extra Files") || prefs.BrawlhallaPath is null) return;
+
+        if (ImGui.Button("Add file"))
+        {
+            Task.Run(() =>
+            {
+                DialogResult result = Dialog.FileOpen(null, prefs.BrawlhallaPath);
+                if (result.IsOk)
+                    _extraFiles.Add(NormalizePartialPath(prefs.BrawlhallaPath, result.Path));
+                // proper validation of the file is done when to mod is created
+            });
+        }
+
+        ImGuiExt.BeginStyledChild("extra files");
+        List<string> toRemove = [];
+        foreach (string path in _extraFiles)
+        {
+            if (ImGui.Button($"x##{path}")) toRemove.Add(path);
+            ImGui.SameLine();
+            ImGui.Text(path);
+        }
+
+        foreach (string path in toRemove)
+            _extraFiles.Remove(path);
+
+        ImGuiExt.EndStyledChild();
     }
 
     private ModFile CreateModFile(string brawlDir, ModHeaderObject header)
@@ -231,7 +260,7 @@ public class ModCreatorWindow(PathPreferences prefs)
             builder.AddLevel(l);
             LevelFileList files = ml.Files;
 
-            bool shouldAddFile(string path) => !_addedPaths.Add(path) && !_excludedPaths.Contains(path);
+            bool shouldAddFile(string path) => _addedPaths.Add(path) && !_excludedPaths.Contains(path);
             foreach (string asset in files.Assets)
             {
                 if (shouldAddFile(asset))
@@ -247,6 +276,13 @@ public class ModCreatorWindow(PathPreferences prefs)
                 if (shouldAddFile(files.Thumbnail))
                     builder.AddFilePath(brawlDir, Path.Combine(brawlDir, "images", "thumbnails", files.Thumbnail));
             }
+        }
+
+        foreach (string path in _extraFiles)
+        {
+            // excludedPaths keeps track of excluded level assets, don't need to check it here
+            if (_addedPaths.Add(path))
+                builder.AddFilePath(brawlDir, Path.Combine(brawlDir, path));
         }
 
         return builder.CreateMod();
