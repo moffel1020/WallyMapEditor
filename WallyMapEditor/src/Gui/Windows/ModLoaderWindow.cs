@@ -152,9 +152,9 @@ public class ModLoaderWindow(PathPreferences prefs)
         if (!WmeUtils.IsValidBrawlPath(prefs.BrawlhallaPath))
             throw new Exception($"{prefs.BrawlhallaPath} is not a valid brawlhalla path");
 
-        _loadStatus = "Creating backups...";
         if (_backup)
         {
+            _loadStatus = "Creating backups...";
             WmeUtils.CreateBackupOfFile(Path.Combine(prefs.BrawlhallaPath!, "Init.swz"));
             WmeUtils.CreateBackupOfFile(Path.Combine(prefs.BrawlhallaPath!, "Game.swz"));
             WmeUtils.CreateBackupOfFile(Path.Combine(prefs.BrawlhallaPath!, "Engine.swz"));

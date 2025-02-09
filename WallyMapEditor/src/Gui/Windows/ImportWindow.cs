@@ -83,8 +83,14 @@ public class ImportWindow
         ImGui.End();
     }
 
+    private const string MODFILE_IMPORT_WARNING = @"Note: importing mods files into the editor is advanced usage. 
+If you just want to play with mods in game, use the menu under Mods > Load mods";
+
     private void ShowModFileImportMenu(LevelLoader loader)
     {
+        ImGui.TextWrapped(MODFILE_IMPORT_WARNING);
+        ImGui.Separator();
+
         if (loader.BoneTypes is null)
         {
             ImGui.Text("Required files are missing.\nPress \"Load required files only\" in the level import tab first");
