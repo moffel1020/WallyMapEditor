@@ -7,7 +7,6 @@ using System.Linq;
 
 using WallyMapSpinzor2;
 using BrawlhallaSwz;
-using WallyMapEditor.Mod;
 
 using ImGuiNET;
 using Raylib_cs;
@@ -29,12 +28,6 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
     private string? _exportStatus;
 
     private const int PREVIEW_SIZE = 25;
-
-    private readonly Dictionary<string, bool> _assetFiles = [];
-    private readonly Dictionary<string, bool> _backgroundFiles = [];
-    private string? _thumbnailFile;
-    private bool _addThumbnailFile = true;
-    private Level? _lastLevel;
 
     private readonly BackupsList.ExternalState _state = new();
 
@@ -89,7 +82,6 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
             ImGui.PopTextWrapPos();
         }
 
-        _lastLevel = level;
         ImGui.End();
     }
 

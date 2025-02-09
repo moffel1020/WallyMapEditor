@@ -42,6 +42,7 @@ public class Editor
     public ImportWindow ImportDialog { get; set; }
     public BackupsWindow BackupsDialog { get; set; }
     public ModCreatorWindow ModCreatorDialog { get; set; }
+    public ModLoaderWindow ModLoaderDialog { get; set; }
 
     public OverlayManager OverlayManager { get; set; } = new();
     public SelectionContext Selection { get; set; } = new();
@@ -68,6 +69,7 @@ public class Editor
         ImportDialog = new(pathPrefs);
         BackupsDialog = new(pathPrefs, _backupsList);
         ModCreatorDialog = new(pathPrefs);
+        ModLoaderDialog = new(pathPrefs);
         LevelLoader = new(this);
     }
 
@@ -223,6 +225,8 @@ public class Editor
             BackupsDialog.Show();
         if (ModCreatorDialog.Open)
             ModCreatorDialog.Show();
+        if (ModLoaderDialog.Open)
+            ModLoaderDialog.Show();
 
         if (ViewportWindow.Hovered && (Rl.IsKeyPressed(KeyboardKey.Space) || Rl.IsMouseButtonPressed(MouseButton.Middle)))
         {
@@ -298,7 +302,7 @@ public class Editor
         if (ImGui.BeginMenu("Mods"))
         {
             if (ImGui.MenuItem("Create mod", null, ModCreatorDialog.Open)) ModCreatorDialog.Open = !ModCreatorDialog.Open;
-            if (ImGui.MenuItem("Load mod")) ;
+            if (ImGui.MenuItem("Load mods", null, ModLoaderDialog.Open)) ModLoaderDialog.Open = !ModLoaderDialog.Open;
             ImGui.EndMenu();
         }
 

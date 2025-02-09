@@ -65,18 +65,10 @@ public class ModCreatorWindow(PathPreferences prefs)
         ModFileExportButton();
 
         if (_exportError is not null)
-        {
-            ImGui.PushTextWrapPos();
-            ImGui.Text($"[Error]: {_exportError}");
-            ImGui.PopTextWrapPos();
-        }
+            ImGui.TextWrapped($"[Error]: {_exportError}");
 
         if (_exportStatus is not null)
-        {
-            ImGui.PushTextWrapPos();
-            ImGui.Text(_exportStatus);
-            ImGui.PopTextWrapPos();
-        }
+            ImGui.TextWrapped($"{_exportStatus}");
 
         ImGui.End();
     }
@@ -142,42 +134,41 @@ public class ModCreatorWindow(PathPreferences prefs)
 
     private void AddLevelFileButton()
     {
-        if (ImGui.Button("Add Level file"))
-        {
-            Task.Run(() =>
-            {
-                DialogResult result = Dialog.FileOpenMultiple("xml");
-                if (!result.IsOk) return;
-                StringBuilder? sb = null;
-                foreach (string path in result.Paths)
-                {
-                    if (!File.Exists(path))
-                    {
-                        sb ??= new();
-                        sb.AppendLine($"Invalid path {path}");
-                        continue;
-                    }
+        if (!ImGui.Button("Add level file")) return;
 
-                    try
-                    {
-                        XElement element;
-                        using (FileStream file = File.OpenRead(path))
-                            element = XElement.Load(file);
-                        if (element.Name.LocalName != "Level") throw new ArgumentException("Given path does not contain a Level file");
-                        Level l = element.DeserializeTo<Level>();
-                        _levels.Add(new(l, FindUsedFiles(l)));
-                    }
-                    catch (Exception e)
-                    {
-                        sb ??= new();
-                        sb.AppendLine($"Error while parsing file: {e.Message}");
-                        Rl.TraceLog(Raylib_cs.TraceLogLevel.Error, e.Message);
-                        Rl.TraceLog(Raylib_cs.TraceLogLevel.Trace, e.StackTrace);
-                    }
+        Task.Run(() =>
+        {
+            DialogResult result = Dialog.FileOpenMultiple("xml");
+            if (!result.IsOk) return;
+            StringBuilder? sb = null;
+            foreach (string path in result.Paths)
+            {
+                if (!File.Exists(path))
+                {
+                    sb ??= new();
+                    sb.AppendLine($"Invalid path {path}");
+                    continue;
                 }
-                _exportError = sb?.ToString();
-            });
-        }
+
+                try
+                {
+                    XElement element;
+                    using (FileStream file = File.OpenRead(path))
+                        element = XElement.Load(file);
+                    if (element.Name.LocalName != "Level") throw new ArgumentException("Given path does not contain a Level file");
+                    Level l = element.DeserializeTo<Level>();
+                    _levels.Add(new(l, FindUsedFiles(l)));
+                }
+                catch (Exception e)
+                {
+                    sb ??= new();
+                    sb.AppendLine($"Error while parsing file: {e.Message}");
+                    Rl.TraceLog(Raylib_cs.TraceLogLevel.Error, e.Message);
+                    Rl.TraceLog(Raylib_cs.TraceLogLevel.Trace, e.StackTrace);
+                }
+            }
+            _exportError = sb?.ToString();
+        });
     }
 
     private void ShowLevelList()
