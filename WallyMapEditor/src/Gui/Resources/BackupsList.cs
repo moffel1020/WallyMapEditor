@@ -36,7 +36,8 @@ public class BackupsList
         string[] backedUpFiles = [
             Path.Combine(prefs.BrawlhallaPath, "Dynamic.swz"),
             Path.Combine(prefs.BrawlhallaPath, "Init.swz"),
-            Path.Combine(prefs.BrawlhallaPath, "Game.swz")
+            Path.Combine(prefs.BrawlhallaPath, "Game.swz"),
+            Path.Combine(prefs.BrawlhallaPath, "Engine.swz"),
         ];
 
         int selectedBackupIndex = state.SelectedBackupIndex;
@@ -81,11 +82,13 @@ public class BackupsList
             string dynamicPath = Path.Combine(prefs.BrawlhallaPath, "Dynamic.swz");
             string initPath = Path.Combine(prefs.BrawlhallaPath, "Init.swz");
             string gamePath = Path.Combine(prefs.BrawlhallaPath, "Game.swz");
+            string enginePath = Path.Combine(prefs.BrawlhallaPath, "Engine.swz");
             Task.Run(() =>
             {
                 WmeUtils.CreateBackupOfFile(dynamicPath);
                 WmeUtils.CreateBackupOfFile(initPath);
                 WmeUtils.CreateBackupOfFile(gamePath);
+                WmeUtils.CreateBackupOfFile(enginePath);
                 RefreshBackupList(prefs.BrawlhallaPath);
                 _doingBackup = false;
                 state.BackupStatus = null;
@@ -104,6 +107,7 @@ public class BackupsList
             WmeUtils.CreateBackupPath(Path.Combine(dir, "Dynamic.swz"), num),
             WmeUtils.CreateBackupPath(Path.Combine(dir, "Init.swz"), num),
             WmeUtils.CreateBackupPath(Path.Combine(dir, "Game.swz"), num),
+            WmeUtils.CreateBackupPath(Path.Combine(dir, "Engine.swz"), num),
         ];
 
         int[] validBackupNumbers = Directory.EnumerateFiles(dir)

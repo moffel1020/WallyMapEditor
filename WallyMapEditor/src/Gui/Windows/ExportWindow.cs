@@ -293,6 +293,7 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
         string dynamicPath = Path.Combine(prefs.BrawlhallaPath!, "Dynamic.swz");
         string initPath = Path.Combine(prefs.BrawlhallaPath!, "Init.swz");
         string gamePath = Path.Combine(prefs.BrawlhallaPath!, "Game.swz");
+        string enginePath = Path.Combine(prefs.BrawlhallaPath!, "Engine.swz");
 
         if (backup)
         {
@@ -300,6 +301,7 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
             WmeUtils.CreateBackupOfFile(dynamicPath);
             WmeUtils.CreateBackupOfFile(initPath);
             WmeUtils.CreateBackupOfFile(gamePath);
+            WmeUtils.CreateBackupOfFile(enginePath);
         }
 
         _exportStatus = "reading swz...";
