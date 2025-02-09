@@ -23,6 +23,7 @@ public class ModCreatorWindow(PathPreferences prefs)
     private readonly List<ModLevel> _levels = [];
     // easier to maintain excluded than included
     private readonly HashSet<string> _excludedPaths = [];
+
     private readonly HashSet<string> _extraFiles = [];
 
     private string? _exportError = null;

@@ -56,12 +56,6 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
             ImGui.EndTabItem();
         }
 
-        if (ImGui.BeginTabItem($"Mod file (.{ModFile.EXTENSION})"))
-        {
-            ShowModFileExportTab(level);
-            ImGui.EndTabItem();
-        }
-
         if (ImGui.BeginTabItem("LevelDesc"))
         {
             ShowLevelDescExportTab(level.Desc);
@@ -150,104 +144,6 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
         if (prefs.BrawlhallaPath is not null && ImGui.CollapsingHeader("Previous backups"))
         {
             backups.ShowBackupMenu(prefs, _state);
-        }
-    }
-
-    private void ShowModFileExportTab(Level l)
-    {
-        if (l != _lastLevel || _thumbnailFile is null || _backgroundFiles.Count == 0 || _assetFiles.Count == 0)
-            FindUsedAssets(l);
-
-        ImGui.SeparatorText("Brawlhalla path");
-        if (ImGui.Button("Select Brawlhalla path"))
-        {
-            Task.Run(() =>
-            {
-                DialogResult result = Dialog.FolderPicker(prefs.BrawlhallaPath);
-                if (result.IsOk)
-                    prefs.BrawlhallaPath = result.Path;
-            });
-        }
-        ImGui.Text($"Path: {prefs.BrawlhallaPath}");
-
-        ImGui.SeparatorText("Info");
-        prefs.ModName = ImGuiExt.InputText("Mod name", prefs.ModName ?? "My mod", 64);
-        prefs.ModAuthor = ImGuiExt.InputText("Author", prefs.ModAuthor ?? "", 64);
-        prefs.ModVersionInfo = ImGuiExt.InputText("Mod version", prefs.ModVersionInfo ?? "1.0", 16);
-        prefs.ModDescription = ImGuiExt.InputTextMultiline("Description", prefs.ModDescription ?? "", new(0, ImGui.GetTextLineHeight() * 8), 1024);
-        prefs.GameVersionInfo = ImGuiExt.InputText("Game version", prefs.GameVersionInfo ?? "", 8);
-
-        ImGui.Separator();
-
-        ImGuiExt.HeaderWithWidget("Files to include", () =>
-        {
-            ImGuiExt.BeginStyledChild("files");
-            if (_thumbnailFile is not null)
-                _addThumbnailFile = ImGuiExt.Checkbox("Thumbnail: " + _thumbnailFile, _addThumbnailFile);
-
-            if (_backgroundFiles.Count != 0 && ImGui.TreeNode("Backgrounds"))
-            {
-                foreach ((string file, bool @checked) in _backgroundFiles)
-                    _backgroundFiles[file] = ImGuiExt.Checkbox(file, @checked);
-                ImGui.TreePop();
-            }
-
-            if (_assetFiles.Count != 0 && ImGui.TreeNode($"Assets ({l.Desc.AssetDir})"))
-            {
-                foreach ((string file, bool @checked) in _assetFiles)
-                    _assetFiles[file] = ImGuiExt.Checkbox(file, @checked);
-                ImGui.TreePop();
-            }
-            ImGuiExt.EndStyledChild();
-        },
-        () =>
-        {
-            if (ImGui.Button("Refresh"))
-                FindUsedAssets(l);
-        }, 60);
-
-        ImGui.Separator();
-        ModFileExportButton(l);
-    }
-
-    private void ModFileExportButton(Level l)
-    {
-        if (ImGuiExt.ButtonDisabledIf(!WmeUtils.IsValidBrawlPath(prefs.BrawlhallaPath), "Export"))
-        {
-            ModHeaderObject header = new()
-            {
-                ModName = prefs.ModName ?? "",
-                GameVersionInfo = prefs.GameVersionInfo ?? "",
-                ModVersionInfo = prefs.ModVersionInfo ?? "",
-                ModDescription = prefs.ModDescription ?? "",
-                CreatorInfo = prefs.ModAuthor ?? "",
-            };
-
-            Task.Run(() =>
-            {
-                try
-                {
-                    _exportError = null;
-                    _exportStatus = "select file";
-                    ModFile mod = CreateModFile(l, prefs.BrawlhallaPath!, header);
-                    DialogResult result = Dialog.FileSave(ModFile.EXTENSION, Path.GetDirectoryName(prefs.ModFilePath));
-                    if (result.IsOk)
-                    {
-                        _exportStatus = "exporting...";
-                        string path = WmeUtils.ForcePathExtension(result.Path, '.' + ModFile.EXTENSION);
-                        using FileStream stream = new(path, FileMode.Create, FileAccess.Write);
-                        mod.Save(stream);
-                    }
-                }
-                catch (Exception e)
-                {
-                    _exportError = e.Message;
-                }
-                finally
-                {
-                    _exportStatus = null;
-                }
-            });
         }
     }
 
@@ -443,28 +339,6 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
         backups.RefreshBackupList(prefs.BrawlhallaPath!);
     }
 
-    private ModFile CreateModFile(Level l, string brawlDir, ModHeaderObject header)
-    {
-        ModFileBuilder builder = new(header);
-        builder.AddLevel(l);
-        if (_thumbnailFile is not null && _addThumbnailFile)
-            builder.AddFilePath(brawlDir, Path.Combine(brawlDir, "images", "thumbnails", _thumbnailFile));
-
-        foreach ((string bg, bool shouldAddFile) in _backgroundFiles)
-        {
-            if (shouldAddFile)
-                builder.AddFilePath(brawlDir, Path.Combine(brawlDir, "mapArt", "Backgrounds", bg));
-        }
-
-        foreach ((string a, bool shouldAddFile) in _assetFiles)
-        {
-            if (shouldAddFile)
-                builder.AddFilePath(brawlDir, Path.Combine(brawlDir, "mapArt", l.Desc.AssetDir, a));
-        }
-
-        return builder.CreateMod();
-    }
-
     private static void UpdatePlaylists(LevelSetTypes levelSetTypes, Level l)
     {
         foreach (string plName in l.Playlists)
@@ -483,38 +357,4 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
             }
         }
     }
-
-    private void FindUsedAssets(Level l)
-    {
-        _thumbnailFile = null;
-        _backgroundFiles.Clear();
-        _assetFiles.Clear();
-
-        if (l.Type?.ThumbnailPNGFile is not null)
-            _thumbnailFile = l.Type.ThumbnailPNGFile;
-
-        foreach (Background bg in l.Desc.Backgrounds)
-        {
-            _backgroundFiles[NormalizePartialPath("Backgrounds", bg.AssetName)] = true;
-            if (bg.AnimatedAssetName is not null) _backgroundFiles[NormalizePartialPath("Backgrounds", bg.AnimatedAssetName)] = true;
-        }
-
-        foreach (AbstractAsset a in l.Desc.Assets)
-        {
-            foreach (string path in FindChildAssetNames(a))
-                _assetFiles[NormalizePartialPath(l.Desc.AssetDir, path)] = true;
-        }
-    }
-
-    // removes '../baseDir/' from file paths if they are inside baseDir to make sure they are truly unique
-    private static string NormalizePartialPath(string baseDir, string path) =>
-        Path.GetRelativePath(baseDir, Path.Combine(baseDir, path));
-
-    private static IEnumerable<string> FindChildAssetNames(AbstractAsset a) => a switch
-    {
-        AbstractAsset asset when asset.AssetName is not null => [asset.AssetName],
-        MovingPlatform mp => mp.Assets.SelectMany(FindChildAssetNames),
-        Platform p when p.AssetChildren is not null => p.AssetChildren.SelectMany(FindChildAssetNames),
-        _ => throw new Exception("Could not find associated assets. Unimplemented AbstractAsset type")
-    };
 }
