@@ -134,7 +134,9 @@ public class ModCreatorWindow(PathPreferences prefs)
 
     private void AddLevelFileButton()
     {
-        if (!ImGui.Button("Add level file")) return;
+        bool res = ImGui.Button("Add level file");
+        ImGuiExt.HintTooltip("Level files are obtained by saving with File > Save");
+        if (!res) return;
 
         Task.Run(() =>
         {
@@ -225,6 +227,7 @@ public class ModCreatorWindow(PathPreferences prefs)
                 // proper validation of the file is done when to mod is created
             });
         }
+        ImGuiExt.HintTooltip("Extra files must be inside the brawlhalla directory");
 
         ImGuiExt.BeginStyledChild("extra files");
         List<string> toRemove = [];
