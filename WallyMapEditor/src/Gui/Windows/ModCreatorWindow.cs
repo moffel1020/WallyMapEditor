@@ -14,8 +14,8 @@ namespace WallyMapEditor;
 
 public class ModCreatorWindow(PathPreferences prefs)
 {
-    private readonly record struct LevelFileList(string[] assets, string[] backgrounds, string? thumbnail);
-    private readonly record struct ModLevel(Level level, LevelFileList files);
+    private readonly record struct LevelFileList(string[] Assets, string[] Backgrounds, string? Thumbnail);
+    private readonly record struct ModLevel(Level Level, LevelFileList Files);
 
     private bool _open;
     public bool Open { get => _open; set => _open = value; }
@@ -31,80 +31,35 @@ public class ModCreatorWindow(PathPreferences prefs)
     {
         ImGui.SetNextWindowSizeConstraints(new(425, 425), new(int.MaxValue));
         ImGui.Begin("Mod Creation", ref _open, ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoCollapse);
-        ImGui.SeparatorText("Brawlhalla path");
-        if (ImGui.Button("Select Brawlhalla path"))
+
+        if (ImGui.CollapsingHeader("Brawlhalla path"))
         {
-            Task.Run(() =>
+            if (ImGui.Button("Select Brawlhalla path"))
             {
-                DialogResult result = Dialog.FolderPicker(prefs.BrawlhallaPath);
-                if (result.IsOk)
-                    prefs.BrawlhallaPath = result.Path;
-            });
+                Task.Run(() =>
+                {
+                    DialogResult result = Dialog.FolderPicker(prefs.BrawlhallaPath);
+                    if (result.IsOk)
+                        prefs.BrawlhallaPath = result.Path;
+                });
+            }
+            ImGui.Text($"Path: {prefs.BrawlhallaPath}");
         }
-        ImGui.Text($"Path: {prefs.BrawlhallaPath}");
-        ImGui.SeparatorText("Info");
-        prefs.ModName = ImGuiExt.InputText("Mod name", prefs.ModName ?? "My mod", 64);
-        prefs.ModAuthor = ImGuiExt.InputText("Author", prefs.ModAuthor ?? "", 64);
-        prefs.ModVersionInfo = ImGuiExt.InputText("Mod version", prefs.ModVersionInfo ?? "1.0", 16);
-        prefs.ModDescription = ImGuiExt.InputTextMultiline("Description", prefs.ModDescription ?? "", new(0, ImGui.GetTextLineHeight() * 8), 1024);
-        prefs.GameVersionInfo = ImGuiExt.InputText("Game version", prefs.GameVersionInfo ?? "", 8);
 
-        ImGui.SeparatorText("Maps");
-        AddLevelFileButton();
+        ImGui.Spacing();
+        ShowModInfoSection();
 
-        ImGuiExt.BeginStyledChild("");
-        /*foreach (ModLevel ml in _levels)
+        ImGui.Spacing();
+        if (ImGui.CollapsingHeader("Maps"))
         {
-            Level l = ml.level;
-            ImGui.BulletText(l.Desc.LevelName);
-        }*/
-        foreach (string excluded in _excludedPaths)
-            ImGui.BulletText(excluded);
-        ImGuiExt.EndStyledChild();
+            AddLevelFileButton();
+            ShowLevelList();
+        }
 
-        ImGuiExt.HeaderWithWidget("Files to include", () =>
-        {
-            ImGuiExt.BeginStyledChild("files");
-            foreach (ModLevel ml in _levels)
-            {
-                Level l = ml.level;
-                if (ImGui.TreeNode($"{l.Desc.LevelName}###{l.GetHashCode()}"))
-                {
-                    LevelFileList files = ml.files;
-                    string? thumbnail = files.thumbnail;
-                    if (thumbnail is not null)
-                        FileCheckbox("Thumbnail: " + thumbnail, MakeGlobal(Path.Combine("images", "thumbnails", thumbnail)));
-                    string[] backgrounds = files.backgrounds;
-                    if (backgrounds.Length != 0 && ImGui.TreeNode("Backgrounds"))
-                    {
-                        foreach (string file in backgrounds)
-                            FileCheckbox(file, MakeGlobal(Path.Combine("mapArt", "Background", file)));
-                        ImGui.TreePop();
-                    }
-                    string[] assets = files.assets;
-                    if (assets.Length != 0 && ImGui.TreeNode($"Assets ({l.Desc.AssetDir})"))
-                    {
-                        foreach (string file in assets)
-                            FileCheckbox(file, MakeGlobal(Path.Combine("mapArt", l.Desc.AssetDir, file)));
-                        ImGui.TreePop();
-                    }
-                    ImGui.TreePop();
-                }
-            }
-            ImGuiExt.EndStyledChild();
-        },
-        () =>
-        {
-            if (ImGui.Button("Refresh"))
-            {
-                for (int i = 0; i < _levels.Count; ++i)
-                {
-                    ModLevel ml = _levels[i];
-                    LevelFileList files = FindUsedFiles(ml.level);
-                    _levels[i] = ml with { files = files };
-                }
-            }
-        }, 60);
+        // ImGuiExt.BeginStyledChild("");
+        // foreach (string excluded in _excludedPaths)
+        //     ImGui.BulletText(excluded);
+        // ImGuiExt.EndStyledChild();
 
         ImGui.Separator();
         ModFileExportButton();
@@ -147,11 +102,11 @@ public class ModCreatorWindow(PathPreferences prefs)
                 CreatorInfo = prefs.ModAuthor ?? "",
             };
 
-            Task.Run((Action)(() =>
+            Task.Run(() =>
             {
                 try
                 {
-                    this._exportError = null;
+                    _exportError = null;
                     _exportStatus = "select file";
                     ModFile mod = CreateModFile(prefs.BrawlhallaPath!, header);
                     DialogResult result = Dialog.FileSave(ModFile.EXTENSION, Path.GetDirectoryName(prefs.ModFilePath));
@@ -165,21 +120,31 @@ public class ModCreatorWindow(PathPreferences prefs)
                 }
                 catch (Exception e)
                 {
-                    this._exportError = e.Message;
+                    _exportError = e.Message;
                 }
                 finally
                 {
                     _exportStatus = null;
                 }
-            }));
+            });
         }
+    }
+
+    private void ShowModInfoSection()
+    {
+        if (!ImGui.CollapsingHeader("Mod Info")) return;
+        prefs.ModName = ImGuiExt.InputText("Mod name", prefs.ModName ?? "My mod", 64);
+        prefs.ModAuthor = ImGuiExt.InputText("Author", prefs.ModAuthor ?? "", 64);
+        prefs.ModVersionInfo = ImGuiExt.InputText("Mod version", prefs.ModVersionInfo ?? "1.0", 16);
+        prefs.ModDescription = ImGuiExt.InputTextMultiline("Description", prefs.ModDescription ?? "", new(0, ImGui.GetTextLineHeight() * 8), 1024);
+        prefs.GameVersionInfo = ImGuiExt.InputText("Game version", prefs.GameVersionInfo ?? "", 8);
     }
 
     private void AddLevelFileButton()
     {
         if (ImGui.Button("Add Level file"))
         {
-            Task.Run((Action)(() =>
+            Task.Run(() =>
             {
                 DialogResult result = Dialog.FileOpenMultiple("xml");
                 if (!result.IsOk) return;
@@ -210,9 +175,49 @@ public class ModCreatorWindow(PathPreferences prefs)
                         Rl.TraceLog(Raylib_cs.TraceLogLevel.Trace, e.StackTrace);
                     }
                 }
-                this._exportError = sb?.ToString();
-            }));
+                _exportError = sb?.ToString();
+            });
         }
+    }
+
+    private void ShowLevelList()
+    {
+        List<ModLevel> toRemove = [];
+
+        ImGuiExt.BeginStyledChild("files");
+        foreach (ModLevel ml in _levels)
+        {
+            Level l = ml.Level;
+            if (ImGui.TreeNode($"{l.Desc.LevelName}###{l.GetHashCode()}"))
+            {
+                LevelFileList files = ml.Files;
+                string? thumbnail = files.Thumbnail;
+                if (thumbnail is not null)
+                    FileCheckbox("Thumbnail: " + thumbnail, MakeGlobal(Path.Combine("images", "thumbnails", thumbnail)));
+                string[] backgrounds = files.Backgrounds;
+                if (backgrounds.Length != 0 && ImGui.TreeNode("Backgrounds"))
+                {
+                    foreach (string file in backgrounds)
+                        FileCheckbox(file, MakeGlobal(Path.Combine("mapArt", "Background", file)));
+                    ImGui.TreePop();
+                }
+                string[] assets = files.Assets;
+                if (assets.Length != 0 && ImGui.TreeNode($"Assets ({l.Desc.AssetDir})"))
+                {
+                    foreach (string file in assets)
+                        FileCheckbox(file, MakeGlobal(Path.Combine("mapArt", l.Desc.AssetDir, file)));
+                    ImGui.TreePop();
+                }
+                ImGui.TreePop();
+            }
+
+            if (ImGui.Button($"Remove##{ml.GetHashCode()}"))
+                toRemove.Add(ml);
+        }
+        ImGuiExt.EndStyledChild();
+
+        foreach (ModLevel ml in toRemove)
+            _levels.Remove(ml);
     }
 
     private ModFile CreateModFile(string brawlDir, ModHeaderObject header)
@@ -222,32 +227,32 @@ public class ModCreatorWindow(PathPreferences prefs)
         HashSet<string> _addedPaths = [];
         foreach (ModLevel ml in _levels)
         {
-            Level l = ml.level;
+            Level l = ml.Level;
             builder.AddLevel(l);
-            LevelFileList files = ml.files;
+            LevelFileList files = ml.Files;
 
             bool shouldAddFile(string path) => !_addedPaths.Add(path) && !_excludedPaths.Contains(path);
-            foreach (string asset in files.assets)
+            foreach (string asset in files.Assets)
             {
                 if (shouldAddFile(asset))
                     builder.AddFilePath(brawlDir, Path.Combine(brawlDir, "mapArt", l.Desc.AssetDir, asset));
             }
-            foreach (string bg in files.backgrounds)
+            foreach (string bg in files.Backgrounds)
             {
                 if (shouldAddFile(bg))
                     builder.AddFilePath(brawlDir, Path.Combine(brawlDir, "mapArt", "Backgrounds", bg));
             }
-            if (files.thumbnail is not null)
+            if (files.Thumbnail is not null)
             {
-                if (shouldAddFile(files.thumbnail))
-                    builder.AddFilePath(brawlDir, Path.Combine(brawlDir, "images", "thumbnails", files.thumbnail));
+                if (shouldAddFile(files.Thumbnail))
+                    builder.AddFilePath(brawlDir, Path.Combine(brawlDir, "images", "thumbnails", files.Thumbnail));
             }
         }
 
         return builder.CreateMod();
     }
 
-    private LevelFileList FindUsedFiles(Level l)
+    private static LevelFileList FindUsedFiles(Level l)
     {
         string? thumbnail = null;
         if (l.Type?.ThumbnailPNGFile is not null)
@@ -270,7 +275,7 @@ public class ModCreatorWindow(PathPreferences prefs)
                 assets.Add(NormalizePartialPath(l.Desc.AssetDir, path));
         }
 
-        return new(assets.ToArray(), backgrounds.ToArray(), thumbnail);
+        return new([.. assets], [.. backgrounds], thumbnail);
     }
 
     // removes '../baseDir/' from file paths if they are inside baseDir to make sure they are truly unique
