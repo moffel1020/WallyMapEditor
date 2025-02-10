@@ -120,7 +120,7 @@ public class ModLoaderWindow(PathPreferences prefs)
 
         Task.Run(() =>
         {
-            DialogResult result = Dialog.FileOpen("wally");
+            DialogResult result = Dialog.FileOpen(ModFile.EXTENSION);
             if (!result.IsOk) return;
 
             try
