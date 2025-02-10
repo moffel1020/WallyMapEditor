@@ -164,9 +164,9 @@ public class ModLoaderWindow(PathPreferences prefs)
         _loadStatus = "Loading...";
         ModLoader loader = new(prefs.BrawlhallaPath!);
         loader.AddModFiles(_modFiles);
-        ModFileOverrides files = loader.Load();
+        Dictionary<string, byte[]> files = loader.Load();
 
-        foreach ((string path, byte[] content) in files.Overrides)
+        foreach ((string path, byte[] content) in files)
         {
             _loadStatus = $"Writing {path}...";
             using FileStream stream = new(Path.Combine(prefs.BrawlhallaPath!, path), FileMode.Create, FileAccess.Write);

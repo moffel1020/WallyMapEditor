@@ -7,7 +7,7 @@ using System;
 
 namespace WallyMapEditor.Mod;
 
-public readonly record struct ModFileOverrides(Dictionary<string, byte[]> Overrides);
+using ModFileOverrides = Dictionary<string, byte[]>;
 
 public class ModLoader(string brawlDir)
 {
@@ -29,15 +29,15 @@ public class ModLoader(string brawlDir)
         LoadSwzFiles();
         AddModsToSwz(_wallyFiles);
 
-        ModFileOverrides files = new([]);
-        files.Overrides.Add("Dynamic.swz", SaveSwzToByteArray(_dynamicFiles.Values));
-        files.Overrides.Add("Engine.swz", SaveSwzToByteArray(_engineFiles.Values));
-        files.Overrides.Add("Init.swz", SaveSwzToByteArray(_initFiles.Values));
-        files.Overrides.Add("Game.swz", SaveSwzToByteArray(_gameFiles.Values));
+        ModFileOverrides overrides = [];
+        overrides.Add("Dynamic.swz", SaveSwzToByteArray(_dynamicFiles.Values));
+        overrides.Add("Engine.swz", SaveSwzToByteArray(_engineFiles.Values));
+        overrides.Add("Init.swz", SaveSwzToByteArray(_initFiles.Values));
+        overrides.Add("Game.swz", SaveSwzToByteArray(_gameFiles.Values));
 
-        AddExtraFiles(_wallyFiles, files);
+        AddExtraFiles(_wallyFiles, overrides);
 
-        return files;
+        return overrides;
     }
 
     private void AddModsToSwz(IEnumerable<ModFile> mods)
@@ -60,7 +60,7 @@ public class ModLoader(string brawlDir)
         foreach (ModFile m in mods)
         {
             foreach (ExtraFileObject efo in m.ExtraFiles)
-                files.Overrides.TryAdd(efo.FullPath, efo.FileContent);
+                files.TryAdd(efo.FullPath, efo.FileContent);
         }
     }
 
