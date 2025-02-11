@@ -32,7 +32,7 @@ public partial class PropertiesWindow
             if (data.Loader is not null)
             {
                 Texture2DWrapper texture = data.Loader.LoadTextureFromPath(Path.Combine(backgroundDir, b.AssetName));
-                rlImGui.ImageSize(texture.Texture, new Vector2(200 * (float)(texture.Width / texture.Height), 200));
+                rlImGui.ImageSize(texture.Texture, new Vector2(200.0f * texture.Width / texture.Height, 200));
                 (b.W, b.H) = (texture.Texture.Width, texture.Texture.Height);
             }
         }
@@ -53,7 +53,7 @@ public partial class PropertiesWindow
             if (data.Loader is not null && b.AnimatedAssetName is not null)
             {
                 Texture2DWrapper texture = data.Loader.LoadTextureFromPath(Path.Combine(backgroundDir, b.AnimatedAssetName));
-                rlImGui.ImageSize(texture.Texture, new Vector2(200 * (float)(texture.Width / texture.Height), 200));
+                rlImGui.ImageSize(texture.Texture, new Vector2(200.0f * (texture.Width / texture.Height), 200));
                 if (texture.Width != b.W || texture.Height != b.H)
                     _warningText = "AnimatedAssetName image is not the same size as the AssetName image. This can lead to the image displaying incorrectly";
                 else

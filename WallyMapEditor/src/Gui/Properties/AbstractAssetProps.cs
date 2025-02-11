@@ -47,7 +47,7 @@ partial class PropertiesWindow
                 if (data.Loader is not null)
                 {
                     Texture2DWrapper texture = data.Loader.LoadTextureFromPath(Path.Combine(assetDir, a.AssetName));
-                    rlImGui.ImageSize(texture.Texture, new Vector2(60 * (float)(texture.Width / texture.Height), 60));
+                    rlImGui.ImageSize(texture.Texture, new Vector2(60.0f * texture.Width / texture.Height, 60));
 
                     if (ImGui.Button("Reset width/height"))
                     {

@@ -8,16 +8,14 @@ public class Texture2DWrapper : IDisposable
     private bool _disposedValue = false;
 
     public Texture2D Texture { get; private init; }
-    public double Width { get; private init; }
-    public double Height { get; private init; }
+    public int Width => Texture.Width;
+    public int Height => Texture.Height;
     public WmsTransform Transform { get; private init; } = WmsTransform.IDENTITY;
 
     public Texture2DWrapper(Texture2D texture)
     {
         Texture = texture;
         Rl.SetTextureWrap(texture, TextureWrap.Clamp);
-        Width = texture.Width;
-        Height = texture.Height;
     }
 
     public Texture2DWrapper(Texture2D texture, WmsTransform transform) : this(texture)
