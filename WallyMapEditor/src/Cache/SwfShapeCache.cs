@@ -59,6 +59,7 @@ public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCach
         bitmap1.Dispose();
         RlImage img = WmeUtils.SKBitmapToRlImage(bitmap2);
         bitmap2.Dispose();
+        Rl.ImageMipmaps(ref img);
 
         // no need for alpha premult since we specify it in the ToBitmap
 
@@ -70,6 +71,8 @@ public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCach
     {
         (RlImage img, WmsTransform trans) = shapeData;
         Texture2D texture = Rl.LoadTextureFromImage(img);
+        Rl.SetTextureWrap(texture, TextureWrap.Clamp);
+        Rl.GenTextureMipmaps(ref texture);
         return new(texture, trans);
     }
 

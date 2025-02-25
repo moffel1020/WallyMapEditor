@@ -15,7 +15,6 @@ public class Texture2DWrapper : IDisposable
     public Texture2DWrapper(Texture2D texture)
     {
         Texture = texture;
-        Rl.SetTextureWrap(texture, TextureWrap.Clamp);
     }
 
     public Texture2DWrapper(Texture2D texture, WmsTransform transform) : this(texture)

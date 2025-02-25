@@ -1,4 +1,5 @@
 using System.IO;
+using Raylib_cs;
 
 namespace WallyMapEditor;
 
@@ -9,12 +10,16 @@ public class TextureCache : UploadCache<string, RlImage, Texture2DWrapper>
         path = Path.GetFullPath(path);
         RlImage image = WmeUtils.LoadRlImage(path);
         Rl.ImageAlphaPremultiply(ref image);
+        Rl.ImageMipmaps(ref image);
         return image;
     }
 
     protected override Texture2DWrapper IntermediateToValue(RlImage img)
     {
-        return new(Rl.LoadTextureFromImage(img));
+        Texture2D texture = Rl.LoadTextureFromImage(img);
+        Rl.SetTextureWrap(texture, TextureWrap.Clamp);
+        Rl.GenTextureMipmaps(ref texture);
+        return new(texture);
     }
 
     protected override void UnloadIntermediate(RlImage img)
