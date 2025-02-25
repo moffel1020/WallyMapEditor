@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using SkiaSharp;
 using SwfLib.Data;
 
@@ -22,31 +23,32 @@ public static partial class WmeUtils
 
     public static RlColor WmsColorToRlColor(WmsColor c) => new(c.R, c.G, c.B, c.A);
 
-    public static RlImage SKBitmapToRlImage(SKBitmap bitmap)
+    /// <remarks>
+    /// WARNING! Do not try to access the bitmap after calling this function.
+    /// </remarks>
+    [SkipLocalsInit]
+    public static unsafe RlImage SKBitmapToRlImage(SKBitmap bitmap)
     {
         if (bitmap.ColorType != SKColorType.Rgba8888)
         {
             throw new ArgumentException($"{nameof(SKBitmapToRlImage)} only supports Rgba8888, but got {bitmap.ColorType}");
         }
 
-        unsafe
+        RlImage image = new()
         {
-            // use Rl alloc so GC doesn't free the memory
-            void* bufferPtr = Rl.MemAlloc((uint)bitmap.ByteCount);
-            // create a Span from the unmanaged memory
-            Span<byte> buffer = new(bufferPtr, bitmap.ByteCount);
-            // copy the bitmap bytes to the span
-            bitmap.GetPixelSpan().CopyTo(buffer);
+            Data = (void*)bitmap.GetPixels(),
+            Width = bitmap.Width,
+            Height = bitmap.Height,
+            Mipmaps = 1,
+            Format = Raylib_cs.PixelFormat.UncompressedR8G8B8A8,
+        };
 
-            return new()
-            {
-                Data = bufferPtr,
-                Width = bitmap.Width,
-                Height = bitmap.Height,
-                Mipmaps = 1,
-                Format = Raylib_cs.PixelFormat.UncompressedR8G8B8A8,
-            };
-        }
+        // very evil. gaslight the bitmap into thinking it disposed its pixels.
+        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = nameof(set_Handle))]
+        extern static void set_Handle(SKObject obj, IntPtr handle);
+        set_Handle(bitmap, IntPtr.Zero);
+
+        return image;
     }
 
     public static uint RlColorToHex(RlColor color) => (uint)((color.R << 24) | (color.G << 16) | (color.B << 8) | color.A);
