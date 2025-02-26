@@ -1,6 +1,6 @@
 using System;
 using System.Numerics;
-using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using SkiaSharp;
 using SwfLib.Data;
 
@@ -23,15 +23,11 @@ public static partial class WmeUtils
 
     public static RlColor WmsColorToRlColor(WmsColor c) => new(c.R, c.G, c.B, c.A);
 
-    /// <remarks>
-    /// WARNING! Do not try to access the bitmap after calling this function.
-    /// </remarks>
-    [SkipLocalsInit]
-    public static unsafe RlImage SKBitmapToRlImage(SKBitmap bitmap)
+    public static unsafe RlImage SKBitmapAsRlImage(SKBitmap bitmap)
     {
         if (bitmap.ColorType != SKColorType.Rgba8888)
         {
-            throw new ArgumentException($"{nameof(SKBitmapToRlImage)} only supports Rgba8888, but got {bitmap.ColorType}");
+            throw new ArgumentException($"{nameof(SKBitmapAsRlImage)} only supports Rgba8888, but got {bitmap.ColorType}");
         }
 
         RlImage image = new()
@@ -42,11 +38,6 @@ public static partial class WmeUtils
             Mipmaps = 1,
             Format = Raylib_cs.PixelFormat.UncompressedR8G8B8A8,
         };
-
-        // very evil. gaslight the bitmap into thinking it disposed its pixels.
-        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = nameof(set_Handle))]
-        extern static void set_Handle(SKObject obj, IntPtr handle);
-        set_Handle(bitmap, IntPtr.Zero);
 
         return image;
     }

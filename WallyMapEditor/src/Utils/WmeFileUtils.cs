@@ -9,24 +9,17 @@ namespace WallyMapEditor;
 
 public static partial class WmeUtils
 {
-    public static RlImage LoadRlImage(string path)
+    public static SKBitmap LoadSKBitmap(string path)
     {
-        RlImage img;
-        if (Path.GetExtension(path) == ".jpg")
-        {
-            SKImageInfo info;
-            using (SKCodec codec = SKCodec.Create(path))
-                info = codec.Info;
-            SKImageInfo desiredInfo = info.WithColorType(SKColorType.Rgba8888);
-            using SKBitmap bitmap = SKBitmap.Decode(path, desiredInfo);
+        SKImageInfo info;
+        using (SKCodec codec = SKCodec.Create(path))
+            info = codec.Info;
+        SKImageInfo desiredInfo = info
+            .WithColorType(SKColorType.Rgba8888)
+            .WithAlphaType(SKAlphaType.Premul);
 
-            img = SKBitmapToRlImage(bitmap);
-        }
-        else
-        {
-            img = Rl.LoadImage(path);
-        }
-        return img;
+        SKBitmap bitmap = SKBitmap.Decode(path, desiredInfo);
+        return bitmap;
     }
 
     public static bool IsInDirectory(string dirPath, string filePath)

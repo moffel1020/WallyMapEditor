@@ -18,7 +18,7 @@ public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCach
     private const double ANIM_SCALE_MULTIPLIER = 1.2;
 
     public readonly record struct TextureInfo(SwfFileData Swf, ushort ShapeId, double AnimScale);
-    public readonly record struct ShapeData(RlImage Img, WmsTransform Transform);
+    public readonly record struct ShapeData(RlImage Image, WmsTransform Transform);
 
     protected override ShapeData LoadIntermediate(TextureInfo textureInfo)
     {
@@ -57,28 +57,31 @@ public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCach
         // Medium and High work the same for downscaling
         using SKBitmap bitmap2 = bitmap1.Resize(new SKSizeI(imageW, imageH), SKFilterQuality.Medium);
         bitmap1.Dispose();
-        RlImage img = WmeUtils.SKBitmapToRlImage(bitmap2);
-        bitmap2.Dispose();
-        Rl.ImageMipmaps(ref img);
-
-        // no need for alpha premult since we specify it in the ToBitmap
+        RlImage img1 = WmeUtils.SKBitmapAsRlImage(bitmap2);
+        RlImage img2 = RaylibEx.ImageCopyWithMipmaps(img1);
+        bitmap2.Dispose(); // also unloads img1
 
         WmsTransform inv = WmsTransform.CreateInverse(transform);
-        return new ShapeData(img, inv);
+        return new ShapeData(img2, inv);
     }
 
     protected override Texture2DWrapper IntermediateToValue(ShapeData shapeData)
     {
         (RlImage img, WmsTransform trans) = shapeData;
         Texture2D texture = Rl.LoadTextureFromImage(img);
+        return new(texture, trans);
+    }
+
+    protected override void InitValue(Texture2DWrapper v)
+    {
+        Texture2D texture = v.Texture;
         Rl.SetTextureWrap(texture, TextureWrap.Clamp);
         Rl.GenTextureMipmaps(ref texture);
-        return new(texture, trans);
     }
 
     protected override void UnloadIntermediate(ShapeData shapeData)
     {
-        Rl.UnloadImage(shapeData.Img);
+        Rl.UnloadImage(shapeData.Image);
     }
 
     protected override void UnloadValue(Texture2DWrapper texture)

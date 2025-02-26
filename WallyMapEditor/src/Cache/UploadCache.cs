@@ -14,6 +14,7 @@ public abstract class UploadCache<K, I, V> where K : notnull
     protected abstract I LoadIntermediate(K k);
     protected abstract V IntermediateToValue(I i);
     protected abstract void UnloadIntermediate(I i);
+    protected virtual void InitValue(V v) { }
     protected abstract void UnloadValue(V v);
 
     public void Load(K k)
@@ -23,6 +24,7 @@ public abstract class UploadCache<K, I, V> where K : notnull
         I i = LoadIntermediate(k);
         V v = IntermediateToValue(i);
         UnloadIntermediate(i);
+        InitValue(v);
         Cache[k] = v;
     }
 
@@ -53,18 +55,25 @@ public abstract class UploadCache<K, I, V> where K : notnull
     {
         Unload();
 
-        lock (_queue)
+        for (int j = 0; j < amount; j++)
         {
-            amount = Math.Clamp(amount, 0, _queue.Count);
-            for (int j = 0; j < amount; j++)
+            K k; I i;
+            lock (_queue)
             {
-                (K k, I i) = _queue.Dequeue();
-                _queueSet.Remove(k);
-                if (!Cache.ContainsKey(k))
-                {
-                    V v = IntermediateToValue(i);
-                    Cache[k] = v;
-                }
+                if (_queue.Count == 0) break;
+                (k, i) = _queue.Dequeue();
+            }
+
+            _queueSet.Remove(k);
+            if (!Cache.ContainsKey(k))
+            {
+                V v = IntermediateToValue(i);
+                Cache[k] = v;
+                UnloadIntermediate(i);
+                InitValue(v);
+            }
+            else
+            {
                 UnloadIntermediate(i);
             }
         }
