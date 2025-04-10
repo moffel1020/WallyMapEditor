@@ -169,7 +169,13 @@ public class ModLoaderWindow(PathPreferences prefs)
         foreach ((string path, byte[] content) in files)
         {
             _loadStatus = $"Writing {path}...";
-            using FileStream stream = new(Path.Combine(prefs.BrawlhallaPath!, path), FileMode.Create, FileAccess.Write);
+            string realPath = Path.Combine(prefs.BrawlhallaPath!, path);
+            // make sure directory exists
+            string? dir = Path.GetDirectoryName(realPath);
+            if (dir is not null)
+                Directory.CreateDirectory(dir);
+            // write out the content
+            using FileStream stream = new(realPath, FileMode.Create, FileAccess.Write);
             stream.Write(content);
         }
 
