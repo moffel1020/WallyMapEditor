@@ -100,14 +100,14 @@ public class ModLoaderWindow(PathPreferences prefs)
             ImGui.TextWrapped($"Description:\n{header.ModDescription}");
             if (ImGui.TreeNode($"Maps ({mod.LevelDescs.Length})##{mod.GetHashCode()}"))
             {
-                string mapsNamesText = string.Join("\n", mod.LevelToPlaylistLinks.Select(e => e.LevelName));
-                ImGui.Text(mapsNamesText);
+                foreach (LevelToPlaylistLinkObject link in mod.LevelToPlaylistLinks)
+                    ImGui.Text(link.LevelName);
                 ImGui.TreePop();
             }
             if (ImGui.TreeNode($"Extra files ({mod.ExtraFiles.Length})##{mod.GetHashCode()}"))
             {
-                string filesText = string.Join("\n", mod.ExtraFiles.Select(e => e.FullPath));
-                ImGui.Text($"{filesText}");
+                foreach (ExtraFileObject extraFile in mod.ExtraFiles)
+                    ImGui.Text(extraFile.FullPath);
                 ImGui.TreePop();
             }
             ImGui.TreePop();

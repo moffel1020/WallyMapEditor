@@ -152,8 +152,8 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
                 ImGui.Text($"Description:\n{header.ModDescription}");
                 ImGui.Text($"Game Version: {header.GameVersionInfo}");
                 ImGui.SeparatorText("Extra files");
-                string filesToWrite = string.Join("\n", _modFileLoad.ModFile.ExtraFiles.Select(e => e.FullPath));
-                ImGui.Text($"{filesToWrite}");
+                foreach (ExtraFileObject extraFile in _modFileLoad.ModFile.ExtraFiles)
+                    ImGui.Text(extraFile.FullPath);
                 ImGuiExt.EndStyledChild();
             }
         }
