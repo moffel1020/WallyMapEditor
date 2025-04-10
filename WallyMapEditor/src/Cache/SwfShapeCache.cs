@@ -52,7 +52,7 @@ public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCach
         using XmlReader reader = exporter.Document.CreateReader();
         using SKSvg svg = SKSvg.CreateFromXmlReader(reader);
         reader.Dispose();
-        using SKBitmap bitmap1 = svg.Picture!.ToBitmap(SKColors.Transparent, 20, 20, SKColorType.Rgba8888, SKAlphaType.Premul, SKColorSpace.CreateSrgb())!;
+        using SKBitmap bitmap1 = svg.Picture!.ToBitmap(SKColors.Transparent, 3, 3, SKColorType.Rgba8888, SKAlphaType.Premul, SKColorSpace.CreateSrgb())!;
         svg.Dispose();
         // Medium and High work the same for downscaling
         using SKBitmap bitmap2 = bitmap1.Resize(new SKSizeI(imageW, imageH), SKFilterQuality.Medium);
