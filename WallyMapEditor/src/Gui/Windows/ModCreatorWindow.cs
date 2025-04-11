@@ -20,6 +20,9 @@ public class ModCreatorWindow(PathPreferences prefs)
     private bool _open;
     public bool Open { get => _open; set => _open = value; }
 
+    // when adding new levels in a thread add them to this queue to ensure that the _levels
+    // list does not get updated while it is being enumerated
+    private readonly Queue<ModLevel> _queuedLevels = [];
     private readonly List<ModLevel> _levels = [];
     // easier to maintain excluded than included
     private readonly HashSet<string> _excludedPaths = [];
@@ -159,7 +162,7 @@ public class ModCreatorWindow(PathPreferences prefs)
                         element = XElement.Load(file);
                     if (element.Name.LocalName != "Level") throw new ArgumentException("Given path does not contain a Level file");
                     Level l = element.DeserializeTo<Level>();
-                    _levels.Add(new(l, FindUsedFiles(l)));
+                    _queuedLevels.Enqueue(new(l, FindUsedFiles(l)));
                 }
                 catch (Exception e)
                 {
@@ -176,6 +179,9 @@ public class ModCreatorWindow(PathPreferences prefs)
     private void ShowLevelList()
     {
         List<ModLevel> toRemove = [];
+
+        _levels.AddRange(_queuedLevels);
+        _queuedLevels.Clear();
 
         ImGuiExt.BeginStyledChild("files");
         foreach (ModLevel ml in _levels)
