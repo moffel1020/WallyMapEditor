@@ -99,7 +99,7 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
 
         ImGui.Text("Import from mod file. \nThis may add extra files like images to your brawlhalla directory.");
 
-        ImGui.Separator();
+        ImGui.SeparatorText("Brawlhalla path");
         if (ImGui.Button("Select Brawlhalla Path"))
         {
             Task.Run(() =>
@@ -109,8 +109,11 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
                     Prefs.BrawlhallaPath = result.Path;
             });
         }
-        ImGui.Text($"Path: {Prefs.BrawlhallaPath}");
-        ImGui.Separator();
+        if (Prefs.BrawlhallaPath is null)
+            ImGui.TextColored(ImGuiExt.RGBHexToVec4(0xAA4433), "Please select path");
+        else
+            ImGui.Text($"Selected path: {Prefs.BrawlhallaPath}");
+        ImGui.SeparatorText("Mod file");
 
         if (ImGuiExt.ButtonDisabledIf(!WmeUtils.IsValidBrawlPath(Prefs.BrawlhallaPath), "Select mod file"))
         {
@@ -345,7 +348,7 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip("When importing from the game these files are loaded from the swz's.\nYou can override them with your own xml or csv files.");
 
-        ImGui.Separator();
+        ImGui.SeparatorText("Brawlhalla path");
         if (ImGui.Button("Select Brawlhalla Path"))
         {
             Task.Run(() =>
@@ -355,8 +358,11 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
                     Prefs.BrawlhallaPath = result.Path;
             });
         }
-        ImGui.Text($"Path: {Prefs.BrawlhallaPath}");
-        ImGui.Separator();
+        if (Prefs.BrawlhallaPath is null)
+            ImGui.TextColored(ImGuiExt.RGBHexToVec4(0xAA4433), "Please select path");
+        else
+            ImGui.Text($"Selected path: {Prefs.BrawlhallaPath}");
+        ImGui.SeparatorText("Decryption key");
 
         ImGui.InputText("Decryption key", ref _keyInput, 9, ImGuiInputTextFlags.CharsDecimal);
         if (Prefs.BrawlhallaPath is not null && ImGui.Button("Find key"))

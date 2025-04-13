@@ -24,8 +24,10 @@ public static class KeyFinderPanel
                     prefs.BrawlhallaAirPath = result.Path;
             });
         }
-
-        ImGui.Text($"Path: {prefs.BrawlhallaAirPath}");
+        if (prefs.BrawlhallaPath is null)
+            ImGui.TextColored(ImGuiExt.RGBHexToVec4(0xAA4433), "Please select path");
+        else
+            ImGui.Text($"Selected path: {prefs.BrawlhallaPath}");
 
         if (!string.IsNullOrWhiteSpace(prefs.BrawlhallaAirPath) && ImGui.Button("Find"))
             Task.Run(() => _foundKey = WmeUtils.FindDecryptionKeyFromPath(prefs.BrawlhallaAirPath)?.ToString());

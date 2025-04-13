@@ -99,7 +99,10 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
                     prefs.BrawlhallaPath = result.Path;
             });
         }
-        ImGui.Text($"Path: {prefs.BrawlhallaPath}");
+        if (prefs.BrawlhallaPath is null)
+            ImGui.TextColored(ImGuiExt.RGBHexToVec4(0xAA4433), "Please select path");
+        else
+            ImGui.Text($"Selected path: {prefs.BrawlhallaPath}");
 
         ImGui.Checkbox("Create backup for swz files", ref _backup);
 

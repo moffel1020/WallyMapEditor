@@ -35,7 +35,10 @@ public class ModLoaderWindow(PathPreferences prefs)
                     prefs.BrawlhallaPath = result.Path;
             });
         }
-        ImGui.Text($"Path: {prefs.BrawlhallaPath}");
+        if (prefs.BrawlhallaPath is null)
+            ImGui.TextColored(ImGuiExt.RGBHexToVec4(0xAA4433), "Please select path");
+        else
+            ImGui.Text($"Selected path: {prefs.BrawlhallaPath}");
 
         ImGui.SeparatorText("Mod files (.wally)");
         AddModFileButton();

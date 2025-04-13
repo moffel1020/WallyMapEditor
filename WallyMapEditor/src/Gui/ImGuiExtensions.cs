@@ -174,4 +174,12 @@ public static partial class ImGuiExt
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip(explanation);
     }
+
+    public static Vector4 RGBHexToVec4(uint hex)
+    {
+        float r = ((hex >> 16) & 0xFF) / 255f;
+        float g = ((hex >> 8) & 0xFF) / 255f;
+        float b = (hex & 0xFF) / 255f;
+        return new(r, g, b, 1);
+    }
 }
