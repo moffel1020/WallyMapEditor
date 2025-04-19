@@ -322,8 +322,8 @@ public class ModCreatorWindow(PathPreferences prefs)
     private static string NormalizePartialPath(string baseDir, string path) =>
         Path.GetRelativePath(baseDir, Path.Combine(baseDir, path)).Replace('\\', '/');
 
-    // use an impossible base path. this is just for the hashset so it's not exposed to the user.
-    private static string MakeGlobal(string path) => Path.GetFullPath(path, "Z:/BRAWL/").Replace('\\', '/');
+    // get unique path for use in hashsets. this likely prepends an incorrect base path, so do not expose this data to the user
+    private static string MakeGlobal(string path) => Path.GetFullPath(path).Replace('\\', '/');
 
     private static IEnumerable<string> FindChildAssetNames(AbstractAsset a) => a switch
     {
