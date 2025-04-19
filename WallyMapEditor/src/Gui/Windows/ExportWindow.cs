@@ -293,10 +293,10 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
         _exportStatus = "found!";
         string ldData = WmeUtils.SerializeToString(l.Desc, minify: true, bhstyle: true);
 
-        string dynamicPath = Path.Combine(prefs.BrawlhallaPath!, "Dynamic.swz");
-        string initPath = Path.Combine(prefs.BrawlhallaPath!, "Init.swz");
-        string gamePath = Path.Combine(prefs.BrawlhallaPath!, "Game.swz");
-        string enginePath = Path.Combine(prefs.BrawlhallaPath!, "Engine.swz");
+        string dynamicPath = Path.Combine(prefs.BrawlhallaPath, "Dynamic.swz");
+        string initPath = Path.Combine(prefs.BrawlhallaPath, "Init.swz");
+        string gamePath = Path.Combine(prefs.BrawlhallaPath, "Game.swz");
+        string enginePath = Path.Combine(prefs.BrawlhallaPath, "Engine.swz");
 
         if (backup)
         {
@@ -333,7 +333,7 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
         WmeUtils.SerializeSwzFilesToPath(initPath, initFiles.Values, key);
         WmeUtils.SerializeSwzFilesToPath(gamePath, gameFiles.Values, key);
 
-        backups.RefreshBackupList(prefs.BrawlhallaPath!);
+        backups.RefreshBackupList(prefs.BrawlhallaPath);
     }
 
     private static void UpdatePlaylists(LevelSetTypes levelSetTypes, Level l)

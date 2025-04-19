@@ -1,11 +1,13 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ImGuiNET;
 
 namespace WallyMapEditor;
 
-public class BackupsList
+public partial class BackupsList
 {
     // state that is unique to each instance
     public sealed class ExternalState
@@ -101,7 +103,7 @@ public class BackupsList
         }
     }
 
-    private static int[] FindBackups(string dir)
+    private static IEnumerable<int> FindBackups(string dir)
     {
         string[] requiredFiles(int num) => [
             WmeUtils.CreateBackupPath(Path.Combine(dir, "Dynamic.swz"), num),
@@ -110,20 +112,34 @@ public class BackupsList
             WmeUtils.CreateBackupPath(Path.Combine(dir, "Engine.swz"), num),
         ];
 
-        int[] validBackupNumbers = Directory.EnumerateFiles(dir)
-            .Where(p => p.Contains("_Backup"))
-            .Select(p => Path.GetFileNameWithoutExtension(p).Split("_Backup").Last())
-            .MapFilter(n => int.TryParse(n, out int i) ? i : Maybe<int>.None)
-            .Distinct()
-            .Where(num => requiredFiles(num).All(File.Exists))
-            .ToArray();
+        Regex re = BackupFileRegex();
 
-        return validBackupNumbers;
+        return Directory.EnumerateFiles(dir)
+            .Where(p => p.Contains("_Backup"))
+            .MapFilter(p =>
+            {
+                string name = Path.GetFileNameWithoutExtension(p);
+
+                Match match = re.Match(name);
+                if (!match.Success)
+                    return Maybe<int>.None;
+
+                string backupNumString = match.Groups[1].Value;
+                if (!int.TryParse(backupNumString, out int backupNum))
+                    return Maybe<int>.None;
+
+                return backupNum;
+            })
+            .Distinct()
+            .Where(num => requiredFiles(num).All(File.Exists));
     }
 
     public void RefreshBackupList(string brawlPath)
     {
-        _backupNums = FindBackups(brawlPath);
-        _backupDisplayNames = _backupNums.Select(n => $"Backup {n} - {File.GetLastWriteTime(Path.Combine(brawlPath, $"Dynamic_Backup{n}.swz"))}").ToArray();
+        _backupNums = [.. FindBackups(brawlPath)];
+        _backupDisplayNames = [.. _backupNums.Select(n => $"Backup {n} - {File.GetLastWriteTime(Path.Combine(brawlPath, $"Dynamic_Backup{n}.swz"))}")];
     }
+
+    [GeneratedRegex(@"^(?:.*)_Backup([0-9]+)$")]
+    private static partial Regex BackupFileRegex();
 }

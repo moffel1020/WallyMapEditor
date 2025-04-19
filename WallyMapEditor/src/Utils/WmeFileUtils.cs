@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using System.Diagnostics.CodeAnalysis;
 using BrawlhallaSwz;
 using SkiaSharp;
 
@@ -34,7 +35,7 @@ public static partial class WmeUtils
         return false;
     }
 
-    public static bool IsValidBrawlPath(string? path)
+    public static bool IsValidBrawlPath([NotNullWhen(true)] string? path)
     {
         if (path is null) return false;
 
@@ -69,9 +70,7 @@ public static partial class WmeUtils
             backupPath = CreateBackupPath(path, suffix);
             suffix++;
         } while (File.Exists(backupPath));
-        using FileStream read = new(path, FileMode.Open, FileAccess.Read);
-        using FileStream write = new(backupPath, FileMode.CreateNew, FileAccess.Write);
-        read.CopyTo(write);
+        File.Copy(path, backupPath, true);
     }
 
     public static string ForcePathExtension(string path, string extension)
