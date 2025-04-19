@@ -99,4 +99,17 @@ public static partial class WmeUtils
             writer.WriteFile(file);
         writer.Flush();
     }
+
+    public static bool IsSubPathOf(string path, string basePath)
+    {
+        path = path.Replace('\\', '/');
+        path = Path.TrimEndingDirectorySeparator(path);
+        string normalizedPath = Path.GetFullPath(path);
+
+        basePath = basePath.Replace('\\', '/');
+        basePath = Path.TrimEndingDirectorySeparator(basePath);
+        string normalizedBasePath = Path.GetFullPath(basePath);
+
+        return normalizedPath.StartsWith(normalizedBasePath, StringComparison.OrdinalIgnoreCase);
+    }
 }
