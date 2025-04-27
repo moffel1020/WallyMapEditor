@@ -116,11 +116,11 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
             ImGui.Separator();
         }
 
-        List<string> badStuff = [.. FindBadMapStuff(l, prefs)];
-        if (badStuff.Count > 0)
+        List<string> mapErrors = [.. ValidateMapForGame(l, prefs)];
+        if (mapErrors.Count > 0)
         {
             ImGui.SeparatorText("Warnings");
-            foreach (string warning in badStuff)
+            foreach (string warning in mapErrors)
                 ImGui.TextWrapped("[Warning]: " + warning);
             ImGui.Separator();
         }
@@ -364,7 +364,7 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
         }
     }
 
-    public static IEnumerable<string> FindBadMapStuff(Level l, PathPreferences prefs)
+    public static IEnumerable<string> ValidateMapForGame(Level l, PathPreferences prefs)
     {
         LevelType? lt = l.Type;
         if (lt is not null && lt.LevelID > LevelTypes.MAX_LEVEL_ID)
