@@ -116,6 +116,15 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
             ImGui.Separator();
         }
 
+        List<string> mapErrors = [.. ValidateMapForGame(l, prefs)];
+        if (mapErrors.Count > 0)
+        {
+            ImGui.SeparatorText("Warnings");
+            foreach (string warning in mapErrors)
+                ImGui.TextWrapped("[Warning]: " + warning);
+            ImGui.Separator();
+        }
+
         if (ImGui.Button("Export"))
         {
             Task.Run(() =>
@@ -353,5 +362,136 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
                 }
             }
         }
+    }
+
+    public static IEnumerable<string> ValidateMapForGame(Level l, PathPreferences prefs)
+    {
+        LevelType? lt = l.Type;
+        if (lt is not null && lt.LevelID > LevelTypes.MAX_LEVEL_ID)
+            yield return $"LevelType has LevelID {lt.LevelID}, which is greater than {LevelTypes.MAX_LEVEL_ID}.";
+
+        LevelDesc ld = l.Desc;
+        if (ld.NavNodes.Length == 0 && ld.DynamicNavNodes.All((dn) => dn.Children.Length == 0))
+            yield return "The LevelDesc has no NavNodes. This will cause a crash when using a bot.";
+        if (ld.Respawns.Length == 0 && ld.DynamicRespawns.All((dr) => dr.Children.Length == 0))
+            yield return "The LevelDesc has no Respawns. This will cause a crash.";
+        if (ld.Volumes.OfType<Goal>().Count() == 1)
+            yield return "The LevelDesc has only one Goal. This will cause a crash in Horde.";
+
+        static IEnumerable<string> assetNameCheck(Level l, string brawlPath)
+        {
+            LevelDesc ld = l.Desc;
+            // AssetDir
+            string assetDir = ld.AssetDir;
+            string assetDirPath = Path.Combine(brawlPath, "mapArt", assetDir);
+            if (!WmeUtils.IsSubPathOf(assetDirPath, brawlPath))
+            {
+                yield return $"LevelDesc has AssetDir of \"{assetDir}\", which would end up outside the brawlhalla path";
+                yield break; // subsequent errors would be a result of this
+            }
+
+            // backgrounds
+            foreach (Background background in ld.Backgrounds)
+            {
+                // AssetName
+                string assetName = background.AssetName;
+                string assetNameExtension = Path.GetExtension(assetName);
+                if (assetNameExtension != ".png" && assetNameExtension != ".jpg")
+                    yield return $"A Background has AssetName of \"{assetName}\", but the game only supports png and jpg";
+                string assetNamePath = Path.Combine(brawlPath, "Backgrounds", assetName);
+                if (!WmeUtils.IsSubPathOf(assetNamePath, brawlPath))
+                    yield return $"A Background has AssetName of \"{assetName}\", which would end up outside the brawlhalla path";
+                // AnimatedAssetName
+                string? animatedAssetName = background.AnimatedAssetName;
+                if (animatedAssetName is not null)
+                {
+                    string animatedAssetNameExtension = Path.GetExtension(animatedAssetName);
+                    if (animatedAssetNameExtension != ".png" && animatedAssetNameExtension != ".jpg")
+                        yield return $"A Background has AnimatedAssetName of \"{animatedAssetName}\", but the game only supports png and jpg";
+                    string animatedAssetNamePath = Path.Combine(brawlPath, "Backgrounds", animatedAssetName);
+                    if (!WmeUtils.IsSubPathOf(animatedAssetNamePath, brawlPath))
+                        yield return $"A Background has AnimatedAssetName of \"{animatedAssetName}\", which would end up outside the brawlhalla path";
+                }
+            }
+
+            // assets
+            foreach (AbstractAsset asset in ld.Assets)
+            {
+                foreach (string warning in checkAsset(asset, assetDirPath, brawlPath))
+                    yield return warning;
+            }
+
+            static IEnumerable<string> checkAsset(AbstractAsset asset, string assetDirPath, string brawlPath)
+            {
+                string? assetName = asset.AssetName;
+                if (assetName is not null)
+                {
+                    string assetNamePath = Path.Combine(assetDirPath, assetName);
+                    string assetNameExtension = Path.GetExtension(assetName);
+                    if (assetNameExtension != ".png" && assetNameExtension != ".jpg")
+                        yield return $"A Background has AssetName of \"{assetName}\", but the game only supports png and jpg";
+                    if (!WmeUtils.IsSubPathOf(assetNamePath, brawlPath))
+                        yield return $"A {asset.GetType().Name} has AssetName of \"{assetName}\", which would end up outside the brawlhalla path";
+                }
+
+                if (asset is Platform platform && platform.AssetChildren is not null)
+                {
+                    foreach (AbstractAsset child in platform.AssetChildren)
+                    {
+                        foreach (string warning in checkAsset(child, assetDirPath, brawlPath))
+                            yield return warning;
+                    }
+                }
+                else if (asset is MovingPlatform mp)
+                {
+                    foreach (AbstractAsset child in mp.Assets)
+                    {
+                        foreach (string warning in checkAsset(child, assetDirPath, brawlPath))
+                            yield return warning;
+                    }
+                }
+            }
+        }
+
+        string? brawlPath = prefs.BrawlhallaPath;
+        if (brawlPath is not null)
+        {
+            if (lt is not null && lt.ThumbnailPNGFile is not null)
+            {
+                string thumbnail = lt.ThumbnailPNGFile;
+                string thumbnailExtension = Path.GetExtension(thumbnail);
+
+                if (thumbnailExtension != ".png" && thumbnailExtension != ".jpg")
+                    yield return $"The LevelType has ThumbnailPNGFile of \"{thumbnail}\", but the game only supports png and jpg";
+                string thumbnailPath = Path.Combine(brawlPath, "images/thumbnails", thumbnail);
+                if (!WmeUtils.IsSubPathOf(thumbnailPath, brawlPath))
+                    yield return $"The LevelType has ThumbnailPNGFile of \"{thumbnailPath}\", which would end up outside the brawlhalla path";
+            }
+
+            foreach (string warning in assetNameCheck(l, brawlPath))
+                yield return warning;
+        }
+
+        static IEnumerable<string> colliderBugCheck(Level l)
+        {
+            LevelDesc ld = l.Desc;
+
+            HashSet<string> dynamicCollisionPlatIds = [];
+            foreach (DynamicCollision dc in ld.DynamicCollisions)
+            {
+                dynamicCollisionPlatIds.Add(dc.PlatID);
+            }
+
+            foreach (MovingPlatform mp in ld.Assets.OfType<MovingPlatform>())
+            {
+                if (!dynamicCollisionPlatIds.Contains(mp.PlatID))
+                {
+                    yield return $"PlatID {mp.PlatID} does not move any DynamicCollision. This will cause a crash when a power with TargetMethod Collider is used.";
+                }
+            }
+        }
+
+        foreach (string warning in colliderBugCheck(l))
+            yield return warning;
     }
 }

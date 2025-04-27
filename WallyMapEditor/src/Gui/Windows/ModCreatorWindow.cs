@@ -67,6 +67,25 @@ public class ModCreatorWindow(PathPreferences prefs)
         ImGui.Spacing();
         ShowExtraFileSection();
 
+        bool showedWarnings = false;
+        foreach (ModLevel l in _levels)
+        {
+            List<string> badStuff = [.. ExportWindow.FindBadMapStuff(l.Level, prefs)];
+            if (badStuff.Count > 0)
+            {
+                if (!showedWarnings)
+                {
+                    ImGui.SeparatorText("Warnings");
+                    showedWarnings = true;
+                }
+
+                ImGui.Text($"For {l.Level.Desc.LevelName}");
+
+                foreach (string warning in badStuff)
+                    ImGui.TextWrapped("[Warning]: " + warning);
+            }
+        }
+
         ImGui.Separator();
         ModFileExportButton();
 
