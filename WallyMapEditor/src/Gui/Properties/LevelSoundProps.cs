@@ -12,7 +12,7 @@ public partial class PropertiesWindow
         ImGui.Separator();
 
         bool propChanged = false;
-        ImGui.Text("SoundEventName: " + ls.SoundEventName);
+        propChanged |= ImGuiExt.InputTextHistory("SoundEventName", ls.SoundEventName, val => ls.SoundEventName = val, cmd);
         propChanged |= ImGuiExt.DragUIntHistory("Interval", ls.Interval, val => ls.Interval = val, cmd, speed: 16);
         propChanged |= ImGuiExt.DragUIntHistory("Delay", ls.Delay, val => ls.Delay = val, cmd, speed: 16);
         propChanged |= ImGuiExt.DragIntHistory("OnlineDelayDiff", ls.OnlineDelayDiff, val => ls.OnlineDelayDiff = val, cmd, speed: 16);
