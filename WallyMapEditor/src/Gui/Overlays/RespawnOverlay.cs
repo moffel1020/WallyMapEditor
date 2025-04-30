@@ -27,10 +27,11 @@ public class RespawnOverlay(Respawn res) : IOverlay
 
         if (Box.Dragging)
         {
-            cmd.Add(new PropChangeCommand<(double, double)>(
-                val => (res.X, res.Y) = val,
-                (res.X, res.Y),
-                (Box.Middle.Item1 - offsetX, Box.Middle.Item2 - offsetY)));
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (res.X, res.Y) = (val1, val2),
+                res.X, res.Y,
+                Box.Middle.Item1 - offsetX, Box.Middle.Item2 - offsetY
+            ));
         }
 
         return Box.Dragging;

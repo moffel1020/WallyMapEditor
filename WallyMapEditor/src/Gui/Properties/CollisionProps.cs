@@ -62,7 +62,7 @@ public partial class PropertiesWindow
             $"AnchorX##props{ac.GetHashCode()}", $"AnchorY##props{ac.GetHashCode()}",
             ac.AnchorX, ac.AnchorY,
             (ac.X1 + ac.X2) / 2 + (ac.Parent?.X ?? 0), (ac.Y1 + ac.Y2) / 2 + (ac.Parent?.Y ?? 0),
-            val => (ac.AnchorX, ac.AnchorY) = val,
+            (val1, val2) => (ac.AnchorX, ac.AnchorY) = (val1, val2),
             cmd
         );
 

@@ -186,7 +186,7 @@ public static partial class ImGuiExt
         string label1, string label2,
         double? value1, double? value2,
         double default1, double default2,
-        Action<(double?, double?)> changeCommand,
+        Action<double?, double?> changeCommand,
         CommandHistory cmd,
         float speed1 = 1, float speed2 = 1,
         double minValue1 = double.MinValue, double minValue2 = double.MaxValue,
@@ -196,11 +196,11 @@ public static partial class ImGuiExt
         bool propChanged = false;
         if (value1 is not null && value2 is not null)
         {
-            propChanged |= DragDoubleHistory(label1, value1.Value, val => changeCommand((val, value2.Value)), cmd, speed: speed1, minValue: minValue1, maxValue: maxValue1);
-            propChanged |= DragDoubleHistory(label2, value2.Value, val => changeCommand((value1.Value, val)), cmd, speed: speed2, minValue: minValue2, maxValue: maxValue2);
+            propChanged |= DragDoubleHistory(label1, value1.Value, val => changeCommand(val, value2.Value), cmd, speed: speed1, minValue: minValue1, maxValue: maxValue1);
+            propChanged |= DragDoubleHistory(label2, value2.Value, val => changeCommand(value1.Value, val), cmd, speed: speed2, minValue: minValue2, maxValue: maxValue2);
             if (ImGui.Button("Remove##" + mainLabel))
             {
-                cmd.Add(new PropChangeCommand<(double?, double?)>(changeCommand, (value1, value2), (null, null)));
+                cmd.Add(new PropChangeCommand<double?, double?>(changeCommand, value1, value2, null, null));
                 return true;
             }
         }
@@ -210,7 +210,7 @@ public static partial class ImGuiExt
             ImGui.SameLine();
             if (ImGui.Button("Add##" + mainLabel))
             {
-                cmd.Add(new PropChangeCommand<(double?, double?)>(changeCommand, (value1, value2), (default1, default2)));
+                cmd.Add(new PropChangeCommand<double?, double?>(changeCommand, value1, value2, default1, default2));
                 return true;
             }
         }
@@ -313,11 +313,11 @@ public static partial class ImGuiExt
     #region InputTextWithFilter
 
     // type ImGuiInputTextCallback
-    private unsafe static int NumAlphaFilter(ImGuiInputTextCallbackData* data) => (char)data->EventChar switch
+    private unsafe static int NumAlphaFilter(ImGuiInputTextCallbackData* data) => data->EventChar switch
     {
-        >= 'a' and <= 'z' => 0,
-        >= 'A' and <= 'Z' => 0,
-        >= '0' and <= '9' => 0,
+        >= 0x30 /* 0 */ and <= 0x39 /* 9 */ => 0,
+        >= 0x41 /* A */ and <= 0x5a /* Z */ => 0,
+        >= 0x61 /* a */ and <= 0x6a /* z */ => 0,
         _ => 1,
     };
 

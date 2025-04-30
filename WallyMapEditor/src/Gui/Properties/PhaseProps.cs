@@ -12,7 +12,7 @@ public partial class PropertiesWindow
             // create
             () => CreateKeyFrame(LastKeyFrameNum(phase.KeyFrames), phase),
             // edit
-            (int index) => ShowOneOfManyKeyFrameProps(phase.KeyFrames, index, cmd),
+            index => ShowOneOfManyKeyFrameProps(phase.KeyFrames, index, cmd),
             cmd, allowMove: false);
 
         return propChanged;

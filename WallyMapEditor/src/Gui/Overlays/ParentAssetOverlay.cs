@@ -40,10 +40,11 @@ public class ParentAssetOverlay(AbstractAsset asset) : IOverlay
 
         if (ScaleGizmo.Dragging)
         {
-            cmd.Add(new PropChangeCommand<(double, double)>(
-                val => (asset.ScaleX, asset.ScaleY) = val,
-                (asset.ScaleX, asset.ScaleY),
-                (ScaleGizmo.ScaleX, ScaleGizmo.ScaleY)));
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (asset.ScaleX, asset.ScaleY) = (val1, val2),
+                asset.ScaleX, asset.ScaleY,
+                ScaleGizmo.ScaleX, ScaleGizmo.ScaleY
+            ));
         }
 
         if (RotatePoint.Active)
@@ -51,15 +52,17 @@ public class ParentAssetOverlay(AbstractAsset asset) : IOverlay
             cmd.Add(new PropChangeCommand<double>(
                 val => asset.Rotation = val,
                 asset.Rotation,
-                RotatePoint.Rotation * 180 / Math.PI));
+                RotatePoint.Rotation * 180 / Math.PI
+            ));
         }
 
         if (Position.Dragging)
         {
-            cmd.Add(new PropChangeCommand<(double, double)>(
-                val => (asset.X, asset.Y) = val,
-                (asset.X, asset.Y),
-                (Position.X - parent.TranslateX, Position.Y - parent.TranslateY)));
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (asset.X, asset.Y) = (val1, val2),
+                asset.X, asset.Y,
+                Position.X - parent.TranslateX, Position.Y - parent.TranslateY
+            ));
         }
 
         return ScaleGizmo.Dragging || Position.Dragging || RotatePoint.Active;

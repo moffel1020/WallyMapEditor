@@ -38,10 +38,11 @@ public class KeyFrameOverlay(KeyFrame kf) : IOverlay
 
         if (Circle.Dragging)
         {
-            cmd.Add(new PropChangeCommand<(double, double)>(
-                val => (kf.X, kf.Y) = val,
-                (kf.X, kf.Y),
-                (Circle.X - offX, Circle.Y - offY)));
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (kf.X, kf.Y) = (val1, val2),
+                kf.X, kf.Y,
+                Circle.X - offX, Circle.Y - offY
+            ));
         }
 
         return Circle.Dragging;

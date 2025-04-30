@@ -92,7 +92,8 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             cmd.Add(new PropChangeCommand<(double, double, double, double)>(
                 val => (asset.X, asset.Y, asset.W, asset.H) = val,
                 (asset.X, asset.Y, asset.W.Value, asset.H.Value),
-                (newX, newY, newW, newH)));
+                (newX, newY, newW, newH)
+            ));
         }
 
         MoveRect.Update(data, !dragging && !RotatePoint.Active);
@@ -111,10 +112,12 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             (TopEdge.X, TopEdge.Y) = newTransform * (w / 2, 0);
             (BottomEdge.X, BottomEdge.Y) = newTransform * (w / 2, h);
 
-            cmd.Add(new PropChangeCommand<(double, double)>(
-                val => (asset.X, asset.Y) = val,
-                (asset.X, asset.Y),
-                asset.Transform * (MoveRect.X, MoveRect.Y)));
+            (double newAssetX, double newAssetY) = asset.Transform * (MoveRect.X, MoveRect.Y);
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (asset.X, asset.Y) = (val1, val2),
+                asset.X, asset.Y,
+                newAssetX, newAssetY
+            ));
         }
 
         return dragging || MoveRect.Dragging || RotatePoint.Active;

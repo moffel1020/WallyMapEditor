@@ -53,10 +53,11 @@ partial class PropertiesWindow
                     {
                         if (data.Loader.TextureCache.Cache.TryGetValue(Path.Combine(assetDir, a.AssetName), out Texture2DWrapper? tex))
                         {
-                            cmd.Add(new PropChangeCommand<(double, double)>(
-                                val => (a.W, a.H) = val,
-                                (a.W!.Value, a.H!.Value),
-                                (tex.Width, tex.Height)));
+                            cmd.Add(new PropChangeCommand<double, double>(
+                                (val1, val2) => (a.W, a.H) = (val1, val2),
+                                a.W!.Value, a.H!.Value,
+                                tex.Width, tex.Height
+                            ));
                         }
                     }
                 }

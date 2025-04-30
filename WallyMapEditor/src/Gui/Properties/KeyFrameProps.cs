@@ -33,7 +33,7 @@ public partial class PropertiesWindow
             "CenterX", "CenterY",
             k.CenterX, k.CenterY,
             0, 0,
-            val => (k.CenterX, k.CenterY) = val,
+            (val1, val2) => (k.CenterX, k.CenterY) = (val1, val2),
             cmd
         );
 

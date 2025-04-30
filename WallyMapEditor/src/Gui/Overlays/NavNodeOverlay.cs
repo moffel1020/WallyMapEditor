@@ -29,10 +29,11 @@ public class NavNodeOverlay(NavNode node) : IOverlay
 
         if (Box.Dragging)
         {
-            cmd.Add(new PropChangeCommand<(double, double)>(
-                val => (node.X, node.Y) = val,
-                (node.X, node.Y),
-                (Box.Middle.Item1 - offsetX, Box.Middle.Item2 - offsetY)));
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (node.X, node.Y) = (val1, val2),
+                node.X, node.Y,
+                Box.Middle.Item1 - offsetX, Box.Middle.Item2 - offsetY
+            ));
         }
 
         return Box.Dragging;

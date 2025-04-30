@@ -31,7 +31,7 @@ public partial class PropertiesWindow
             "CenterX", "CenterY",
             anim.CenterX, anim.CenterY,
             0, 0,
-            val => (anim.CenterX, anim.CenterY) = val,
+            (val1, val2) => (anim.CenterX, anim.CenterY) = (val1, val2),
             cmd
         );
 
@@ -43,7 +43,7 @@ public partial class PropertiesWindow
             // create
             () => CreateKeyFrame(LastKeyFrameNum(anim.KeyFrames)),
             // edit
-            (int index) =>
+            index =>
             {
                 if (index != 0)
                     ImGui.Separator();

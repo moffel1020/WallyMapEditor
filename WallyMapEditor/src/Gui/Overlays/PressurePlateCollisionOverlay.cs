@@ -48,13 +48,15 @@ public class PressurePlateCollisionOverlay(AbstractPressurePlateCollision col) :
                 dragging = true;
 
                 int iCapture = i;
-                cmd.Add(new PropChangeCommand<(double, double)>(val =>
+                double newX = Math.Round(circle.X - offsetX, ROUND_DECIMALS);
+                double newY = Math.Round(circle.Y - offsetY, ROUND_DECIMALS);
+                cmd.Add(new PropChangeCommand<double, double>((val1, val2) =>
                 {
-                    col.FireOffsetX[sharedFireOffsetX ? 0 : iCapture] = val.Item1;
-                    col.FireOffsetY[sharedFireOffsetY ? 0 : iCapture] = val.Item2;
+                    col.FireOffsetX[sharedFireOffsetX ? 0 : iCapture] = val1;
+                    col.FireOffsetY[sharedFireOffsetY ? 0 : iCapture] = val2;
                 },
-                (oldX, oldY),
-                (Math.Round(circle.X - offsetX, ROUND_DECIMALS), Math.Round(circle.Y - offsetY, ROUND_DECIMALS))
+                oldX, oldY,
+                newX, newY
                 ));
             }
         }

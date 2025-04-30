@@ -55,6 +55,7 @@ public partial class PropertiesWindow
                 int index = i;
                 remove = () =>
                 {
+                    // no need for ArrayRemoveCommand because we're not dealing with selectables
                     (uint, NavNodeTypeEnum)[] result = WmeUtils.RemoveAt(n.Path, index);
                     cmd.Add(new PropChangeCommand<(uint, NavNodeTypeEnum)[]>(val => n.Path = val, n.Path, result));
                     cmd.SetAllowMerge(false);
@@ -74,6 +75,7 @@ public partial class PropertiesWindow
                 {
                     if (node.NavID != n.NavID && ImGui.Selectable($"{node.NavID}###pathselect{node.GetHashCode()}"))
                     {
+                        // no need for ArrayAddCommand because we're not dealing with selectables
                         cmd.Add(new PropChangeCommand<(uint, NavNodeTypeEnum)[]>(val => n.Path = val, n.Path, [.. n.Path, (node.NavID, node.Type)]));
                         cmd.SetAllowMerge(false);
                     }

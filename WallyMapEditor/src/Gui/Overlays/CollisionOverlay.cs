@@ -54,10 +54,13 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
             if (!Rl.IsKeyDown(KeyboardKey.LeftAlt))
                 _snapToPoint = SnapDrag(col, Circle1, data);
 
-            cmd.Add(new PropChangeCommand<(double, double)>(
-                val => (col.X1, col.Y1) = val,
-                (col.X1, col.Y1),
-                (Math.Round(Circle1.X - offsetX, ROUND_DECIMALS), Math.Round(Circle1.Y - offsetY, ROUND_DECIMALS))));
+            double newX = Math.Round(Circle1.X - offsetX, ROUND_DECIMALS);
+            double newY = Math.Round(Circle1.Y - offsetY, ROUND_DECIMALS);
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (col.X1, col.Y1) = (val1, val2),
+                col.X1, col.Y1,
+                newX, newY
+            ));
         }
 
         if (Circle2.Dragging)
@@ -69,18 +72,22 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
             if (!Rl.IsKeyDown(KeyboardKey.LeftAlt))
                 _snapToPoint = SnapDrag(col, Circle2, data);
 
-            cmd.Add(new PropChangeCommand<(double, double)>(
-                val => (col.X2, col.Y2) = val,
-                (col.X2, col.Y2),
-                (Math.Round(Circle2.X - offsetX, ROUND_DECIMALS), Math.Round(Circle2.Y - offsetY, ROUND_DECIMALS))));
+            double newX = Math.Round(Circle2.X - offsetX, ROUND_DECIMALS);
+            double newY = Math.Round(Circle2.Y - offsetY, ROUND_DECIMALS);
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (col.X2, col.Y2) = (val1, val2),
+                col.X2, col.Y2,
+                newX, newY
+            ));
         }
 
         if (HasAnchor && Anchor.Dragging)
         {
-            cmd.Add(new PropChangeCommand<(double?, double?)>(
-                val => (col.AnchorX, col.AnchorY) = val,
-                (col.AnchorX, col.AnchorY),
-                (Anchor.X - dynOffsetX, Anchor.Y - dynOffsetY)));
+            cmd.Add(new PropChangeCommand<double?, double?>(
+                (val1, val2) => (col.AnchorX, col.AnchorY) = (val1, val2),
+                col.AnchorX, col.AnchorY,
+                Anchor.X - dynOffsetX, Anchor.Y - dynOffsetY
+            ));
         }
 
         return Circle1.Dragging || Circle2.Dragging || Anchor.Dragging;

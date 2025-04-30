@@ -25,10 +25,11 @@ public class AbstractDynamicOverlay<T>(AbstractDynamic<T> dyn) : IOverlay
 
         if (Position.Dragging)
         {
-            cmd.Add(new PropChangeCommand<(double, double)>(
-                val => (dyn.X, dyn.Y) = val,
-                (dyn.X, dyn.Y),
-                (Position.X - offsetX, Position.Y - offsetY)));
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (dyn.X, dyn.Y) = (val1, val2),
+                dyn.X, dyn.Y,
+                Position.X - offsetX, Position.Y - offsetY
+            ));
         }
 
         return Position.Dragging;

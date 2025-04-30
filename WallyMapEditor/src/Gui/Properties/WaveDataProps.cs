@@ -24,7 +24,7 @@ public partial class PropertiesWindow
         {
             propChanged |= ImGuiExt.EditArrayHistory("##custompathslist", w.CustomPaths, val => w.CustomPaths = val,
             () => CreateNewCustomPath(w),
-            (int index) =>
+            index =>
             {
                 bool changed = false;
                 CustomPath cp = w.CustomPaths[index];
@@ -44,7 +44,7 @@ public partial class PropertiesWindow
         {
             propChanged |= ImGuiExt.EditArrayHistory("##groupslist", w.Groups, val => w.Groups = val,
             () => CreateNewGroup(w),
-            (int index) =>
+            index =>
             {
                 bool changed = false;
                 Group g = w.Groups[index];
@@ -64,7 +64,7 @@ public partial class PropertiesWindow
         bool propChanged = false;
         propChanged |= ImGuiExt.EditArrayHistory($"##custompathPoints{cp.GetHashCode()}", cp.Points, val => cp.Points = val,
         () => CreateNewPoint(cp),
-        (int index) =>
+        index =>
         {
             bool changed = false;
             Point p = cp.Points[index];

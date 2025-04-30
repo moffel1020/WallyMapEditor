@@ -56,10 +56,11 @@ public class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
 
         if (Position.Dragging)
         {
-            cmd.Add(new PropChangeCommand<(double, double)>(
-                val => (plat.X, plat.Y) = val,
-                (plat.X, plat.Y),
-                (plat.X + Position.X - offsetX, plat.Y + Position.Y - offsetY)));
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (plat.X, plat.Y) = (val1, val2),
+                plat.X, plat.Y,
+                plat.X + Position.X - offsetX, plat.Y + Position.Y - offsetY
+            ));
         }
 
         return Position.Dragging || dragging;

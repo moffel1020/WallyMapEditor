@@ -39,7 +39,11 @@ public class CustomPathOverlay(CustomPath cp) : IOverlay
             if (circle.Dragging)
             {
                 dragging = true;
-                cmd.Add(new PropChangeCommand<(double, double)>(val => (point.X, point.Y) = val, (point.X, point.Y), (circle.X, circle.Y)));
+                cmd.Add(new PropChangeCommand<double, double>(
+                    (val1, val2) => (point.X, point.Y) = (val1, val2),
+                    point.X, point.Y,
+                    circle.X, circle.Y
+                ));
             }
         }
 

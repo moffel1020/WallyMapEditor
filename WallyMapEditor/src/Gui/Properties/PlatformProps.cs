@@ -43,7 +43,7 @@ partial class PropertiesWindow
         {
             propChanged |= ImGuiExt.EditArrayHistory("", p.AssetChildren!, val => p.AssetChildren = val,
             () => CreateNewPlatformChild(p),
-            (int index) =>
+            index =>
             {
                 if (index != 0)
                     ImGui.Separator();

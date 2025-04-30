@@ -84,8 +84,8 @@ public readonly struct Maybe<T>
         return this;
     }
 
-    public Maybe<T> NoneIf(Predicate<T> predicate) => _hasValue && !predicate(_value) ? _value : Maybe<T>.None;
-    public Maybe<T> SomeIf(Predicate<T> predicate) => _hasValue && predicate(_value) ? _value : Maybe<T>.None;
+    public Maybe<T> NoneIf(Predicate<T> predicate) => _hasValue && !predicate(_value) ? _value : None;
+    public Maybe<T> SomeIf(Predicate<T> predicate) => _hasValue && predicate(_value) ? _value : None;
 
     public static Maybe<T> Some(T value) => new(value);
     public static Maybe<T> None => new();

@@ -25,7 +25,7 @@ public partial class PropertiesWindow
         {
             propChanged |= ImGuiExt.EditArrayHistory("", ad.Children, val => ad.Children = val,
             () => CreateDynamicChild(ad, data.Level?.Desc),
-            (int index) =>
+            index =>
             {
                 bool changed = false;
                 if (index >= ad.Children.Length) return false;

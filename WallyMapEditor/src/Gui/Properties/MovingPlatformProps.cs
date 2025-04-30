@@ -32,7 +32,7 @@ public partial class PropertiesWindow
         {
             propChanged |= ImGuiExt.EditArrayHistory("", mp.Assets, val => mp.Assets = val,
             () => CreateNewMovingPlatformChild(mp),
-            (int index) =>
+            index =>
             {
                 bool changed = false;
                 if (index >= mp.Assets.Length) return false;
