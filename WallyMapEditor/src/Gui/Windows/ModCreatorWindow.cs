@@ -70,8 +70,8 @@ public class ModCreatorWindow(PathPreferences prefs)
         bool showedWarnings = false;
         foreach (ModLevel l in _levels)
         {
-            List<string> badStuff = [.. ExportWindow.FindBadMapStuff(l.Level, prefs)];
-            if (badStuff.Count > 0)
+            List<string> mapWarnings = [.. ExportWindow.ValidateMapForGame(l.Level, prefs)];
+            if (mapWarnings.Count > 0)
             {
                 if (!showedWarnings)
                 {
@@ -81,7 +81,7 @@ public class ModCreatorWindow(PathPreferences prefs)
 
                 ImGui.Text($"For {l.Level.Desc.LevelName}");
 
-                foreach (string warning in badStuff)
+                foreach (string warning in mapWarnings)
                     ImGui.TextWrapped("[Warning]: " + warning);
             }
         }

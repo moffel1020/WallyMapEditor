@@ -116,11 +116,11 @@ public class ExportWindow(PathPreferences prefs, BackupsList backups)
             ImGui.Separator();
         }
 
-        List<string> mapErrors = [.. ValidateMapForGame(l, prefs)];
-        if (mapErrors.Count > 0)
+        List<string> mapWarnings = [.. ValidateMapForGame(l, prefs)];
+        if (mapWarnings.Count > 0)
         {
             ImGui.SeparatorText("Warnings");
-            foreach (string warning in mapErrors)
+            foreach (string warning in mapWarnings)
                 ImGui.TextWrapped("[Warning]: " + warning);
             ImGui.Separator();
         }
