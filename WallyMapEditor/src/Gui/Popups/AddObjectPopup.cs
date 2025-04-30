@@ -167,8 +167,7 @@ public static class AddObjectPopup
     public static void AddWaveDataMenuHistory(Level l, SelectionContext selection, CommandHistory cmd)
     {
         WaveData wave = PropertiesWindow.DefaultWaveData(l.Desc);
-        cmd.Add(new ArrayAddCommand<WaveData>(val => l.Desc.WaveDatas = val, l.Desc.WaveDatas, wave));
-        cmd.SetAllowMerge(false);
+        cmd.Add(new ArrayAddCommand<WaveData>(val => l.Desc.WaveDatas = val, l.Desc.WaveDatas, wave), false);
         selection.Object = wave;
     }
 
@@ -196,8 +195,7 @@ public static class AddObjectPopup
 
         if (maybeAsset.TryGetValue(out AbstractAsset? asset))
         {
-            cmd.Add(new ArrayAddCommand<AbstractAsset>(val => l.Desc.Assets = val, l.Desc.Assets, asset));
-            cmd.SetAllowMerge(false);
+            cmd.Add(new ArrayAddCommand<AbstractAsset>(val => l.Desc.Assets = val, l.Desc.Assets, asset), false);
             selection.Object = asset;
         }
     }

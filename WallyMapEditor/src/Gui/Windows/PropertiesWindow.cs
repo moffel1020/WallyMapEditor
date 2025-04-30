@@ -41,9 +41,8 @@ public partial class PropertiesWindow
             if (index == -1) index = Array.FindIndex(list, e => e == newObj); // undo
             if (index == -1) Rl.TraceLog(TraceLogLevel.Error, $"Attempt to change type of orphaned {typeof(T).Name}");
             else list[index] = val;
-        }, obj, newObj));
+        }, obj, newObj), false);
 
-        cmd.SetAllowMerge(false);
         return true;
     }
 
@@ -60,8 +59,7 @@ public partial class PropertiesWindow
         }
 
         T[] removed = WmeUtils.RemoveAt(parentArray, idx);
-        cmd.Add(new ArrayRemoveCommand<T>(setParentArray, parentArray, removed, value));
-        cmd.SetAllowMerge(false);
+        cmd.Add(new ArrayRemoveCommand<T>(setParentArray, parentArray, removed, value), false);
         return true;
     }
 

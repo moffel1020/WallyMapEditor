@@ -380,8 +380,7 @@ public class MapOverviewWindow
                 if (ImGui.Button($"x##{o.GetHashCode()}"))
                 {
                     T[] result = WmeUtils.RemoveAt(values, i);
-                    cmd.Add(new ArrayRemoveCommand<T>(changeCommand, values, result, values[i]));
-                    cmd.SetAllowMerge(false);
+                    cmd.Add(new ArrayRemoveCommand<T>(changeCommand, values, result, values[i]), false);
                     _propChanged |= true;
                 }
                 ImGui.SameLine();
@@ -393,16 +392,14 @@ public class MapOverviewWindow
                 if (ImGuiExt.ButtonDisabledIf(i == 0, $"^##{o.GetHashCode()}"))
                 {
                     T[] result = WmeUtils.MoveUp(values, i);
-                    cmd.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
-                    cmd.SetAllowMerge(false);
+                    cmd.Add(new PropChangeCommand<T[]>(changeCommand, values, result), false);
                     _propChanged |= true;
                 }
                 ImGui.SameLine();
                 if (ImGuiExt.ButtonDisabledIf(i == values.Length - 1, $"v##{o.GetHashCode()}"))
                 {
                     T[] result = WmeUtils.MoveDown(values, i);
-                    cmd.Add(new PropChangeCommand<T[]>(changeCommand, values, result));
-                    cmd.SetAllowMerge(false);
+                    cmd.Add(new PropChangeCommand<T[]>(changeCommand, values, result), false);
                     _propChanged |= true;
                 }
                 ImGui.SameLine();
@@ -457,16 +454,14 @@ public class MapOverviewWindow
             if (ImGuiExt.ButtonDisabledIf(i == 0, $"^##{c}"))
             {
                 TeamColorEnum[] result = WmeUtils.MoveUp(order, i);
-                cmd.Add(new PropChangeCommand<TeamColorEnum[]>(setOrder, order, result));
-                cmd.SetAllowMerge(false);
+                cmd.Add(new PropChangeCommand<TeamColorEnum[]>(setOrder, order, result), false);
                 _propChanged |= true;
             }
             ImGui.SameLine();
             if (ImGuiExt.ButtonDisabledIf(i == order.Length - 1, $"v##{c}"))
             {
                 TeamColorEnum[] result = WmeUtils.MoveDown(order, i);
-                cmd.Add(new PropChangeCommand<TeamColorEnum[]>(setOrder, order, result));
-                cmd.SetAllowMerge(false);
+                cmd.Add(new PropChangeCommand<TeamColorEnum[]>(setOrder, order, result), false);
                 _propChanged |= true;
             }
             ImGui.SameLine();

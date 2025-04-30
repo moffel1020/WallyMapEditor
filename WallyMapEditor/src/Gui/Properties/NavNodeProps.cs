@@ -33,8 +33,7 @@ public partial class PropertiesWindow
             {
                 if (!NavIDExists(newID, data.Level.Desc))
                 {
-                    cmd.Add(new PropChangeCommand<uint>(val => RenameNavID(n, val, data.Level.Desc), n.NavID, newID));
-                    cmd.SetAllowMerge(false);
+                    cmd.Add(new PropChangeCommand<uint>(val => RenameNavID(n, val, data.Level.Desc), n.NavID, newID), false);
                 }
             }
         }
@@ -57,8 +56,7 @@ public partial class PropertiesWindow
                 {
                     // no need for ArrayRemoveCommand because we're not dealing with selectables
                     (uint, NavNodeTypeEnum)[] result = WmeUtils.RemoveAt(n.Path, index);
-                    cmd.Add(new PropChangeCommand<(uint, NavNodeTypeEnum)[]>(val => n.Path = val, n.Path, result));
-                    cmd.SetAllowMerge(false);
+                    cmd.Add(new PropChangeCommand<(uint, NavNodeTypeEnum)[]>(val => n.Path = val, n.Path, result), false);
                     propChanged = true;
                 };
             }
@@ -76,8 +74,7 @@ public partial class PropertiesWindow
                     if (node.NavID != n.NavID && ImGui.Selectable($"{node.NavID}###pathselect{node.GetHashCode()}"))
                     {
                         // no need for ArrayAddCommand because we're not dealing with selectables
-                        cmd.Add(new PropChangeCommand<(uint, NavNodeTypeEnum)[]>(val => n.Path = val, n.Path, [.. n.Path, (node.NavID, node.Type)]));
-                        cmd.SetAllowMerge(false);
+                        cmd.Add(new PropChangeCommand<(uint, NavNodeTypeEnum)[]>(val => n.Path = val, n.Path, [.. n.Path, (node.NavID, node.Type)]), false);
                     }
                 }
                 ImGui.EndCombo();

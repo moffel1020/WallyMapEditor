@@ -12,4 +12,6 @@ public class ArrayAddCommand<T>(Action<T[]> arrayChange, T[] array, T toAdd)
     }
 
     public void ModifyOnExecute(SelectionContext selection) { }
+
+    public override bool AllowMerge => false;
 }

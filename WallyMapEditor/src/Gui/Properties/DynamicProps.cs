@@ -57,15 +57,13 @@ public partial class PropertiesWindow
             propChanged = ShowPlatIDEdit(changeCommand, value, data, cmd);
             if (ImGui.Button("Remove PlatID"))
             {
-                cmd.Add(new PropChangeCommand<string?>(changeCommand, value, null));
-                cmd.SetAllowMerge(false);
+                cmd.Add(new PropChangeCommand<string?>(changeCommand, value, null), false);
                 propChanged = true;
             }
         }
         else if (ImGui.Button("Add PlatID"))
         {
-            cmd.Add(new PropChangeCommand<string?>(changeCommand, value, "0"));
-            cmd.SetAllowMerge(false);
+            cmd.Add(new PropChangeCommand<string?>(changeCommand, value, "0"), false);
             propChanged = true;
         }
 
@@ -94,8 +92,7 @@ public partial class PropertiesWindow
                 {
                     if (ImGui.Selectable(id, id == value))
                     {
-                        cmd.Add(new PropChangeCommand<string>(changeCommand, value, id));
-                        cmd.SetAllowMerge(false);
+                        cmd.Add(new PropChangeCommand<string>(changeCommand, value, id), false);
                         propChanged = true;
                     }
                 }

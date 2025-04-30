@@ -14,4 +14,6 @@ public class ArrayRemoveCommand<T>(Action<T[]> arrayChange, T[] originalArray, T
         if (selection.Object == (object?)removedValue || WmeUtils.IsObjectChildOf(selection.Object, removedValue))
             selection.Object = null;
     }
+
+    public override bool AllowMerge => false;
 }

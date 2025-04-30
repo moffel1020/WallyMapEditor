@@ -143,10 +143,7 @@ public static partial class ImGuiExt
         }
 
         foreach ((ICommand command, bool mergeable) in commands)
-        {
-            cmd.Add(command);
-            cmd.SetAllowMerge(mergeable);
-        }
+            cmd.Add(command, mergeable);
 
         return changed;
     }

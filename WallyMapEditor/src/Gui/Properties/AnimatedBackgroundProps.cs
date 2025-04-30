@@ -52,7 +52,7 @@ partial class PropertiesWindow
                     },
                     ab.SoundString, ab.SoundFrame,
                     null, null
-                ));
+                ), false);
             }
         }
         else
@@ -68,7 +68,7 @@ partial class PropertiesWindow
                     },
                     ab.SoundString, ab.SoundFrame,
                     "", ab.SoundFrame ?? 0
-                ));
+                ), false);
             }
         }
 
