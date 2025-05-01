@@ -11,7 +11,7 @@ public class PropChangeCommand<T1, T2>(Action<T1, T2> changeAction, T1 oldVal1, 
     protected T2 NewVal2 { get; set; } = newVal2;
 
     public void Execute() => Action(NewVal1, NewVal2);
-    public void Undo() => Action(OldVal1, NewVal2);
+    public void Undo() => Action(OldVal1, OldVal2);
 
     public bool Merge(ICommand cmd)
     {
