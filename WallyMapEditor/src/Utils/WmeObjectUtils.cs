@@ -1,6 +1,6 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
-using System.Reflection.Metadata;
 using Raylib_cs;
 using WallyMapSpinzor2;
 
@@ -60,104 +60,43 @@ public static partial class WmeUtils
 
     public static T[]? GetParentArray<T>(T obj, LevelDesc ld)
     {
-        // C# can't infer that if obj is U, then T = U.
-        // So this hack has to be used.
-        object[]? impl()
+        // C# can't infer that if obj is U, then T = U. So this hack has to be used
+        object? result = obj switch
         {
-            if (obj is Background b)
-            {
-                return ld.Backgrounds;
-            }
-            else if (obj is AbstractAsset a)
-            {
-                if (a.Parent is not null)
-                    return a.Parent switch
-                    {
-                        MovingPlatform mp => mp.Assets,
-                        Platform p when p.AssetChildren is not null => p.AssetChildren,
-                        _ => null,
-                    };
-                return ld.Assets;
-            }
-            else if (obj is AnimatedBackground)
-            {
-                return ld.AnimatedBackgrounds;
-            }
-            else if (obj is LevelAnim)
-            {
-                return ld.LevelAnims;
-            }
-            else if (obj is LevelAnimation)
-            {
-                return ld.LevelAnimations;
-            }
-            else if (obj is LevelSound)
-            {
-                return ld.LevelSounds;
-            }
-            else if (obj is AbstractCollision c)
-            {
-                if (c.Parent is not null) return c.Parent.Children;
-                return ld.Collisions;
-            }
-            else if (obj is DynamicCollision)
-            {
-                return ld.DynamicCollisions;
-            }
-            else if (obj is ItemSpawn i)
-            {
-                if (i.Parent is not null) return i.Parent.Children;
-                return ld.ItemSpawns;
-            }
-            else if (obj is DynamicItemSpawn)
-            {
-                return ld.DynamicItemSpawns;
-            }
-            else if (obj is NavNode n)
-            {
-                if (n.Parent is not null) return n.Parent.Children;
-                return ld.NavNodes;
-            }
-            else if (obj is DynamicNavNode)
-            {
-                return ld.DynamicNavNodes;
-            }
-            else if (obj is Respawn r)
-            {
-                if (r.Parent is not null) return r.Parent.Children;
-                return ld.Respawns;
-            }
-            else if (obj is DynamicRespawn)
-            {
-                return ld.DynamicRespawns;
-            }
-            else if (obj is AbstractVolume)
-            {
-                return ld.Volumes;
-            }
-            else if (obj is WaveData)
-            {
-                return ld.WaveDatas;
-            }
-            else if (obj is CustomPath cp)
-            {
-                if (cp.Parent is null) return null;
-                return cp.Parent.CustomPaths;
-            }
-            else if (obj is Point p)
-            {
-                if (p.Parent is null) return null;
-                return p.Parent.Points;
-            }
-            else if (obj is Group g)
-            {
-                if (g.Parent is null) return null;
-                return g.Parent.Groups;
-            }
-            return null;
-        }
-        return (T[]?)(object?)impl();
+            Background => ld.Backgrounds,
+            AbstractAsset a => a.GetAbstractAssetParentArray(ld),
+            AnimatedBackground => ld.AnimatedBackgrounds,
+            LevelAnim => ld.LevelAnims,
+            LevelAnimation => ld.LevelAnimations,
+            LevelSound => ld.LevelSounds,
+            AbstractCollision c => c.Parent?.Children ?? ld.Collisions,
+            DynamicCollision => ld.DynamicCollisions,
+            ItemSpawn i => i.Parent?.Children ?? ld.ItemSpawns,
+            DynamicItemSpawn => ld.DynamicItemSpawns,
+            NavNode n => n.Parent?.Children ?? ld.NavNodes,
+            DynamicNavNode => ld.DynamicNavNodes,
+            Respawn r => r.Parent?.Children ?? ld.Respawns,
+            DynamicRespawn => ld.DynamicRespawns,
+            AbstractVolume => ld.Volumes,
+            WaveData => ld.WaveDatas,
+            CustomPath cp => cp.Parent?.CustomPaths,
+            Point p => p.Parent?.Points,
+            Group g => g.Parent?.Groups,
+            _ => null,
+        };
+
+        return (T[]?)result;
     }
+
+    private static AbstractAsset[] GetAbstractAssetParentArray(this AbstractAsset a, LevelDesc desc) =>
+        a.Parent is null
+            ? desc.Assets
+            : a.Parent switch
+            {
+                MovingPlatform mp => mp.Assets,
+                Platform p when p.AssetChildren is not null => p.AssetChildren,
+                _ => throw new UnreachableException(),
+            };
 
     public static bool SetParentArray<T>(T obj, LevelDesc ld, T[] newArray)
     {

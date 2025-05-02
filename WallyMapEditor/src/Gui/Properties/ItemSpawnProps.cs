@@ -1,4 +1,3 @@
-using System;
 using WallyMapSpinzor2;
 using ImGuiNET;
 
@@ -54,14 +53,6 @@ public partial class PropertiesWindow
 
         return result;
     }
-
-    private static AbstractItemSpawn[] GetItemSpawnParentArray(AbstractItemSpawn i, LevelDesc desc) =>
-        i.Parent is null ? desc.ItemSpawns : i.Parent.Children;
-
-    private static Action<AbstractItemSpawn[]> SetItemSpawnParentArray(AbstractItemSpawn i, LevelDesc desc) =>
-        i.Parent is null
-            ? val => desc.ItemSpawns = val
-            : val => i.Parent.Children = val;
 
     public static T DefaultItemSpawn<T>(double posX, double posY) where T : AbstractItemSpawn, new()
     {

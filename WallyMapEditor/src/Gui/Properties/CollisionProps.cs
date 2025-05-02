@@ -379,12 +379,4 @@ public partial class PropertiesWindow
 
         return propChanged;
     }
-
-    public static AbstractCollision[] GetColParentArray(AbstractCollision c, LevelDesc desc) =>
-        c.Parent is null ? desc.Collisions : c.Parent.Children;
-
-    public static Action<AbstractCollision[]> SetColParentArray(AbstractCollision c, LevelDesc desc) =>
-        c.Parent is null
-            ? val => desc.Collisions = val
-            : val => c.Parent.Children = val;
 }

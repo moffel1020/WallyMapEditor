@@ -1,4 +1,3 @@
-using System;
 using WallyMapSpinzor2;
 using ImGuiNET;
 
@@ -33,14 +32,6 @@ public partial class PropertiesWindow
 
         return propChanged;
     }
-
-    private static Respawn[] GetRespawnParentArray(Respawn r, LevelDesc desc) =>
-        r.Parent is null ? desc.Respawns : r.Parent.Children;
-
-    private static Action<Respawn[]> SetRespawnParentArray(Respawn r, LevelDesc desc) =>
-        r.Parent is null
-            ? val => desc.Respawns = val
-            : val => r.Parent.Children = val;
 
     public static Respawn DefaultRespawn(double posX, double posY) => new() { X = posX, Y = posY };
 }
