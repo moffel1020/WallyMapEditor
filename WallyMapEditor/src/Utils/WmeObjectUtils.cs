@@ -60,7 +60,6 @@ public static partial class WmeUtils
 
     public static T[]? GetParentArray<T>(T obj, LevelDesc ld)
     {
-        // C# can't infer that if obj is U, then T = U. So this hack has to be used
         object? result = obj switch
         {
             Background => ld.Backgrounds,
@@ -85,6 +84,7 @@ public static partial class WmeUtils
             _ => null,
         };
 
+        // C# can't infer that if obj is U, then T = U. So this hack has to be used
         return (T[]?)result;
     }
 
