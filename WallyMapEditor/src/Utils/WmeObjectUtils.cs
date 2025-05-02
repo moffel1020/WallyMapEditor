@@ -71,7 +71,7 @@ public static partial class WmeUtils
             LevelSound => ld.LevelSounds,
             AbstractCollision c => c.Parent?.Children ?? ld.Collisions,
             DynamicCollision => ld.DynamicCollisions,
-            ItemSpawn i => i.Parent?.Children ?? ld.ItemSpawns,
+            AbstractItemSpawn i => i.Parent?.Children ?? ld.ItemSpawns,
             DynamicItemSpawn => ld.DynamicItemSpawns,
             NavNode n => n.Parent?.Children ?? ld.NavNodes,
             DynamicNavNode => ld.DynamicNavNodes,
@@ -96,20 +96,30 @@ public static partial class WmeUtils
                 _ => throw new UnreachableException(),
             };
 
-    // Very unsafe: obj's type must much newArray's elements' type.
-    // Otherwise, we explode.
-    private static bool SetParentArray<T>(T obj, LevelDesc ld, T[] newArray)
-        where T : class
+    private static bool SetParentArray(object obj, LevelDesc ld, object[] newArray)
     {
+        static void ThrowIfBad<T>(object[] arr)
+        {
+            foreach (object element in arr)
+            {
+                if (element is not T)
+                    throw new InvalidOperationException("unsafe input to SetParentArray");
+            }
+        }
+
         if (obj is Background)
         {
+            ThrowIfBad<Background>(newArray);
             Background[] arr = Unsafe.As<Background[]>(newArray);
+
             ld.Backgrounds = arr;
             return true;
         }
         else if (obj is AbstractAsset a)
         {
+            ThrowIfBad<AbstractAsset>(newArray);
             AbstractAsset[] arr = Unsafe.As<AbstractAsset[]>(newArray);
+
             if (a.Parent is MovingPlatform mp)
             {
                 mp.Assets = arr;
@@ -129,31 +139,41 @@ public static partial class WmeUtils
         }
         else if (obj is AnimatedBackground)
         {
+            ThrowIfBad<AnimatedBackground>(newArray);
             AnimatedBackground[] arr = Unsafe.As<AnimatedBackground[]>(newArray);
+
             ld.AnimatedBackgrounds = arr;
             return true;
         }
         else if (obj is LevelAnim)
         {
+            ThrowIfBad<LevelAnim>(newArray);
             LevelAnim[] arr = Unsafe.As<LevelAnim[]>(newArray);
+
             ld.LevelAnims = arr;
             return true;
         }
         else if (obj is LevelAnimation)
         {
+            ThrowIfBad<LevelAnimation>(newArray);
             LevelAnimation[] arr = Unsafe.As<LevelAnimation[]>(newArray);
+
             ld.LevelAnimations = arr;
             return true;
         }
         else if (obj is LevelSound)
         {
+            ThrowIfBad<LevelSound>(newArray);
             LevelSound[] arr = Unsafe.As<LevelSound[]>(newArray);
+
             ld.LevelSounds = arr;
             return true;
         }
         else if (obj is AbstractCollision c)
         {
+            ThrowIfBad<AbstractCollision>(newArray);
             AbstractCollision[] arr = Unsafe.As<AbstractCollision[]>(newArray);
+
             if (c.Parent is not null)
                 c.Parent.Children = arr;
             else
@@ -162,13 +182,17 @@ public static partial class WmeUtils
         }
         else if (obj is DynamicCollision)
         {
+            ThrowIfBad<DynamicCollision>(newArray);
             DynamicCollision[] arr = Unsafe.As<DynamicCollision[]>(newArray);
+
             ld.DynamicCollisions = arr;
             return true;
         }
-        else if (obj is ItemSpawn i)
+        else if (obj is AbstractItemSpawn i)
         {
-            ItemSpawn[] arr = Unsafe.As<ItemSpawn[]>(newArray);
+            ThrowIfBad<AbstractItemSpawn>(newArray);
+            AbstractItemSpawn[] arr = Unsafe.As<AbstractItemSpawn[]>(newArray);
+
             if (i.Parent is not null)
                 i.Parent.Children = arr;
             else
@@ -177,13 +201,17 @@ public static partial class WmeUtils
         }
         else if (obj is DynamicItemSpawn)
         {
+            ThrowIfBad<DynamicItemSpawn>(newArray);
             DynamicItemSpawn[] arr = Unsafe.As<DynamicItemSpawn[]>(newArray);
+
             ld.DynamicItemSpawns = arr;
             return true;
         }
         else if (obj is NavNode n)
         {
+            ThrowIfBad<NavNode>(newArray);
             NavNode[] arr = Unsafe.As<NavNode[]>(newArray);
+
             if (n.Parent is not null)
                 n.Parent.Children = arr;
             else
@@ -192,13 +220,17 @@ public static partial class WmeUtils
         }
         else if (obj is DynamicNavNode)
         {
+            ThrowIfBad<DynamicNavNode>(newArray);
             DynamicNavNode[] arr = Unsafe.As<DynamicNavNode[]>(newArray);
+
             ld.DynamicNavNodes = arr;
             return true;
         }
         else if (obj is Respawn r)
         {
+            ThrowIfBad<Respawn>(newArray);
             Respawn[] arr = Unsafe.As<Respawn[]>(newArray);
+
             if (r.Parent is not null)
                 r.Parent.Children = arr;
             else
@@ -207,39 +239,51 @@ public static partial class WmeUtils
         }
         else if (obj is DynamicRespawn)
         {
+            ThrowIfBad<DynamicRespawn>(newArray);
             DynamicRespawn[] arr = Unsafe.As<DynamicRespawn[]>(newArray);
+
             ld.DynamicRespawns = arr;
             return true;
         }
         else if (obj is AbstractVolume)
         {
+            ThrowIfBad<AbstractVolume>(newArray);
             AbstractVolume[] arr = Unsafe.As<AbstractVolume[]>(newArray);
+
             ld.Volumes = arr;
             return true;
         }
         else if (obj is WaveData)
         {
+            ThrowIfBad<WaveData>(newArray);
             WaveData[] arr = Unsafe.As<WaveData[]>(newArray);
+
             ld.WaveDatas = arr;
             return true;
         }
         else if (obj is CustomPath cp)
         {
+            ThrowIfBad<CustomPath>(newArray);
             CustomPath[] arr = Unsafe.As<CustomPath[]>(newArray);
+
             if (cp.Parent is null) return false;
             cp.Parent.CustomPaths = arr;
             return true;
         }
         else if (obj is Point p)
         {
+            ThrowIfBad<Point>(newArray);
             Point[] arr = Unsafe.As<Point[]>(newArray);
+
             if (p.Parent is null) return false;
             p.Parent.Points = arr;
             return true;
         }
         else if (obj is Group g)
         {
+            ThrowIfBad<Group>(newArray);
             Group[] arr = Unsafe.As<Group[]>(newArray);
+
             if (g.Parent is null) return false;
             g.Parent.Groups = arr;
             return true;
@@ -269,8 +313,6 @@ public static partial class WmeUtils
             return true;
         }
 
-        // implicit assumption: obj's type is the same as the type of every element inside parentArray.
-        // if this assumption is wrong, segfault or worse.
         object[]? parentArray = GetParentArray(obj, ld);
         if (parentArray is null)
         {
