@@ -17,6 +17,7 @@ public class RenderConfigWindow
     public bool Open { get => _open; set => _open = value; }
 
     public event EventHandler<int>? MoveFrames;
+    public event EventHandler<int>? SetFrames;
 
     private int _advanceFrames;
     private int _setFrames;
@@ -102,21 +103,20 @@ public class RenderConfigWindow
 
         ImGui.SeparatorText("Rendering##config");
 
-        int currentFrame = (int)Math.Floor(config.Time.TotalSeconds * 60);
+        int currentFrame = (int)Math.Round(config.Time.TotalSeconds * 60);
         ImGui.Text($"Frame {currentFrame}");
 
         config.RenderSpeed = ImGuiExt.DragDouble("Render speed##config", config.RenderSpeed, speed: 0.1f);
         if (ImGui.Button(paused ? "Unpause###pause" : "Pause###pause"))
             paused = !paused;
-        if (ImGui.Button("Reset time##config"))
-            config.Time = TimeSpan.FromSeconds(0);
+        if (ImGui.Button("Reset time##config")) SetFrames?.Invoke(this, 0);
         if (ImGui.Button("Prev frame")) MoveFrames?.Invoke(this, -1);
         ImGui.SameLine();
         if (ImGui.Button("Next frame")) MoveFrames?.Invoke(this, 1);
 
         ImGui.InputInt("##setFramesInput", ref _setFrames, 0, 0);
         ImGui.SameLine();
-        if (ImGui.Button("Set frames")) MoveFrames?.Invoke(this, _setFrames - currentFrame);
+        if (ImGui.Button("Set frames")) SetFrames?.Invoke(this, _setFrames);
 
         ImGui.InputInt("##advanceframesinput", ref _advanceFrames, 0, 0);
         ImGui.SameLine();
