@@ -8,7 +8,7 @@ public partial class PropertiesWindow
     public static bool ShowLevelSoundProps(LevelSound ls, CommandHistory cmd, PropertiesWindowData data)
     {
         if (data.Level is not null)
-            RemoveButton(ls, cmd, data.Level.Desc.LevelSounds, val => data.Level.Desc.LevelSounds = val);
+            RemoveButton(ls, data.Level.Desc, cmd);
         ImGui.Separator();
 
         bool propChanged = false;

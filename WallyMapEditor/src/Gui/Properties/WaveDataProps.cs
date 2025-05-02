@@ -10,7 +10,7 @@ public partial class PropertiesWindow
     public static bool ShowWaveDataProps(WaveData w, CommandHistory cmd, PropertiesWindowData data)
     {
         if (data.Level is not null)
-            RemoveButton(w, cmd, data.Level.Desc.WaveDatas, val => data.Level.Desc.WaveDatas = val);
+            RemoveButton(w, data.Level.Desc, cmd);
         ImGui.Separator();
 
         bool propChanged = false;

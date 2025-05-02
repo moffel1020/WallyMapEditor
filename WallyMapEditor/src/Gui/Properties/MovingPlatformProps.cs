@@ -13,7 +13,7 @@ public partial class PropertiesWindow
 
         ImGui.Separator();
         if (data.Level is not null)
-            RemoveButton(mp, cmd, data.Level.Desc.Assets, val => data.Level.Desc.Assets = val);
+            RemoveButton(mp, data.Level.Desc, cmd);
         ImGui.Separator();
 
         if (data.Level is not null && ImGui.TreeNode("Connected dynamics"))

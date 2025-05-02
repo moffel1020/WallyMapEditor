@@ -8,7 +8,7 @@ partial class PropertiesWindow
     public static bool ShowLevelAnimProps(LevelAnim la, CommandHistory cmd, PropertiesWindowData data)
     {
         if (data.Level is not null)
-            RemoveButton(la, cmd, data.Level.Desc.LevelAnims, val => data.Level.Desc.LevelAnims = val);
+            RemoveButton(la, data.Level.Desc, cmd);
         ImGui.Separator();
 
         bool propChanged = false;

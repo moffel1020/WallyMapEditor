@@ -258,7 +258,7 @@ public class Editor
                 if (ImGui.MenuItem("New", "Ctrl+N")) NewLevelModal.Open();
                 ImGui.Separator();
                 if (ImGui.MenuItem("Open", "Ctrl+O")) OpenLevelFile();
-            };
+            }
             ImGui.EndGroup();
             if (btIsNull && ImGui.IsItemHovered())
                 ImGui.SetTooltip("Required files need to be imported first.\nPress \"Load required files only\" in the import menu or override the individual files manually.");
@@ -368,6 +368,10 @@ public class Editor
         {
             if (Rl.IsKeyPressed(KeyboardKey.F11)) Rl.ToggleFullscreen();
             if (Rl.IsKeyPressed(KeyboardKey.F1)) _showMainMenuBar = !_showMainMenuBar;
+            if (Level is not null && Selection.Object is not null && Rl.IsKeyPressed(KeyboardKey.Delete))
+            {
+                WmeUtils.RemoveObject(Selection.Object, Level.Desc, CommandHistory);
+            }
         }
 
         if (!wantCaptureKeyboard && Rl.IsKeyPressed(KeyboardKey.P))
