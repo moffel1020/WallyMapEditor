@@ -28,10 +28,10 @@ public partial class PropertiesWindow
         bool propChanged = false;
 
         if (data.Level is not null)
-            RemoveButton(ac, cmd, GetColParentArray(ac, data.Level.Desc), SetColParentArray(ac, data.Level.Desc));
+            RemoveButton(ac, data.Level.Desc, cmd);
         ImGui.Separator();
 
-        if (data.Level is not null) propChanged |= ObjectChangeType(ac, cmd, ShowChangeColTypeMenu, () => ac.Parent?.Children ?? data.Level.Desc.Collisions);
+        if (data.Level is not null) propChanged |= WmeUtils.ObjectChangeType(ac, data.Level.Desc, cmd, ShowChangeColTypeMenu);
 
         propChanged |= ImGuiExt.DragDoubleHistory($"X1##props{ac.GetHashCode()}", ac.X1, val => ac.X1 = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory($"Y1##props{ac.GetHashCode()}", ac.Y1, val => ac.Y1 = val, cmd);
@@ -93,7 +93,7 @@ public partial class PropertiesWindow
         {
             ImGuiExt.Animation(data.Canvas, pc.Gfx, "Ready", 0);
         }
-        propChanged |= ImGuiExt.DragDoubleHistory($"AnimOffseyX##props{pc.GetHashCode()}", pc.AnimOffsetX, val => pc.AnimOffsetX = val, cmd);
+        propChanged |= ImGuiExt.DragDoubleHistory($"AnimOffsetX##props{pc.GetHashCode()}", pc.AnimOffsetX, val => pc.AnimOffsetX = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory($"AnimOffsetY##props{pc.GetHashCode()}", pc.AnimOffsetY, val => pc.AnimOffsetY = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory($"AnimRotation##props{pc.GetHashCode()}", pc.AnimRotation, val => pc.AnimRotation = BrawlhallaMath.SafeMod(val, 360.0), cmd);
         propChanged |= ImGuiExt.DragIntHistory($"Cooldown##props{pc.GetHashCode()}", pc.Cooldown, val => pc.Cooldown = val, cmd, minValue: 0);
@@ -380,10 +380,10 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
-    private static AbstractCollision[] GetColParentArray(AbstractCollision c, LevelDesc desc) =>
+    public static AbstractCollision[] GetColParentArray(AbstractCollision c, LevelDesc desc) =>
         c.Parent is null ? desc.Collisions : c.Parent.Children;
 
-    private static Action<AbstractCollision[]> SetColParentArray(AbstractCollision c, LevelDesc desc) =>
+    public static Action<AbstractCollision[]> SetColParentArray(AbstractCollision c, LevelDesc desc) =>
         c.Parent is null
             ? val => desc.Collisions = val
             : val => c.Parent.Children = val;

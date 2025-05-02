@@ -1,7 +1,6 @@
 using WallyMapSpinzor2;
 using ImGuiNET;
 using Raylib_cs;
-using System;
 
 namespace WallyMapEditor;
 
@@ -27,40 +26,11 @@ public partial class PropertiesWindow
         ImGui.End();
     }
 
-    private static bool ObjectChangeType<T>(T obj, CommandHistory cmd, Func<T, Maybe<T>> menu, Func<T[]> getArray)
-        where T : class
-    {
-        Maybe<T> maybeNew = menu(obj);
-        if (!maybeNew.TryGetValue(out T? newObj))
-            return false;
-
-        cmd.Add(new SelectPropChangeCommand<T>(val =>
-        {
-            T[] list = getArray();
-            int index = Array.FindIndex(list, e => e == obj); // execute
-            if (index == -1) index = Array.FindIndex(list, e => e == newObj); // undo
-            if (index == -1) Rl.TraceLog(TraceLogLevel.Error, $"Attempt to change type of orphaned {typeof(T).Name}");
-            else list[index] = val;
-        }, obj, newObj), false);
-
-        return true;
-    }
-
-    private static bool RemoveButton<T>(T value, CommandHistory cmd, T[] parentArray, Action<T[]> setParentArray)
+    private static bool RemoveButton<T>(T value, LevelDesc ld, CommandHistory cmd)
         where T : class
     {
         if (!ImGui.Button($"Delete##{value.GetHashCode()}")) return false;
-
-        int idx = Array.FindIndex(parentArray, val => val == value);
-        if (idx == -1)
-        {
-            Rl.TraceLog(TraceLogLevel.Error, $"Tried to remove orphaned value of type {value.GetType().Name}");
-            return false;
-        }
-
-        T[] removed = WmeUtils.RemoveAt(parentArray, idx);
-        cmd.Add(new ArrayRemoveCommand<T>(setParentArray, parentArray, removed, value), false);
-        return true;
+        return WmeUtils.RemoveObject(value, ld, cmd);
     }
 
     private static bool ShowProperties(object o, CommandHistory cmd, PropertiesWindowData data) => o switch

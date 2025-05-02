@@ -19,7 +19,7 @@ public partial class PropertiesWindow
         bool propChanged = false;
 
         if (data.Level is not null)
-            RemoveButton(r, cmd, GetRespawnParentArray(r, data.Level.Desc), SetRespawnParentArray(r, data.Level.Desc));
+            RemoveButton(r, data.Level.Desc, cmd);
         ImGui.Separator();
 
         propChanged |= ImGuiExt.DragDoubleHistory("X", r.X, val => r.X = val, cmd);

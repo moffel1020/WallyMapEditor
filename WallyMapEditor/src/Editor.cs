@@ -258,7 +258,7 @@ public class Editor
                 if (ImGui.MenuItem("New", "Ctrl+N")) NewLevelModal.Open();
                 ImGui.Separator();
                 if (ImGui.MenuItem("Open", "Ctrl+O")) OpenLevelFile();
-            };
+            }
             ImGui.EndGroup();
             if (btIsNull && ImGui.IsItemHovered())
                 ImGui.SetTooltip("Required files need to be imported first.\nPress \"Load required files only\" in the import menu or override the individual files manually.");

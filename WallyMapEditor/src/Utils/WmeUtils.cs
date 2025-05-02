@@ -119,18 +119,6 @@ public static partial class WmeUtils
         return CheckCollisionPointRec(point, rec);
     }
 
-    // NOTE: this does not check of child of LevelDesc
-    public static bool IsObjectChildOf(object? child, object? parent) => child switch
-    {
-        AbstractAsset a => parent == a.Parent || IsObjectChildOf(a.Parent, parent),
-        AbstractCollision c => parent == c.Parent,
-        AbstractItemSpawn i => parent == i.Parent,
-        Respawn r => parent == r.Parent,
-        NavNode n => parent == n.Parent,
-        AbstractKeyFrame k => parent == k.Parent || IsObjectChildOf(k.Parent, parent),
-        _ => false,
-    };
-
     public static IEnumerable<(T, int)> Indexed<T>(this IEnumerable<T> e)
     {
         int i = 0;

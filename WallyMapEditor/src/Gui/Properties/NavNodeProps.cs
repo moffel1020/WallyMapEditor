@@ -22,7 +22,7 @@ public partial class PropertiesWindow
 
         if (data.Level is not null)
         {
-            bool removed = RemoveButton(n, cmd, GetNavNodeParentArray(n, data.Level.Desc), SetNavNodeParentArray(n, data.Level.Desc));
+            bool removed = RemoveButton(n, data.Level.Desc, cmd);
             ImGui.Separator();
 
             string newIDText = ImGuiExt.InputText("Change NavID", n.NavID.ToString(), flags: ImGuiInputTextFlags.CharsDecimal);

@@ -17,12 +17,12 @@ public partial class PropertiesWindow
         }
 
         if (data.Level is not null)
-            RemoveButton(i, cmd, GetItemSpawnParentArray(i, data.Level.Desc), SetItemSpawnParentArray(i, data.Level.Desc));
+            RemoveButton(i, data.Level.Desc, cmd);
         ImGui.Separator();
 
         bool propChanged = false;
 
-        if (data.Level is not null) propChanged |= ObjectChangeType(i, cmd, ShowChangeItemTypeMenu, () => i.Parent?.Children ?? data.Level.Desc.ItemSpawns);
+        if (data.Level is not null) propChanged |= WmeUtils.ObjectChangeType(i, data.Level.Desc, cmd, ShowChangeItemTypeMenu);
         propChanged |= ImGuiExt.DragDoubleHistory($"X##props{i.GetHashCode()}", i.X, val => i.X = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory($"Y##props{i.GetHashCode()}", i.Y, val => i.Y = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory($"W##props{i.GetHashCode()}", i.W, val => i.W = val, cmd);
