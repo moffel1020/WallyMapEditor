@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Raylib_cs;
 using WallyMapSpinzor2;
 
@@ -58,7 +59,7 @@ public static partial class WmeUtils
         return true;
     }
 
-    public static T[]? GetParentArray<T>(T obj, LevelDesc ld)
+    private static T[]? GetParentArray<T>(T obj, LevelDesc ld)
     {
         object? result = obj switch
         {
@@ -83,9 +84,8 @@ public static partial class WmeUtils
             Group g => g.Parent?.Groups,
             _ => null,
         };
-
-        // C# can't infer that if obj is U, then T = U. So this hack has to be used
-        return (T[]?)result;
+        // very scary. if the switch statement lies, we explode.
+        return Unsafe.As<T[]?>(result);
     }
 
     private static AbstractAsset[] GetAbstractAssetParentArray(this AbstractAsset a, LevelDesc desc) =>
@@ -98,17 +98,20 @@ public static partial class WmeUtils
                 _ => throw new UnreachableException(),
             };
 
-    public static bool SetParentArray<T>(T obj, LevelDesc ld, T[] newArray)
+    // Very unsafe: obj's type must much newArray's elements' type.
+    // Otherwise, we explode.
+    private static bool SetParentArray<T>(T obj, LevelDesc ld, T[] newArray)
+        where T : class
     {
         if (obj is Background)
         {
-            Background[] arr = [.. newArray.Cast<Background>()];
+            Background[] arr = Unsafe.As<Background[]>(newArray);
             ld.Backgrounds = arr;
             return true;
         }
         else if (obj is AbstractAsset a)
         {
-            AbstractAsset[] arr = [.. newArray.Cast<AbstractAsset>()];
+            AbstractAsset[] arr = Unsafe.As<AbstractAsset[]>(newArray);
             if (a.Parent is MovingPlatform mp)
             {
                 mp.Assets = arr;
@@ -128,31 +131,31 @@ public static partial class WmeUtils
         }
         else if (obj is AnimatedBackground)
         {
-            AnimatedBackground[] arr = [.. newArray.Cast<AnimatedBackground>()];
+            AnimatedBackground[] arr = Unsafe.As<AnimatedBackground[]>(newArray);
             ld.AnimatedBackgrounds = arr;
             return true;
         }
         else if (obj is LevelAnim)
         {
-            LevelAnim[] arr = [.. newArray.Cast<LevelAnim>()];
+            LevelAnim[] arr = Unsafe.As<LevelAnim[]>(newArray);
             ld.LevelAnims = arr;
             return true;
         }
         else if (obj is LevelAnimation)
         {
-            LevelAnimation[] arr = [.. newArray.Cast<LevelAnimation>()];
+            LevelAnimation[] arr = Unsafe.As<LevelAnimation[]>(newArray);
             ld.LevelAnimations = arr;
             return true;
         }
         else if (obj is LevelSound)
         {
-            LevelSound[] arr = [.. newArray.Cast<LevelSound>()];
+            LevelSound[] arr = Unsafe.As<LevelSound[]>(newArray);
             ld.LevelSounds = arr;
             return true;
         }
         else if (obj is AbstractCollision c)
         {
-            AbstractCollision[] arr = [.. newArray.Cast<AbstractCollision>()];
+            AbstractCollision[] arr = Unsafe.As<AbstractCollision[]>(newArray);
             if (c.Parent is not null)
                 c.Parent.Children = arr;
             else
@@ -161,13 +164,13 @@ public static partial class WmeUtils
         }
         else if (obj is DynamicCollision)
         {
-            DynamicCollision[] arr = [.. newArray.Cast<DynamicCollision>()];
+            DynamicCollision[] arr = Unsafe.As<DynamicCollision[]>(newArray);
             ld.DynamicCollisions = arr;
             return true;
         }
         else if (obj is ItemSpawn i)
         {
-            ItemSpawn[] arr = [.. newArray.Cast<ItemSpawn>()];
+            ItemSpawn[] arr = Unsafe.As<ItemSpawn[]>(newArray);
             if (i.Parent is not null)
                 i.Parent.Children = arr;
             else
@@ -176,13 +179,13 @@ public static partial class WmeUtils
         }
         else if (obj is DynamicItemSpawn)
         {
-            DynamicItemSpawn[] arr = [.. newArray.Cast<DynamicItemSpawn>()];
+            DynamicItemSpawn[] arr = Unsafe.As<DynamicItemSpawn[]>(newArray);
             ld.DynamicItemSpawns = arr;
             return true;
         }
         else if (obj is NavNode n)
         {
-            NavNode[] arr = [.. newArray.Cast<NavNode>()];
+            NavNode[] arr = Unsafe.As<NavNode[]>(newArray);
             if (n.Parent is not null)
                 n.Parent.Children = arr;
             else
@@ -191,13 +194,13 @@ public static partial class WmeUtils
         }
         else if (obj is DynamicNavNode)
         {
-            DynamicNavNode[] arr = [.. newArray.Cast<DynamicNavNode>()];
+            DynamicNavNode[] arr = Unsafe.As<DynamicNavNode[]>(newArray);
             ld.DynamicNavNodes = arr;
             return true;
         }
         else if (obj is Respawn r)
         {
-            Respawn[] arr = [.. newArray.Cast<Respawn>()];
+            Respawn[] arr = Unsafe.As<Respawn[]>(newArray);
             if (r.Parent is not null)
                 r.Parent.Children = arr;
             else
@@ -206,39 +209,39 @@ public static partial class WmeUtils
         }
         else if (obj is DynamicRespawn)
         {
-            DynamicRespawn[] arr = [.. newArray.Cast<DynamicRespawn>()];
+            DynamicRespawn[] arr = Unsafe.As<DynamicRespawn[]>(newArray);
             ld.DynamicRespawns = arr;
             return true;
         }
         else if (obj is AbstractVolume)
         {
-            AbstractVolume[] arr = [.. newArray.Cast<AbstractVolume>()];
+            AbstractVolume[] arr = Unsafe.As<AbstractVolume[]>(newArray);
             ld.Volumes = arr;
             return true;
         }
         else if (obj is WaveData)
         {
-            WaveData[] arr = [.. newArray.Cast<WaveData>()];
+            WaveData[] arr = Unsafe.As<WaveData[]>(newArray);
             ld.WaveDatas = arr;
             return true;
         }
         else if (obj is CustomPath cp)
         {
-            CustomPath[] arr = [.. newArray.Cast<CustomPath>()];
+            CustomPath[] arr = Unsafe.As<CustomPath[]>(newArray);
             if (cp.Parent is null) return false;
             cp.Parent.CustomPaths = arr;
             return true;
         }
         else if (obj is Point p)
         {
-            Point[] arr = [.. newArray.Cast<Point>()];
+            Point[] arr = Unsafe.As<Point[]>(newArray);
             if (p.Parent is null) return false;
             p.Parent.Points = arr;
             return true;
         }
         else if (obj is Group g)
         {
-            Group[] arr = [.. newArray.Cast<Group>()];
+            Group[] arr = Unsafe.As<Group[]>(newArray);
             if (g.Parent is null) return false;
             g.Parent.Groups = arr;
             return true;
