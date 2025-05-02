@@ -32,25 +32,21 @@ public static partial class WmeUtils
 
         cmd.Add(new SelectPropChangeCommand<T>(val =>
         {
-            object[]? list = GetParentArray(obj, ld);
+            // we are changing from `current` to `val`
+            object current = val == obj ? newObj : val == newObj ? obj : throw new UnreachableException();
+
+            object[]? list = GetParentArray(current, ld);
             if (list is null)
             {
-                Rl.TraceLog(TraceLogLevel.Error, CHANGE_ORPHAN_ERROR + obj.GetType().Name);
+                Rl.TraceLog(TraceLogLevel.Error, CHANGE_ORPHAN_ERROR + current.GetType().Name);
                 return;
             }
 
-            // find object to swap
-            int index = Array.FindIndex(list, e => e == obj);
-            // if not in current list, this means we are undoing.
+            int index = Array.FindIndex(list, e => e == current);
             if (index == -1)
             {
-                index = Array.FindIndex(list, e => e == newObj);
-                // error
-                if (index == -1)
-                {
-                    Rl.TraceLog(TraceLogLevel.Error, CHANGE_ORPHAN_ERROR + obj.GetType().Name);
-                    return;
-                }
+                Rl.TraceLog(TraceLogLevel.Error, CHANGE_ORPHAN_ERROR + current.GetType().Name);
+                return;
             }
 
             list[index] = val;
