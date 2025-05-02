@@ -316,16 +316,16 @@ public static partial class WmeUtils
             return false;
         }
 
+        // don't delete background if it's the last one left
+        if (obj is Background && parentArray.Length == 1)
+            return false;
+
         int idx = Array.FindIndex(parentArray, val => val == obj);
         if (idx == -1)
         {
             Rl.TraceLog(TraceLogLevel.Error, REMOVE_BAD_PARENT);
             return false;
         }
-
-        // don't delete background if it's the last one left
-        if (obj is Background && parentArray.Length == 1)
-            return false;
 
         object[] removed = RemoveAt(parentArray, idx);
         cmd.Add(new ArrayRemoveCommand<object>(arr => SetParentArray(obj, ld, arr), parentArray, removed, obj), false);
