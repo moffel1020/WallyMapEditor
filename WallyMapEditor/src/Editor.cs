@@ -368,6 +368,10 @@ public class Editor
         {
             if (Rl.IsKeyPressed(KeyboardKey.F11)) Rl.ToggleFullscreen();
             if (Rl.IsKeyPressed(KeyboardKey.F1)) _showMainMenuBar = !_showMainMenuBar;
+            if (Level is not null && Selection.Object is not null && Rl.IsKeyPressed(KeyboardKey.Delete))
+            {
+                WmeUtils.RemoveObject(Selection.Object, Level.Desc, CommandHistory);
+            }
         }
 
         if (!wantCaptureKeyboard && Rl.IsKeyPressed(KeyboardKey.P))
