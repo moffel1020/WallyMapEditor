@@ -18,15 +18,12 @@ impl -> functional -> nullable -> history -> nullable history
 public static partial class ImGuiExt
 {
     #region Generics
-    private static bool GenericDragScalarImpl<T>(ImGuiDataType type, string label, ref T value, float speed, T minValue, T maxValue) where T : unmanaged
+    private static unsafe bool GenericDragScalarImpl<T>(ImGuiDataType type, string label, ref T value, float speed, T minValue, T maxValue) where T : unmanaged
     {
-        unsafe
-        {
-            IntPtr valuePtr = (IntPtr)Unsafe.AsPointer(ref value);
-            IntPtr minValuePtr = (IntPtr)(&minValue);
-            IntPtr maxValuePtr = (IntPtr)(&maxValue);
-            return ImGui.DragScalar(label, type, valuePtr, speed, minValuePtr, maxValuePtr);
-        }
+        IntPtr valuePtr = (IntPtr)Unsafe.AsPointer(ref value);
+        IntPtr minValuePtr = (IntPtr)(&minValue);
+        IntPtr maxValuePtr = (IntPtr)(&maxValue);
+        return ImGui.DragScalar(label, type, valuePtr, speed, minValuePtr, maxValuePtr);
     }
 
     private delegate bool ScalarDragDelegate<T>(string label, ref T value, float speed, T maxValue, T minValue);
@@ -145,15 +142,12 @@ public static partial class ImGuiExt
     #endregion
     #region  InputUInt
 
-    public static void InputUInt(string label, ref uint value, uint step = 1, uint stepFast = 100)
+    public static unsafe void InputUInt(string label, ref uint value, uint step = 1, uint stepFast = 100)
     {
-        unsafe
-        {
-            IntPtr valuePtr = (IntPtr)Unsafe.AsPointer(ref value);
-            IntPtr stepPtr = (IntPtr)(&step);
-            IntPtr stepFastPtr = (IntPtr)(&stepFast);
-            ImGui.InputScalar(label, ImGuiDataType.U32, valuePtr, stepPtr, stepFastPtr);
-        }
+        IntPtr valuePtr = (IntPtr)Unsafe.AsPointer(ref value);
+        IntPtr stepPtr = (IntPtr)(&step);
+        IntPtr stepFastPtr = (IntPtr)(&stepFast);
+        ImGui.InputScalar(label, ImGuiDataType.U32, valuePtr, stepPtr, stepFastPtr);
     }
 
     public static uint InputUInt(string label, uint value, uint step = 1, uint stepFast = 100)
