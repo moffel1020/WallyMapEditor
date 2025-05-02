@@ -32,7 +32,7 @@ public static partial class WmeUtils
 
         cmd.Add(new SelectPropChangeCommand<T>(val =>
         {
-            T[]? list = GetParentArray(obj, ld);
+            object[]? list = GetParentArray(obj, ld);
             if (list is null)
             {
                 Rl.TraceLog(TraceLogLevel.Error, CHANGE_ORPHAN_ERROR + obj.GetType().Name);
@@ -59,9 +59,9 @@ public static partial class WmeUtils
         return true;
     }
 
-    private static T[]? GetParentArray<T>(T obj, LevelDesc ld)
+    private static object[]? GetParentArray(object obj, LevelDesc ld)
     {
-        object? result = obj switch
+        return obj switch
         {
             Background => ld.Backgrounds,
             AbstractAsset a => a.GetAbstractAssetParentArray(ld),
@@ -84,8 +84,6 @@ public static partial class WmeUtils
             Group g => g.Parent?.Groups,
             _ => null,
         };
-        // very scary. if the switch statement lies, we explode.
-        return Unsafe.As<T[]?>(result);
     }
 
     private static AbstractAsset[] GetAbstractAssetParentArray(this AbstractAsset a, LevelDesc desc) =>
@@ -252,9 +250,11 @@ public static partial class WmeUtils
     private const string REMOVE_ORPHAN_ERROR = "Attempt to remove orphaned object of type ";
     private const string REMOVE_BAD_PARENT = "Removed object is not a child of its parent";
 
-    public static bool RemoveObject<T>(T obj, LevelDesc ld, CommandHistory cmd)
-        where T : class
+    public static bool RemoveObject(object obj, LevelDesc ld, CommandHistory cmd)
     {
+        if (obj is null)
+            return false;
+
         // special cases
         if (obj is LevelDesc || obj is Level || obj is CameraBounds || obj is SpawnBotBounds)
             return false;
@@ -269,7 +269,9 @@ public static partial class WmeUtils
             return true;
         }
 
-        T[]? parentArray = GetParentArray(obj, ld);
+        // implicit assumption: obj's type is the same as the type of every element inside parentArray.
+        // if this assumption is wrong, segfault or worse.
+        object[]? parentArray = GetParentArray(obj, ld);
         if (parentArray is null)
         {
             Rl.TraceLog(TraceLogLevel.Error, REMOVE_ORPHAN_ERROR + obj.GetType().Name);
@@ -287,8 +289,8 @@ public static partial class WmeUtils
         if (obj is Background && parentArray.Length == 1)
             return false;
 
-        T[] removed = RemoveAt(parentArray, idx);
-        cmd.Add(new ArrayRemoveCommand<T>(arr => SetParentArray(obj, ld, arr), parentArray, removed, obj), false);
+        object[] removed = RemoveAt(parentArray, idx);
+        cmd.Add(new ArrayRemoveCommand<object>(arr => SetParentArray(obj, ld, arr), parentArray, removed, obj), false);
         return true;
     }
 }
