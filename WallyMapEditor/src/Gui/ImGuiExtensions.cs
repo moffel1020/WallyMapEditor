@@ -9,7 +9,7 @@ namespace WallyMapEditor;
 
 public static partial class ImGuiExt
 {
-    public readonly struct DisabledIf_ : IDisposable
+    private readonly struct DisabledIf_ : IDisposable
     {
         private readonly bool _disabled;
 
@@ -20,13 +20,13 @@ public static partial class ImGuiExt
             if (_disabled) ImGui.BeginDisabled();
         }
 
-        public void Dispose()
+        void IDisposable.Dispose()
         {
             if (_disabled) ImGui.EndDisabled();
         }
     }
     ///<summary>RAII hack. Should be used as the argument of a using statement.</summary>
-    public static DisabledIf_ DisabledIf(bool disabled) => new(disabled);
+    public static IDisposable DisabledIf(bool disabled) => new DisabledIf_(disabled);
 
     public static string StringListBox(string label, string value, string[] options, float width, int heightItems = 8)
     {
