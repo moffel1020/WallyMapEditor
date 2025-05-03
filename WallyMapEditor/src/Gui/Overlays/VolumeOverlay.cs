@@ -27,10 +27,10 @@ public class VolumeOverlay(AbstractVolume volume) : IOverlay
 
         if (ResizableBox.Resizing)
         {
-            cmd.Add(new PropChangeCommand<(int, int, int, int)>(
-                val => (volume.X, volume.Y, volume.W, volume.H) = val,
-                (volume.X, volume.Y, volume.W, volume.H),
-                (x, y, w, h)
+            cmd.Add(new PropChangeCommand<int, int, int, int>(
+                (val1, val2, val3, val4) => (volume.X, volume.Y, volume.W, volume.H) = (val1, val2, val3, val4),
+                volume.X, volume.Y, volume.W, volume.H,
+                x, y, w, h
             ));
         }
 
