@@ -22,5 +22,5 @@ public class PropChangeCommand<T>(Action<T> changeAction, T oldVal, T newVal) : 
         return false;
     }
 
-    public virtual bool AllowMerge { get; set; } = true;
+    public bool AllowMerge { get; set; } = true;
 }
