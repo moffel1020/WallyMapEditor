@@ -89,10 +89,10 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             (MoveRect.X, MoveRect.Y) = (0, 0);
             (MoveRect.W, MoveRect.H) = (newW, newH);
 
-            cmd.Add(new PropChangeCommand<(double, double, double, double)>(
-                val => (asset.X, asset.Y, asset.W, asset.H) = val,
-                (asset.X, asset.Y, asset.W.Value, asset.H.Value),
-                (newX, newY, newW, newH)
+            cmd.Add(new PropChangeCommand<double, double, double, double>(
+                (val1, val2, val3, val4) => (asset.X, asset.Y, asset.W, asset.H) = (val1, val2, val3, val4),
+                asset.X, asset.Y, asset.W.Value, asset.H.Value,
+                newX, newY, newW, newH
             ));
         }
 

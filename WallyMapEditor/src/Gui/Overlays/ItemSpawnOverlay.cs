@@ -30,10 +30,10 @@ public class ItemSpawnOverlay(AbstractItemSpawn item) : IOverlay
 
         if (ResizableBox.Resizing)
         {
-            cmd.Add(new PropChangeCommand<(double, double, double, double)>(
-                val => (item.X, item.Y, item.W, item.H) = val,
-                (item.X, item.Y, item.W, item.H),
-                (x - offsetX, y - offsetY, w, h)
+            cmd.Add(new PropChangeCommand<double, double, double, double>(
+                (val1, val2, val3, val4) => (item.X, item.Y, item.W, item.H) = (val1, val2, val3, val4),
+                item.X, item.Y, item.W, item.H,
+                x - offsetX, y - offsetY, w, h
             ));
         }
 

@@ -23,10 +23,10 @@ public class SpawnBotBoundsOverlay(SpawnBotBounds bounds) : IOverlay
 
         if (ResizableBox.Resizing)
         {
-            cmd.Add(new PropChangeCommand<(double, double, double, double)>(
-                val => (bounds.X, bounds.Y, bounds.W, bounds.H) = val,
-                (bounds.X, bounds.Y, bounds.W, bounds.H),
-                (x, y, w, h)
+            cmd.Add(new PropChangeCommand<double, double, double, double>(
+                (val1, val2, val3, val4) => (bounds.X, bounds.Y, bounds.W, bounds.H) = (val1, val2, val3, val4),
+                bounds.X, bounds.Y, bounds.W, bounds.H,
+                x, y, w, h
             ));
         }
 

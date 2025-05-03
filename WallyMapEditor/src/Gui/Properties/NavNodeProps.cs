@@ -142,7 +142,7 @@ public partial class PropertiesWindow
     {
         X = posX,
         Y = posY,
-        NavID = EnumerateNavNodes(desc).Select(n => n.NavID).OrderByDescending(id => id).FirstOrDefault() + 1,
+        NavID = EnumerateNavNodes(desc).Select(n => n.NavID).DefaultIfEmpty(unchecked((uint)-1)).Max() + 1,
         Path = [],
         Type = NavNodeTypeEnum.A
     };
