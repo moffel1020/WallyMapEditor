@@ -47,11 +47,11 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
         Circle1.Update(data, true);
         Circle2.Update(data, !Circle1.Dragging);
 
-        _centerDragOrigin ??= (Center.X, Center.Y);
-        Center.Update(data, !Circle1.Dragging && !Circle2.Dragging);
-        if (!Center.Dragging) _centerDragOrigin = null;
+        if (HasAnchor) Anchor.Update(data, !Circle1.Dragging && !Circle2.Dragging);
 
-        if (HasAnchor) Anchor.Update(data, !Circle1.Dragging && !Circle2.Dragging && !Center.Dragging);
+        _centerDragOrigin ??= (Center.X, Center.Y);
+        Center.Update(data, !Circle1.Dragging && !Circle2.Dragging && !Anchor.Dragging);
+        if (!Center.Dragging) _centerDragOrigin = null;
 
         if (Circle1.Dragging)
         {
@@ -89,6 +89,15 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
             ));
         }
 
+        if (HasAnchor && Anchor.Dragging)
+        {
+            cmd.Add(new PropChangeCommand<double?, double?>(
+                (val1, val2) => (col.AnchorX, col.AnchorY) = (val1, val2),
+                col.AnchorX, col.AnchorY,
+                Anchor.X - dynOffsetX, Anchor.Y - dynOffsetY
+            ));
+        }
+
         if (Center.Dragging)
         {
             // _centerDragOrigin shouldn't be null here, but check anyways
@@ -112,15 +121,6 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
             ));
         }
 
-        if (HasAnchor && Anchor.Dragging)
-        {
-            cmd.Add(new PropChangeCommand<double?, double?>(
-                (val1, val2) => (col.AnchorX, col.AnchorY) = (val1, val2),
-                col.AnchorX, col.AnchorY,
-                Anchor.X - dynOffsetX, Anchor.Y - dynOffsetY
-            ));
-        }
-
         return Circle1.Dragging || Circle2.Dragging || Center.Dragging || Anchor.Dragging;
     }
 
@@ -135,8 +135,8 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
 
         Circle1.Draw(data);
         Circle2.Draw(data);
-        Center.Draw(data);
         if (HasAnchor) Anchor.Draw(data);
+        Center.Draw(data);
 
         if (_snapToPoint is not null)
         {
