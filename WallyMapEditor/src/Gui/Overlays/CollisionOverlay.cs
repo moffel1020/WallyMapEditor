@@ -19,6 +19,7 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
 
     private bool HasAnchor => !double.IsNaN(Anchor.X) && !double.IsNaN(Anchor.Y);
     private (double, double)? _snapToPoint;
+    private (double, double)? _centerDragOrigin;
 
     private const double MAX_SNAP_DISTANCE = 4000;  // squared distance
     private const double SNAP_POINT_VISIBLE_DISTANCE = 100000; // squared distance
@@ -45,7 +46,11 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
 
         Circle1.Update(data, true);
         Circle2.Update(data, !Circle1.Dragging);
+
+        _centerDragOrigin ??= (Center.X, Center.Y);
         Center.Update(data, !Circle1.Dragging && !Circle2.Dragging);
+        if (!Center.Dragging) _centerDragOrigin = null;
+
         if (HasAnchor) Anchor.Update(data, !Circle1.Dragging && !Circle2.Dragging && !Center.Dragging);
 
         if (Circle1.Dragging)
@@ -86,6 +91,10 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
 
         if (Center.Dragging)
         {
+            // _centerDragOrigin shouldn't be null here, but check anyways
+            if (_centerDragOrigin is not null && Rl.IsKeyDown(KeyboardKey.LeftShift))
+                LockAxisDrag(Center, _centerDragOrigin.Value.Item1, _centerDragOrigin.Value.Item2);
+
             double centerX = Math.Round(Center.X - offsetX, ROUND_DECIMALS);
             double centerY = Math.Round(Center.Y - offsetY, ROUND_DECIMALS);
 
@@ -142,11 +151,16 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
 
     private static void LockAxisDrag(DragCircle dragging, DragCircle other)
     {
+        LockAxisDrag(dragging, other.X, other.Y);
+    }
+
+    private static void LockAxisDrag(DragCircle dragging, double x, double y)
+    {
         (double newX, double newY) = (dragging.X, dragging.Y);
-        if (Math.Abs(dragging.X - other.X) < Math.Abs(dragging.Y - other.Y))
-            newX = other.X;
+        if (Math.Abs(dragging.X - x) < Math.Abs(dragging.Y - y))
+            newX = x;
         else
-            newY = other.Y;
+            newY = y;
 
         (dragging.X, dragging.Y) = (newX, newY);
     }
