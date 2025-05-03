@@ -11,6 +11,7 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
 {
     public DragCircle Circle1 { get; set; } = new(col.X1, col.Y1);
     public DragCircle Circle2 { get; set; } = new(col.X2, col.Y2);
+    public DragCircle Center { get; set; } = new((col.X1 + col.X2) / 2, (col.Y1 + col.Y2) / 2);
     public DragCircle Anchor { get; set; } = new(col.AnchorX ?? double.NaN, col.AnchorY ?? double.NaN);
 
     public RlColor SnapPointColor { get; set; } = RlColor.Green;
@@ -26,7 +27,7 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
 
     public virtual bool Update(OverlayData data, CommandHistory cmd)
     {
-        Circle1.Radius = Circle2.Radius = data.OverlayConfig.RadiusCollisionPoint;
+        Circle1.Radius = Circle2.Radius = Center.Radius = data.OverlayConfig.RadiusCollisionPoint;
         Anchor.Radius = data.OverlayConfig.RadiusCollisionAnchor;
 
         (double offsetX, double offsetY) = (0, 0);
@@ -39,11 +40,13 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
 
         (Circle1.X, Circle1.Y) = (col.X1 + offsetX, col.Y1 + offsetY);
         (Circle2.X, Circle2.Y) = (col.X2 + offsetX, col.Y2 + offsetY);
+        (Center.X, Center.Y) = ((Circle1.X + Circle2.X) / 2, (Circle1.Y + Circle2.Y) / 2);
         (Anchor.X, Anchor.Y) = ((col.AnchorX ?? double.NaN) + dynOffsetX, (col.AnchorY ?? double.NaN) + dynOffsetY);
 
         Circle1.Update(data, true);
         Circle2.Update(data, !Circle1.Dragging);
-        if (HasAnchor) Anchor.Update(data, !Circle1.Dragging && !Circle2.Dragging);
+        Center.Update(data, !Circle1.Dragging && !Circle2.Dragging);
+        if (HasAnchor) Anchor.Update(data, !Circle1.Dragging && !Circle2.Dragging && !Center.Dragging);
 
         if (Circle1.Dragging)
         {
@@ -81,6 +84,25 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
             ));
         }
 
+        if (Center.Dragging)
+        {
+            double centerX = Math.Round(Center.X - offsetX, ROUND_DECIMALS);
+            double centerY = Math.Round(Center.Y - offsetY, ROUND_DECIMALS);
+
+            double diffX = col.X2 - col.X1;
+            double diffY = col.Y2 - col.Y1;
+            double newX1 = centerX - diffX / 2;
+            double newY1 = centerY - diffY / 2;
+            double newX2 = centerX + diffX / 2;
+            double newY2 = centerY + diffY / 2;
+
+            cmd.Add(new PropChangeCommand<double, double, double, double>(
+                (val1, val2, val3, val4) => (col.X1, col.Y1, col.X2, col.Y2) = (val1, val2, val3, val4),
+                col.X1, col.Y1, col.X2, col.Y2,
+                newX1, newY1, newX2, newY2
+            ));
+        }
+
         if (HasAnchor && Anchor.Dragging)
         {
             cmd.Add(new PropChangeCommand<double?, double?>(
@@ -90,13 +112,13 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
             ));
         }
 
-        return Circle1.Dragging || Circle2.Dragging || Anchor.Dragging;
+        return Circle1.Dragging || Circle2.Dragging || Center.Dragging || Anchor.Dragging;
     }
 
     public virtual void Draw(OverlayData data)
     {
-        Circle1.Color = Circle2.Color = data.OverlayConfig.ColorCollisionPoint;
-        Circle1.UsingColor = Circle2.UsingColor = data.OverlayConfig.UsingColorCollisionPoint;
+        Circle1.Color = Circle2.Color = Center.Color = data.OverlayConfig.ColorCollisionPoint;
+        Circle1.UsingColor = Circle2.UsingColor = Center.UsingColor = data.OverlayConfig.UsingColorCollisionPoint;
         Anchor.Color = data.OverlayConfig.ColorCollisionAnchor;
         Anchor.UsingColor = data.OverlayConfig.UsingColorCollisionAnchor;
         SnapPointRadius = data.OverlayConfig.RadiusCollisionSnapPoint;
@@ -104,6 +126,7 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
 
         Circle1.Draw(data);
         Circle2.Draw(data);
+        Center.Draw(data);
         if (HasAnchor) Anchor.Draw(data);
 
         if (_snapToPoint is not null)
@@ -133,7 +156,7 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
         if (data.Level is null) return null;
 
         (double, double)? closest = data.Level.Desc.Collisions.Where(c => c != current)
-            .SelectMany(c => new[] { (c.X1, c.Y1), (c.X2, c.Y2) })
+            .SelectMany(IEnumerable<(double, double)> (c) => [(c.X1, c.Y1), (c.X2, c.Y2)])
             .Concat(CollisionPointsAbsolute(data.Level.Desc.DynamicCollisions, data.Context, current))
             .OrderBy(p => DistanceSquared(dragging.X, dragging.Y, p.Item1, p.Item2))
             .FirstOrDefault();
