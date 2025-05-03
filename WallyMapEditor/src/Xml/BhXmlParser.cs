@@ -164,7 +164,7 @@ public static class BhXmlParser
                             if (str[p + 1] == '[')
                             {
                                 p += 2;
-                                if (!str.Substring(p, 6).Equals("CDATA[", StringComparison.InvariantCultureIgnoreCase))
+                                if (!str.Substring(p, 6).Equals("CDATA[", StringComparison.OrdinalIgnoreCase))
                                     throw new BhXmlException("Expected <![CDATA[", str, p);
                                 p += 5;
                                 state = S.CDATA;
@@ -172,7 +172,7 @@ public static class BhXmlParser
                             }
                             else if (str[p + 1] == 'D' || str[p + 1] == 'd')
                             {
-                                if (!str.Substring(p + 2, 6).Equals("OCTYPE", StringComparison.InvariantCultureIgnoreCase))
+                                if (!str.Substring(p + 2, 6).Equals("OCTYPE", StringComparison.OrdinalIgnoreCase))
                                     throw new BhXmlException("Expected <!DOCTYPE", str, p);
                                 p += 8;
                                 state = S.DOCTYPE;

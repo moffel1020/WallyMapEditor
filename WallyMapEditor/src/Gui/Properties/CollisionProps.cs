@@ -362,10 +362,7 @@ public partial class PropertiesWindow
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("Search through all powertypes in the game. Note that not all powers will be compatible with traps/lava and changing this can crash the game.");
 
-            string[] powers = allPowers
-                .Where(p => p.Contains(_powerFilter, StringComparison.InvariantCultureIgnoreCase))
-                .ToArray();
-
+            string[] powers = [.. allPowers.Where(p => p.Contains(_powerFilter, StringComparison.CurrentCultureIgnoreCase))];
             string newPower = ImGuiExt.StringListBox("Power", currentPower, powers, 320.0f);
             if (currentPower != newPower)
             {

@@ -113,9 +113,11 @@ public static class PlaylistEditPanel
             ImGui.SameLine();
             ImGui.Text("Filter");
 
-            string[] playlists = _allPlaylists.Where(p => p.Contains(_playlistFilter, StringComparison.InvariantCultureIgnoreCase)).ToArray();
-            foreach (string playlist in playlists)
+            foreach (string playlist in _allPlaylists)
             {
+                if (!playlist.Contains(_playlistFilter, StringComparison.CurrentCultureIgnoreCase))
+                    continue;
+
                 bool contained = l.Playlists.Contains(playlist);
                 if (ImGui.Checkbox(playlist, ref contained))
                 {

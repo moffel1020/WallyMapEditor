@@ -284,9 +284,7 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
             if (levelDescNames.Length > 0)
             {
                 _levelDescFileFilter = ImGuiExt.InputText("Filter map names", _levelDescFileFilter);
-                string[] levelDescs = levelDescNames
-                    .Where(s => s.Contains(_levelDescFileFilter, StringComparison.InvariantCultureIgnoreCase))
-                    .ToArray();
+                string[] levelDescs = [.. levelDescNames.Where(s => s.Contains(_levelDescFileFilter, StringComparison.CurrentCultureIgnoreCase))];
                 int pickedItem = Array.FindIndex(levelDescs, s => s == _swzDescName);
                 if (ImGui.ListBox("Pick level file from swz", ref pickedItem, levelDescs, levelDescs.Length, 12))
                     _swzDescName = levelDescs[pickedItem];
