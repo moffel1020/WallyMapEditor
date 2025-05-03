@@ -46,12 +46,8 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
 
         Circle1.Update(data, true);
         Circle2.Update(data, !Circle1.Dragging);
-
         if (HasAnchor) Anchor.Update(data, !Circle1.Dragging && !Circle2.Dragging);
-
-        _centerDragOrigin ??= (Center.X, Center.Y);
         Center.Update(data, !Circle1.Dragging && !Circle2.Dragging && !Anchor.Dragging);
-        if (!Center.Dragging) _centerDragOrigin = null;
 
         if (Circle1.Dragging)
         {
@@ -100,9 +96,15 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
 
         if (Center.Dragging)
         {
-            // _centerDragOrigin shouldn't be null here, but check anyways
-            if (_centerDragOrigin is not null && Rl.IsKeyDown(KeyboardKey.LeftShift))
+            if (Rl.IsKeyDown(KeyboardKey.LeftShift))
+            {
+                _centerDragOrigin ??= (Center.X, Center.Y);
                 LockAxisDrag(Center, _centerDragOrigin.Value.Item1, _centerDragOrigin.Value.Item2);
+            }
+            else
+            {
+                _centerDragOrigin = null;
+            }
 
             double diffX = col.X2 - col.X1;
             double diffY = col.Y2 - col.Y1;
