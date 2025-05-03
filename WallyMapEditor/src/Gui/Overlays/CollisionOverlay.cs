@@ -121,12 +121,12 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
                 double y2 = Center.Y + diffY / 2;
 
                 // find closest collision
-                (double x, double y)? closest1 = SnapDrag(col, x1, y1, data);
+                (double x, double y)? closest1 = GetClosestCollisionPoint(col, x1, y1, data);
                 // calculate distance
                 double? distance1 = closest1 is null ? null : DistanceSquared(x1, y1, closest1.Value.x, closest1.Value.y);
 
                 // find closest collision
-                (double x, double y)? closest2 = SnapDrag(col, x2, y2, data);
+                (double x, double y)? closest2 = GetClosestCollisionPoint(col, x2, y2, data);
                 // calculate distance
                 double? distance2 = closest2 is null ? null : DistanceSquared(x2, y2, closest2.Value.x, closest2.Value.y);
 
@@ -249,7 +249,7 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
     private static (double, double)? SnapDrag(AbstractCollision current, DragCircle dragging, OverlayData data)
     {
         if (data.Level is null) return null;
-        (double, double)? closest = SnapDrag(current, dragging.X, dragging.Y, data);
+        (double, double)? closest = GetClosestCollisionPoint(current, dragging.X, dragging.Y, data);
 
         if (closest is not null && DistanceSquared(dragging.X, dragging.Y, closest.Value.Item1, closest.Value.Item2) <= MAX_SNAP_DISTANCE)
             (dragging.X, dragging.Y) = (closest.Value.Item1, closest.Value.Item2);
@@ -257,30 +257,15 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
         return closest;
     }
 
-    private static (double, double)? SnapDrag(AbstractCollision current, double x, double y, OverlayData data)
+    private static (double, double)? GetClosestCollisionPoint(AbstractCollision current, double x, double y, OverlayData data)
     {
         if (data.Level is null) return null;
 
-        IEnumerable<(double, double)> collisionPositions =
-        data.Level.Desc.Collisions.Where(c => c != current)
+        IEnumerable<(double, double)> otherPoints = data.Level.Desc.Collisions.Where(c => c != current)
             .SelectMany(IEnumerable<(double, double)> (c) => [(c.X1, c.Y1), (c.X2, c.Y2)])
             .Concat(CollisionPointsAbsolute(data.Level.Desc.DynamicCollisions, data.Context, current));
 
-        (double, double)? closest = null;
-        double closestDistance = double.NaN;
-
-        foreach ((double, double) position in collisionPositions)
-        {
-            (double posX, double posY) = position;
-            double distance = DistanceSquared(x, y, posX, posY);
-            if (closest is null || distance < closestDistance)
-            {
-                closest = position;
-                closestDistance = distance;
-            }
-        }
-
-        return closest;
+        return otherPoints.Any() ? otherPoints.MinBy(p => DistanceSquared(x, y, p.Item1, p.Item2)) : null;
     }
 
     private static IEnumerable<(double, double)> CollisionPointsAbsolute(IEnumerable<DynamicCollision> dynamics, RenderContext context, AbstractCollision exclude)
