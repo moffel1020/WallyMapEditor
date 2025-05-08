@@ -17,25 +17,6 @@ public class MousePickingFramebuffer : IDisposable
     public int Height => Framebuffer.Texture.Height;
     private readonly List<object> _drawables = [];
 
-    private const string VERTEX = @"
-        #version 330
-
-        in vec3 vertexPosition;
-        in vec2 vertexTexCoord;
-        in vec4 vertexColor;
-
-        out vec2 fragTexCoord;
-        out vec4 fragColor;
-
-        uniform mat4 mvp;
-
-        void main()
-        {
-            fragTexCoord = vertexTexCoord;
-            fragColor = vertexColor;
-            gl_Position = mvp*vec4(vertexPosition, 1.0);
-        };";
-
     private const string FRAGMENT = @"
         #version 330
 
@@ -57,7 +38,7 @@ public class MousePickingFramebuffer : IDisposable
     public void Load(int w, int h)
     {
         if (!Rl.IsShaderReady(Shader))
-            Shader = Rl.LoadShaderFromMemory(VERTEX, FRAGMENT);
+            Shader = Rl.LoadShaderFromMemory(null, FRAGMENT);
 
         if (_framebuffer.Id != 0)
             Rl.UnloadRenderTexture(_framebuffer);
