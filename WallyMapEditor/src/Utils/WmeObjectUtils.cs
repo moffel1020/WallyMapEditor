@@ -330,4 +330,197 @@ public static partial class WmeUtils
         cmd.Add(new ArrayRemoveCommand<object>(arr => SetParentArray(obj, ld, arr), parentArray, removed, obj), false);
         return true;
     }
+
+    public static bool MoveObject(object obj, double dx, double dy, CommandHistory cmd)
+    {
+        if (obj is AbstractAsset a)
+        {
+            // TODO: if MovingPlatform, we might also want to move Animation's first keyframe
+
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (a.X, a.Y) = (val1, val2),
+                a.X, a.Y,
+                a.X + dx, a.Y + dy
+            ));
+            return true;
+        }
+        else if (obj is AnimatedBackground ab)
+        {
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (ab.Position_X, ab.Position_Y) = (val1, val2),
+                ab.Position_X, ab.Position_Y,
+                ab.Position_X + dx, ab.Position_Y + dy
+            ));
+            return true;
+        }
+        else if (obj is KeyFrame k)
+        {
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (k.X, k.Y) = (val1, val2),
+                k.X, k.Y,
+                k.X + dx, k.Y + dy
+            ));
+            return true;
+        }
+        else if (obj is LevelAnim la)
+        {
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (la.X, la.Y) = (val1, val2),
+                la.X, la.Y,
+                la.X + dx, la.Y + dy
+            ));
+            return true;
+        }
+        else if (obj is LevelAnimation lan)
+        {
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (lan.PositionX, lan.PositionY) = (val1, val2),
+                lan.PositionX, lan.PositionY,
+                lan.PositionX + dx, lan.PositionY + dy
+            ));
+            return true;
+        }
+        else if (obj is AbstractCollision c)
+        {
+            // conveniently, pressure plates are mutually exclusive with AnchorX and AnchorY
+            if (c.AnchorX is null && c.AnchorY is null && c is AbstractPressurePlateCollision pc)
+            {
+                // TODO: update FireOffsetX and FireOffsetY?
+                cmd.Add(new PropChangeCommand<double, double, double, double, double, double>(
+                    (val1, val2, val3, val4, val5, val6) => (pc.X1, pc.Y1, pc.X2, pc.Y2, pc.AnimOffsetX, pc.AnimOffsetY) = (val1, val2, val3, val4, val5, val6),
+                    pc.X1, pc.Y1, pc.X2, pc.Y2, pc.AnimOffsetX, pc.AnimOffsetY,
+                    pc.X1 + dx, pc.Y1 + dy, pc.X2 + dx, pc.Y2 + dy, pc.AnimOffsetX + dx, pc.AnimOffsetY + dy
+                ));
+            }
+            else
+            {
+                double? anchorX = c.AnchorX;
+                double? newAnchorX = anchorX is not null ? anchorX.Value + dx : null;
+                double? anchorY = c.AnchorY;
+                double? newAnchorY = anchorY is not null ? anchorY.Value + dy : null;
+
+                cmd.Add(new PropChangeCommand<double, double, double, double, double?, double?>(
+                    (val1, val2, val3, val4, val5, val6) => (c.X1, c.Y1, c.X2, c.Y2, c.AnchorX, c.AnchorY) = (val1, val2, val3, val4, val5, val6),
+                    c.X1, c.Y1, c.X2, c.Y2, c.AnchorX, c.AnchorY,
+                    c.X1 + dx, c.Y1 + dy, c.X2 + dx, c.Y2 + dy, newAnchorX, newAnchorY
+                ));
+            }
+            return true;
+        }
+        else if (obj is DynamicCollision dc)
+        {
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (dc.X, dc.Y) = (val1, val2),
+                dc.X, dc.Y,
+                dc.X + dx, dc.Y + dy
+            ));
+            return true;
+        }
+        else if (obj is AbstractItemSpawn i)
+        {
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (i.X, i.Y) = (val1, val2),
+                i.X, i.Y,
+                i.X + dx, i.Y + dy
+            ));
+            return true;
+        }
+        else if (obj is DynamicItemSpawn di)
+        {
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (di.X, di.Y) = (val1, val2),
+                di.X, di.Y,
+                di.X + dx, di.Y + dy
+            ));
+            return true;
+        }
+        else if (obj is NavNode n)
+        {
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (n.X, n.Y) = (val1, val2),
+                n.X, n.Y,
+                n.X + dx, n.Y + dy
+            ));
+            return true;
+        }
+        else if (obj is DynamicNavNode dn)
+        {
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (dn.X, dn.Y) = (val1, val2),
+                dn.X, dn.Y,
+                dn.X + dx, dn.Y + dy
+            ));
+            return true;
+        }
+        else if (obj is Respawn r)
+        {
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (r.X, r.Y) = (val1, val2),
+                r.X, r.Y,
+                r.X + dx, r.Y + dy
+            ));
+            return true;
+        }
+        else if (obj is DynamicRespawn dr)
+        {
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (dr.X, dr.Y) = (val1, val2),
+                dr.X, dr.Y,
+                dr.X + dx, dr.Y + dy
+            ));
+            return true;
+        }
+        else if (obj is AbstractVolume v)
+        {
+            cmd.Add(new PropChangeCommand<int, int>(
+                (val1, val2) => (v.X, v.Y) = (val1, val2),
+                v.X, v.Y,
+                (int)Math.Round(v.X + dx), (int)Math.Round(v.Y + dy)
+            ));
+            return true;
+        }
+        else if (obj is Point p)
+        {
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (p.X, p.Y) = (val1, val2),
+                p.X, p.Y,
+                p.X + dx, p.Y + dy
+            ));
+            return true;
+        }
+        else if (obj is CameraBounds cb)
+        {
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (cb.X, cb.Y) = (val1, val2),
+                cb.X, cb.Y,
+                cb.X + dx, cb.Y + dy
+            ));
+            return true;
+        }
+        else if (obj is SpawnBotBounds sb)
+        {
+            cmd.Add(new PropChangeCommand<double, double>(
+                (val1, val2) => (sb.X, sb.Y) = (val1, val2),
+                sb.X, sb.Y,
+                sb.X + dx, sb.Y + dy
+            ));
+            return true;
+        }
+        else if (obj is TeamScoreboard ts)
+        {
+            int newTeamRedX = (int)Math.Round(ts.RedTeamX + dx);
+            int newTeamBlueX = (int)Math.Round(ts.BlueTeamX + dx);
+            int newY = (int)Math.Round(ts.Y + dy);
+            // DoubleDigitsOnesX and DoubleDigitsTensX are offsets
+            cmd.Add(new PropChangeCommand<int, int, int, double>(
+                (val1, val2, val3, val4) => (ts.RedTeamX, ts.BlueTeamX, ts.Y, ts.DoubleDigitsY) = (val1, val2, val3, val4),
+                ts.RedTeamX, ts.BlueTeamX, ts.Y, ts.DoubleDigitsY,
+                newTeamRedX, newTeamBlueX, newY, ts.DoubleDigitsY + dy
+            ));
+            return true;
+        }
+        // this `else` exists to ensure we `return true` in every case above
+        else
+            return false;
+    }
 }

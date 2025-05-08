@@ -8,11 +8,11 @@ public class PropChangeCommand<T1, T2, T3, T4>(
     T1 newVal1, T2 newVal2, T3 newVal3, T4 newVal4
 ) : ICommand
 {
-    protected Action<T1, T2, T3, T4> Action { get; init; } = changeAction;
-    protected T1 OldVal1 { get; init; } = oldVal1;
-    protected T2 OldVal2 { get; init; } = oldVal2;
-    protected T3 OldVal3 { get; init; } = oldVal3;
-    protected T4 OldVal4 { get; init; } = oldVal4;
+    protected Action<T1, T2, T3, T4> Action { get; } = changeAction;
+    protected T1 OldVal1 { get; } = oldVal1;
+    protected T2 OldVal2 { get; } = oldVal2;
+    protected T3 OldVal3 { get; } = oldVal3;
+    protected T4 OldVal4 { get; } = oldVal4;
     protected T1 NewVal1 { get; set; } = newVal1;
     protected T2 NewVal2 { get; set; } = newVal2;
     protected T3 NewVal3 { get; set; } = newVal3;
