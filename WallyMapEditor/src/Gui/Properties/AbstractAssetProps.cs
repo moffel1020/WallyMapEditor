@@ -18,7 +18,8 @@ partial class PropertiesWindow
         {
             ImGui.Text($"Parent {a.Parent.GetType().Name}: ");
             ImGui.SameLine();
-            if (ImGui.Button($"{MapOverviewWindow.GetExtraObjectInfo(a.Parent)}")) data.Selection.Object = a.Parent;
+            if (ImGui.Button($"{MapOverviewWindow.GetExtraObjectInfo(a.Parent)}") && data.Selection is not null)
+                data.Selection.Object = a.Parent;
             ImGui.Separator();
         }
 

@@ -2,6 +2,7 @@ using System;
 using System.Numerics;
 using System.IO;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 using WallyMapSpinzor2;
 
@@ -9,8 +10,6 @@ using Raylib_cs;
 using rlImGui_cs;
 using ImGuiNET;
 using NativeFileDialogSharp;
-using System.Linq;
-using System.Collections.Generic;
 
 namespace WallyMapEditor;
 
@@ -28,10 +27,12 @@ public class Editor
     PathPreferences PathPrefs { get; }
     RenderConfigDefault ConfigDefault { get; }
 
-    private Level? _currentLevel;
-    public Level? CurrentLevel { get => _currentLevel; set => _currentLevel = value; }
+    private EditorLevel? _currentLevel;
+    public EditorLevel? CurrentLevel { get => _currentLevel; set => _currentLevel = value; }
 
-    public List<Level> LoadedLevels { get; set; } = [];
+    public object? SelectedObject => CurrentLevel?.Selection.Object;
+
+    public List<EditorLevel> LoadedLevels { get; set; } = [];
     public LevelLoader LevelLoader { get; set; }
 
     public RaylibCanvas? Canvas { get; set; }
@@ -50,8 +51,6 @@ public class Editor
     public ModLoaderWindow ModLoaderDialog { get; set; }
 
     public OverlayManager OverlayManager { get; set; } = new();
-    public SelectionContext Selection { get; set; } = new();
-    public CommandHistory CommandHistory { get; set; }
 
     private bool _movingObject = false;
 
@@ -71,7 +70,6 @@ public class Editor
     {
         PathPrefs = pathPrefs;
         ConfigDefault = configDefault;
-        CommandHistory = new(Selection);
         ExportDialog = new(pathPrefs, _backupsList);
         ImportDialog = new(pathPrefs);
         BackupsDialog = new(pathPrefs, _backupsList);
@@ -87,7 +85,7 @@ public class Editor
         Context = _context,
         RenderConfig = _renderConfig,
         OverlayConfig = _overlayConfig,
-        Level = CurrentLevel,
+        Level = CurrentLevel?.Level,
     };
 
     private PropertiesWindowData PropertiesWindowData => new()
@@ -95,9 +93,9 @@ public class Editor
         Time = Time,
         Canvas = Canvas,
         Loader = AssetLoader,
-        Level = CurrentLevel,
+        Level = CurrentLevel?.Level,
+        Selection = CurrentLevel?.Selection,
         PathPrefs = PathPrefs,
-        Selection = Selection,
         PowerNames = LevelLoader.PowerNames,
     };
 
@@ -137,12 +135,6 @@ public class Editor
 
         ResetCam(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT);
         PickingFramebuffer.Load(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT);
-
-        CommandHistory.Changed += (_, _) =>
-        {
-            if (TitleBar.OpenLevelFile is not null)
-                TitleBar.SetTitle(TitleBar.OpenLevelFile, true);
-        };
 
         PathPrefs.BrawlhallaPathChanged += (_, path) =>
         {
@@ -188,7 +180,7 @@ public class Editor
             Canvas.CameraMatrix = Rl.GetCameraMatrix2D(_cam);
 
             _context = new();
-            CurrentLevel?.DrawOn(Canvas, WmsTransform.IDENTITY, _renderConfig, _context, _state);
+            CurrentLevel?.Level.DrawOn(Canvas, WmsTransform.IDENTITY, _renderConfig, _context, _state);
             Canvas.FinalizeDraw();
         }
 
@@ -213,24 +205,25 @@ public class Editor
         if (RenderConfigWindow.Open)
             RenderConfigWindow.Show(_renderConfig, ConfigDefault, PathPrefs, ref _renderPaused);
         if (MapOverviewWindow.Open && CurrentLevel is not null)
-            MapOverviewWindow.Show(CurrentLevel, CommandHistory, PathPrefs, AssetLoader, Selection);
+            MapOverviewWindow.Show(CurrentLevel, PathPrefs, AssetLoader);
 
-        if (Selection.Object is not null)
+        if (CurrentLevel?.Selection.Object is not null)
+        {
             PropertiesWindow.Open = true;
-        if (PropertiesWindow.Open && Selection.Object is not null)
-            PropertiesWindow.Show(Selection.Object, CommandHistory, PropertiesWindowData);
-        if (!PropertiesWindow.Open)
-            Selection.Object = null;
+            PropertiesWindow.Show(CurrentLevel.Selection.Object, CurrentLevel.CommandHistory, PropertiesWindowData);
+        }
+        if (!PropertiesWindow.Open && CurrentLevel is not null)
+            CurrentLevel.Selection.Object = null;
 
-        if (HistoryPanel.Open)
-            HistoryPanel.Show(CommandHistory);
+        if (HistoryPanel.Open && CurrentLevel is not null)
+            HistoryPanel.Show(CurrentLevel.CommandHistory);
         if (PlaylistEditPanel.Open && CurrentLevel is not null)
-            PlaylistEditPanel.Show(CurrentLevel, PathPrefs);
+            PlaylistEditPanel.Show(CurrentLevel.Level, PathPrefs);
         if (KeyFinderPanel.Open)
             KeyFinderPanel.Show(PathPrefs);
 
-        if (ExportDialog.Open)
-            ExportDialog.Show(CurrentLevel);
+        if (ExportDialog.Open && CurrentLevel is not null)
+            ExportDialog.Show(CurrentLevel.Level);
         if (ImportDialog.Open)
             ImportDialog.Show(LevelLoader);
         if (BackupsDialog.Open)
@@ -247,7 +240,7 @@ public class Editor
         }
 
         if (CurrentLevel is not null)
-            AddObjectPopup.Update(CurrentLevel, CommandHistory, Selection);
+            AddObjectPopup.Update(CurrentLevel);
 
         NewLevelModal.Update(LevelLoader, PathPrefs);
     }
@@ -288,9 +281,20 @@ public class Editor
         }
         if (ImGui.BeginMenu("Edit"))
         {
-            if (ImGui.MenuItem("Undo", "Ctrl+Z")) CommandHistory.Undo();
-            if (ImGui.MenuItem("Redo", "Ctrl+Y")) CommandHistory.Redo();
-            if (ImGui.MenuItem("Deselect", "Ctrl+D")) Selection.Object = null;
+            if (CurrentLevel is not null)
+            {
+                if (ImGui.MenuItem("Undo", "Ctrl+Z")) CurrentLevel.CommandHistory.Undo();
+                if (ImGui.MenuItem("Redo", "Ctrl+Y")) CurrentLevel.CommandHistory.Redo();
+                if (ImGui.MenuItem("Deselect", "Ctrl+D")) CurrentLevel.Selection.Object = null;
+            }
+            else
+            {
+                ImGui.BeginDisabled();
+                ImGui.MenuItem("Undo", "Ctrl+Z");
+                ImGui.MenuItem("Redo", "Ctrl+Y");
+                ImGui.MenuItem("Deselect", "Ctrl+D");
+                ImGui.EndDisabled();
+            }
             ImGui.EndMenu();
         }
         if (ImGui.BeginMenu("View"))
@@ -347,18 +351,25 @@ public class Editor
                 ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
         }
 
-        bool usingOverlay = OverlayManager.IsUsing;
-        OverlayManager.Update(Selection, OverlayData, CommandHistory);
-        usingOverlay |= OverlayManager.IsUsing;
+        if (CurrentLevel is not null)
+        {
+            bool usingOverlay = OverlayManager.IsUsing;
+            OverlayManager.Update(CurrentLevel, OverlayData);
+            usingOverlay |= OverlayManager.IsUsing;
 
-        if (ViewportWindow.Hovered && !usingOverlay && Rl.IsMouseButtonReleased(MouseButton.Left))
-            Selection.Object = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, CurrentLevel, _cam, _renderConfig, _state);
+            if (ViewportWindow.Hovered && !usingOverlay && Rl.IsMouseButtonReleased(MouseButton.Left))
+                CurrentLevel.Selection.Object = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, CurrentLevel.Level, _cam, _renderConfig, _state);
+        }
 
         if (!wantCaptureKeyboard && Rl.IsKeyDown(KeyboardKey.LeftControl))
         {
-            if (Rl.IsKeyPressed(KeyboardKey.Z)) CommandHistory.Undo();
-            if (Rl.IsKeyPressed(KeyboardKey.Y)) CommandHistory.Redo();
-            if (Rl.IsKeyPressed(KeyboardKey.D)) Selection.Object = null;
+            if (CurrentLevel is not null)
+            {
+                if (Rl.IsKeyPressed(KeyboardKey.Z)) CurrentLevel.CommandHistory.Undo();
+                if (Rl.IsKeyPressed(KeyboardKey.Y)) CurrentLevel.CommandHistory.Redo();
+                if (Rl.IsKeyPressed(KeyboardKey.D)) CurrentLevel.Selection.Object = null;
+            }
+
             if (EnableNewAndOpenMapButtons)
             {
                 if (Rl.IsKeyPressed(KeyboardKey.N)) NewLevelModal.Open();
@@ -380,7 +391,7 @@ public class Editor
         _movingObject = false;
         if (!wantCaptureKeyboard && Rl.IsKeyDown(KeyboardKey.LeftShift))
         {
-            if (Selection.Object is not null)
+            if (CurrentLevel?.Selection.Object is not null)
             {
                 bool left = Rl.IsKeyDown(KeyboardKey.Left);
                 bool right = Rl.IsKeyDown(KeyboardKey.Right);
@@ -391,25 +402,25 @@ public class Editor
                 if (dx != 0 || dy != 0)
                 {
                     double delta = Rl.GetFrameTime() * 600;
-                    bool moved = WmeUtils.MoveObject(Selection.Object, delta * dx, delta * dy, CommandHistory);
+                    bool moved = WmeUtils.MoveObject(CurrentLevel.Selection.Object, delta * dx, delta * dy, CurrentLevel.CommandHistory);
                     if (moved)
                         _movingObject = true;
                 }
             }
         }
         // finished moving
-        if (wasMovingObject && !_movingObject)
+        if (wasMovingObject && !_movingObject && CurrentLevel is not null)
         {
-            CommandHistory.SetAllowMerge(false);
+            CurrentLevel.CommandHistory.SetAllowMerge(false);
         }
 
         if (!wantCaptureKeyboard)
         {
             if (Rl.IsKeyPressed(KeyboardKey.F11)) Rl.ToggleFullscreen();
             if (Rl.IsKeyPressed(KeyboardKey.F1)) _showMainMenuBar = !_showMainMenuBar;
-            if (CurrentLevel is not null && Selection.Object is not null && Rl.IsKeyPressed(KeyboardKey.Delete))
+            if (CurrentLevel?.Selection.Object is not null && Rl.IsKeyPressed(KeyboardKey.Delete))
             {
-                WmeUtils.RemoveObject(Selection.Object, CurrentLevel.Desc, CommandHistory);
+                WmeUtils.RemoveObject(CurrentLevel.Selection.Object, CurrentLevel.Level.Desc, CurrentLevel.CommandHistory);
             }
         }
 
@@ -425,7 +436,7 @@ public class Editor
     public void ResetCam(int surfaceW, int surfaceH)
     {
         _cam.Zoom = 1.0f;
-        CameraBounds? bounds = CurrentLevel?.Desc.CameraBounds;
+        CameraBounds? bounds = CurrentLevel?.Level.Desc.CameraBounds;
         if (bounds is null) return;
 
         double scale = Math.Min(surfaceW / bounds.W, surfaceH / bounds.H);
@@ -438,7 +449,8 @@ public class Editor
     {
         if (CurrentLevel is null || Canvas is null) return;
 
-        Image image = GetWorldRect((float)CurrentLevel.Desc.CameraBounds.X, (float)CurrentLevel.Desc.CameraBounds.Y, (int)CurrentLevel.Desc.CameraBounds.W, (int)CurrentLevel.Desc.CameraBounds.H);
+        CameraBounds cameraBounds = CurrentLevel.Level.Desc.CameraBounds;
+        Image image = GetWorldRect((float)cameraBounds.X, (float)cameraBounds.Y, (int)cameraBounds.W, (int)cameraBounds.H);
         Task.Run(() =>
         {
             string extension = "png";
@@ -465,7 +477,7 @@ public class Editor
         Rl.ClearBackground(RlColor.Blank);
         Rl.BeginMode2D(camera);
         Canvas.CameraMatrix = Rl.GetCameraMatrix2D(camera);
-        CurrentLevel?.DrawOn(Canvas, WmsTransform.IDENTITY, _renderConfig, new RenderContext(), _state);
+        CurrentLevel?.Level.DrawOn(Canvas, WmsTransform.IDENTITY, _renderConfig, new RenderContext(), _state);
         Canvas.FinalizeDraw();
         Rl.EndMode2D();
         Rl.EndTextureMode();
@@ -502,7 +514,7 @@ public class Editor
     {
         if (LevelLoader.ReloadMethod is LevelPathLoad lpLoad)
         {
-            WmeUtils.SerializeToPath(CurrentLevel!, lpLoad.Path);
+            WmeUtils.SerializeToPath(CurrentLevel!.Level, lpLoad.Path);
             TitleBar.SetTitle(lpLoad.Path, false);
             return;
         }
@@ -520,7 +532,7 @@ public class Editor
             {
                 string path = result.Path;
                 path = WmeUtils.ForcePathExtension(path, extension);
-                WmeUtils.SerializeToPath(CurrentLevel!, path);
+                WmeUtils.SerializeToPath(CurrentLevel!.Level, path);
                 PathPrefs.LevelPath = path;
                 LevelLoader.ReloadMethod = new LevelPathLoad(path);
                 TitleBar.SetTitle(path, false);
@@ -530,10 +542,29 @@ public class Editor
 
     public void CloseCurrentLevel()
     {
-        if (CurrentLevel is not null) LoadedLevels.Remove(CurrentLevel);
+        if (CurrentLevel is not null)
+        {
+            LoadedLevels.Remove(CurrentLevel);
+            CurrentLevel.CommandHistoryChanged -= OnCommandHistoryChanged;
+        }
         CurrentLevel = null;
         TitleBar.Reset();
         ResetState();
+    }
+
+    public void AddNewLevel(Level l)
+    {
+        EditorLevel editorLevel = new(l);
+        LoadedLevels.Add(editorLevel);
+        CurrentLevel = editorLevel;
+        editorLevel.CommandHistoryChanged += OnCommandHistoryChanged;
+        ResetCam();
+    }
+
+    private void OnCommandHistoryChanged(object? sender, EventArgs args)
+    {
+        if (TitleBar.OpenLevelFile is not null)
+            TitleBar.SetTitle(TitleBar.OpenLevelFile, true);
     }
 
     private void ReloadMap()
@@ -558,10 +589,8 @@ public class Editor
     {
         _movingObject = false;
         _renderConfig.Time = TimeSpan.FromTicks(0);
-        Selection.Object = null;
-        CommandHistory.Clear();
+        CurrentLevel?.ResetState();
         Canvas?.ClearTextureCache();
-        CommandHistory.Clear();
         ResetRenderState();
     }
 

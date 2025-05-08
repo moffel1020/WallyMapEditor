@@ -16,7 +16,7 @@ public class ViewportWindow
     private bool _open = true;
     public bool Open { get => _open; set => _open = value; }
 
-    public void Show(IEnumerable<Level> loadedLevels, ref Level? currentLevel)
+    public void Show(IEnumerable<EditorLevel> loadedLevels, ref EditorLevel? currentLevel)
     {
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0, 0));
 
@@ -30,9 +30,9 @@ public class ViewportWindow
 
         if (ImGui.BeginTabBar("levels", ImGuiTabBarFlags.Reorderable))
         {
-            foreach (Level l in loadedLevels)
+            foreach (EditorLevel l in loadedLevels)
             {
-                if (ImGui.BeginTabItem($"{l.Desc.LevelName}###{l.GetHashCode()}"))
+                if (ImGui.BeginTabItem($"{l.Level.Desc.LevelName}###{l.GetHashCode()}"))
                 {
                     currentLevel = l;
                     rlImGui.ImageRenderTexture(Framebuffer);

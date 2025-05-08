@@ -22,8 +22,12 @@ public class MapOverviewWindow
     private string? _thumbnailSelectError;
     private string? _assetDirSelectError;
 
-    public void Show(Level l, CommandHistory cmd, PathPreferences pathPrefs, AssetLoader? loader, SelectionContext selection)
+    public void Show(EditorLevel level, PathPreferences pathPrefs, AssetLoader? loader)
     {
+        Level l = level.Level;
+        CommandHistory cmd = level.CommandHistory;
+        SelectionContext selection = level.Selection;
+
         ImGui.Begin("Map Overview", ref _open);
 
         if (_propChanged && Rl.IsMouseButtonReleased(MouseButton.Left))

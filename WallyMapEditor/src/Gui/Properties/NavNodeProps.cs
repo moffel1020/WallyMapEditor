@@ -14,7 +14,8 @@ public partial class PropertiesWindow
         {
             ImGui.Text("Parent DynamicNavNode: ");
             ImGui.SameLine();
-            if (ImGui.Button($"PlatID {n.Parent.PlatID}")) data.Selection.Object = n.Parent;
+            if (ImGui.Button($"PlatID {n.Parent.PlatID}") && data.Selection is not null)
+                data.Selection.Object = n.Parent;
             ImGui.Separator();
         }
         bool propChanged = false;

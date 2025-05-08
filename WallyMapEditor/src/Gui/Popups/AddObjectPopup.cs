@@ -13,8 +13,12 @@ public static class AddObjectPopup
 
     public static Vector2 NewPos { get; set; }
 
-    public static void Update(Level l, CommandHistory cmd, SelectionContext selection)
+    public static void Update(EditorLevel level)
     {
+        Level l = level.Level;
+        CommandHistory cmd = level.CommandHistory;
+        SelectionContext selection = level.Selection;
+
         if (_shouldOpen)
         {
             ImGui.OpenPopup(NAME);

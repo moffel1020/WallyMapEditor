@@ -11,7 +11,8 @@ public partial class PropertiesWindow
         {
             ImGui.Text($"Parent DynamicItemSpawn: ");
             ImGui.SameLine();
-            if (ImGui.Button($"PlatID {i.Parent.PlatID}")) data.Selection.Object = i.Parent;
+            if (ImGui.Button($"PlatID {i.Parent.PlatID}") && data.Selection is not null)
+                data.Selection.Object = i.Parent;
             ImGui.Separator();
         }
 

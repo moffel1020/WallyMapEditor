@@ -34,7 +34,8 @@ public partial class PropertiesWindow
                     ImGui.TreePop();
                 }
 
-                if (ImGui.Button($"Select##select{cp.GetHashCode()}")) data.Selection.Object = cp;
+                if (ImGui.Button($"Select##select{cp.GetHashCode()}") && data.Selection is not null)
+                    data.Selection.Object = cp;
                 ImGui.SameLine();
 
                 return changed;

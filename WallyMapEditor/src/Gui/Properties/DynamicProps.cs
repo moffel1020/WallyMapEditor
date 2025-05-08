@@ -37,7 +37,8 @@ public partial class PropertiesWindow
                     ImGui.TreePop();
                 }
 
-                if (ImGui.Button($"Select##dyncol{child.GetHashCode()}")) data.Selection.Object = child;
+                if (ImGui.Button($"Select##dyncol{child.GetHashCode()}") && data.Selection is not null)
+                    data.Selection.Object = child;
                 ImGui.SameLine();
 
                 return changed;
@@ -79,7 +80,7 @@ public partial class PropertiesWindow
         {
             ImGui.Text("Animated by MovingPlatform");
             ImGui.SameLine();
-            if (ImGui.Button($"({value})"))
+            if (ImGui.Button($"({value})") && data.Selection is not null)
                 data.Selection.Object = data.Level.Desc.Assets.OfType<MovingPlatform>().Last(mp => mp.PlatID == value);
         }
 

@@ -21,7 +21,8 @@ public partial class PropertiesWindow
         {
             ImGui.Text($"Parent DynamicCollision: ");
             ImGui.SameLine();
-            if (ImGui.Button($"PlatID {ac.Parent.PlatID}")) data.Selection.Object = ac.Parent;
+            if (ImGui.Button($"PlatID {ac.Parent.PlatID}") && data.Selection is not null)
+                data.Selection.Object = ac.Parent;
             ImGui.Separator();
         }
 

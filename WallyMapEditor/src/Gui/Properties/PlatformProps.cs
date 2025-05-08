@@ -55,7 +55,8 @@ partial class PropertiesWindow
                     ImGui.TreePop();
                 }
 
-                if (ImGui.Button($"Select##platchild{child.GetHashCode()}")) data.Selection.Object = child;
+                if (ImGui.Button($"Select##platchild{child.GetHashCode()}") && data.Selection is not null)
+                    data.Selection.Object = child;
                 ImGui.SameLine();
 
                 return changed;

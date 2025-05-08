@@ -8,8 +8,11 @@ public class OverlayManager
     private object? _currentObject = null;
     public bool IsUsing { get; private set; } = false;
 
-    public void Update(SelectionContext selection, OverlayData data, CommandHistory cmd)
+    public void Update(EditorLevel level, OverlayData data)
     {
+        SelectionContext selection = level.Selection;
+        CommandHistory cmd = level.CommandHistory;
+
         if (_currentObject != selection.Object)
         {
             ActiveOverlay = CreateOverlay(selection);

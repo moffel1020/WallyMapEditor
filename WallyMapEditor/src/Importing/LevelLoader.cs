@@ -41,9 +41,7 @@ public class LevelLoader(Editor editor)
         if (bt is not null) (BoneTypes, PowerNames) = (bt, pn);
         ReloadMethod = loadMethod;
 
-        _editor.LoadedLevels.Add(l);
-        _editor.CurrentLevel = l;
-        _editor.ResetCam();
+        _editor.AddNewLevel(l);
     }
 
     public void LoadDefaultMap(string levelName, string assetDir, string displayName, bool addDefaultPlaylists = true)
@@ -55,15 +53,13 @@ public class LevelLoader(Editor editor)
         ld.LevelName = lt.LevelName = levelName;
         ld.AssetDir = assetDir;
         lt.DisplayName = displayName;
-        HashSet<string> playlists = [.. (addDefaultPlaylists ? DefaultPlaylists : [])];
+        HashSet<string> playlists = addDefaultPlaylists ? [.. DefaultPlaylists] : [];
 
         ReloadMethod = null; // loaded default map can't be reimported, it's not on disk
 
         Level l = new(ld, lt, playlists);
 
-        _editor.LoadedLevels.Add(l);
-        _editor.CurrentLevel = l;
-        _editor.ResetCam();
+        _editor.AddNewLevel(l);
     }
 
     public static LevelDesc DefaultLevelDesc => new()
