@@ -385,7 +385,8 @@ public class Editor
                 int dy = up == down ? 0 : up ? -1 : 1;
                 if (dx != 0 || dy != 0)
                 {
-                    bool moved = WmeUtils.MoveObject(Selection.Object, 10 * dx, 10 * dy, CommandHistory);
+                    double delta = Rl.GetFrameTime() * 600;
+                    bool moved = WmeUtils.MoveObject(Selection.Object, delta * dx, delta * dy, CommandHistory);
                     if (moved)
                         _movingObject = true;
                 }
