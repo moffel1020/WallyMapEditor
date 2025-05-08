@@ -48,6 +48,8 @@ public class Editor
     public SelectionContext Selection { get; set; } = new();
     public CommandHistory CommandHistory { get; set; }
 
+    private bool _movingObject = false;
+
     private bool _renderPaused = false;
     private readonly RenderConfig _renderConfig = RenderConfig.Default;
     private readonly OverlayConfig _overlayConfig = OverlayConfig.Default;
@@ -369,6 +371,32 @@ public class Editor
             }
         }
 
+        bool wasMovingObject = _movingObject;
+        _movingObject = false;
+        if (!wantCaptureKeyboard && Rl.IsKeyDown(KeyboardKey.LeftShift))
+        {
+            if (Selection.Object is not null)
+            {
+                bool left = Rl.IsKeyDown(KeyboardKey.Left);
+                bool right = Rl.IsKeyDown(KeyboardKey.Right);
+                bool up = Rl.IsKeyDown(KeyboardKey.Up);
+                bool down = Rl.IsKeyDown(KeyboardKey.Down);
+                int dx = left == right ? 0 : left ? -1 : 1;
+                int dy = up == down ? 0 : up ? -1 : 1;
+                if (dx != 0 || dy != 0)
+                {
+                    bool moved = WmeUtils.MoveObject(Selection.Object, 10 * dx, 10 * dy, CommandHistory);
+                    if (moved)
+                        _movingObject = true;
+                }
+            }
+        }
+        // finished moving
+        if (wasMovingObject && !_movingObject)
+        {
+            CommandHistory.SetAllowMerge(false);
+        }
+
         if (!wantCaptureKeyboard)
         {
             if (Rl.IsKeyPressed(KeyboardKey.F11)) Rl.ToggleFullscreen();
@@ -507,7 +535,6 @@ public class Editor
         {
             try
             {
-                _renderConfig.Time = TimeSpan.FromTicks(0); // reset time
                 LevelLoader.ReImport();
                 if (LevelLoader.ReloadMethod is LevelPathLoad lpLoad)
                     TitleBar.SetTitle(lpLoad.Path, false);
@@ -522,6 +549,8 @@ public class Editor
 
     public void ResetState()
     {
+        _movingObject = false;
+        _renderConfig.Time = TimeSpan.FromTicks(0);
         Selection.Object = null;
         CommandHistory.Clear();
         Canvas?.ClearTextureCache();
