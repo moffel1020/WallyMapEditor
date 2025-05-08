@@ -128,10 +128,13 @@ public class MousePickingFramebuffer : IDisposable
         Vector2 pos = Rl.GetMousePosition() - viewport.Bounds.P1;
         if (pos.X >= 0 && pos.X < img.Width && pos.Y >= 0 && pos.Y < img.Height && Rl.IsImageReady(img))
         {
-            float val = 0;
-            unsafe { val = ((float*)img.Data)[(int)pos.X + (img.Height - (int)pos.Y) * img.Width]; }
+            int posX = (int)Math.Round(pos.X);
+            int posY = (int)Math.Round(pos.Y);
 
-            int index = (int)Math.Round(val, 0);
+            float val;
+            unsafe { val = ((float*)img.Data)[posX + (img.Height - posY) * img.Width]; }
+
+            int index = (int)Math.Round(val);
             if (index > 0 && index <= _drawables.Count)
                 selected = _drawables[index - 1];
         }

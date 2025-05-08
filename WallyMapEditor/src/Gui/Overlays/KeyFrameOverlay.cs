@@ -1,3 +1,4 @@
+using System.Numerics;
 using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
@@ -20,10 +21,13 @@ public class KeyFrameOverlay(KeyFrame kf) : IOverlay
 
         (double offX, double offY) = PlatOffset;
         string frameNum = (FrameNumOverride ?? kf.FrameNum).ToString();
-        int textW = Rl.MeasureText(frameNum, fontSize);
+        float textW = RaylibEx.MeasureTextV(frameNum, fontSize).X;
 
         Circle.Draw(data);
-        Rl.DrawText(frameNum, (int)(kf.X + offX - textW / 2), (int)(kf.Y + offY - Circle.Radius / 2), fontSize, textColor);
+        double textX = kf.X + offX - textW / 2;
+        double textY = kf.Y + offY - Circle.Radius / 2;
+        Vector2 textPos = new((float)textX, (float)textY);
+        RaylibEx.DrawTextV(frameNum, textPos, fontSize, textColor);
     }
 
     public bool Update(OverlayData data, CommandHistory cmd)

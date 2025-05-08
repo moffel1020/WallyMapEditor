@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Numerics;
 using WallyMapSpinzor2;
 
 /*
@@ -57,13 +58,16 @@ public class CustomPathOverlay(CustomPath cp) : IOverlay
 
         foreach ((DragCircle circle, int i) in Points.Indexed())
         {
-            int textW = Rl.MeasureText(i.ToString(), fontSize);
+            float textW = RaylibEx.MeasureTextV(i.ToString(), fontSize).X;
 
             circle.Color = data.OverlayConfig.ColorPathPoint;
             circle.UsingColor = data.OverlayConfig.UsingColorPathPoint;
             circle.Draw(data);
 
-            Rl.DrawText(i.ToString(), (int)(circle.X - textW / 2), (int)(circle.Y - circle.Radius / 2), fontSize, textColor);
+            double textX = circle.X - textW / 2;
+            double textY = circle.Y - circle.Radius / 2;
+            Vector2 textPos = new((float)textX, (float)textY);
+            RaylibEx.DrawTextV(i.ToString(), textPos, fontSize, textColor);
         }
     }
 }

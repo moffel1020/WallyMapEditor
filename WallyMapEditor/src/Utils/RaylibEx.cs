@@ -1,3 +1,4 @@
+using System.Numerics;
 using System.Runtime.InteropServices;
 using Raylib_cs;
 
@@ -160,5 +161,29 @@ public static class RaylibEx
         }
 
         return image;
+    }
+
+    // reimplements DrawText, taking floats
+    // https://github.com/raysan5/raylib/blob/1402e830b47e954e528b520d4ccfb69835d23fdc/src/rtext.c#L1150
+    public static void DrawTextV(string text, Vector2 position, float fontSize, Color tint)
+    {
+        int defaultFontSize = 10;
+        if (fontSize < defaultFontSize) fontSize = defaultFontSize;
+        float spacing = fontSize / defaultFontSize;
+
+        Font font = Rl.GetFontDefault();
+        Rl.DrawTextEx(font, text, position, fontSize, spacing, tint);
+    }
+
+    // reimplements MeasureText without float->int conversion
+    // https://github.com/raysan5/raylib/blob/1402e830b47e954e528b520d4ccfb69835d23fdc/src/rtext.c#L1282
+    public static Vector2 MeasureTextV(string text, float fontSize)
+    {
+        int defaultFontSize = 10;
+        if (fontSize < defaultFontSize) fontSize = defaultFontSize;
+        float spacing = fontSize / defaultFontSize;
+
+        Font font = Rl.GetFontDefault();
+        return Rl.MeasureTextEx(font, text, fontSize, spacing);
     }
 }
