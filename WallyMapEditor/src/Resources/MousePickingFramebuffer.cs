@@ -95,6 +95,14 @@ public class MousePickingFramebuffer : IDisposable
 
         MatchSize(viewport);
 
+        Vector2 pos = Rl.GetMousePosition() - viewport.Bounds.P1;
+        int posX = (int)Math.Round(pos.X);
+        int posY = (int)Math.Round(pos.Y);
+        int width = _framebuffer.Texture.Width;
+        int height = _framebuffer.Texture.Height;
+        if (posX < 0 || posY < 0 || posX >= width || posY >= height)
+            return null;
+
         Rl.BeginTextureMode(_framebuffer);
         Rl.BeginMode2D(cam);
         Rlgl.DisableColorBlend();
@@ -106,10 +114,11 @@ public class MousePickingFramebuffer : IDisposable
         _drawables.Clear();
         while (canvas.DrawingQueue.Count > 0)
         {
-            Rl.BeginShaderMode(Shader);
             (object? obj, Action drawAction) = canvas.DrawingQueue.PopMin();
             if (obj is not null) _drawables.Add(obj);
             float id = obj is not null ? _drawables.Count : 0;
+
+            Rl.BeginShaderMode(Shader);
             // setting shader attribs per vertex in raylib is annoying, so we do it in a hacky way with shader uniforms
             // raylib doesnt expose the integer type for framebuffer drawing so float will do 
             Rl.SetShaderValue(Shader, Rl.GetShaderLocation(Shader, "id"), id, ShaderUniformDataType.Float);
@@ -122,24 +131,28 @@ public class MousePickingFramebuffer : IDisposable
         Rl.EndShaderMode();
         Rl.EndTextureMode();
 
-        object? selected = null;
-        Image img = Rl.LoadImageFromTexture(_framebuffer.Texture);
+        float val = GetFramebufferPixel(posX, posY);
 
-        Vector2 pos = Rl.GetMousePosition() - viewport.Bounds.P1;
-        if (pos.X >= 0 && pos.X < img.Width && pos.Y >= 0 && pos.Y < img.Height && Rl.IsImageReady(img))
+        int index = (int)Math.Round(val); // 1-indexed
+        if (index <= 0 || index > _drawables.Count)
+            return null;
+
+        return _drawables[index - 1];
+    }
+
+    // warning: does not verify inputs
+    private float GetFramebufferPixel(int x, int y)
+    {
+        Image img = default;
+        try
         {
-            int posX = (int)Math.Round(pos.X);
-            int posY = (int)Math.Round(pos.Y);
-
-            float val;
-            unsafe { val = ((float*)img.Data)[posX + (img.Height - posY) * img.Width]; }
-
-            int index = (int)Math.Round(val);
-            if (index > 0 && index <= _drawables.Count)
-                selected = _drawables[index - 1];
+            img = Rl.LoadImageFromTexture(_framebuffer.Texture);
+            unsafe { return ((float*)img.Data)[x + (img.Height - y) * img.Width]; }
         }
-        Rl.UnloadImage(img);
-        return selected;
+        finally
+        {
+            Rl.UnloadImage(img);
+        }
     }
 
     protected virtual void Dispose(bool disposing)
