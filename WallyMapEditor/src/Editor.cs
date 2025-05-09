@@ -75,7 +75,7 @@ public class Editor
         BackupsDialog = new(pathPrefs, _backupsList);
         ModCreatorDialog = new(pathPrefs);
         ModLoaderDialog = new(pathPrefs);
-        LevelLoader = new(this);
+        LevelLoader = new();
     }
 
     private OverlayData OverlayData => new()
@@ -146,6 +146,16 @@ public class Editor
         {
             if (AssetLoader is not null)
                 AssetLoader.BoneTypes = boneTypes;
+        };
+
+        LevelLoader.OnNewMapLoaded += (_, level) =>
+        {
+            AddNewLevel(level, true);
+        };
+
+        LevelLoader.OnMapReloaded += (_, level, newData, loadMethod) =>
+        {
+            OnLevelReloaded(level, newData, loadMethod);
         };
 
         RenderConfigWindow.MoveFrames += (_, frames) =>
@@ -247,7 +257,7 @@ public class Editor
 
     private bool EnableNewAndOpenMapButtons => LevelLoader.BoneTypes is not null;
     private bool EnableSaveButton => CurrentLevel is not null;
-    private bool EnableReloadMapButton => LevelLoader.CanReImport;
+    private bool EnableReloadMapButton => LevelLoader.CanReImport(CurrentLevel);
     private bool EnableCloseMapButton => CurrentLevel is not null;
 
     private void ShowMainMenuBar()
@@ -512,9 +522,11 @@ public class Editor
 
     private void SaveLevelFile()
     {
-        if (LevelLoader.ReloadMethod is LevelPathLoad lpLoad)
+        if (CurrentLevel is null) return;
+
+        if (CurrentLevel.ReloadMethod is LevelPathLoad lpLoad)
         {
-            WmeUtils.SerializeToPath(CurrentLevel!.Level, lpLoad.Path);
+            WmeUtils.SerializeToPath(CurrentLevel.Level, lpLoad.Path);
             TitleBar.SetTitle(lpLoad.Path, false);
             return;
         }
@@ -524,17 +536,20 @@ public class Editor
 
     private void SaveLevelFileToPath()
     {
+        if (CurrentLevel is null) return;
         Task.Run(() =>
         {
+            if (CurrentLevel is null) return;
+
             string extension = "xml";
             DialogResult result = Dialog.FileSave(extension, Path.GetDirectoryName(PathPrefs.LevelPath));
             if (result.IsOk)
             {
                 string path = result.Path;
                 path = WmeUtils.ForcePathExtension(path, extension);
-                WmeUtils.SerializeToPath(CurrentLevel!.Level, path);
+                WmeUtils.SerializeToPath(CurrentLevel.Level, path);
                 PathPrefs.LevelPath = path;
-                LevelLoader.ReloadMethod = new LevelPathLoad(path);
+                CurrentLevel.ReloadMethod = new LevelPathLoad(path);
                 TitleBar.SetTitle(path, false);
             }
         });
@@ -544,21 +559,47 @@ public class Editor
     {
         if (CurrentLevel is not null)
         {
+            DeregisterLevel(CurrentLevel);
             LoadedLevels.Remove(CurrentLevel);
-            CurrentLevel.CommandHistoryChanged -= OnCommandHistoryChanged;
         }
         CurrentLevel = null;
         TitleBar.Reset();
         ResetState();
     }
 
-    public void AddNewLevel(Level l)
+    public void OnLevelReloaded(EditorLevel level, Level newData, ILoadMethod loadMethod)
     {
-        EditorLevel editorLevel = new(l);
+        level.ResetState();
+        level.Level = newData;
+        level.ReloadMethod = loadMethod;
+
+        if (CurrentLevel == level)
+        {
+            ResetCam();
+            ResetState();
+        }
+    }
+
+    public void AddNewLevel(EditorLevel editorLevel, bool takeFocus)
+    {
         LoadedLevels.Add(editorLevel);
-        CurrentLevel = editorLevel;
+        RegisterLevel(editorLevel);
+        if (takeFocus)
+        {
+            CurrentLevel = editorLevel;
+            ResetCam();
+            ResetState();
+        }
+    }
+
+    private void RegisterLevel(EditorLevel editorLevel)
+    {
         editorLevel.CommandHistoryChanged += OnCommandHistoryChanged;
-        ResetCam();
+    }
+
+    private void DeregisterLevel(EditorLevel editorLevel)
+    {
+        editorLevel.CommandHistoryChanged -= OnCommandHistoryChanged;
     }
 
     private void OnCommandHistoryChanged(object? sender, EventArgs args)
@@ -569,12 +610,13 @@ public class Editor
 
     private void ReloadMap()
     {
+        if (CurrentLevel is null) return;
         Task.Run(() =>
         {
             try
             {
-                LevelLoader.ReImport();
-                if (LevelLoader.ReloadMethod is LevelPathLoad lpLoad)
+                LevelLoader.ReImport(CurrentLevel);
+                if (CurrentLevel.ReloadMethod is LevelPathLoad lpLoad)
                     TitleBar.SetTitle(lpLoad.Path, false);
             }
             catch (Exception e)

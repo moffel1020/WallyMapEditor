@@ -1,12 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public class LevelLoader(Editor editor)
+public class LevelLoader
 {
-    private readonly Editor _editor = editor;
+    public delegate void OnNewMapLoadedEventHandler(LevelLoader? sender, EditorLevel newLevel);
+    public delegate void OnMapReloadedEventHandler(LevelLoader? sender, EditorLevel level, Level newData, ILoadMethod loadMethod);
+
+    public event OnNewMapLoadedEventHandler? OnNewMapLoaded;
+    public event OnMapReloadedEventHandler? OnMapReloaded;
 
     public string[]? PowerNames { get; set; }
 
@@ -23,25 +28,28 @@ public class LevelLoader(Editor editor)
         }
     }
 
-    public ILoadMethod? ReloadMethod { get; set; }
+    public static bool CanReImport([NotNullWhen(true)] EditorLevel? level) => level?.ReloadMethod is not null;
 
-    public bool CanReImport => ReloadMethod is not null;
-
-    public void ReImport()
+    public void ReImport(EditorLevel? level)
     {
-        if (ReloadMethod is not null) LoadMap(ReloadMethod, true);
+        if (!CanReImport(level)) return;
+        LoadMap(level.ReloadMethod!, level);
     }
 
-    public void LoadMap(ILoadMethod loadMethod, bool reload = false)
+    public void LoadMap(ILoadMethod loadMethod, EditorLevel? reload = null)
     {
         (Level l, BoneTypes? bt, string[]? pn) = loadMethod.Load();
         if (BoneTypes is null && bt is null) throw new InvalidOperationException("Could not load map. BoneTypes has not been imported.");
 
-        if (reload) _editor.CloseCurrentLevel();
         if (bt is not null) (BoneTypes, PowerNames) = (bt, pn);
-        ReloadMethod = loadMethod;
 
-        _editor.AddNewLevel(l);
+        if (reload is not null)
+            OnMapReloaded?.Invoke(this, reload, l, loadMethod);
+        else
+        {
+            EditorLevel editorLevel = new(l) { ReloadMethod = loadMethod };
+            OnNewMapLoaded?.Invoke(this, editorLevel);
+        }
     }
 
     public void LoadDefaultMap(string levelName, string assetDir, string displayName, bool addDefaultPlaylists = true)
@@ -55,11 +63,10 @@ public class LevelLoader(Editor editor)
         lt.DisplayName = displayName;
         HashSet<string> playlists = addDefaultPlaylists ? [.. DefaultPlaylists] : [];
 
-        ReloadMethod = null; // loaded default map can't be reimported, it's not on disk
-
         Level l = new(ld, lt, playlists);
+        EditorLevel level = new(l);
 
-        _editor.AddNewLevel(l);
+        OnNewMapLoaded?.Invoke(this, level);
     }
 
     public static LevelDesc DefaultLevelDesc => new()

@@ -2,7 +2,6 @@ using System.Numerics;
 using Raylib_cs;
 using ImGuiNET;
 using rlImGui_cs;
-using WallyMapSpinzor2;
 using System.Collections.Generic;
 
 namespace WallyMapEditor;
