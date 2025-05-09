@@ -566,7 +566,6 @@ public class Editor
         }
         CurrentLevel = null;
         TitleBar.Reset();
-        ResetState();
     }
 
     public void OnLevelReloaded(EditorLevel level, Level newData, ILoadMethod loadMethod)
@@ -590,7 +589,6 @@ public class Editor
         {
             CurrentLevel = editorLevel;
             QueueResetCam();
-            ResetState();
         }
     }
 
