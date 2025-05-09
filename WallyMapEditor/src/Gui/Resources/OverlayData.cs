@@ -10,5 +10,6 @@ public class OverlayData
     public required RenderContext Context { get; init; }
     public required RenderConfig RenderConfig { get; init; }
     public required OverlayConfig OverlayConfig { get; init; }
+    // TODO: This shouldn't be needed - OverlayManager has a reference to the EditorLevel
     public required Level? Level { get; init; }
 }

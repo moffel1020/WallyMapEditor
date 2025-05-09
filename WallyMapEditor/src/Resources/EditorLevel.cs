@@ -8,6 +8,7 @@ public sealed class EditorLevel
     public Level Level { get; set; }
     public SelectionContext Selection { get; }
     public CommandHistory CommandHistory { get; }
+    public OverlayManager OverlayManager { get; }
     public ILoadMethod? ReloadMethod { get; set; }
 
     public event EventHandler? CommandHistoryChanged;
@@ -16,6 +17,7 @@ public sealed class EditorLevel
     {
         Level = level;
         Selection = new();
+        OverlayManager = new(this);
         CommandHistory = new(Selection);
         ReloadMethod = null;
 

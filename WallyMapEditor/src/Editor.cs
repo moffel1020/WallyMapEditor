@@ -51,8 +51,6 @@ public class Editor
     public ModCreatorWindow ModCreatorDialog { get; set; }
     public ModLoaderWindow ModLoaderDialog { get; set; }
 
-    public OverlayManager OverlayManager { get; set; } = new();
-
     private bool _movingObject = false;
 
     private bool _renderPaused = false;
@@ -204,7 +202,7 @@ public class Editor
             Canvas.FinalizeDraw();
         }
 
-        OverlayManager.Draw(OverlayData);
+        CurrentLevel?.OverlayManager.Draw(OverlayData);
 
         Rl.EndMode2D();
         Rl.EndTextureMode();
@@ -373,9 +371,9 @@ public class Editor
 
         if (CurrentLevel is not null)
         {
-            bool usingOverlay = OverlayManager.IsUsing;
-            OverlayManager.Update(CurrentLevel, OverlayData);
-            usingOverlay |= OverlayManager.IsUsing;
+            bool usingOverlay = CurrentLevel.OverlayManager.IsUsing;
+            CurrentLevel.OverlayManager.Update(OverlayData);
+            usingOverlay |= CurrentLevel.OverlayManager.IsUsing;
 
             if (ViewportWindow.Hovered && !usingOverlay && Rl.IsMouseButtonReleased(MouseButton.Left))
                 CurrentLevel.Selection.Object = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, CurrentLevel.Level, _cam, _renderConfig, _state);
