@@ -73,15 +73,12 @@ public class Editor
         LevelLoader = new();
     }
 
-    // Don't call if CurrentLevel is null
     private OverlayData OverlayData => new()
     {
         Viewport = ViewportWindow,
-        Cam = CurrentLevel!.Camera,
         Context = _context,
         RenderConfig = _renderConfig,
         OverlayConfig = _overlayConfig,
-        Level = CurrentLevel?.Level,
     };
 
     private PropertiesWindowData PropertiesWindowData => new()
@@ -89,8 +86,6 @@ public class Editor
         Time = Time,
         Canvas = Canvas,
         Loader = AssetLoader,
-        Level = CurrentLevel?.Level,
-        Selection = CurrentLevel?.Selection,
         PathPrefs = PathPrefs,
         PowerNames = LevelLoader.PowerNames,
     };
@@ -230,7 +225,7 @@ public class Editor
             if (CurrentLevel.Selection.Object is not null)
             {
                 PropertiesWindow.Open = true;
-                PropertiesWindow.Show(CurrentLevel.Selection.Object, CurrentLevel.CommandHistory, PropertiesWindowData);
+                PropertiesWindow.Show(CurrentLevel.Selection.Object, CurrentLevel, PropertiesWindowData);
             }
             if (!PropertiesWindow.Open)
                 CurrentLevel.Selection.Object = null;

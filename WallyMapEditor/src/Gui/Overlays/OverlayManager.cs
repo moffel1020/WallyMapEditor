@@ -20,13 +20,13 @@ public class OverlayManager(EditorLevel level)
         }
 
         bool wasUsing = IsUsing;
-        IsUsing = ActiveOverlay?.Update(data, cmd) ?? false;
+        IsUsing = ActiveOverlay?.Update(level, data) ?? false;
         if (wasUsing && !IsUsing) cmd.SetAllowMerge(false);
     }
 
     public void Draw(OverlayData data)
     {
-        ActiveOverlay?.Draw(data);
+        ActiveOverlay?.Draw(level, data);
     }
 
     private static IOverlay? CreateOverlay(SelectionContext selection) => selection.Object switch

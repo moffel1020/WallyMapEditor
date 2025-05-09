@@ -16,7 +16,7 @@ public class CustomPathOverlay(CustomPath cp) : IOverlay
 {
     public List<DragCircle> Points { get; set; } = [];
 
-    public bool Update(OverlayData data, CommandHistory cmd)
+    public bool Update(EditorLevel level, OverlayData data)
     {
         bool dragging = false;
 
@@ -35,12 +35,12 @@ public class CustomPathOverlay(CustomPath cp) : IOverlay
             circle.Radius = data.OverlayConfig.RadiusPathPoint;
             circle.X = point.X;
             circle.Y = point.Y;
-            circle.Update(data, !dragging);
+            circle.Update(level.Camera, data, !dragging);
 
             if (circle.Dragging)
             {
                 dragging = true;
-                cmd.Add(new PropChangeCommand<double, double>(
+                level.CommandHistory.Add(new PropChangeCommand<double, double>(
                     (val1, val2) => (point.X, point.Y) = (val1, val2),
                     point.X, point.Y,
                     circle.X, circle.Y
@@ -51,7 +51,7 @@ public class CustomPathOverlay(CustomPath cp) : IOverlay
         return dragging;
     }
 
-    public void Draw(OverlayData data)
+    public void Draw(EditorLevel level, OverlayData data)
     {
         int fontSize = data.OverlayConfig.FontSizePathPointNum;
         RlColor textColor = data.OverlayConfig.TextColorPathPointNum;

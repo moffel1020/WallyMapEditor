@@ -1,3 +1,5 @@
+using Raylib_cs;
+
 namespace WallyMapEditor;
 
 public class ScaleGizmo(double x, double y)
@@ -59,10 +61,10 @@ public class ScaleGizmo(double x, double y)
         set => ScaleXSlider.Y = ScaleYSlider.Y = value;
     }
 
-    public void Update(OverlayData data, double currentScaleX, double currentScaleY, bool allowDragging)
+    public void Update(Camera2D cam, OverlayData data, double currentScaleX, double currentScaleY, bool allowDragging)
     {
-        ScaleXSlider.Update(data, currentScaleX, allowDragging);
-        ScaleYSlider.Update(data, currentScaleY, allowDragging && !ScaleXSlider.Dragging);
+        ScaleXSlider.Update(cam, data, currentScaleX, allowDragging);
+        ScaleYSlider.Update(cam, data, currentScaleY, allowDragging && !ScaleXSlider.Dragging);
     }
 
     public void Draw(OverlayData data)

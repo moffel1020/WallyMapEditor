@@ -5,8 +5,11 @@ namespace WallyMapEditor;
 
 partial class PropertiesWindow
 {
-    public static bool ShowPlatformProps(Platform p, CommandHistory cmd, PropertiesWindowData data)
+    public static bool ShowPlatformProps(Platform p, EditorLevel level, PropertiesWindowData data)
     {
+        CommandHistory cmd = level.CommandHistory;
+        SelectionContext selection = level.Selection;
+
         bool propChanged = false;
 
         string name = p.InstanceName;
@@ -18,7 +21,7 @@ partial class PropertiesWindow
         }
 
         ImGui.Separator();
-        propChanged |= ShowAbstractAssetProps(p, cmd, data);
+        propChanged |= ShowAbstractAssetProps(p, level, data);
         if (p.AssetName is not null)
         {
             propChanged |= ImGuiExt.GenericStringComboHistory("PlatformAssetSwap", p.PlatformAssetSwap, val => p.PlatformAssetSwap = val,
@@ -51,12 +54,12 @@ partial class PropertiesWindow
                 bool changed = false;
                 if (ImGui.TreeNode($"{child.GetType().Name}###{child.GetHashCode()}"))
                 {
-                    changed |= ShowProperties(child, cmd, data);
+                    changed |= ShowProperties(child, level, data);
                     ImGui.TreePop();
                 }
 
-                if (ImGui.Button($"Select##platchild{child.GetHashCode()}") && data.Selection is not null)
-                    data.Selection.Object = child;
+                if (ImGui.Button($"Select##platchild{child.GetHashCode()}"))
+                    selection.Object = child;
                 ImGui.SameLine();
 
                 return changed;

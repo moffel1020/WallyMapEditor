@@ -12,7 +12,7 @@ public class KeyFrameOverlay(KeyFrame kf) : IOverlay
 
     public int? FrameNumOverride { get; set; }
 
-    public void Draw(OverlayData data)
+    public void Draw(EditorLevel level, OverlayData data)
     {
         int fontSize = data.OverlayConfig.FontSizeKeyFrameNum;
         RlColor textColor = data.OverlayConfig.TextColorKeyFrameNum;
@@ -30,7 +30,7 @@ public class KeyFrameOverlay(KeyFrame kf) : IOverlay
         RaylibEx.DrawTextV(frameNum, textPos, fontSize, textColor);
     }
 
-    public bool Update(OverlayData data, CommandHistory cmd)
+    public bool Update(EditorLevel level, OverlayData data)
     {
         Circle.Radius = data.OverlayConfig.RadiusKeyFramePosition;
 
@@ -38,11 +38,11 @@ public class KeyFrameOverlay(KeyFrame kf) : IOverlay
         Circle.X = kf.X + offX;
         Circle.Y = kf.Y + offY;
 
-        Circle.Update(data, AllowDragging);
+        Circle.Update(level.Camera, data, AllowDragging);
 
         if (Circle.Dragging)
         {
-            cmd.Add(new PropChangeCommand<double, double>(
+            level.CommandHistory.Add(new PropChangeCommand<double, double>(
                 (val1, val2) => (kf.X, kf.Y) = (val1, val2),
                 kf.X, kf.Y,
                 Circle.X - offX, Circle.Y - offY

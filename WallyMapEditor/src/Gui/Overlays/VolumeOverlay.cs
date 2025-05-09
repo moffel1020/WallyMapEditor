@@ -7,7 +7,7 @@ public class VolumeOverlay(AbstractVolume volume) : IOverlay
 {
     public ResizableDragBox ResizableBox { get; set; } = new(volume.X, volume.Y, volume.W, volume.H);
 
-    public void Draw(OverlayData data)
+    public void Draw(EditorLevel level, OverlayData data)
     {
         ResizableBox.Color = data.OverlayConfig.ColorVolumeBox;
         ResizableBox.UsingColor = data.OverlayConfig.UsingColorVolumeBox;
@@ -18,11 +18,13 @@ public class VolumeOverlay(AbstractVolume volume) : IOverlay
     private static (int, int, int, int) RoundBoundsToInt((double, double, double, double) val) =>
         ((int)Math.Round(val.Item1), (int)Math.Round(val.Item2), (int)Math.Round(val.Item3), (int)Math.Round(val.Item4));
 
-    public bool Update(OverlayData data, CommandHistory cmd)
+    public bool Update(EditorLevel level, OverlayData data)
     {
+        CommandHistory cmd = level.CommandHistory;
+
         ResizableBox.CircleRadius = data.OverlayConfig.RadiusVolumeCorner;
 
-        ResizableBox.Update(data, volume.X, volume.Y, volume.W, volume.H);
+        ResizableBox.Update(level.Camera, data, volume.X, volume.Y, volume.W, volume.H);
         (int x, int y, int w, int h) = RoundBoundsToInt(ResizableBox.Bounds);
 
         if (ResizableBox.Resizing)

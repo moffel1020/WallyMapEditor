@@ -14,8 +14,10 @@ public partial class PropertiesWindow
     private static string? _warningText;
     private static string? _backgroundErrorText;
 
-    public static bool ShowBackgroundProps(Background b, CommandHistory cmd, PropertiesWindowData data)
+    public static bool ShowBackgroundProps(Background b, EditorLevel level, PropertiesWindowData data)
     {
+        CommandHistory cmd = level.CommandHistory;
+
         string? backgroundDir = data.PathPrefs.BrawlhallaPath is not null
             ? Path.Combine(data.PathPrefs.BrawlhallaPath, "mapArt", "Backgrounds")
             : null;
@@ -88,7 +90,7 @@ public partial class PropertiesWindow
 
     private static void ShowSelectBackgroundButton(string key, string? assetName, Action<string?> setAssetName, CommandHistory cmd, PropertiesWindowData data, string backgroundDir)
     {
-        if (data.Level is null || data.PathPrefs.BrawlhallaPath is null || !ImGui.Button($"Select##{key}")) return;
+        if (data.PathPrefs.BrawlhallaPath is null || !ImGui.Button($"Select##{key}")) return;
 
         Task.Run(() =>
         {

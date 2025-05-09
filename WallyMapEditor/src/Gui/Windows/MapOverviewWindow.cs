@@ -208,7 +208,7 @@ public class MapOverviewWindow
         {
             ImGui.Text("Camera bounds");
             ImGuiExt.HintTooltip(Strings.UI_CAMERA_BOUNDS_TOOLTIP);
-            _propChanged |= PropertiesWindow.ShowCameraBoundsProps(l.Desc.CameraBounds, cmd);
+            _propChanged |= PropertiesWindow.ShowCameraBoundsProps(l.Desc.CameraBounds, level);
             if (l.Type is not null)
             {
                 _propChanged |= ImGuiExt.CheckboxHistory("FixedCamera", l.Type.FixedCamera ?? false, val => l.Type.FixedCamera = val ? val : null, cmd);
@@ -232,7 +232,7 @@ public class MapOverviewWindow
         {
             ImGui.Text("Spawn bot bounds");
             ImGuiExt.HintTooltip(Strings.UI_SIDEKICK_BOUNDS_TOOLTIP);
-            _propChanged |= PropertiesWindow.ShowSpawnBotBoundsProps(l.Desc.SpawnBotBounds, cmd);
+            _propChanged |= PropertiesWindow.ShowSpawnBotBoundsProps(l.Desc.SpawnBotBounds, level);
         }
 
         if (l.Type is not null && ImGui.CollapsingHeader("Bot Behavior##overview"))

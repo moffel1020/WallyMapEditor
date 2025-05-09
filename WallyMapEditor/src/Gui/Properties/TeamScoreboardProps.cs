@@ -5,8 +5,10 @@ namespace WallyMapEditor;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowTeamScoreboardProps(TeamScoreboard ts, CommandHistory cmd)
+    public static bool ShowTeamScoreboardProps(TeamScoreboard ts, EditorLevel level)
     {
+        CommandHistory cmd = level.CommandHistory;
+
         bool propChanged = false;
         ImGui.Text("RedDigitFont: " + ts.RedDigitFont);
         ImGui.Text("BlueDigitFont: " + ts.BlueDigitFont);

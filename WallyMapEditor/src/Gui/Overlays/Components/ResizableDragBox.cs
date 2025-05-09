@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Raylib_cs;
 
 namespace WallyMapEditor;
 
@@ -73,7 +74,7 @@ public class ResizableDragBox(double x, double y, double w, double h)
         MoveRect.Draw(data);
     }
 
-    public void Update(OverlayData data, double x, double y, double w, double h)
+    public void Update(Camera2D cam, OverlayData data, double x, double y, double w, double h)
     {
         Bounds = (x, y, w, h);
 
@@ -82,7 +83,7 @@ public class ResizableDragBox(double x, double y, double w, double h)
 
         foreach (DragCircle circle in GetCircles())
         {
-            circle.Update(data, !Resizing);
+            circle.Update(cam, data, !Resizing);
             Resizing |= circle.Dragging;
         }
 
@@ -145,7 +146,7 @@ public class ResizableDragBox(double x, double y, double w, double h)
 
         if (Resizing) Bounds = (x, y, w, h);
 
-        MoveRect.Update(data, !Resizing);
+        MoveRect.Update(cam, data, !Resizing);
         Moving = MoveRect.Dragging;
         // this will also update the points
         if (Moving) Bounds = (MoveRect.X, MoveRect.Y, MoveRect.W, MoveRect.H);

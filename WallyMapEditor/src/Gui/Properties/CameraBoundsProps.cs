@@ -4,8 +4,10 @@ namespace WallyMapEditor;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowCameraBoundsProps(CameraBounds cb, CommandHistory cmd)
+    public static bool ShowCameraBoundsProps(CameraBounds cb, EditorLevel level)
     {
+        CommandHistory cmd = level.CommandHistory;
+
         bool propChanged = false;
         propChanged |= ImGuiExt.DragDoubleHistory("X##cambounds", cb.X, val => cb.X = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory("Y##cambounds", cb.Y, val => cb.Y = val, cmd);

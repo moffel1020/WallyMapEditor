@@ -6,19 +6,22 @@ namespace WallyMapEditor;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowMovingPlatformProps(MovingPlatform mp, CommandHistory cmd, PropertiesWindowData data)
+    public static bool ShowMovingPlatformProps(MovingPlatform mp, EditorLevel level, PropertiesWindowData data)
     {
+        CommandHistory cmd = level.CommandHistory;
+        SelectionContext selection = level.Selection;
+        LevelDesc ld = level.Level.Desc;
+
         bool propChanged = false;
         propChanged |= ImGuiExt.InputTextHistory("PlatID", mp.PlatID, val => mp.PlatID = val, cmd, 32);
 
         ImGui.Separator();
-        if (data.Level is not null)
-            RemoveButton(mp, data.Level.Desc, cmd);
+        RemoveButton(mp, level);
         ImGui.Separator();
 
-        if (data.Level is not null && ImGui.TreeNode("Connected dynamics"))
+        if (ImGui.TreeNode("Connected dynamics"))
         {
-            ShowConnectedDynamics(data.Level.Desc, mp, data.Selection);
+            ShowConnectedDynamics(ld, mp, selection);
             ImGui.TreePop();
         }
         ImGui.Separator();
@@ -26,7 +29,7 @@ public partial class PropertiesWindow
         propChanged |= ImGuiExt.DragDoubleHistory("X##mp", mp.X, val => mp.X = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory("Y##mp", mp.Y, val => mp.Y = val, cmd);
         if (ImGui.CollapsingHeader("Animation"))
-            propChanged |= ShowAnimationProps(mp.Animation, cmd);
+            propChanged |= ShowAnimationProps(mp.Animation, level);
         ImGui.Separator();
         if (mp.AssetName is null && ImGui.CollapsingHeader("Children"))
         {
@@ -39,12 +42,12 @@ public partial class PropertiesWindow
                 AbstractAsset child = mp.Assets[index];
                 if (ImGui.TreeNode($"{child.GetType().Name} {MapOverviewWindow.GetExtraObjectInfo(child)}###{child.GetHashCode()}"))
                 {
-                    changed |= ShowProperties(child, cmd, data);
+                    changed |= ShowProperties(child, level, data);
                     ImGui.TreePop();
                 }
 
-                if (ImGui.Button($"Select##mpchild{index}") && data.Selection is not null)
-                    data.Selection.Object = child;
+                if (ImGui.Button($"Select##mpchild{index}"))
+                    selection.Object = child;
                 ImGui.SameLine();
 
                 return changed;

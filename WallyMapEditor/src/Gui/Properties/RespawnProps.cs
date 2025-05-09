@@ -5,21 +5,23 @@ namespace WallyMapEditor;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowRespawnProps(Respawn r, CommandHistory cmd, PropertiesWindowData data)
+    public static bool ShowRespawnProps(Respawn r, EditorLevel level)
     {
+        SelectionContext selection = level.Selection;
+        CommandHistory cmd = level.CommandHistory;
+
         if (r.Parent is not null)
         {
             ImGui.Text($"Parent DynamicRespawn: ");
             ImGui.SameLine();
-            if (ImGui.Button($"PlatID {r.Parent.PlatID}") && data.Selection is not null)
-                data.Selection.Object = r.Parent;
+            if (ImGui.Button($"PlatID {r.Parent.PlatID}"))
+                selection.Object = r.Parent;
             ImGui.Separator();
         }
 
         bool propChanged = false;
 
-        if (data.Level is not null)
-            RemoveButton(r, data.Level.Desc, cmd);
+        RemoveButton(r, level);
         ImGui.Separator();
 
         propChanged |= ImGuiExt.DragDoubleHistory("X", r.X, val => r.X = val, cmd);

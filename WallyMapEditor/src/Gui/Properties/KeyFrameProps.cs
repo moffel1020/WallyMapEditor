@@ -6,8 +6,10 @@ namespace WallyMapEditor;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowKeyFrameProps(KeyFrame k, CommandHistory cmd, int minFrameNum = 0, int maxFrameNum = int.MaxValue)
+    public static bool ShowKeyFrameProps(KeyFrame k, EditorLevel level, int minFrameNum = 0, int maxFrameNum = int.MaxValue)
     {
+        CommandHistory cmd = level.CommandHistory;
+
         bool propChanged = false;
 
         propChanged |= ImGuiExt.DragIntHistory("FrameNum", k.FrameNum, val => k.FrameNum = val, cmd, minValue: minFrameNum, maxValue: maxFrameNum);
@@ -44,7 +46,7 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
-    public static bool ShowOneOfManyKeyFrameProps(AbstractKeyFrame[] frames, int index, CommandHistory cmd)
+    public static bool ShowOneOfManyKeyFrameProps(AbstractKeyFrame[] frames, int index, EditorLevel level)
     {
         bool propChanged = false;
         AbstractKeyFrame key = frames[index];
@@ -55,7 +57,7 @@ public partial class PropertiesWindow
             if (index - 1 >= 0) minFrameNum = LastKeyFrameNum(frames[index - 1]) + 1;
             if (index + 1 < frames.Length) maxFrameNum = FirstKeyFrameNum(frames[index + 1]) - 1;
 
-            propChanged |= ShowKeyFrameProps(keyFrame, cmd, minFrameNum, maxFrameNum);
+            propChanged |= ShowKeyFrameProps(keyFrame, level, minFrameNum, maxFrameNum);
             ImGui.TreePop();
         }
         else if (key is Phase phase && ImGui.TreeNode($"Phase {MapOverviewWindow.GetExtraObjectInfo(key)}###akf{key.GetHashCode()}"))
@@ -65,7 +67,7 @@ public partial class PropertiesWindow
             if (index - 1 >= 0) minStartFrame = LastKeyFrameNum(frames[index - 1]) + 1;
             if (index + 1 < frames.Length) maxFrameNum = FirstKeyFrameNum(frames[index + 1]) - 1;
 
-            propChanged |= ShowPhaseProps(phase, cmd, minStartFrame, maxFrameNum);
+            propChanged |= ShowPhaseProps(phase, level, minStartFrame, maxFrameNum);
             ImGui.TreePop();
         }
 
