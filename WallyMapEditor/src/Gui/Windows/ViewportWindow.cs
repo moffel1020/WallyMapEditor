@@ -28,7 +28,7 @@ public class ViewportWindow
 
         if (SizeChanged()) CreateFramebuffer((int)Bounds.Size.X, (int)Bounds.Size.Y);
 
-        if (ImGui.BeginTabBar("levels", ImGuiTabBarFlags.Reorderable))
+        if (ImGui.BeginTabBar("levels", ImGuiTabBarFlags.Reorderable | ImGuiTabBarFlags.AutoSelectNewTabs))
         {
             foreach (EditorLevel l in loadedLevels)
             {
