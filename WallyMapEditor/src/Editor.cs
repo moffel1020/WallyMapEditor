@@ -38,6 +38,7 @@ public class Editor
     public RaylibCanvas? Canvas { get; set; }
     public AssetLoader? AssetLoader { get; set; }
     private Camera2D _cam = new();
+    private bool _camResetQueued = false;
     public TimeSpan Time { get; set; } = TimeSpan.FromSeconds(0);
 
     public ViewportWindow ViewportWindow { get; set; } = new();
@@ -136,6 +137,15 @@ public class Editor
         ResetCam(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT);
         PickingFramebuffer.Load(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT);
 
+        ViewportWindow.ResetCamPossible += (_) =>
+        {
+            if (_camResetQueued)
+            {
+                _camResetQueued = false;
+                ResetCam();
+            }
+        };
+
         PathPrefs.BrawlhallaPathChanged += (_, path) =>
         {
             if (AssetLoader is not null)
@@ -211,7 +221,7 @@ public class Editor
             ShowMainMenuBar();
 
         if (ViewportWindow.Open)
-            ViewportWindow.Show(LoadedLevels, ref _currentLevel);
+            ViewportWindow.Show(LoadedLevels, ref _currentLevel, _camResetQueued);
         if (RenderConfigWindow.Open)
             RenderConfigWindow.Show(_renderConfig, ConfigDefault, PathPrefs, ref _renderPaused);
         if (MapOverviewWindow.Open && CurrentLevel is not null)
@@ -318,7 +328,7 @@ public class Editor
         if (ImGui.BeginMenu("Tools"))
         {
             if (ImGui.MenuItem("Save image", "P")) ExportWorldImage();
-            if (ImGui.MenuItem("Center Camera", "R")) ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
+            if (ImGui.MenuItem("Center Camera", "R")) ResetCam();
             if (ImGui.MenuItem("History", null, HistoryPanel.Open)) HistoryPanel.Open = !HistoryPanel.Open;
             if (ImGui.MenuItem("Clear Cache")) Canvas?.ClearTextureCache();
             if (ImGui.MenuItem("Find swz key", null, KeyFinderPanel.Open)) KeyFinderPanel.Open = !KeyFinderPanel.Open;
@@ -358,7 +368,7 @@ public class Editor
             }
 
             if (!wantCaptureKeyboard && Rl.IsKeyPressed(KeyboardKey.R) && !Rl.IsKeyDown(KeyboardKey.LeftControl))
-                ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
+                ResetCam();
         }
 
         if (CurrentLevel is not null)
@@ -441,9 +451,10 @@ public class Editor
     public Vector2 ScreenToWorld(Vector2 screenPos) =>
         Rl.GetScreenToWorld2D(screenPos - ViewportWindow.Bounds.P1, _cam);
 
-    public void ResetCam() => ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
+    public void QueueResetCam() => _camResetQueued = true;
+    public void ResetCam() => ResetCam(ViewportWindow.Bounds.Width, ViewportWindow.Bounds.Height);
 
-    public void ResetCam(int surfaceW, int surfaceH)
+    public void ResetCam(double surfaceW, double surfaceH)
     {
         _cam.Zoom = 1.0f;
         CameraBounds? bounds = CurrentLevel?.Level.Desc.CameraBounds;
@@ -575,7 +586,7 @@ public class Editor
 
         if (CurrentLevel == level)
         {
-            ResetCam();
+            QueueResetCam();
             ResetState();
         }
     }
@@ -587,7 +598,7 @@ public class Editor
         if (takeFocus)
         {
             CurrentLevel = editorLevel;
-            ResetCam();
+            QueueResetCam();
             ResetState();
         }
     }

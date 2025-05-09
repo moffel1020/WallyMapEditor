@@ -1,8 +1,8 @@
+using System.Collections.Generic;
 using System.Numerics;
 using Raylib_cs;
 using ImGuiNET;
 using rlImGui_cs;
-using System.Collections.Generic;
 
 namespace WallyMapEditor;
 
@@ -15,17 +15,14 @@ public class ViewportWindow
     private bool _open = true;
     public bool Open { get => _open; set => _open = value; }
 
-    public void Show(IEnumerable<EditorLevel> loadedLevels, ref EditorLevel? currentLevel)
+    public delegate void ResetCamPossibleEventHandler(ViewportWindow? sender);
+    public event ResetCamPossibleEventHandler? ResetCamPossible;
+
+    public void Show(IEnumerable<EditorLevel> loadedLevels, ref EditorLevel? currentLevel, bool cameraResetQueued = false)
     {
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0, 0));
 
         ImGui.Begin("Viewport", ref _open, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
-        Focussed = ImGui.IsWindowFocused();
-        Hovered = ImGui.IsWindowHovered();
-        Bounds.P1 = ImGui.GetWindowContentRegionMin() + ImGui.GetWindowPos();
-        Bounds.P2 = ImGui.GetWindowContentRegionMax() + ImGui.GetWindowPos();
-
-        if (SizeChanged()) CreateFramebuffer((int)Bounds.Size.X, (int)Bounds.Size.Y);
 
         if (ImGui.BeginTabBar("levels", ImGuiTabBarFlags.Reorderable | ImGuiTabBarFlags.AutoSelectNewTabs))
         {
@@ -34,7 +31,19 @@ public class ViewportWindow
                 if (ImGui.BeginTabItem($"{l.Level.Desc.LevelName}###{l.GetHashCode()}"))
                 {
                     currentLevel = l;
+
+                    ImGui.BeginChild("");
+
+                    Focussed = ImGui.IsWindowFocused();
+                    Hovered = ImGui.IsWindowHovered();
+                    Bounds.P1 = ImGui.GetCursorScreenPos();
+                    Bounds.P2 = ImGui.GetCursorScreenPos() + ImGui.GetContentRegionAvail();
+                    if (SizeChanged()) CreateFramebuffer((int)Bounds.Size.X, (int)Bounds.Size.Y);
+                    if (cameraResetQueued) ResetCamPossible?.Invoke(this);
+
                     rlImGui.ImageRenderTexture(Framebuffer);
+
+                    ImGui.EndChild();
 
                     ImGui.EndTabItem();
                 }
