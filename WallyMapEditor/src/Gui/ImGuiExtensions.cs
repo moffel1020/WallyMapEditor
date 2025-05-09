@@ -148,17 +148,10 @@ public static partial class ImGuiExt
     public static void HeaderWithWidget(string label, Action headerAction, Action widget, int rightOffset = 15)
     {
         ImGui.SetNextItemAllowOverlap();
-        if (ImGui.CollapsingHeader(label))
-        {
-            ImGui.SameLine(ImGui.GetContentRegionMax().X - rightOffset);
-            widget();
-            headerAction();
-        }
-        else
-        {
-            ImGui.SameLine(ImGui.GetContentRegionMax().X - rightOffset);
-            widget();
-        }
+        bool header = ImGui.CollapsingHeader(label);
+        ImGui.SameLine(ImGui.GetContentRegionMax().X - rightOffset);
+        widget();
+        if (header) headerAction();
     }
 
     public static void HintTooltip(string explanation)
