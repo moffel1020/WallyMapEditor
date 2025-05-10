@@ -178,7 +178,7 @@ public class RenderConfigWindow
                 config.ShowBombsketballTargets = ImGuiExt.Checkbox("Show bombsketball targets##config", config.ShowBombsketballTargets);
                 config.UseBombsketballDigitSize = ImGuiExt.Checkbox("Bombsketball digit size fix##config", config.UseBombsketballDigitSize);
                 ImGui.Separator();
-                double[] frames = [7500 / 16.0, 3000 / 10.0, 7500 / 16.0];
+                ReadOnlySpan<double> frames = [7500 / 16.0, 3000 / 10.0, 7500 / 16.0];
                 for (int i = 0; i < 3; ++i)
                 {
                     config.ShowBombsketballBombTimers[i] = ImGuiExt.Checkbox($"Show timer {i + 1}##config", config.ShowBombsketballBombTimers[i]);

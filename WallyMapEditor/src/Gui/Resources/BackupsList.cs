@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -35,7 +36,7 @@ public partial class BackupsList
             state.RefreshListOnOpen = false;
         }
 
-        string[] backedUpFiles = [
+        ReadOnlySpan<string> backedUpFiles = [
             Path.Combine(prefs.BrawlhallaPath, "Dynamic.swz"),
             Path.Combine(prefs.BrawlhallaPath, "Init.swz"),
             Path.Combine(prefs.BrawlhallaPath, "Game.swz"),

@@ -39,7 +39,7 @@ public static partial class WmeUtils
     {
         if (path is null) return false;
 
-        string[] requiredFiles = ["BrawlhallaAir.swf", "Dynamic.swz", "Game.swz", "Engine.swz"];
+        ReadOnlySpan<string> requiredFiles = ["BrawlhallaAir.swf", "Dynamic.swz", "Game.swz", "Engine.swz"];
         foreach (string name in requiredFiles)
         {
             if (!File.Exists(Path.Combine(path, name)))
