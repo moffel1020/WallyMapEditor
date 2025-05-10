@@ -562,9 +562,28 @@ public class Editor
         if (CurrentLevel is not null)
         {
             DeregisterLevel(CurrentLevel);
+
+            EditorLevel? newLevel = null;
+            // only switch if there's something to switch to
+            if (LoadedLevels.Count >= 2)
+            {
+                int index = LoadedLevels.FindIndex(level => level == CurrentLevel);
+
+                // fallback for invalid state
+                if (index == -1)
+                    newLevel = LoadedLevels[0];
+                // last level. go one back.
+                else if (index == LoadedLevels.Count - 1)
+                    newLevel = LoadedLevels[index - 1];
+                // else, go one forward
+                else
+                    newLevel = LoadedLevels[index + 1];
+            }
+
             LoadedLevels.Remove(CurrentLevel);
+
+            CurrentLevel = newLevel;
         }
-        CurrentLevel = null;
         TitleBar.Reset();
     }
 

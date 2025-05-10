@@ -18,32 +18,34 @@ public class ViewportWindow
     public delegate void ResetCamPossibleEventHandler(ViewportWindow? sender);
     public event ResetCamPossibleEventHandler? ResetCamPossible;
 
+    private EditorLevel? _currentLevel;
+
     public void Show(IEnumerable<EditorLevel> loadedLevels, ref EditorLevel? currentLevel, bool cameraResetQueued = false)
     {
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0, 0));
+        bool needSetSelected = _currentLevel != currentLevel;
 
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0, 0));
         ImGui.Begin("Viewport", ref _open, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+
+        Focussed = ImGui.IsWindowFocused();
+        Hovered = ImGui.IsWindowHovered();
 
         if (ImGui.BeginTabBar("levels", ImGuiTabBarFlags.Reorderable | ImGuiTabBarFlags.AutoSelectNewTabs))
         {
             foreach (EditorLevel l in loadedLevels)
             {
-                if (ImGui.BeginTabItem($"{l.Level.Desc.LevelName}###{l.GetHashCode()}"))
+                bool open = true;
+                bool setSelected = needSetSelected && currentLevel == l;
+                if (ImGui.BeginTabItem($"{l.Level.Desc.LevelName}###{l.GetHashCode()}", ref open, setSelected ? ImGuiTabItemFlags.SetSelected : 0))
                 {
                     currentLevel = l;
 
-                    ImGui.BeginChild("");
-
-                    Focussed = ImGui.IsWindowFocused();
-                    Hovered = ImGui.IsWindowHovered();
                     Bounds.P1 = ImGui.GetCursorScreenPos();
                     Bounds.P2 = ImGui.GetCursorScreenPos() + ImGui.GetContentRegionAvail();
                     if (SizeChanged()) CreateFramebuffer((int)Bounds.Size.X, (int)Bounds.Size.Y);
                     if (cameraResetQueued) ResetCamPossible?.Invoke(this);
 
                     rlImGui.ImageRenderTexture(Framebuffer);
-
-                    ImGui.EndChild();
 
                     ImGui.EndTabItem();
                 }
@@ -53,8 +55,9 @@ public class ViewportWindow
         }
 
         ImGui.End();
-
         ImGui.PopStyleVar();
+
+        _currentLevel = currentLevel;
     }
 
     public Vector2 ScreenToWorld(Vector2 screenPos, Camera2D cam) =>
