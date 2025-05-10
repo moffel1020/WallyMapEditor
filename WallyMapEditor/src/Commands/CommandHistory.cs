@@ -1,19 +1,17 @@
-using System;
 using System.Collections.Generic;
 
 namespace WallyMapEditor;
 
 public class CommandHistory(SelectionContext selection)
 {
+    private int _saveAtCommands = 0;
     public Stack<ICommand> Commands { get; set; } = new();
     public Stack<ICommand> Undone { get; set; } = new();
 
-    public event EventHandler? Changed;
+    public bool IsSaved => Commands.Count == _saveAtCommands;
 
     public void Add(ICommand cmd, bool? allowMerge = null)
     {
-        Changed?.Invoke(this, EventArgs.Empty);
-
         cmd.Execute();
         Undone.Clear();
 
@@ -31,8 +29,6 @@ public class CommandHistory(SelectionContext selection)
 
     public void Undo()
     {
-        Changed?.Invoke(this, EventArgs.Empty);
-
         if (Commands.TryPop(out ICommand? prev))
         {
             if (prev is ISelectCommand d)
@@ -45,8 +41,6 @@ public class CommandHistory(SelectionContext selection)
 
     public void Redo()
     {
-        Changed?.Invoke(this, EventArgs.Empty);
-
         if (Undone.TryPop(out ICommand? cmd))
         {
             if (cmd is ISelectCommand d)
@@ -55,6 +49,11 @@ public class CommandHistory(SelectionContext selection)
             cmd.Execute();
             Commands.Push(cmd);
         }
+    }
+
+    public void OnSave()
+    {
+        _saveAtCommands = Commands.Count;
     }
 
     public void SetAllowMerge(bool merge)
@@ -67,5 +66,6 @@ public class CommandHistory(SelectionContext selection)
     {
         Commands.Clear();
         Undone.Clear();
+        _saveAtCommands = IsSaved ? 0 : -1;
     }
 }

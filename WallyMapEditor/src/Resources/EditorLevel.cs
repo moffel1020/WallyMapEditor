@@ -13,32 +13,23 @@ public sealed class EditorLevel
     public ILoadMethod? ReloadMethod { get; set; }
     public Camera2D Camera { get; set; } = new();
 
-    public event EventHandler? CommandHistoryChanged;
-
     public EditorLevel(Level level)
     {
         Level = level;
-
         Selection = new();
-
         CommandHistory = new(Selection);
-        CommandHistory.Changed += (obj, data) =>
-        {
-            CommandHistoryChanged?.Invoke(obj, data);
-        };
-
         OverlayManager = new(this);
-
         Camera = new();
-        ResetCam(Editor.INITIAL_SCREEN_WIDTH, Editor.INITIAL_SCREEN_HEIGHT);
-
         ReloadMethod = null;
+        ResetCam(Editor.INITIAL_SCREEN_WIDTH, Editor.INITIAL_SCREEN_HEIGHT);
     }
 
     public void ResetState()
     {
         Selection.Object = null;
+
         CommandHistory.Clear();
+        OnSave(); // pretend we saved
     }
 
     public void ResetCam(double surfaceW, double surfaceH)
@@ -52,5 +43,32 @@ public sealed class EditorLevel
         camera.Zoom = (float)scale;
 
         Camera = camera;
+    }
+
+    public void OnSave()
+    {
+        CommandHistory.OnSave();
+    }
+
+    public string LevelTitle
+    {
+        get
+        {
+            string result = Level.Desc.LevelName;
+            if (!CommandHistory.IsSaved) return result + '*';
+            return result;
+        }
+    }
+
+    public string? LevelTooltip
+    {
+        get
+        {
+            if (ReloadMethod is LevelPathLoad lpLoad)
+                return lpLoad.Path;
+            if (ReloadMethod is ModFileLoad mfLoad)
+                return mfLoad.FilePath;
+            return null;
+        }
     }
 }

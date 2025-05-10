@@ -15,14 +15,13 @@ namespace WallyMapEditor;
 
 public class Editor
 {
+    public const string WINDOW_NAME = "WallyMapEditor";
     public const float ZOOM_INCREMENT = 0.15f;
     public const float MIN_ZOOM = 0.01f;
     public const float MAX_ZOOM = 5.0f;
     public const float LINE_WIDTH = 5; // width at Camera zoom = 1
     public const int INITIAL_SCREEN_WIDTH = 1280;
     public const int INITIAL_SCREEN_HEIGHT = 720;
-
-    public WindowTitleBar TitleBar { get; set; } = new();
 
     PathPreferences PathPrefs { get; }
     RenderConfigDefault ConfigDefault { get; }
@@ -117,14 +116,12 @@ public class Editor
 
         ImportDialog.Open = true;
 
-        Rl.SetConfigFlags(ConfigFlags.VSyncHint);
-        Rl.SetConfigFlags(ConfigFlags.ResizableWindow);
-        Rl.InitWindow(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT, WindowTitleBar.WINDOW_NAME);
+        Rl.SetConfigFlags(ConfigFlags.VSyncHint | ConfigFlags.ResizableWindow | ConfigFlags.MaximizedWindow);
+        Rl.InitWindow(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT, WINDOW_NAME);
         Rl.SetExitKey(KeyboardKey.Null);
+        Rl.MaximizeWindow();
         rlImGui.Setup(true, true);
         Style.Apply();
-
-        PickingFramebuffer.Load(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT);
 
         ViewportWindow.ResetCamPossible += (_) =>
         {
@@ -511,7 +508,6 @@ public class Editor
                 {
                     LevelLoader.LoadMap(new LevelPathLoad(result.Path));
                     PathPrefs.LevelPath = result.Path;
-                    TitleBar.SetTitle(result.Path, false);
                 }
                 catch (Exception e)
                 {
@@ -529,7 +525,7 @@ public class Editor
         if (CurrentLevel.ReloadMethod is LevelPathLoad lpLoad)
         {
             WmeUtils.SerializeToPath(CurrentLevel.Level, lpLoad.Path);
-            TitleBar.SetTitle(lpLoad.Path, false);
+            CurrentLevel.OnSave();
             return;
         }
 
@@ -552,7 +548,7 @@ public class Editor
                 WmeUtils.SerializeToPath(CurrentLevel.Level, path);
                 PathPrefs.LevelPath = path;
                 CurrentLevel.ReloadMethod = new LevelPathLoad(path);
-                TitleBar.SetTitle(path, false);
+                CurrentLevel.OnSave();
             }
         });
     }
@@ -561,8 +557,6 @@ public class Editor
     {
         if (CurrentLevel is not null)
         {
-            DeregisterLevel(CurrentLevel);
-
             EditorLevel? newLevel = null;
             // only switch if there's something to switch to
             if (LoadedLevels.Count >= 2)
@@ -584,7 +578,6 @@ public class Editor
 
             CurrentLevel = newLevel;
         }
-        TitleBar.Reset();
     }
 
     public void OnLevelReloaded(EditorLevel level, Level newData, ILoadMethod loadMethod)
@@ -603,28 +596,11 @@ public class Editor
     public void AddNewLevel(EditorLevel editorLevel, bool takeFocus)
     {
         LoadedLevels.Add(editorLevel);
-        RegisterLevel(editorLevel);
         if (takeFocus)
         {
             CurrentLevel = editorLevel;
             QueueResetCam();
         }
-    }
-
-    private void RegisterLevel(EditorLevel editorLevel)
-    {
-        editorLevel.CommandHistoryChanged += OnCommandHistoryChanged;
-    }
-
-    private void DeregisterLevel(EditorLevel editorLevel)
-    {
-        editorLevel.CommandHistoryChanged -= OnCommandHistoryChanged;
-    }
-
-    private void OnCommandHistoryChanged(object? sender, EventArgs args)
-    {
-        if (TitleBar.OpenLevelFile is not null)
-            TitleBar.SetTitle(TitleBar.OpenLevelFile, true);
     }
 
     private void ReloadMap()
@@ -635,8 +611,6 @@ public class Editor
             try
             {
                 LevelLoader.ReImport(CurrentLevel);
-                if (CurrentLevel.ReloadMethod is LevelPathLoad lpLoad)
-                    TitleBar.SetTitle(lpLoad.Path, false);
             }
             catch (Exception e)
             {

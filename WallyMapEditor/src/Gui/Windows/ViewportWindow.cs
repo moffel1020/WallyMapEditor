@@ -36,7 +36,14 @@ public class ViewportWindow
             {
                 bool open = true;
                 bool setSelected = needSetSelected && currentLevel == l;
-                if (ImGui.BeginTabItem($"{l.Level.Desc.LevelName}###{l.GetHashCode()}", ref open, setSelected ? ImGuiTabItemFlags.SetSelected : 0))
+
+                string title = l.LevelTitle;
+                string? tooltip = l.LevelTooltip;
+
+                bool beginTabItem = ImGui.BeginTabItem($"{title}###{l.GetHashCode()}", ref open, setSelected ? ImGuiTabItemFlags.SetSelected : 0);
+                if (tooltip is not null && ImGui.IsItemHovered())
+                    ImGui.SetTooltip(tooltip);
+                if (beginTabItem)
                 {
                     currentLevel = l;
 
