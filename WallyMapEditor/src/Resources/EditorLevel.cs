@@ -7,21 +7,19 @@ namespace WallyMapEditor;
 public sealed class EditorLevel
 {
     public Level Level { get; set; }
-    public SelectionContext Selection { get; }
+    public SelectionContext Selection { get; } = new();
     public CommandHistory CommandHistory { get; }
     public OverlayManager OverlayManager { get; }
-    public ILoadMethod? ReloadMethod { get; set; }
+    public ILoadMethod? ReloadMethod { get; set; } = null;
+
     public Camera2D Camera { get; set; } = new();
+    public bool DidCameraInit { get; set; } = false;
 
     public EditorLevel(Level level)
     {
         Level = level;
-        Selection = new();
         CommandHistory = new(Selection);
         OverlayManager = new(this);
-        Camera = new();
-        ReloadMethod = null;
-        ResetCam(Editor.INITIAL_SCREEN_WIDTH, Editor.INITIAL_SCREEN_HEIGHT);
     }
 
     public void ResetState()
@@ -43,23 +41,14 @@ public sealed class EditorLevel
         camera.Zoom = (float)scale;
 
         Camera = camera;
+
+        DidCameraInit = true;
     }
 
-    public void OnSave()
-    {
-        CommandHistory.OnSave();
-    }
+    public void OnSave() => CommandHistory.OnSave();
 
-    public string LevelTitle
-    {
-        get
-        {
-            string result = Level.Desc.LevelName;
-            if (!CommandHistory.IsSaved) return result + '*';
-            return result;
-        }
-    }
-
+    public string LevelTitle => Level.Desc.LevelName;
+    public bool IsSaved => CommandHistory.IsSaved;
     public string? LevelTooltip
     {
         get

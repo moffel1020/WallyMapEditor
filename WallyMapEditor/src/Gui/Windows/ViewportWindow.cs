@@ -15,12 +15,12 @@ public class ViewportWindow
     private bool _open = true;
     public bool Open { get => _open; set => _open = value; }
 
-    public delegate void ResetCamPossibleEventHandler(ViewportWindow? sender);
-    public event ResetCamPossibleEventHandler? ResetCamPossible;
+    public delegate void ClosedLevelEventHandler(ViewportWindow? sender, EditorLevel level);
+    public event ClosedLevelEventHandler? ClosedLevel;
 
     private EditorLevel? _currentLevel;
 
-    public void Show(IEnumerable<EditorLevel> loadedLevels, ref EditorLevel? currentLevel, bool cameraResetQueued = false)
+    public void Show(IEnumerable<EditorLevel> loadedLevels, ref EditorLevel? currentLevel)
     {
         bool needSetSelected = _currentLevel != currentLevel;
 
@@ -38,9 +38,13 @@ public class ViewportWindow
                 bool setSelected = needSetSelected && currentLevel == l;
 
                 string title = l.LevelTitle;
+                bool saved = l.IsSaved;
                 string? tooltip = l.LevelTooltip;
 
-                bool beginTabItem = ImGui.BeginTabItem($"{title}###{l.GetHashCode()}", ref open, setSelected ? ImGuiTabItemFlags.SetSelected : 0);
+                ImGuiTabItemFlags selectFlags = setSelected ? ImGuiTabItemFlags.SetSelected : 0;
+                ImGuiTabItemFlags unsavedFlags = saved ? 0 : ImGuiTabItemFlags.UnsavedDocument;
+                ImGuiTabItemFlags flags = selectFlags | unsavedFlags;
+                bool beginTabItem = ImGui.BeginTabItem($"{title}###{l.GetHashCode()}", ref open, flags);
                 if (tooltip is not null && ImGui.IsItemHovered())
                     ImGui.SetTooltip(tooltip);
                 if (beginTabItem)
@@ -50,12 +54,16 @@ public class ViewportWindow
                     Bounds.P1 = ImGui.GetCursorScreenPos();
                     Bounds.P2 = ImGui.GetCursorScreenPos() + ImGui.GetContentRegionAvail();
                     if (SizeChanged()) CreateFramebuffer((int)Bounds.Size.X, (int)Bounds.Size.Y);
-                    if (cameraResetQueued) ResetCamPossible?.Invoke(this);
 
                     rlImGui.ImageRenderTexture(Framebuffer);
 
+                    if (!l.DidCameraInit)
+                        l.ResetCam(Bounds.Width, Bounds.Height);
+
                     ImGui.EndTabItem();
                 }
+                if (!open)
+                    ClosedLevel?.Invoke(this, l);
             }
 
             ImGui.EndTabBar();

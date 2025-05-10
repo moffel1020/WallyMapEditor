@@ -28,12 +28,13 @@ public class Editor
 
     private EditorLevel? _currentLevel;
     public EditorLevel? CurrentLevel { get => _currentLevel; set => _currentLevel = value; }
+
     public List<EditorLevel> LoadedLevels { get; set; } = [];
+    private readonly Queue<EditorLevel> _removedLevelsQueue = [];
     public LevelLoader LevelLoader { get; set; }
 
     public RaylibCanvas? Canvas { get; set; }
     public AssetLoader? AssetLoader { get; set; }
-    private bool _camResetQueued = false;
     public TimeSpan Time { get; set; } = TimeSpan.FromSeconds(0);
 
     public ViewportWindow ViewportWindow { get; set; } = new();
@@ -123,13 +124,9 @@ public class Editor
         rlImGui.Setup(true, true);
         Style.Apply();
 
-        ViewportWindow.ResetCamPossible += (_) =>
+        ViewportWindow.ClosedLevel += (_, level) =>
         {
-            if (_camResetQueued)
-            {
-                _camResetQueued = false;
-                ResetCam();
-            }
+            _removedLevelsQueue.Enqueue(level);
         };
 
         PathPrefs.BrawlhallaPathChanged += (_, path) =>
@@ -211,7 +208,7 @@ public class Editor
             ShowMainMenuBar();
 
         if (ViewportWindow.Open)
-            ViewportWindow.Show(LoadedLevels, ref _currentLevel, _camResetQueued);
+            ViewportWindow.Show(LoadedLevels, ref _currentLevel);
         if (RenderConfigWindow.Open)
             RenderConfigWindow.Show(_renderConfig, ConfigDefault, PathPrefs, ref _renderPaused);
 
@@ -242,6 +239,11 @@ public class Editor
             }
 
             AddObjectPopup.Update(CurrentLevel);
+        }
+
+        while (_removedLevelsQueue.TryDequeue(out EditorLevel? removedLevel))
+        {
+            RemoveLevel(removedLevel);
         }
 
         if (KeyFinderPanel.Open)
@@ -446,7 +448,11 @@ public class Editor
             ExportWorldImage();
     }
 
-    public void QueueResetCam() => _camResetQueued = true;
+    public void QueueResetCam()
+    {
+        if (CurrentLevel is not null)
+            CurrentLevel.DidCameraInit = false;
+    }
     public void ResetCam() => ResetCam(ViewportWindow.Bounds.Width, ViewportWindow.Bounds.Height);
 
     public void ResetCam(double surfaceW, double surfaceH)
@@ -556,12 +562,19 @@ public class Editor
     public void CloseCurrentLevel()
     {
         if (CurrentLevel is not null)
+            RemoveLevel(CurrentLevel);
+    }
+
+    public void RemoveLevel(EditorLevel level)
+    {
+        // if current level, need to figure out what new level will have focus
+        if (level == CurrentLevel)
         {
             EditorLevel? newLevel = null;
             // only switch if there's something to switch to
             if (LoadedLevels.Count >= 2)
             {
-                int index = LoadedLevels.FindIndex(level => level == CurrentLevel);
+                int index = LoadedLevels.FindIndex(l => l == level);
 
                 // fallback for invalid state
                 if (index == -1)
@@ -573,11 +586,10 @@ public class Editor
                 else
                     newLevel = LoadedLevels[index + 1];
             }
-
-            LoadedLevels.Remove(CurrentLevel);
-
             CurrentLevel = newLevel;
         }
+
+        LoadedLevels.Remove(level);
     }
 
     public void OnLevelReloaded(EditorLevel level, Level newData, ILoadMethod loadMethod)
@@ -585,22 +597,16 @@ public class Editor
         level.ResetState();
         level.Level = newData;
         level.ReloadMethod = loadMethod;
-
+        level.DidCameraInit = false;
         if (CurrentLevel == level)
-        {
-            QueueResetCam();
             ResetState();
-        }
     }
 
     public void AddNewLevel(EditorLevel editorLevel, bool takeFocus)
     {
         LoadedLevels.Add(editorLevel);
         if (takeFocus)
-        {
             CurrentLevel = editorLevel;
-            QueueResetCam();
-        }
     }
 
     private void ReloadMap()
@@ -623,7 +629,6 @@ public class Editor
     public void ResetState()
     {
         _movingObject = false;
-        _renderConfig.Time = TimeSpan.FromTicks(0);
         CurrentLevel?.ResetState();
         Canvas?.ClearTextureCache();
         ResetRenderState();
