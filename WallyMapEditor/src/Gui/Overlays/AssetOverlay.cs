@@ -19,7 +19,7 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
     public DragBox MoveRect { get; set; } = new(0, 0, 0, 0);
     public RotatePoint RotatePoint { get; set; } = new(0, 0);
 
-    public void Draw(OverlayData data)
+    public void Draw(EditorLevel level, OverlayData data)
     {
         foreach (DragCircle circle in GetCircles())
         {
@@ -40,8 +40,11 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
         RotatePoint.Draw(data);
     }
 
-    public bool Update(OverlayData data, CommandHistory cmd)
+    public bool Update(EditorLevel level, OverlayData data)
     {
+        CommandHistory cmd = level.CommandHistory;
+        Camera2D cam = level.Camera;
+
         if (asset.AssetName is null) throw new ArgumentException("AssetOverlay used on asset without AssetName");
 
         foreach (DragCircle circle in GetCircles())
@@ -67,13 +70,13 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
         (MoveRect.W, MoveRect.H) = (w, h);
 
         (RotatePoint.X, RotatePoint.Y) = (trans.TranslateX, trans.TranslateY);
-        RotatePoint.Update(data, true, asset.Rotation * Math.PI / 180);
+        RotatePoint.Update(cam, data, true, asset.Rotation * Math.PI / 180);
         if (RotatePoint.Active)
         {
             cmd.Add(new PropChangeCommand<double>(val => asset.Rotation = val, asset.Rotation, RotatePoint.Rotation * 180 / Math.PI));
         }
 
-        bool dragging = UpdateCircles(data, trans, inv);
+        bool dragging = UpdateCircles(cam, data, trans, inv);
         // POSSIBLE OPTIMIZATION: at the end of UpdateCircles we transform by trans, and here we undo that
         // so we can save two transforms here
         TransfromDragCircles(inv);
@@ -96,7 +99,7 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
             ));
         }
 
-        MoveRect.Update(data, !dragging && !RotatePoint.Active);
+        MoveRect.Update(cam, data, !dragging && !RotatePoint.Active);
 
         if (MoveRect.Dragging)
         {
@@ -123,7 +126,7 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
         return dragging || MoveRect.Dragging || RotatePoint.Active;
     }
 
-    private bool UpdateCircles(OverlayData data, WmsTransform trans, WmsTransform invTrans)
+    private bool UpdateCircles(Camera2D cam, OverlayData data, WmsTransform trans, WmsTransform invTrans)
     {
         double x = 0;
         double y = 0;
@@ -144,7 +147,7 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
         bool dragging = false;
         foreach (DragCircle circle in GetCircles())
         {
-            circle.Update(data, !dragging && !RotatePoint.Active);
+            circle.Update(cam, data, !dragging && !RotatePoint.Active);
             dragging |= circle.Dragging;
         }
 

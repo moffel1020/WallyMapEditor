@@ -1,4 +1,5 @@
 using System;
+using Raylib_cs;
 using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
@@ -9,7 +10,7 @@ public class ParentAssetOverlay(AbstractAsset asset) : IOverlay
     public RotatePoint RotatePoint { get; set; } = new(0, 0);
     public ScaleGizmo ScaleGizmo { get; set; } = new(0, 0);
 
-    public void Draw(OverlayData data)
+    public void Draw(EditorLevel level, OverlayData data)
     {
         Position.Color = data.OverlayConfig.ColorParentAssetPosition;
         Position.UsingColor = data.OverlayConfig.UsingColorParentAssetPosition;
@@ -25,18 +26,21 @@ public class ParentAssetOverlay(AbstractAsset asset) : IOverlay
         ScaleGizmo.Draw(data);
     }
 
-    public bool Update(OverlayData data, CommandHistory cmd)
+    public bool Update(EditorLevel level, OverlayData data)
     {
+        Camera2D cam = level.Camera;
+        CommandHistory cmd = level.CommandHistory;
+
         Position.Radius = data.OverlayConfig.RadiusParentAssetPosition;
 
-        Transform parent = AssetOverlay.FullTransform(asset.Parent, data.Context);
+        WmsTransform parent = AssetOverlay.FullTransform(asset.Parent, data.Context);
         (Position.X, Position.Y) = (RotatePoint.X, RotatePoint.Y) = (parent.TranslateX + asset.X, parent.TranslateY + asset.Y);
         (ScaleGizmo.X, ScaleGizmo.Y) = (Position.X, Position.Y);
         ScaleGizmo.Rotation = asset.Rotation;
 
-        ScaleGizmo.Update(data, asset.ScaleX, asset.ScaleY, true);
-        RotatePoint.Update(data, !ScaleGizmo.Dragging, asset.Rotation * Math.PI / 180);
-        Position.Update(data, !ScaleGizmo.Dragging && !RotatePoint.Active);
+        ScaleGizmo.Update(cam, data, asset.ScaleX, asset.ScaleY, true);
+        RotatePoint.Update(cam, data, !ScaleGizmo.Dragging, asset.Rotation * Math.PI / 180);
+        Position.Update(cam, data, !ScaleGizmo.Dragging && !RotatePoint.Active);
 
         if (ScaleGizmo.Dragging)
         {

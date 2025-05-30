@@ -27,9 +27,9 @@ public class DragBox(double x, double y, double w, double h)
 
     private (double, double) _mouseDragOffset;
 
-    public void Update(OverlayData data, bool allowDragging)
+    public void Update(Camera2D cam, OverlayData data, bool allowDragging)
     {
-        Vector2 worldPos = data.Viewport.ScreenToWorld(Rl.GetMousePosition(), data.Cam);
+        Vector2 worldPos = data.Viewport.ScreenToWorld(Rl.GetMousePosition(), cam);
         (double worldX, double worldY) = WmsTransform.CreateInverse(Transform) * (worldPos.X, worldPos.Y);
         (worldPos.X, worldPos.Y) = ((float)worldX, (float)worldY);
 

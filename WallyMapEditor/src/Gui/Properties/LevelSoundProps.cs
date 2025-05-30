@@ -5,10 +5,12 @@ namespace WallyMapEditor;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowLevelSoundProps(LevelSound ls, CommandHistory cmd, PropertiesWindowData data)
+    public static bool ShowLevelSoundProps(LevelSound ls, EditorLevel level)
     {
-        if (data.Level is not null)
-            RemoveButton(ls, data.Level.Desc, cmd);
+        CommandHistory cmd = level.CommandHistory;
+        LevelDesc ld = level.Level.Desc;
+
+        RemoveButton(ls, level);
         ImGui.Separator();
 
         bool propChanged = false;

@@ -8,31 +8,34 @@ namespace WallyMapEditor;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowCollisionProps(AbstractCollision ac, CommandHistory cmd, PropertiesWindowData data) => ac switch
+    public static bool ShowCollisionProps(AbstractCollision ac, EditorLevel level, PropertiesWindowData data) => ac switch
     {
-        AbstractPressurePlateCollision pc => ShowAbstractPressurePlateCollisionProps(pc, cmd, data),
-        LavaCollision lc => ShowLavaCollisionProps(lc, cmd, data),
-        _ => ShowAbstractCollisionProps(ac, cmd, data)
+        AbstractPressurePlateCollision pc => ShowAbstractPressurePlateCollisionProps(pc, level, data),
+        LavaCollision lc => ShowLavaCollisionProps(lc, level, data),
+        _ => ShowAbstractCollisionProps(ac, level)
     };
 
-    public static bool ShowAbstractCollisionProps(AbstractCollision ac, CommandHistory cmd, PropertiesWindowData data)
+    public static bool ShowAbstractCollisionProps(AbstractCollision ac, EditorLevel level)
     {
+        SelectionContext selection = level.Selection;
+        CommandHistory cmd = level.CommandHistory;
+        LevelDesc ld = level.Level.Desc;
+
         if (ac.Parent is not null)
         {
             ImGui.Text($"Parent DynamicCollision: ");
             ImGui.SameLine();
-            if (ImGui.Button($"PlatID {ac.Parent.PlatID}")) data.Selection.Object = ac.Parent;
+            if (ImGui.Button($"PlatID {ac.Parent.PlatID}"))
+                selection.Object = ac.Parent;
             ImGui.Separator();
         }
 
         bool propChanged = false;
 
-        if (data.Level is not null)
-            RemoveButton(ac, data.Level.Desc, cmd);
+        RemoveButton(ac, level);
         ImGui.Separator();
 
-        if (data.Level is not null) propChanged |= WmeUtils.ObjectChangeType(ac, data.Level.Desc, cmd, ShowChangeColTypeMenu);
-
+        propChanged |= WmeUtils.ObjectChangeType(ac, ld, cmd, ShowChangeColTypeMenu);
         propChanged |= ImGuiExt.DragDoubleHistory($"X1##props{ac.GetHashCode()}", ac.X1, val => ac.X1 = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory($"Y1##props{ac.GetHashCode()}", ac.Y1, val => ac.Y1 = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory($"X2##props{ac.GetHashCode()}", ac.X2, val => ac.X2 = val, cmd);
@@ -76,13 +79,15 @@ public partial class PropertiesWindow
 
     private const string EMPTY_TRAP_POWERS_WARNING = "Warning: An empty TrapPowers list will crash the game";
 
-    public static bool ShowAbstractPressurePlateCollisionProps(AbstractPressurePlateCollision pc, CommandHistory cmd, PropertiesWindowData data)
+    public static bool ShowAbstractPressurePlateCollisionProps(AbstractPressurePlateCollision pc, EditorLevel level, PropertiesWindowData data)
     {
+        CommandHistory cmd = level.CommandHistory;
+
         bool propChanged = false;
-        propChanged |= ShowAbstractCollisionProps(pc, cmd, data);
+        propChanged |= ShowAbstractCollisionProps(pc, level);
 
         ImGui.SeparatorText($"Pressure plate props##props{pc.GetHashCode()}");
-        propChanged |= ShowNullablePlatIDEdit(val => pc.PlatID = val, pc.PlatID, data, cmd);
+        propChanged |= ShowNullablePlatIDEdit(val => pc.PlatID = val, pc.PlatID, level, cmd);
         if (pc.Parent?.PlatID != pc.PlatID)
             ImGui.TextWrapped("Warning: Pressure plate asset PlatID and parent PlatID do not match");
         ImGui.Separator();
@@ -206,9 +211,11 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
-    public static bool ShowLavaCollisionProps(LavaCollision lc, CommandHistory cmd, PropertiesWindowData data)
+    public static bool ShowLavaCollisionProps(LavaCollision lc, EditorLevel level, PropertiesWindowData data)
     {
-        bool propChanged = ShowAbstractCollisionProps(lc, cmd, data);
+        CommandHistory cmd = level.CommandHistory;
+
+        bool propChanged = ShowAbstractCollisionProps(lc, level);
 
         ImGui.SeparatorText($"Lava collision props##props{lc.GetHashCode()}");
         if (data.PowerNames is null)

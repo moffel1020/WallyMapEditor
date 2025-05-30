@@ -8,33 +8,35 @@ namespace WallyMapEditor;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowNavNodeProps(NavNode n, CommandHistory cmd, PropertiesWindowData data)
+    public static bool ShowNavNodeProps(NavNode n, EditorLevel level)
     {
+        CommandHistory cmd = level.CommandHistory;
+        SelectionContext selection = level.Selection;
+        LevelDesc ld = level.Level.Desc;
+
         if (n.Parent is not null)
         {
             ImGui.Text("Parent DynamicNavNode: ");
             ImGui.SameLine();
-            if (ImGui.Button($"PlatID {n.Parent.PlatID}")) data.Selection.Object = n.Parent;
+            if (ImGui.Button($"PlatID {n.Parent.PlatID}"))
+                selection.Object = n.Parent;
             ImGui.Separator();
         }
         bool propChanged = false;
         ImGui.Text("NavID: " + n.NavID);
 
-        if (data.Level is not null)
+        bool removed = RemoveButton(n, level);
+        ImGui.Separator();
+
+        string newIDText = ImGuiExt.InputText("Change NavID", n.NavID.ToString(), flags: ImGuiInputTextFlags.CharsDecimal);
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip("If the new ID already exists this NavID will not be renamed");
+
+        if (!removed && uint.TryParse(newIDText, out uint newID))
         {
-            bool removed = RemoveButton(n, data.Level.Desc, cmd);
-            ImGui.Separator();
-
-            string newIDText = ImGuiExt.InputText("Change NavID", n.NavID.ToString(), flags: ImGuiInputTextFlags.CharsDecimal);
-            if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("If the new ID already exists this NavID will not be renamed");
-
-            if (!removed && uint.TryParse(newIDText, out uint newID))
+            if (!NavIDExists(newID, ld))
             {
-                if (!NavIDExists(newID, data.Level.Desc))
-                {
-                    cmd.Add(new PropChangeCommand<uint>(val => RenameNavID(n, val, data.Level.Desc), n.NavID, newID), false);
-                }
+                cmd.Add(new PropChangeCommand<uint>(val => RenameNavID(n, val, ld), n.NavID, newID), false);
             }
         }
 
@@ -64,21 +66,18 @@ public partial class PropertiesWindow
         }
         if (remove is not null) remove();
 
-        if (data.Level is not null)
+        ImGui.SetNextItemWidth(95);
+        if (ImGui.BeginCombo("##addnavpath", "Add id to path", ImGuiComboFlags.NoArrowButton))
         {
-            ImGui.SetNextItemWidth(95);
-            if (ImGui.BeginCombo("##addnavpath", "Add id to path", ImGuiComboFlags.NoArrowButton))
+            foreach (NavNode node in EnumerateNavNodes(ld).Where(nav => !n.Path.Select(p => p.Item1).Contains(nav.NavID)).OrderBy(n => n.NavID))
             {
-                foreach (NavNode node in EnumerateNavNodes(data.Level.Desc).Where(nav => !n.Path.Select(p => p.Item1).Contains(nav.NavID)).OrderBy(n => n.NavID))
+                if (node.NavID != n.NavID && ImGui.Selectable($"{node.NavID}###pathselect{node.GetHashCode()}"))
                 {
-                    if (node.NavID != n.NavID && ImGui.Selectable($"{node.NavID}###pathselect{node.GetHashCode()}"))
-                    {
-                        // no need for ArrayAddCommand because we're not dealing with selectables
-                        cmd.Add(new PropChangeCommand<(uint, NavNodeTypeEnum)[]>(val => n.Path = val, n.Path, [.. n.Path, (node.NavID, node.Type)]), false);
-                    }
+                    // no need for ArrayAddCommand because we're not dealing with selectables
+                    cmd.Add(new PropChangeCommand<(uint, NavNodeTypeEnum)[]>(val => n.Path = val, n.Path, [.. n.Path, (node.NavID, node.Type)]), false);
                 }
-                ImGui.EndCombo();
             }
+            ImGui.EndCombo();
         }
         ImGui.Separator();
 

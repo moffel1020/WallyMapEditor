@@ -6,15 +6,17 @@ namespace WallyMapEditor;
 
 partial class PropertiesWindow
 {
-    public static bool ShowLevelAnimationProps(LevelAnimation la, CommandHistory cmd, PropertiesWindowData data)
+    public static bool ShowLevelAnimationProps(LevelAnimation la, EditorLevel level)
     {
-        if (data.Level is not null)
-            RemoveButton(la, data.Level.Desc, cmd);
+        CommandHistory cmd = level.CommandHistory;
+        LevelDesc ld = level.Level.Desc;
+
+        RemoveButton(la, level);
         ImGui.Separator();
 
         bool propChanged = false;
 
-        propChanged |= ShowNullablePlatIDEdit(val => la.PlatID = val, la.PlatID, data, cmd);
+        propChanged |= ShowNullablePlatIDEdit(val => la.PlatID = val, la.PlatID, level, cmd);
         ImGui.Separator();
 
         ImGui.Text("FileName: " + la.FileName);

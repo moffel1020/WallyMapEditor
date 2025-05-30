@@ -2,6 +2,6 @@ namespace WallyMapEditor;
 
 public interface IOverlay
 {
-    public bool Update(OverlayData data, CommandHistory cmd);
-    public void Draw(OverlayData data);
+    public bool Update(EditorLevel level, OverlayData data);
+    public void Draw(EditorLevel level, OverlayData data);
 }

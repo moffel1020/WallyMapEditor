@@ -7,16 +7,19 @@ namespace WallyMapEditor;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowDynamicProps<T>(AbstractDynamic<T> ad, CommandHistory cmd, PropertiesWindowData data)
+    public static bool ShowDynamicProps<T>(AbstractDynamic<T> ad, EditorLevel level, PropertiesWindowData data)
         where T : IDeserializable, ISerializable, IDrawable
     {
+        CommandHistory cmd = level.CommandHistory;
+        SelectionContext selection = level.Selection;
+        LevelDesc ld = level.Level.Desc;
+
         bool propChanged = false;
 
-        ShowPlatIDEdit(val => ad.PlatID = val, ad.PlatID, data, cmd);
+        ShowPlatIDEdit(val => ad.PlatID = val, ad.PlatID, level, cmd);
 
         ImGui.Separator();
-        if (data.Level is not null)
-            RemoveButton(ad, data.Level.Desc, cmd);
+        RemoveButton(ad, level);
         ImGui.Separator();
 
         propChanged |= ImGuiExt.DragDoubleHistory("X", ad.X, val => ad.X = val, cmd);
@@ -25,7 +28,7 @@ public partial class PropertiesWindow
         if (ImGui.CollapsingHeader("Children"))
         {
             propChanged |= ImGuiExt.EditArrayHistory("", ad.Children, val => ad.Children = val,
-            () => CreateDynamicChild(ad, data.Level?.Desc),
+            () => CreateDynamicChild(ad, ld),
             index =>
             {
                 bool changed = false;
@@ -33,11 +36,12 @@ public partial class PropertiesWindow
                 T child = ad.Children[index];
                 if (ImGui.TreeNode($"{child.GetType().Name} {MapOverviewWindow.GetExtraObjectInfo(child)}###dynamicChild{child.GetHashCode()}"))
                 {
-                    changed |= ShowProperties(child, cmd, data);
+                    changed |= ShowProperties(child, level, data);
                     ImGui.TreePop();
                 }
 
-                if (ImGui.Button($"Select##dyncol{child.GetHashCode()}")) data.Selection.Object = child;
+                if (ImGui.Button($"Select##dyncol{child.GetHashCode()}"))
+                    selection.Object = child;
                 ImGui.SameLine();
 
                 return changed;
@@ -47,15 +51,15 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
-    private static string[] GetKnownPlatIDs(PropertiesWindowData data)
-        => data.Level?.Desc.Assets.OfType<MovingPlatform>().Select(mp => mp.PlatID).ToArray() ?? [];
+    private static string[] GetKnownPlatIDs(EditorLevel level)
+        => level.Level.Desc.Assets.OfType<MovingPlatform>().Select(mp => mp.PlatID).ToArray() ?? [];
 
-    public static bool ShowNullablePlatIDEdit(Action<string?> changeCommand, string? value, PropertiesWindowData data, CommandHistory cmd)
+    public static bool ShowNullablePlatIDEdit(Action<string?> changeCommand, string? value, EditorLevel level, CommandHistory cmd)
     {
         bool propChanged = false;
         if (value is not null)
         {
-            propChanged = ShowPlatIDEdit(changeCommand, value, data, cmd);
+            propChanged = ShowPlatIDEdit(changeCommand, value, level, cmd);
             if (ImGui.Button("Remove PlatID"))
             {
                 cmd.Add(new PropChangeCommand<string?>(changeCommand, value, null), false);
@@ -71,16 +75,18 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
-    public static bool ShowPlatIDEdit(Action<string> changeCommand, string value, PropertiesWindowData data, CommandHistory cmd)
+    public static bool ShowPlatIDEdit(Action<string> changeCommand, string value, EditorLevel level, CommandHistory cmd)
     {
-        string[] knownPlatIds = GetKnownPlatIDs(data);
+        SelectionContext selection = level.Selection;
+        LevelDesc ld = level.Level.Desc;
 
-        if (data.Level is not null && knownPlatIds.Contains(value))
+        string[] knownPlatIds = GetKnownPlatIDs(level);
+        if (knownPlatIds.Contains(value))
         {
             ImGui.Text("Animated by MovingPlatform");
             ImGui.SameLine();
             if (ImGui.Button($"({value})"))
-                data.Selection.Object = data.Level.Desc.Assets.OfType<MovingPlatform>().Last(mp => mp.PlatID == value);
+                selection.Object = ld.Assets.OfType<MovingPlatform>().Last(mp => mp.PlatID == value);
         }
 
         bool propChanged = ImGuiExt.InputTextHistory("##platid", value, changeCommand, cmd);

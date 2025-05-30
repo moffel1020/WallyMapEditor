@@ -5,10 +5,12 @@ namespace WallyMapEditor;
 
 partial class PropertiesWindow
 {
-    public static bool ShowLevelAnimProps(LevelAnim la, CommandHistory cmd, PropertiesWindowData data)
+    public static bool ShowLevelAnimProps(LevelAnim la, EditorLevel level)
     {
-        if (data.Level is not null)
-            RemoveButton(la, data.Level.Desc, cmd);
+        CommandHistory cmd = level.CommandHistory;
+        LevelDesc ld = level.Level.Desc;
+
+        RemoveButton(la, level);
         ImGui.Separator();
 
         bool propChanged = false;

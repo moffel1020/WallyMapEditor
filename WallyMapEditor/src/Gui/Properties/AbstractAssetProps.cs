@@ -12,31 +12,34 @@ partial class PropertiesWindow
 {
     private static string? _assetErrorText;
 
-    public static bool ShowAbstractAssetProps(AbstractAsset a, CommandHistory cmd, PropertiesWindowData data)
+    public static bool ShowAbstractAssetProps(AbstractAsset a, EditorLevel level, PropertiesWindowData data)
     {
+        SelectionContext selection = level.Selection;
+        CommandHistory cmd = level.CommandHistory;
+
         if (a.Parent is not null)
         {
             ImGui.Text($"Parent {a.Parent.GetType().Name}: ");
             ImGui.SameLine();
-            if (ImGui.Button($"{MapOverviewWindow.GetExtraObjectInfo(a.Parent)}")) data.Selection.Object = a.Parent;
+            if (ImGui.Button($"{MapOverviewWindow.GetExtraObjectInfo(a.Parent)}"))
+                selection.Object = a.Parent;
             ImGui.Separator();
         }
 
         bool propChanged = false;
 
-        if (data.Level is not null)
-            RemoveButton(a, data.Level.Desc, cmd);
+        RemoveButton(a, level);
         ImGui.Separator();
 
         if (a.AssetName is not null)
         {
             ImGui.Text("AssetName: " + a.AssetName);
 
-            if (data.Level is not null && data.PathPrefs.BrawlhallaPath is not null)
+            if (data.PathPrefs.BrawlhallaPath is not null)
             {
-                string assetDir = Path.Combine(data.PathPrefs.BrawlhallaPath, "mapArt", data.Level.Desc.AssetDir);
+                string assetDir = Path.Combine(data.PathPrefs.BrawlhallaPath, "mapArt", level.Level.Desc.AssetDir);
                 ImGui.SameLine();
-                ShowSelectAssetButton(a, cmd, data, assetDir);
+                ShowSelectAssetButton(a, level, data, assetDir);
 
                 if (_assetErrorText is not null)
                 {
@@ -86,9 +89,9 @@ partial class PropertiesWindow
         return propChanged;
     }
 
-    private static void ShowSelectAssetButton(AbstractAsset a, CommandHistory cmd, PropertiesWindowData data, string assetDir)
+    private static void ShowSelectAssetButton(AbstractAsset a, EditorLevel level, PropertiesWindowData data, string assetDir)
     {
-        if (data.Level is null || data.PathPrefs.BrawlhallaPath is null || !ImGui.Button("Select##AssetName")) return;
+        if (data.PathPrefs.BrawlhallaPath is null || !ImGui.Button("Select##AssetName")) return;
 
         Task.Run(() =>
         {
@@ -116,7 +119,7 @@ partial class PropertiesWindow
                     return;
                 }
 
-                cmd.Add(new PropChangeCommand<string>(val => a.AssetName = val, a.AssetName!, newAssetName));
+                level.CommandHistory.Add(new PropChangeCommand<string>(val => a.AssetName = val, a.AssetName!, newAssetName));
                 _assetErrorText = null;
             }
         });

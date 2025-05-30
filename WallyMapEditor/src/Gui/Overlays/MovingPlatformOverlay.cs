@@ -11,7 +11,7 @@ public class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
 
     public Dictionary<KeyFrame, KeyFrameOverlay> KeyFrameCircles { get; set; } = [];
 
-    public void Draw(OverlayData data)
+    public void Draw(EditorLevel level, OverlayData data)
     {
         Position.Color = data.OverlayConfig.ColorMovingPlatformPosition;
         Position.UsingColor = data.OverlayConfig.UsingColorMovingPlatformPosition;
@@ -19,10 +19,10 @@ public class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
         Position.Draw(data);
         // draw higher framenum keyframes ontop of lower framenum keyframes
         foreach (KeyFrameOverlay kfo in KeyFrameCircles.Values.OrderBy(k => k.FrameNumOverride))
-            kfo.Draw(data);
+            kfo.Draw(level, data);
     }
 
-    public bool Update(OverlayData data, CommandHistory cmd)
+    public bool Update(EditorLevel level, OverlayData data)
     {
         Position.Radius = data.OverlayConfig.RadiusMovingPlatformPosition;
 
@@ -39,7 +39,7 @@ public class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
             kfo.PlatOffset = (plat.X, plat.Y);
             kfo.AllowDragging = !dragging;
             kfo.FrameNumOverride = num;
-            dragging |= kfo.Update(data, cmd);
+            dragging |= kfo.Update(level, data);
         }
         // remove deleted keyframes
         foreach (KeyFrame kf in KeyFrameCircles.Keys)
@@ -52,11 +52,11 @@ public class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
             throw new Exception($"Attempt to update overlay for moving platform with PlatID {plat.PlatID}, but moving platform offset dictionary did not contain that PlatID");
         (double offsetX, double offsetY) = platTransform * (0, 0);
         (Position.X, Position.Y) = (offsetX, offsetY);
-        Position.Update(data, !dragging);
+        Position.Update(level.Camera, data, !dragging);
 
         if (Position.Dragging)
         {
-            cmd.Add(new PropChangeCommand<double, double>(
+            level.CommandHistory.Add(new PropChangeCommand<double, double>(
                 (val1, val2) => (plat.X, plat.Y) = (val1, val2),
                 plat.X, plat.Y,
                 plat.X + Position.X - offsetX, plat.Y + Position.Y - offsetY

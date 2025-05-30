@@ -5,14 +5,16 @@ namespace WallyMapEditor;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowAbstractVolumeProps(AbstractVolume v, CommandHistory cmd, PropertiesWindowData data)
+    public static bool ShowAbstractVolumeProps(AbstractVolume v, EditorLevel level, PropertiesWindowData data)
     {
-        if (data.Level is not null)
-            RemoveButton(v, data.Level.Desc, cmd);
+        CommandHistory cmd = level.CommandHistory;
+        LevelDesc ld = level.Level.Desc;
+
+        RemoveButton(v, level);
         ImGui.Separator();
 
         bool propChanged = false;
-        if (data.Level is not null) propChanged |= WmeUtils.ObjectChangeType(v, data.Level.Desc, cmd, ShowChangeVolumeTypeMenu);
+        propChanged |= WmeUtils.ObjectChangeType(v, ld, cmd, ShowChangeVolumeTypeMenu);
         propChanged |= ImGuiExt.DragIntHistory($"X##props{v.GetHashCode()}", v.X, val => v.X = val, cmd);
         propChanged |= ImGuiExt.DragIntHistory($"Y##props{v.GetHashCode()}", v.Y, val => v.Y = val, cmd);
         propChanged |= ImGuiExt.DragIntHistory($"W##props{v.GetHashCode()}", v.W, val => v.W = val, cmd, minValue: 1);

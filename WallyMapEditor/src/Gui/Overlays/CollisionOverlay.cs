@@ -26,8 +26,11 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
 
     public const int ROUND_DECIMALS = 6;
 
-    public virtual bool Update(OverlayData data, CommandHistory cmd)
+    public virtual bool Update(EditorLevel level, OverlayData data)
     {
+        CommandHistory cmd = level.CommandHistory;
+        Camera2D cam = level.Camera;
+
         Circle1.Radius = Circle2.Radius = Center.Radius = data.OverlayConfig.RadiusCollisionPoint;
         Anchor.Radius = data.OverlayConfig.RadiusCollisionAnchor;
 
@@ -44,10 +47,10 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
         (Center.X, Center.Y) = ((Circle1.X + Circle2.X) / 2, (Circle1.Y + Circle2.Y) / 2);
         (Anchor.X, Anchor.Y) = ((col.AnchorX ?? double.NaN) + dynOffsetX, (col.AnchorY ?? double.NaN) + dynOffsetY);
 
-        Circle1.Update(data, true);
-        Circle2.Update(data, !Circle1.Dragging);
-        if (HasAnchor) Anchor.Update(data, !Circle1.Dragging && !Circle2.Dragging);
-        Center.Update(data, !Circle1.Dragging && !Circle2.Dragging && !Anchor.Dragging);
+        Circle1.Update(cam, data, true);
+        Circle2.Update(cam, data, !Circle1.Dragging);
+        if (HasAnchor) Anchor.Update(cam, data, !Circle1.Dragging && !Circle2.Dragging);
+        Center.Update(cam, data, !Circle1.Dragging && !Circle2.Dragging && !Anchor.Dragging);
 
         if (Circle1.Dragging)
         {
@@ -56,7 +59,7 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
 
             _snapToPoint = null;
             if (!Rl.IsKeyDown(KeyboardKey.LeftAlt))
-                _snapToPoint = SnapDrag(col, Circle1, data);
+                _snapToPoint = SnapDrag(level, col, Circle1, data);
 
             double newX = Math.Round(Circle1.X - offsetX, ROUND_DECIMALS);
             double newY = Math.Round(Circle1.Y - offsetY, ROUND_DECIMALS);
@@ -74,7 +77,7 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
 
             _snapToPoint = null;
             if (!Rl.IsKeyDown(KeyboardKey.LeftAlt))
-                _snapToPoint = SnapDrag(col, Circle2, data);
+                _snapToPoint = SnapDrag(level, col, Circle2, data);
 
             double newX = Math.Round(Circle2.X - offsetX, ROUND_DECIMALS);
             double newY = Math.Round(Circle2.Y - offsetY, ROUND_DECIMALS);
@@ -121,12 +124,12 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
                 double y2 = Center.Y + diffY / 2;
 
                 // find closest collision
-                (double x, double y)? closest1 = GetClosestCollisionPoint(col, x1, y1, data);
+                (double x, double y)? closest1 = GetClosestCollisionPoint(level, col, x1, y1, data);
                 // calculate distance
                 double? distance1 = closest1 is null ? null : DistanceSquared(x1, y1, closest1.Value.x, closest1.Value.y);
 
                 // find closest collision
-                (double x, double y)? closest2 = GetClosestCollisionPoint(col, x2, y2, data);
+                (double x, double y)? closest2 = GetClosestCollisionPoint(level, col, x2, y2, data);
                 // calculate distance
                 double? distance2 = closest2 is null ? null : DistanceSquared(x2, y2, closest2.Value.x, closest2.Value.y);
 
@@ -203,7 +206,7 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
         return Circle1.Dragging || Circle2.Dragging || Center.Dragging || Anchor.Dragging;
     }
 
-    public virtual void Draw(OverlayData data)
+    public virtual void Draw(EditorLevel level, OverlayData data)
     {
         Circle1.Color = Circle2.Color = Center.Color = data.OverlayConfig.ColorCollisionPoint;
         Circle1.UsingColor = Circle2.UsingColor = Center.UsingColor = data.OverlayConfig.UsingColorCollisionPoint;
@@ -246,10 +249,9 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
         (dragging.X, dragging.Y) = (newX, newY);
     }
 
-    private static (double, double)? SnapDrag(AbstractCollision current, DragCircle dragging, OverlayData data)
+    private static (double, double)? SnapDrag(EditorLevel level, AbstractCollision current, DragCircle dragging, OverlayData data)
     {
-        if (data.Level is null) return null;
-        (double, double)? closest = GetClosestCollisionPoint(current, dragging.X, dragging.Y, data);
+        (double, double)? closest = GetClosestCollisionPoint(level, current, dragging.X, dragging.Y, data);
 
         if (closest is not null && DistanceSquared(dragging.X, dragging.Y, closest.Value.Item1, closest.Value.Item2) <= MAX_SNAP_DISTANCE)
             (dragging.X, dragging.Y) = (closest.Value.Item1, closest.Value.Item2);
@@ -257,13 +259,12 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
         return closest;
     }
 
-    private static (double, double)? GetClosestCollisionPoint(AbstractCollision current, double x, double y, OverlayData data)
+    private static (double, double)? GetClosestCollisionPoint(EditorLevel level, AbstractCollision current, double x, double y, OverlayData data)
     {
-        if (data.Level is null) return null;
-
-        IEnumerable<(double, double)> otherPoints = data.Level.Desc.Collisions.Where(c => c != current)
+        LevelDesc ld = level.Level.Desc;
+        IEnumerable<(double, double)> otherPoints = ld.Collisions.Where(c => c != current)
             .SelectMany(IEnumerable<(double, double)> (c) => [(c.X1, c.Y1), (c.X2, c.Y2)])
-            .Concat(CollisionPointsAbsolute(data.Level.Desc.DynamicCollisions, data.Context, current));
+            .Concat(CollisionPointsAbsolute(ld.DynamicCollisions, data.Context, current));
 
         return otherPoints.Any() ? otherPoints.MinBy(p => DistanceSquared(x, y, p.Item1, p.Item2)) : null;
     }

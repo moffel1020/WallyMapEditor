@@ -6,7 +6,7 @@ public class ItemSpawnOverlay(AbstractItemSpawn item) : IOverlay
 {
     public ResizableDragBox ResizableBox { get; set; } = new(item.X, item.Y, item.W, item.H);
 
-    public void Draw(OverlayData data)
+    public void Draw(EditorLevel level, OverlayData data)
     {
         ResizableBox.Color = data.OverlayConfig.ColorItemSpawnBox;
         ResizableBox.UsingColor = data.OverlayConfig.UsingColorItemSpawnBox;
@@ -14,8 +14,10 @@ public class ItemSpawnOverlay(AbstractItemSpawn item) : IOverlay
         ResizableBox.Draw(data);
     }
 
-    public bool Update(OverlayData data, CommandHistory cmd)
+    public bool Update(EditorLevel level, OverlayData data)
     {
+        CommandHistory cmd = level.CommandHistory;
+
         ResizableBox.CircleRadius = data.OverlayConfig.RadiusItemSpawnCorner;
 
         (double offsetX, double offsetY) = (0, 0);
@@ -25,7 +27,7 @@ public class ItemSpawnOverlay(AbstractItemSpawn item) : IOverlay
             (offsetX, offsetY) = (dynOffsetX + item.Parent.X, dynOffsetY + item.Parent.Y);
         }
 
-        ResizableBox.Update(data, item.X + offsetX, item.Y + offsetY, item.W, item.H);
+        ResizableBox.Update(level.Camera, data, item.X + offsetX, item.Y + offsetY, item.W, item.H);
         (double x, double y, double w, double h) = ResizableBox.Bounds;
 
         if (ResizableBox.Resizing)

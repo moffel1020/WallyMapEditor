@@ -5,23 +5,27 @@ namespace WallyMapEditor;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowItemSpawnProps(AbstractItemSpawn i, CommandHistory cmd, PropertiesWindowData data)
+    public static bool ShowItemSpawnProps(AbstractItemSpawn i, EditorLevel level)
     {
+        CommandHistory cmd = level.CommandHistory;
+        SelectionContext selection = level.Selection;
+        LevelDesc ld = level.Level.Desc;
+
         if (i.Parent is not null)
         {
             ImGui.Text($"Parent DynamicItemSpawn: ");
             ImGui.SameLine();
-            if (ImGui.Button($"PlatID {i.Parent.PlatID}")) data.Selection.Object = i.Parent;
+            if (ImGui.Button($"PlatID {i.Parent.PlatID}"))
+                selection.Object = i.Parent;
             ImGui.Separator();
         }
 
-        if (data.Level is not null)
-            RemoveButton(i, data.Level.Desc, cmd);
+        RemoveButton(i, level);
         ImGui.Separator();
 
         bool propChanged = false;
 
-        if (data.Level is not null) propChanged |= WmeUtils.ObjectChangeType(i, data.Level.Desc, cmd, ShowChangeItemTypeMenu);
+        propChanged |= WmeUtils.ObjectChangeType(i, ld, cmd, ShowChangeItemTypeMenu);
         propChanged |= ImGuiExt.DragDoubleHistory($"X##props{i.GetHashCode()}", i.X, val => i.X = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory($"Y##props{i.GetHashCode()}", i.Y, val => i.Y = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory($"W##props{i.GetHashCode()}", i.W, val => i.W = val, cmd);

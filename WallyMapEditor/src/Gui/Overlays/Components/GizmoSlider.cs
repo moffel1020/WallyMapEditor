@@ -47,12 +47,12 @@ public class GizmoSlider(double x, double y)
             Rl.DrawRectanglePro(rect, rotOrigin, Rotation, Color);
     }
 
-    public void Update(OverlayData data, double currentValue, bool allowDragging)
+    public void Update(Camera2D cam, OverlayData data, double currentValue, bool allowDragging)
     {
         Rectangle rect = new((float)X, (float)Y, (float)(Length * currentValue), (float)LineWidth);
 
         Vector2 rotOrigin = new(0, (float)LineWidth / 2);
-        Vector2 mousePos = data.Viewport.ScreenToWorld(Rl.GetMousePosition(), data.Cam);
+        Vector2 mousePos = data.Viewport.ScreenToWorld(Rl.GetMousePosition(), cam);
 
         Hovered = WmeUtils.CheckCollisionPointRotatedRec(mousePos, rect, Rotation * Math.PI / 180, rotOrigin);
         Value = currentValue;

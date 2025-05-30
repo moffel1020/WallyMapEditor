@@ -2,14 +2,17 @@ using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public class OverlayManager
+public class OverlayManager(EditorLevel level)
 {
     public IOverlay? ActiveOverlay { get; private set; } = null;
     private object? _currentObject = null;
     public bool IsUsing { get; private set; } = false;
 
-    public void Update(SelectionContext selection, OverlayData data, CommandHistory cmd)
+    public void Update(OverlayData data)
     {
+        CommandHistory cmd = level.CommandHistory;
+        SelectionContext selection = level.Selection;
+
         if (_currentObject != selection.Object)
         {
             ActiveOverlay = CreateOverlay(selection);
@@ -17,12 +20,14 @@ public class OverlayManager
         }
 
         bool wasUsing = IsUsing;
-        IsUsing = ActiveOverlay?.Update(data, cmd) ?? false;
-
+        IsUsing = ActiveOverlay?.Update(level, data) ?? false;
         if (wasUsing && !IsUsing) cmd.SetAllowMerge(false);
     }
 
-    public void Draw(OverlayData data) => ActiveOverlay?.Draw(data);
+    public void Draw(OverlayData data)
+    {
+        ActiveOverlay?.Draw(level, data);
+    }
 
     private static IOverlay? CreateOverlay(SelectionContext selection) => selection.Object switch
     {

@@ -6,7 +6,7 @@ public class SpawnBotBoundsOverlay(SpawnBotBounds bounds) : IOverlay
 {
     public ResizableDragBox ResizableBox { get; set; } = new(bounds.X, bounds.Y, bounds.W, bounds.H);
 
-    public void Draw(OverlayData data)
+    public void Draw(EditorLevel level, OverlayData data)
     {
         ResizableBox.Color = data.OverlayConfig.ColorSpawnBotBoundsBox;
         ResizableBox.UsingColor = data.OverlayConfig.UsingColorSpawnBotBoundsBox;
@@ -14,11 +14,13 @@ public class SpawnBotBoundsOverlay(SpawnBotBounds bounds) : IOverlay
         ResizableBox.Draw(data);
     }
 
-    public bool Update(OverlayData data, CommandHistory cmd)
+    public bool Update(EditorLevel level, OverlayData data)
     {
+        CommandHistory cmd = level.CommandHistory;
+
         ResizableBox.CircleRadius = data.OverlayConfig.RadiusSpawnBotBoundsCorner;
 
-        ResizableBox.Update(data, bounds.X, bounds.Y, bounds.W, bounds.H);
+        ResizableBox.Update(level.Camera, data, bounds.X, bounds.Y, bounds.W, bounds.H);
         (double x, double y, double w, double h) = ResizableBox.Bounds;
 
         if (ResizableBox.Resizing)

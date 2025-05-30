@@ -6,8 +6,10 @@ namespace WallyMapEditor;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowAnimationProps(Animation anim, CommandHistory cmd)
+    public static bool ShowAnimationProps(Animation anim, EditorLevel level)
     {
+        CommandHistory cmd = level.CommandHistory;
+
         bool propChanged = false;
 
         propChanged |= ImGuiExt.DragNullableIntHistory("NumFrames", anim.NumFrames, LastKeyFrameNum(anim.KeyFrames), val => anim.NumFrames = val, cmd, minValue: LastKeyFrameNum(anim.KeyFrames));
@@ -47,7 +49,7 @@ public partial class PropertiesWindow
             {
                 if (index != 0)
                     ImGui.Separator();
-                return ShowOneOfManyKeyFrameProps(anim.KeyFrames, index, cmd);
+                return ShowOneOfManyKeyFrameProps(anim.KeyFrames, index, level);
             },
             cmd, allowRemove: anim.KeyFrames.Length > 1, allowMove: false);
         }

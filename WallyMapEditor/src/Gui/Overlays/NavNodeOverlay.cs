@@ -5,14 +5,14 @@ namespace WallyMapEditor;
 public class NavNodeOverlay(NavNode node) : IOverlay
 {
     public DragBox Box { get; set; } = new(node.X, node.Y, 0, 0);
-    public void Draw(OverlayData data)
+    public void Draw(EditorLevel level, OverlayData data)
     {
         Box.Color = data.OverlayConfig.ColorNavNodeBox;
         Box.UsingColor = data.OverlayConfig.UsingColorNavNodeBox;
         Box.Draw(data);
     }
 
-    public bool Update(OverlayData data, CommandHistory cmd)
+    public bool Update(EditorLevel level, OverlayData data)
     {
         (double offsetX, double offsetY) = (0, 0);
         if (node.Parent is not null)
@@ -25,11 +25,11 @@ public class NavNodeOverlay(NavNode node) : IOverlay
         Box.H = data.RenderConfig.RadiusNavNode * 2 + data.OverlayConfig.SizeOffsetNavNodeBox;
         Box.Middle = (node.X + offsetX, node.Y + offsetY);
 
-        Box.Update(data, true);
+        Box.Update(level.Camera, data, true);
 
         if (Box.Dragging)
         {
-            cmd.Add(new PropChangeCommand<double, double>(
+            level.CommandHistory.Add(new PropChangeCommand<double, double>(
                 (val1, val2) => (node.X, node.Y) = (val1, val2),
                 node.X, node.Y,
                 Box.Middle.Item1 - offsetX, Box.Middle.Item2 - offsetY
