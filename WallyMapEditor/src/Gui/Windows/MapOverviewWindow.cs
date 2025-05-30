@@ -164,7 +164,10 @@ public class MapOverviewWindow
                 if (loader is not null)
                 {
                     Texture2DWrapper texture = loader.LoadTextureFromPath(Path.Combine(thumbnailPath, l.Type.ThumbnailPNGFile ?? "CorruptFile.png"));
-                    rlImGui.ImageSize(texture.Texture, new Vector2(60.0f * texture.Width / texture.Height, 60));
+                    if (texture.Texture.Id != 0)
+                    {
+                        rlImGui.ImageSize(texture.Texture, new Vector2(60.0f * texture.Width / texture.Height, 60));
+                    }
                 }
             }
             ImGui.Separator();
