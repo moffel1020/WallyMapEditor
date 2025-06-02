@@ -299,7 +299,7 @@ public class AssetOverlay(AbstractAsset asset) : IOverlay
 
             if (mirrorDrag)
             {
-                double diffW = w - oldY;
+                double diffW = w - oldW;
                 x -= diffW;
                 w += diffW;
             }
