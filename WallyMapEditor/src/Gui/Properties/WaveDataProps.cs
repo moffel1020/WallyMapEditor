@@ -7,10 +7,13 @@ namespace WallyMapEditor;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowWaveDataProps(WaveData w, CommandHistory cmd, PropertiesWindowData data)
+    public static bool ShowWaveDataProps(WaveData w, EditorLevel level, PropertiesWindowData data)
     {
-        if (data.Level is not null)
-            RemoveButton(w, data.Level.Desc, cmd);
+        CommandHistory cmd = level.CommandHistory;
+        SelectionContext selection = level.Selection;
+        LevelDesc ld = level.Level.Desc;
+
+        RemoveButton(w, level);
         ImGui.Separator();
 
         bool propChanged = false;
@@ -30,11 +33,12 @@ public partial class PropertiesWindow
                 CustomPath cp = w.CustomPaths[index];
                 if (ImGui.TreeNode($"CustomPath {MapOverviewWindow.GetExtraObjectInfo(cp)}###customPaths{cp.GetHashCode()}"))
                 {
-                    changed |= ShowProperties(cp, cmd, data);
+                    changed |= ShowProperties(cp, level, data);
                     ImGui.TreePop();
                 }
 
-                if (ImGui.Button($"Select##select{cp.GetHashCode()}")) data.Selection.Object = cp;
+                if (ImGui.Button($"Select##select{cp.GetHashCode()}"))
+                    selection.Object = cp;
                 ImGui.SameLine();
 
                 return changed;
@@ -50,7 +54,7 @@ public partial class PropertiesWindow
                 Group g = w.Groups[index];
                 if (ImGui.TreeNode($"Group {MapOverviewWindow.GetExtraObjectInfo(g)}###groups{g.GetHashCode()}"))
                 {
-                    changed |= ShowProperties(g, cmd, data);
+                    changed |= ShowProperties(g, level, data);
                     ImGui.TreePop();
                 }
                 return changed;
@@ -59,7 +63,7 @@ public partial class PropertiesWindow
         return propChanged;
     }
 
-    public static bool ShowCustomPathProps(CustomPath cp, CommandHistory cmd, PropertiesWindowData data)
+    public static bool ShowCustomPathProps(CustomPath cp, EditorLevel level, PropertiesWindowData data)
     {
         bool propChanged = false;
         propChanged |= ImGuiExt.EditArrayHistory($"##custompathPoints{cp.GetHashCode()}", cp.Points, val => cp.Points = val,
@@ -70,24 +74,28 @@ public partial class PropertiesWindow
             Point p = cp.Points[index];
             if (ImGui.TreeNode($"Point {MapOverviewWindow.GetExtraObjectInfo(p)}###points{p.GetHashCode()}"))
             {
-                changed |= ShowProperties(p, cmd, data);
+                changed |= ShowProperties(p, level, data);
                 ImGui.TreePop();
             }
             return changed;
-        }, cmd);
+        }, level.CommandHistory);
         return propChanged;
     }
 
-    public static bool ShowPointProps(Point p, CommandHistory cmd)
+    public static bool ShowPointProps(Point p, EditorLevel level)
     {
+        CommandHistory cmd = level.CommandHistory;
+
         bool propChanged = false;
         propChanged |= ImGuiExt.DragDoubleHistory($"X##props{p.GetHashCode()}", p.X, val => p.X = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory($"Y##props{p.GetHashCode()}", p.Y, val => p.Y = val, cmd);
         return propChanged;
     }
 
-    public static bool ShowGroupProps(Group g, CommandHistory cmd)
+    public static bool ShowGroupProps(Group g, EditorLevel level)
     {
+        CommandHistory cmd = level.CommandHistory;
+
         bool propChanged = false;
         ImGui.SeparatorText("Count");
         ImGuiExt.HintTooltip(Strings.UI_HORDE_GROUP_COUNT_TOOLTIP);

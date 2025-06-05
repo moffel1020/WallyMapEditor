@@ -19,9 +19,9 @@ public class RotatePoint(double x, double y)
     private Vector2 Coords => new((float)X, (float)Y);
     private Vector2 _mouseWorldPos = new(0, 0);
 
-    public void Update(OverlayData data, bool allowRotation, double currentRot = 0)
+    public void Update(Camera2D cam, OverlayData data, bool allowRotation, double currentRot = 0)
     {
-        _mouseWorldPos = data.Viewport.ScreenToWorld(Rl.GetMousePosition(), data.Cam);
+        _mouseWorldPos = data.Viewport.ScreenToWorld(Rl.GetMousePosition(), cam);
 
         if (!allowRotation)
         {

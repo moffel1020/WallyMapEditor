@@ -2,6 +2,7 @@ using System;
 using System.Numerics;
 using System.IO;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 using WallyMapSpinzor2;
 
@@ -14,6 +15,7 @@ namespace WallyMapEditor;
 
 public class Editor
 {
+    public const string WINDOW_NAME = "WallyMapEditor";
     public const float ZOOM_INCREMENT = 0.15f;
     public const float MIN_ZOOM = 0.01f;
     public const float MAX_ZOOM = 5.0f;
@@ -21,17 +23,18 @@ public class Editor
     public const int INITIAL_SCREEN_WIDTH = 1280;
     public const int INITIAL_SCREEN_HEIGHT = 720;
 
-    public WindowTitleBar TitleBar { get; set; } = new();
-
     PathPreferences PathPrefs { get; }
     RenderConfigDefault ConfigDefault { get; }
 
-    public Level? Level { get; set; }
+    private EditorLevel? _currentLevel;
+    public EditorLevel? CurrentLevel { get => _currentLevel; set => _currentLevel = value; }
+
+    public List<EditorLevel> LoadedLevels { get; set; } = [];
+    private readonly Queue<EditorLevel> _removedLevelsQueue = [];
     public LevelLoader LevelLoader { get; set; }
 
     public RaylibCanvas? Canvas { get; set; }
     public AssetLoader? AssetLoader { get; set; }
-    private Camera2D _cam = new();
     public TimeSpan Time { get; set; } = TimeSpan.FromSeconds(0);
 
     public ViewportWindow ViewportWindow { get; set; } = new();
@@ -43,10 +46,6 @@ public class Editor
     public BackupsWindow BackupsDialog { get; set; }
     public ModCreatorWindow ModCreatorDialog { get; set; }
     public ModLoaderWindow ModLoaderDialog { get; set; }
-
-    public OverlayManager OverlayManager { get; set; } = new();
-    public SelectionContext Selection { get; set; } = new();
-    public CommandHistory CommandHistory { get; set; }
 
     private bool _movingObject = false;
 
@@ -66,23 +65,20 @@ public class Editor
     {
         PathPrefs = pathPrefs;
         ConfigDefault = configDefault;
-        CommandHistory = new(Selection);
         ExportDialog = new(pathPrefs, _backupsList);
         ImportDialog = new(pathPrefs);
         BackupsDialog = new(pathPrefs, _backupsList);
         ModCreatorDialog = new(pathPrefs);
         ModLoaderDialog = new(pathPrefs);
-        LevelLoader = new(this);
+        LevelLoader = new();
     }
 
     private OverlayData OverlayData => new()
     {
         Viewport = ViewportWindow,
-        Cam = _cam,
         Context = _context,
         RenderConfig = _renderConfig,
         OverlayConfig = _overlayConfig,
-        Level = Level,
     };
 
     private PropertiesWindowData PropertiesWindowData => new()
@@ -90,9 +86,7 @@ public class Editor
         Time = Time,
         Canvas = Canvas,
         Loader = AssetLoader,
-        Level = Level,
         PathPrefs = PathPrefs,
-        Selection = Selection,
         PowerNames = LevelLoader.PowerNames,
     };
 
@@ -123,20 +117,16 @@ public class Editor
 
         ImportDialog.Open = true;
 
-        Rl.SetConfigFlags(ConfigFlags.VSyncHint);
-        Rl.SetConfigFlags(ConfigFlags.ResizableWindow);
-        Rl.InitWindow(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT, WindowTitleBar.WINDOW_NAME);
+        Rl.SetConfigFlags(ConfigFlags.VSyncHint | ConfigFlags.ResizableWindow | ConfigFlags.MaximizedWindow);
+        Rl.InitWindow(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT, WINDOW_NAME);
         Rl.SetExitKey(KeyboardKey.Null);
+        Rl.MaximizeWindow();
         rlImGui.Setup(true, true);
         Style.Apply();
 
-        ResetCam(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT);
-        PickingFramebuffer.Load(INITIAL_SCREEN_WIDTH, INITIAL_SCREEN_HEIGHT);
-
-        CommandHistory.Changed += (_, _) =>
+        ViewportWindow.ClosedLevel += (_, level) =>
         {
-            if (TitleBar.OpenLevelFile is not null)
-                TitleBar.SetTitle(TitleBar.OpenLevelFile, true);
+            _removedLevelsQueue.Enqueue(level);
         };
 
         PathPrefs.BrawlhallaPathChanged += (_, path) =>
@@ -149,6 +139,16 @@ public class Editor
         {
             if (AssetLoader is not null)
                 AssetLoader.BoneTypes = boneTypes;
+        };
+
+        LevelLoader.OnNewMapLoaded += (_, level) =>
+        {
+            AddNewLevel(level, true);
+        };
+
+        LevelLoader.OnMapReloaded += (_, level, newData, loadMethod) =>
+        {
+            OnLevelReloaded(level, newData, loadMethod);
         };
 
         RenderConfigWindow.MoveFrames += (_, frames) =>
@@ -166,31 +166,35 @@ public class Editor
     {
         Rl.BeginDrawing();
         Rl.ClearBackground(RlColor.Black);
-        Rlgl.SetLineWidth(Math.Max(LINE_WIDTH * _cam.Zoom, 1));
+        if (CurrentLevel is not null)
+            Rlgl.SetLineWidth(Math.Max(LINE_WIDTH * CurrentLevel.Camera.Zoom, 1));
         rlImGui.Begin();
         ImGui.PushFont(Style.Font);
 
         Gui();
 
-        Rl.BeginTextureMode(ViewportWindow.Framebuffer);
-        Rl.BeginMode2D(_cam);
-
-        Rl.ClearBackground(RlColor.Black);
-        if (PathPrefs.BrawlhallaPath is not null)
+        if (CurrentLevel is not null)
         {
-            AssetLoader ??= new(PathPrefs.BrawlhallaPath, LevelLoader.BoneTypes!);
-            Canvas ??= new(AssetLoader);
-            Canvas.CameraMatrix = Rl.GetCameraMatrix2D(_cam);
+            Rl.BeginTextureMode(ViewportWindow.Framebuffer);
+            Rl.BeginMode2D(CurrentLevel.Camera);
 
-            _context = new();
-            Level?.DrawOn(Canvas, WmsTransform.IDENTITY, _renderConfig, _context, _state);
-            Canvas.FinalizeDraw();
+            Rl.ClearBackground(RlColor.Black);
+            if (PathPrefs.BrawlhallaPath is not null)
+            {
+                AssetLoader ??= new(PathPrefs.BrawlhallaPath, LevelLoader.BoneTypes!);
+                Canvas ??= new(AssetLoader);
+                Canvas.CameraMatrix = Rl.GetCameraMatrix2D(CurrentLevel.Camera);
+
+                _context = new();
+                CurrentLevel.Level.DrawOn(Canvas, WmsTransform.IDENTITY, _renderConfig, _context, _state);
+                Canvas.FinalizeDraw();
+            }
+
+            CurrentLevel.OverlayManager.Draw(OverlayData);
+
+            Rl.EndMode2D();
+            Rl.EndTextureMode();
         }
-
-        OverlayManager.Draw(OverlayData);
-
-        Rl.EndMode2D();
-        Rl.EndTextureMode();
 
         ImGui.PopFont();
         rlImGui.End();
@@ -204,28 +208,46 @@ public class Editor
             ShowMainMenuBar();
 
         if (ViewportWindow.Open)
-            ViewportWindow.Show();
+            ViewportWindow.Show(LoadedLevels, ref _currentLevel);
         if (RenderConfigWindow.Open)
             RenderConfigWindow.Show(_renderConfig, ConfigDefault, PathPrefs, ref _renderPaused);
-        if (MapOverviewWindow.Open && Level is not null)
-            MapOverviewWindow.Show(Level, CommandHistory, PathPrefs, AssetLoader, Selection);
 
-        if (Selection.Object is not null)
-            PropertiesWindow.Open = true;
-        if (PropertiesWindow.Open && Selection.Object is not null)
-            PropertiesWindow.Show(Selection.Object, CommandHistory, PropertiesWindowData);
-        if (!PropertiesWindow.Open)
-            Selection.Object = null;
+        if (CurrentLevel is not null)
+        {
+            if (MapOverviewWindow.Open)
+                MapOverviewWindow.Show(CurrentLevel, PathPrefs, AssetLoader);
+            if (CurrentLevel.Selection.Object is not null)
+            {
+                PropertiesWindow.Open = true;
+                PropertiesWindow.Show(CurrentLevel.Selection.Object, CurrentLevel, PropertiesWindowData);
+            }
+            if (!PropertiesWindow.Open)
+                CurrentLevel.Selection.Object = null;
 
-        if (HistoryPanel.Open)
-            HistoryPanel.Show(CommandHistory);
-        if (PlaylistEditPanel.Open && Level is not null)
-            PlaylistEditPanel.Show(Level, PathPrefs);
+            if (HistoryPanel.Open)
+                HistoryPanel.Show(CurrentLevel.CommandHistory);
+            if (PlaylistEditPanel.Open)
+                PlaylistEditPanel.Show(CurrentLevel.Level, PathPrefs);
+
+            if (ExportDialog.Open)
+                ExportDialog.Show(CurrentLevel.Level);
+
+            if (ViewportWindow.Hovered && (Rl.IsKeyPressed(KeyboardKey.Space) || Rl.IsMouseButtonPressed(MouseButton.Middle)))
+            {
+                AddObjectPopup.Open();
+                AddObjectPopup.NewPos = ViewportWindow.ScreenToWorld(Rl.GetMousePosition(), CurrentLevel.Camera);
+            }
+
+            AddObjectPopup.Update(CurrentLevel);
+        }
+
+        while (_removedLevelsQueue.TryDequeue(out EditorLevel? removedLevel))
+        {
+            RemoveLevel(removedLevel);
+        }
+
         if (KeyFinderPanel.Open)
             KeyFinderPanel.Show(PathPrefs);
-
-        if (ExportDialog.Open)
-            ExportDialog.Show(Level);
         if (ImportDialog.Open)
             ImportDialog.Show(LevelLoader);
         if (BackupsDialog.Open)
@@ -235,22 +257,13 @@ public class Editor
         if (ModLoaderDialog.Open)
             ModLoaderDialog.Show();
 
-        if (ViewportWindow.Hovered && (Rl.IsKeyPressed(KeyboardKey.Space) || Rl.IsMouseButtonPressed(MouseButton.Middle)))
-        {
-            AddObjectPopup.Open();
-            AddObjectPopup.NewPos = ViewportWindow.ScreenToWorld(Rl.GetMousePosition(), _cam);
-        }
-
-        if (Level is not null)
-            AddObjectPopup.Update(Level, CommandHistory, Selection);
-
         NewLevelModal.Update(LevelLoader, PathPrefs);
     }
 
     private bool EnableNewAndOpenMapButtons => LevelLoader.BoneTypes is not null;
-    private bool EnableSaveButton => Level is not null;
-    private bool EnableReloadMapButton => LevelLoader.CanReImport;
-    private bool EnableCloseMapButton => Level is not null;
+    private bool EnableSaveButton => CurrentLevel is not null;
+    private bool EnableReloadMapButton => LevelLoader.CanReImport(CurrentLevel);
+    private bool EnableCloseMapButton => CurrentLevel is not null;
 
     private void ShowMainMenuBar()
     {
@@ -283,9 +296,20 @@ public class Editor
         }
         if (ImGui.BeginMenu("Edit"))
         {
-            if (ImGui.MenuItem("Undo", "Ctrl+Z")) CommandHistory.Undo();
-            if (ImGui.MenuItem("Redo", "Ctrl+Y")) CommandHistory.Redo();
-            if (ImGui.MenuItem("Deselect", "Ctrl+D")) Selection.Object = null;
+            if (CurrentLevel is not null)
+            {
+                if (ImGui.MenuItem("Undo", "Ctrl+Z")) CurrentLevel.CommandHistory.Undo();
+                if (ImGui.MenuItem("Redo", "Ctrl+Y")) CurrentLevel.CommandHistory.Redo();
+                if (ImGui.MenuItem("Deselect", "Ctrl+D")) CurrentLevel.Selection.Object = null;
+            }
+            else
+            {
+                ImGui.BeginDisabled();
+                ImGui.MenuItem("Undo", "Ctrl+Z");
+                ImGui.MenuItem("Redo", "Ctrl+Y");
+                ImGui.MenuItem("Deselect", "Ctrl+D");
+                ImGui.EndDisabled();
+            }
             ImGui.EndMenu();
         }
         if (ImGui.BeginMenu("View"))
@@ -299,7 +323,7 @@ public class Editor
         if (ImGui.BeginMenu("Tools"))
         {
             if (ImGui.MenuItem("Save image", "P")) ExportWorldImage();
-            if (ImGui.MenuItem("Center Camera", "R")) ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
+            if (ImGui.MenuItem("Center Camera", "R")) ResetCam();
             if (ImGui.MenuItem("History", null, HistoryPanel.Open)) HistoryPanel.Open = !HistoryPanel.Open;
             if (ImGui.MenuItem("Clear Cache")) Canvas?.ClearTextureCache();
             if (ImGui.MenuItem("Find swz key", null, KeyFinderPanel.Open)) KeyFinderPanel.Open = !KeyFinderPanel.Open;
@@ -321,39 +345,51 @@ public class Editor
         ImGuiIOPtr io = ImGui.GetIO();
         bool wantCaptureKeyboard = io.WantCaptureKeyboard;
 
-        if (ViewportWindow.Hovered)
+        if (CurrentLevel is not null)
         {
-            float wheel = Rl.GetMouseWheelMove();
-            if (wheel != 0)
+            // camera controls
+            if (ViewportWindow.Hovered)
             {
-                _cam.Target = ViewportWindow.ScreenToWorld(Rl.GetMousePosition(), _cam);
-                _cam.Offset = Rl.GetMousePosition() - ViewportWindow.Bounds.P1;
-                _cam.Zoom = Math.Clamp(_cam.Zoom + wheel * ZOOM_INCREMENT * _cam.Zoom, MIN_ZOOM, MAX_ZOOM);
-            }
+                Camera2D camera = CurrentLevel.Camera;
 
-            if (Rl.IsMouseButtonDown(MouseButton.Right))
-            {
-                Vector2 delta = Rl.GetMouseDelta();
-                delta = Raymath.Vector2Scale(delta, -1.0f / _cam.Zoom);
-                _cam.Target += delta;
-            }
+                float wheel = Rl.GetMouseWheelMove();
+                if (wheel != 0)
+                {
+                    camera.Target = ViewportWindow.ScreenToWorld(Rl.GetMousePosition(), camera);
+                    camera.Offset = Rl.GetMousePosition() - ViewportWindow.Bounds.P1;
+                    camera.Zoom = Math.Clamp(camera.Zoom + wheel * ZOOM_INCREMENT * camera.Zoom, MIN_ZOOM, MAX_ZOOM);
+                }
 
-            if (!wantCaptureKeyboard && Rl.IsKeyPressed(KeyboardKey.R) && !Rl.IsKeyDown(KeyboardKey.LeftControl))
-                ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
+                if (Rl.IsMouseButtonDown(MouseButton.Right))
+                {
+                    Vector2 delta = Rl.GetMouseDelta();
+                    delta = Raymath.Vector2Scale(delta, -1.0f / camera.Zoom);
+                    camera.Target += delta;
+                }
+
+                CurrentLevel.Camera = camera;
+
+                if (!wantCaptureKeyboard && Rl.IsKeyPressed(KeyboardKey.R) && !Rl.IsKeyDown(KeyboardKey.LeftControl))
+                    ResetCam();
+            }
+            // overlay
+            bool usingOverlay = CurrentLevel.OverlayManager.IsUsing;
+            CurrentLevel.OverlayManager.Update(OverlayData);
+            usingOverlay |= CurrentLevel.OverlayManager.IsUsing;
+            // if overlay not used, do object picking
+            if (ViewportWindow.Hovered && !usingOverlay && Rl.IsMouseButtonReleased(MouseButton.Left))
+                CurrentLevel.Selection.Object = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, CurrentLevel.Level, CurrentLevel.Camera, _renderConfig, _state);
         }
-
-        bool usingOverlay = OverlayManager.IsUsing;
-        OverlayManager.Update(Selection, OverlayData, CommandHistory);
-        usingOverlay |= OverlayManager.IsUsing;
-
-        if (ViewportWindow.Hovered && !usingOverlay && Rl.IsMouseButtonReleased(MouseButton.Left))
-            Selection.Object = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, Level, _cam, _renderConfig, _state);
 
         if (!wantCaptureKeyboard && Rl.IsKeyDown(KeyboardKey.LeftControl))
         {
-            if (Rl.IsKeyPressed(KeyboardKey.Z)) CommandHistory.Undo();
-            if (Rl.IsKeyPressed(KeyboardKey.Y)) CommandHistory.Redo();
-            if (Rl.IsKeyPressed(KeyboardKey.D)) Selection.Object = null;
+            if (CurrentLevel is not null)
+            {
+                if (Rl.IsKeyPressed(KeyboardKey.Z)) CurrentLevel.CommandHistory.Undo();
+                if (Rl.IsKeyPressed(KeyboardKey.Y)) CurrentLevel.CommandHistory.Redo();
+                if (Rl.IsKeyPressed(KeyboardKey.D)) CurrentLevel.Selection.Object = null;
+            }
+
             if (EnableNewAndOpenMapButtons)
             {
                 if (Rl.IsKeyPressed(KeyboardKey.N)) NewLevelModal.Open();
@@ -375,7 +411,7 @@ public class Editor
         _movingObject = false;
         if (!wantCaptureKeyboard && Rl.IsKeyDown(KeyboardKey.LeftShift))
         {
-            if (Selection.Object is not null)
+            if (CurrentLevel?.Selection.Object is not null)
             {
                 bool left = Rl.IsKeyDown(KeyboardKey.Left);
                 bool right = Rl.IsKeyDown(KeyboardKey.Right);
@@ -386,25 +422,25 @@ public class Editor
                 if (dx != 0 || dy != 0)
                 {
                     double delta = Rl.GetFrameTime() * 600;
-                    bool moved = WmeUtils.MoveObject(Selection.Object, delta * dx, delta * dy, CommandHistory);
+                    bool moved = WmeUtils.MoveObject(CurrentLevel.Selection.Object, delta * dx, delta * dy, CurrentLevel.CommandHistory);
                     if (moved)
                         _movingObject = true;
                 }
             }
         }
         // finished moving
-        if (wasMovingObject && !_movingObject)
+        if (wasMovingObject && !_movingObject && CurrentLevel is not null)
         {
-            CommandHistory.SetAllowMerge(false);
+            CurrentLevel.CommandHistory.SetAllowMerge(false);
         }
 
         if (!wantCaptureKeyboard)
         {
             if (Rl.IsKeyPressed(KeyboardKey.F11)) Rl.ToggleFullscreen();
             if (Rl.IsKeyPressed(KeyboardKey.F1)) _showMainMenuBar = !_showMainMenuBar;
-            if (Level is not null && Selection.Object is not null && Rl.IsKeyPressed(KeyboardKey.Delete))
+            if (CurrentLevel?.Selection.Object is not null && Rl.IsKeyPressed(KeyboardKey.Delete))
             {
-                WmeUtils.RemoveObject(Selection.Object, Level.Desc, CommandHistory);
+                WmeUtils.RemoveObject(CurrentLevel.Selection.Object, CurrentLevel.Level.Desc, CurrentLevel.CommandHistory);
             }
         }
 
@@ -412,28 +448,24 @@ public class Editor
             ExportWorldImage();
     }
 
-    public Vector2 ScreenToWorld(Vector2 screenPos) =>
-        Rl.GetScreenToWorld2D(screenPos - ViewportWindow.Bounds.P1, _cam);
-
-    public void ResetCam() => ResetCam((int)ViewportWindow.Bounds.Width, (int)ViewportWindow.Bounds.Height);
-
-    public void ResetCam(int surfaceW, int surfaceH)
+    public void QueueResetCam()
     {
-        _cam.Zoom = 1.0f;
-        CameraBounds? bounds = Level?.Desc.CameraBounds;
-        if (bounds is null) return;
+        if (CurrentLevel is not null)
+            CurrentLevel.DidCameraInit = false;
+    }
+    public void ResetCam() => ResetCam(ViewportWindow.Bounds.Width, ViewportWindow.Bounds.Height);
 
-        double scale = Math.Min(surfaceW / bounds.W, surfaceH / bounds.H);
-        _cam.Offset = new(0);
-        _cam.Target = new((float)bounds.X, (float)bounds.Y);
-        _cam.Zoom = (float)scale;
+    public void ResetCam(double surfaceW, double surfaceH)
+    {
+        CurrentLevel?.ResetCam(surfaceW, surfaceH);
     }
 
     public void ExportWorldImage()
     {
-        if (Level is null || Canvas is null) return;
+        if (CurrentLevel is null || Canvas is null) return;
 
-        Image image = GetWorldRect((float)Level.Desc.CameraBounds.X, (float)Level.Desc.CameraBounds.Y, (int)Level.Desc.CameraBounds.W, (int)Level.Desc.CameraBounds.H);
+        CameraBounds cameraBounds = CurrentLevel.Level.Desc.CameraBounds;
+        Image image = GetWorldRect((float)cameraBounds.X, (float)cameraBounds.Y, (int)cameraBounds.W, (int)cameraBounds.H);
         Task.Run(() =>
         {
             string extension = "png";
@@ -460,7 +492,7 @@ public class Editor
         Rl.ClearBackground(RlColor.Blank);
         Rl.BeginMode2D(camera);
         Canvas.CameraMatrix = Rl.GetCameraMatrix2D(camera);
-        Level?.DrawOn(Canvas, WmsTransform.IDENTITY, _renderConfig, new RenderContext(), _state);
+        CurrentLevel?.Level.DrawOn(Canvas, WmsTransform.IDENTITY, _renderConfig, new RenderContext(), _state);
         Canvas.FinalizeDraw();
         Rl.EndMode2D();
         Rl.EndTextureMode();
@@ -482,7 +514,6 @@ public class Editor
                 {
                     LevelLoader.LoadMap(new LevelPathLoad(result.Path));
                     PathPrefs.LevelPath = result.Path;
-                    TitleBar.SetTitle(result.Path, false);
                 }
                 catch (Exception e)
                 {
@@ -495,10 +526,12 @@ public class Editor
 
     private void SaveLevelFile()
     {
-        if (LevelLoader.ReloadMethod is LevelPathLoad lpLoad)
+        if (CurrentLevel is null) return;
+
+        if (CurrentLevel.ReloadMethod is LevelPathLoad lpLoad)
         {
-            WmeUtils.SerializeToPath(Level!, lpLoad.Path);
-            TitleBar.SetTitle(lpLoad.Path, false);
+            WmeUtils.SerializeToPath(CurrentLevel.Level, lpLoad.Path);
+            CurrentLevel.OnSave();
             return;
         }
 
@@ -507,38 +540,83 @@ public class Editor
 
     private void SaveLevelFileToPath()
     {
+        if (CurrentLevel is null) return;
         Task.Run(() =>
         {
+            if (CurrentLevel is null) return;
+
             string extension = "xml";
             DialogResult result = Dialog.FileSave(extension, Path.GetDirectoryName(PathPrefs.LevelPath));
             if (result.IsOk)
             {
                 string path = result.Path;
                 path = WmeUtils.ForcePathExtension(path, extension);
-                WmeUtils.SerializeToPath(Level!, path);
+                WmeUtils.SerializeToPath(CurrentLevel.Level, path);
                 PathPrefs.LevelPath = path;
-                LevelLoader.ReloadMethod = new LevelPathLoad(path);
-                TitleBar.SetTitle(path, false);
+                CurrentLevel.ReloadMethod = new LevelPathLoad(path);
+                CurrentLevel.OnSave();
             }
         });
     }
 
     public void CloseCurrentLevel()
     {
-        Level = null;
-        TitleBar.Reset();
-        ResetState();
+        if (CurrentLevel is not null)
+            RemoveLevel(CurrentLevel);
+    }
+
+    public void RemoveLevel(EditorLevel level)
+    {
+        // if current level, need to figure out what new level will have focus
+        if (level == CurrentLevel)
+        {
+            EditorLevel? newLevel = null;
+            // only switch if there's something to switch to
+            if (LoadedLevels.Count >= 2)
+            {
+                int index = LoadedLevels.FindIndex(l => l == level);
+
+                // fallback for invalid state
+                if (index == -1)
+                    newLevel = LoadedLevels[0];
+                // last level. go one back.
+                else if (index == LoadedLevels.Count - 1)
+                    newLevel = LoadedLevels[index - 1];
+                // else, go one forward
+                else
+                    newLevel = LoadedLevels[index + 1];
+            }
+            CurrentLevel = newLevel;
+        }
+
+        LoadedLevels.Remove(level);
+    }
+
+    public void OnLevelReloaded(EditorLevel level, Level newData, ILoadMethod loadMethod)
+    {
+        level.ResetState();
+        level.Level = newData;
+        level.ReloadMethod = loadMethod;
+        level.DidCameraInit = false;
+        if (CurrentLevel == level)
+            ResetState();
+    }
+
+    public void AddNewLevel(EditorLevel editorLevel, bool takeFocus)
+    {
+        LoadedLevels.Add(editorLevel);
+        if (takeFocus)
+            CurrentLevel = editorLevel;
     }
 
     private void ReloadMap()
     {
+        if (CurrentLevel is null) return;
         Task.Run(() =>
         {
             try
             {
-                LevelLoader.ReImport();
-                if (LevelLoader.ReloadMethod is LevelPathLoad lpLoad)
-                    TitleBar.SetTitle(lpLoad.Path, false);
+                LevelLoader.ReImport(CurrentLevel);
             }
             catch (Exception e)
             {
@@ -551,11 +629,8 @@ public class Editor
     public void ResetState()
     {
         _movingObject = false;
-        _renderConfig.Time = TimeSpan.FromTicks(0);
-        Selection.Object = null;
-        CommandHistory.Clear();
+        CurrentLevel?.ResetState();
         Canvas?.ClearTextureCache();
-        CommandHistory.Clear();
         ResetRenderState();
     }
 

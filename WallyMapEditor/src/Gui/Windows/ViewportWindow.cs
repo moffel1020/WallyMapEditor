@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Numerics;
 using Raylib_cs;
 using ImGuiNET;
@@ -14,22 +15,64 @@ public class ViewportWindow
     private bool _open = true;
     public bool Open { get => _open; set => _open = value; }
 
-    public void Show()
-    {
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0, 0));
+    public delegate void ClosedLevelEventHandler(ViewportWindow? sender, EditorLevel level);
+    public event ClosedLevelEventHandler? ClosedLevel;
 
+    private EditorLevel? _currentLevel;
+
+    public void Show(IEnumerable<EditorLevel> loadedLevels, ref EditorLevel? currentLevel)
+    {
+        bool needSetSelected = _currentLevel != currentLevel;
+
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0, 0));
         ImGui.Begin("Viewport", ref _open, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+
         Focussed = ImGui.IsWindowFocused();
         Hovered = ImGui.IsWindowHovered();
-        Bounds.P1 = ImGui.GetWindowContentRegionMin() + ImGui.GetWindowPos();
-        Bounds.P2 = ImGui.GetWindowContentRegionMax() + ImGui.GetWindowPos();
 
-        if (SizeChanged()) CreateFramebuffer((int)Bounds.Size.X, (int)Bounds.Size.Y);
+        if (ImGui.BeginTabBar("levels", ImGuiTabBarFlags.Reorderable | ImGuiTabBarFlags.AutoSelectNewTabs))
+        {
+            foreach (EditorLevel l in loadedLevels)
+            {
+                bool open = true;
+                bool setSelected = needSetSelected && currentLevel == l;
 
-        rlImGui.ImageRenderTexture(Framebuffer);
+                string title = l.LevelTitle;
+                bool saved = l.IsSaved;
+                string? tooltip = l.LevelTooltip;
+
+                ImGuiTabItemFlags selectFlags = setSelected ? ImGuiTabItemFlags.SetSelected : 0;
+                ImGuiTabItemFlags unsavedFlags = saved ? 0 : ImGuiTabItemFlags.UnsavedDocument;
+                ImGuiTabItemFlags flags = selectFlags | unsavedFlags;
+                bool beginTabItem = ImGui.BeginTabItem($"{title}###{l.GetHashCode()}", ref open, flags);
+                if (tooltip is not null && ImGui.IsItemHovered())
+                    ImGui.SetTooltip(tooltip);
+                if (beginTabItem)
+                {
+                    currentLevel = l;
+
+                    Bounds.P1 = ImGui.GetCursorScreenPos();
+                    Bounds.P2 = ImGui.GetCursorScreenPos() + ImGui.GetContentRegionAvail();
+                    if (SizeChanged()) CreateFramebuffer((int)Bounds.Size.X, (int)Bounds.Size.Y);
+
+                    rlImGui.ImageRenderTexture(Framebuffer);
+
+                    if (!l.DidCameraInit)
+                        l.ResetCam(Bounds.Width, Bounds.Height);
+
+                    ImGui.EndTabItem();
+                }
+                if (!open)
+                    ClosedLevel?.Invoke(this, l);
+            }
+
+            ImGui.EndTabBar();
+        }
+
         ImGui.End();
-
         ImGui.PopStyleVar();
+
+        _currentLevel = currentLevel;
     }
 
     public Vector2 ScreenToWorld(Vector2 screenPos, Camera2D cam) =>

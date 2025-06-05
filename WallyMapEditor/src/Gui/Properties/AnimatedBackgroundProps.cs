@@ -5,16 +5,17 @@ namespace WallyMapEditor;
 
 partial class PropertiesWindow
 {
-    public static bool ShowAnimatedBackgroundProps(AnimatedBackground ab, CommandHistory cmd, PropertiesWindowData data)
+    public static bool ShowAnimatedBackgroundProps(AnimatedBackground ab, EditorLevel level, PropertiesWindowData data)
     {
-        if (data.Level is not null)
-            RemoveButton(ab, data.Level.Desc, cmd);
+        CommandHistory cmd = level.CommandHistory;
+
+        RemoveButton(ab, level);
         ImGui.Separator();
 
         bool propChanged = false;
 
         if (ImGui.CollapsingHeader("Gfx"))
-            propChanged |= ShowProperties(ab.Gfx, cmd, data);
+            propChanged |= ShowProperties(ab.Gfx, level, data);
 
         ImGui.SeparatorText("Display");
         propChanged |= ImGuiExt.CheckboxHistory("Midground", ab.Midground, val => ab.Midground = val, cmd);
@@ -75,10 +76,7 @@ partial class PropertiesWindow
         return propChanged;
     }
 
-    // Remove unused parameter 'cmd' if it is not part of a shipped public API [WallyMapEditor]
-#pragma warning disable IDE0060
-    public static bool ShowGfxProps(Gfx g, CommandHistory cmd, PropertiesWindowData data)
-#pragma warning restore IDE0060
+    public static bool ShowGfxProps(Gfx g, PropertiesWindowData data)
     {
         bool propChanged = false;
         ImGui.Text("AnimFile: " + g.AnimFile);

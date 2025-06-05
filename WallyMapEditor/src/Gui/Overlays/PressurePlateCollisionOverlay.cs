@@ -8,9 +8,9 @@ public class PressurePlateCollisionOverlay(AbstractPressurePlateCollision col) :
 {
     public List<DragCircle> OffsetCircles { get; set; } = [];
 
-    public override bool Update(OverlayData data, CommandHistory cmd)
+    public override bool Update(EditorLevel level, OverlayData data)
     {
-        bool dragging = base.Update(data, cmd);
+        bool dragging = base.Update(level, data);
 
         col.FireOffsetX = PropertiesWindow.NormalizeFireOffset(col.TrapPowers.Length, col.FireOffsetX, 0);
         bool sharedFireOffsetX = col.FireOffsetX.Length == 1;
@@ -41,7 +41,7 @@ public class PressurePlateCollisionOverlay(AbstractPressurePlateCollision col) :
             double oldY = sharedFireOffsetY ? col.FireOffsetY[0] : col.FireOffsetY[i];
             circle.X = oldX + offsetX;
             circle.Y = oldY + offsetY;
-            circle.Update(data, !dragging);
+            circle.Update(level.Camera, data, !dragging);
 
             if (circle.Dragging)
             {
@@ -50,7 +50,7 @@ public class PressurePlateCollisionOverlay(AbstractPressurePlateCollision col) :
                 int iCapture = i;
                 double newX = Math.Round(circle.X - offsetX, ROUND_DECIMALS);
                 double newY = Math.Round(circle.Y - offsetY, ROUND_DECIMALS);
-                cmd.Add(new PropChangeCommand<double, double>((val1, val2) =>
+                level.CommandHistory.Add(new PropChangeCommand<double, double>((val1, val2) =>
                 {
                     col.FireOffsetX[sharedFireOffsetX ? 0 : iCapture] = val1;
                     col.FireOffsetY[sharedFireOffsetY ? 0 : iCapture] = val2;
@@ -64,9 +64,9 @@ public class PressurePlateCollisionOverlay(AbstractPressurePlateCollision col) :
         return dragging;
     }
 
-    public override void Draw(OverlayData data)
+    public override void Draw(EditorLevel level, OverlayData data)
     {
-        base.Draw(data);
+        base.Draw(level, data);
 
         foreach (DragCircle circle in OffsetCircles)
         {

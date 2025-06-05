@@ -35,9 +35,9 @@ public class DragCircle(double x, double y)
             Rl.DrawCircleV(Coords, Radius, Color);
     }
 
-    public void Update(OverlayData data, bool allowDragging)
+    public void Update(Camera2D cam, OverlayData data, bool allowDragging)
     {
-        Vector2 mousePos = data.Viewport.ScreenToWorld(Rl.GetMousePosition(), data.Cam);
+        Vector2 mousePos = data.Viewport.ScreenToWorld(Rl.GetMousePosition(), cam);
         Hovered = data.Viewport.Hovered && Rl.CheckCollisionPointCircle(mousePos, Coords, Radius);
 
         if (!allowDragging)

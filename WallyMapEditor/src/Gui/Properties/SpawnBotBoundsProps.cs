@@ -4,8 +4,10 @@ namespace WallyMapEditor;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowSpawnBotBoundsProps(SpawnBotBounds sb, CommandHistory cmd)
+    public static bool ShowSpawnBotBoundsProps(SpawnBotBounds sb, EditorLevel level)
     {
+        CommandHistory cmd = level.CommandHistory;
+
         bool propChanged = false;
         propChanged |= ImGuiExt.DragDoubleHistory("X##botbounds", sb.X, val => sb.X = val, cmd);
         propChanged |= ImGuiExt.DragDoubleHistory("Y##botbounds", sb.Y, val => sb.Y = val, cmd);
