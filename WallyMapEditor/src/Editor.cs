@@ -23,6 +23,9 @@ public class Editor
     public const int INITIAL_SCREEN_WIDTH = 1280;
     public const int INITIAL_SCREEN_HEIGHT = 720;
 
+    public const float OBJECT_MOVE_SPEED = 600; // for arrow key movement
+    public const float CAM_MOVE_SPEED = 1500; // for arrow key movement
+
     PathPreferences PathPrefs { get; }
     RenderConfigDefault ConfigDefault { get; }
 
@@ -350,27 +353,7 @@ public class Editor
             // camera controls
             if (ViewportWindow.Hovered)
             {
-                Camera2D camera = CurrentLevel.Camera;
-
-                float wheel = Rl.GetMouseWheelMove();
-                if (wheel != 0)
-                {
-                    camera.Target = ViewportWindow.ScreenToWorld(Rl.GetMousePosition(), camera);
-                    camera.Offset = Rl.GetMousePosition() - ViewportWindow.Bounds.P1;
-                    camera.Zoom = Math.Clamp(camera.Zoom + wheel * ZOOM_INCREMENT * camera.Zoom, MIN_ZOOM, MAX_ZOOM);
-                }
-
-                if (Rl.IsMouseButtonDown(MouseButton.Right))
-                {
-                    Vector2 delta = Rl.GetMouseDelta();
-                    delta = Raymath.Vector2Scale(delta, -1.0f / camera.Zoom);
-                    camera.Target += delta;
-                }
-
-                CurrentLevel.Camera = camera;
-
-                if (!wantCaptureKeyboard && Rl.IsKeyPressed(KeyboardKey.R) && !Rl.IsKeyDown(KeyboardKey.LeftControl))
-                    ResetCam();
+                UpdateCam();
             }
             // overlay
             bool usingOverlay = CurrentLevel.OverlayManager.IsUsing;
@@ -421,7 +404,7 @@ public class Editor
                 int dy = up == down ? 0 : up ? -1 : 1;
                 if (dx != 0 || dy != 0)
                 {
-                    double delta = Rl.GetFrameTime() * 600;
+                    double delta = Rl.GetFrameTime() * OBJECT_MOVE_SPEED;
                     bool moved = WmeUtils.MoveObject(CurrentLevel.Selection.Object, delta * dx, delta * dy, CurrentLevel.CommandHistory);
                     if (moved)
                         _movingObject = true;
@@ -446,6 +429,66 @@ public class Editor
 
         if (!wantCaptureKeyboard && Rl.IsKeyPressed(KeyboardKey.P))
             ExportWorldImage();
+    }
+
+    private void UpdateCam()
+    {
+        if (CurrentLevel is null) return;
+
+        bool wantCaptureKeyboard = ImGui.GetIO().WantCaptureKeyboard;
+
+        // mouse controls
+        Camera2D cam = CurrentLevel.Camera;
+
+        float wheel = Rl.GetMouseWheelMove();
+        if (wheel != 0)
+        {
+            cam.Target = ViewportWindow.ScreenToWorld(Rl.GetMousePosition(), cam);
+            cam.Offset = Rl.GetMousePosition() - ViewportWindow.Bounds.P1;
+            cam.Zoom = Math.Clamp(cam.Zoom + wheel * ZOOM_INCREMENT * cam.Zoom, MIN_ZOOM, MAX_ZOOM);
+        }
+
+        if (Rl.IsMouseButtonDown(MouseButton.Right))
+        {
+            Vector2 mouseDelta = Rl.GetMouseDelta();
+            mouseDelta = Raymath.Vector2Scale(mouseDelta, -1.0f / cam.Zoom);
+            cam.Target += mouseDelta;
+        }
+
+        // keyboard controls
+        if (!wantCaptureKeyboard && Rl.IsKeyPressed(KeyboardKey.R) && !Rl.IsKeyDown(KeyboardKey.LeftControl))
+            ResetCam();
+
+        bool left = Rl.IsKeyDown(KeyboardKey.Left);
+        bool right = Rl.IsKeyDown(KeyboardKey.Right);
+        bool up = Rl.IsKeyDown(KeyboardKey.Up);
+        bool down = Rl.IsKeyDown(KeyboardKey.Down);
+        int dx = left == right ? 0 : left ? -1 : 1;
+        int dy = up == down ? 0 : up ? -1 : 1;
+
+        float kbDelta = Rl.GetFrameTime() * CAM_MOVE_SPEED;
+        if (!Rl.IsKeyDown(KeyboardKey.LeftShift) && (dx != 0 || dy != 0))
+            cam.Target = new(cam.Target.X + dx * kbDelta, cam.Target.Y + dy * kbDelta);
+
+        // zoom with ctrl +/-
+        if (Rl.IsKeyDown(KeyboardKey.LeftControl) && !Rl.IsKeyDown(KeyboardKey.LeftShift))
+        {
+            // cam.Target = ViewportWindow.ScreenToWorld(Rl.GetMousePosition(), cam);
+            if (Rl.IsKeyPressed(KeyboardKey.Equal)) // plus
+            {
+                cam.Target = ViewportWindow.ScreenToWorld(Rl.GetMousePosition(), cam);
+                cam.Offset = Rl.GetMousePosition() - ViewportWindow.Bounds.P1;
+                cam.Zoom = Math.Clamp(cam.Zoom + 2 * ZOOM_INCREMENT * cam.Zoom, MIN_ZOOM, MAX_ZOOM);
+            }
+            else if (Rl.IsKeyPressed(KeyboardKey.Minus))
+            {
+                cam.Target = ViewportWindow.ScreenToWorld(Rl.GetMousePosition(), cam);
+                cam.Offset = Rl.GetMousePosition() - ViewportWindow.Bounds.P1;
+                cam.Zoom = Math.Clamp(cam.Zoom - 2 * ZOOM_INCREMENT * cam.Zoom, MIN_ZOOM, MAX_ZOOM);
+            }
+        }
+
+        CurrentLevel.Camera = cam;
     }
 
     public void QueueResetCam()
