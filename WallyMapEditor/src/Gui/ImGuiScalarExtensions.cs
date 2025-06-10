@@ -311,7 +311,7 @@ public static partial class ImGuiExt
     {
         >= 0x30 /* 0 */ and <= 0x39 /* 9 */ => 0,
         >= 0x41 /* A */ and <= 0x5a /* Z */ => 0,
-        >= 0x61 /* a */ and <= 0x6a /* z */ => 0,
+        >= 0x61 /* a */ and <= 0x7a /* z */ => 0,
         _ => 1,
     };
 
