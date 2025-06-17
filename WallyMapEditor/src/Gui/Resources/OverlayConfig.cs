@@ -18,6 +18,7 @@ public class OverlayConfig : ISerializable, IDeserializable
     public required float RadiusDynamicPosition { get; set; }
     public required float RadiusMovingPlatformPosition { get; set; }
     public required float RadiusKeyFramePosition { get; set; }
+    public required float RadiusAnmCenter { get; set; }
     public required float RadiusFireOffset { get; set; }
     public required float RadiusPathPoint { get; set; }
 
@@ -33,6 +34,7 @@ public class OverlayConfig : ISerializable, IDeserializable
     public required double OffsetFireDirectionArrowSide { get; set; }
 
     public required int FontSizeKeyFrameNum { get; set; }
+    public required int FontSizeAnmCenter { get; set; }
     public required int FontSizePathPointNum { get; set; }
 
     public required RlColor ColorCollisionPoint { get; set; }
@@ -77,7 +79,10 @@ public class OverlayConfig : ISerializable, IDeserializable
 
     public required RlColor ColorKeyFramePosition { get; set; }
     public required RlColor UsingColorKeyFramePosition { get; set; }
+    public required RlColor ColorAnmCenter { get; set; }
+    public required RlColor UsingColorAnmCenter { get; set; }
     public required RlColor TextColorKeyFrameNum { get; set; }
+    public required RlColor TextColorAnmCenter { get; set; }
 
     public required RlColor ColorFireOffset { get; set; }
     public required RlColor UsingColorFireOffset { get; set; }
@@ -111,6 +116,7 @@ public class OverlayConfig : ISerializable, IDeserializable
         RadiusDynamicPosition = getFloat(nameof(RadiusDynamicPosition), @default.RadiusDynamicPosition);
         RadiusMovingPlatformPosition = getFloat(nameof(RadiusMovingPlatformPosition), @default.RadiusMovingPlatformPosition);
         RadiusKeyFramePosition = getFloat(nameof(RadiusKeyFramePosition), @default.RadiusKeyFramePosition);
+        RadiusAnmCenter = getFloat(nameof(RadiusAnmCenter), @default.RadiusAnmCenter);
         RadiusFireOffset = getFloat(nameof(RadiusFireOffset), @default.RadiusFireOffset);
         RadiusPathPoint = getFloat(nameof(RadiusPathPoint), @default.RadiusPathPoint);
 
@@ -123,6 +129,7 @@ public class OverlayConfig : ISerializable, IDeserializable
         OffsetFireDirectionArrowBack = getDouble(nameof(OffsetFireDirectionArrowBack), @default.OffsetFireDirectionArrowBack);
         OffsetFireDirectionArrowSide = getDouble(nameof(OffsetFireDirectionArrowSide), @default.OffsetFireDirectionArrowSide);
         FontSizeKeyFrameNum = getInt(nameof(FontSizeKeyFrameNum), @default.FontSizeKeyFrameNum);
+        FontSizeAnmCenter = getInt(nameof(FontSizeAnmCenter), @default.FontSizeAnmCenter);
         FontSizePathPointNum = getInt(nameof(FontSizePathPointNum), @default.FontSizePathPointNum);
 
         ColorCollisionPoint = getColor(nameof(ColorCollisionPoint), @default.ColorCollisionPoint);
@@ -156,7 +163,10 @@ public class OverlayConfig : ISerializable, IDeserializable
         UsingColorMovingPlatformPosition = getColor(nameof(UsingColorMovingPlatformPosition), @default.UsingColorMovingPlatformPosition);
         ColorKeyFramePosition = getColor(nameof(ColorKeyFramePosition), @default.ColorKeyFramePosition);
         UsingColorKeyFramePosition = getColor(nameof(UsingColorKeyFramePosition), @default.UsingColorKeyFramePosition);
+        ColorAnmCenter = getColor(nameof(ColorAnmCenter), @default.ColorAnmCenter);
+        UsingColorAnmCenter = getColor(nameof(UsingColorAnmCenter), @default.UsingColorAnmCenter);
         TextColorKeyFrameNum = getColor(nameof(TextColorKeyFrameNum), @default.TextColorKeyFrameNum);
+        TextColorAnmCenter = getColor(nameof(TextColorAnmCenter), @default.TextColorAnmCenter);
         ColorFireOffset = getColor(nameof(ColorFireOffset), @default.ColorFireOffset);
         UsingColorFireOffset = getColor(nameof(UsingColorFireOffset), @default.UsingColorFireOffset);
         ColorFireOffsetLine = getColor(nameof(ColorFireOffsetLine), @default.ColorFireOffsetLine);
@@ -184,6 +194,7 @@ public class OverlayConfig : ISerializable, IDeserializable
         addValue(nameof(RadiusDynamicPosition), RadiusDynamicPosition);
         addValue(nameof(RadiusMovingPlatformPosition), RadiusMovingPlatformPosition);
         addValue(nameof(RadiusKeyFramePosition), RadiusKeyFramePosition);
+        addValue(nameof(RadiusAnmCenter), RadiusAnmCenter);
         addValue(nameof(RadiusFireOffset), RadiusFireOffset);
         addValue(nameof(RadiusPathPoint), RadiusPathPoint);
         addValue(nameof(SizeOffsetRespawnBox), SizeOffsetRespawnBox);
@@ -195,6 +206,7 @@ public class OverlayConfig : ISerializable, IDeserializable
         addValue(nameof(OffsetFireDirectionArrowBack), OffsetFireDirectionArrowBack);
         addValue(nameof(OffsetFireDirectionArrowSide), OffsetFireDirectionArrowSide);
         addValue(nameof(FontSizeKeyFrameNum), FontSizeKeyFrameNum);
+        addValue(nameof(FontSizeAnmCenter), FontSizeAnmCenter);
         addValue(nameof(FontSizePathPointNum), FontSizePathPointNum);
         addColor(nameof(ColorCollisionPoint), ColorCollisionPoint);
         addColor(nameof(UsingColorCollisionPoint), UsingColorCollisionPoint);
@@ -227,7 +239,10 @@ public class OverlayConfig : ISerializable, IDeserializable
         addColor(nameof(UsingColorMovingPlatformPosition), UsingColorMovingPlatformPosition);
         addColor(nameof(ColorKeyFramePosition), ColorKeyFramePosition);
         addColor(nameof(UsingColorKeyFramePosition), UsingColorKeyFramePosition);
+        addColor(nameof(ColorAnmCenter), ColorAnmCenter);
+        addColor(nameof(UsingColorAnmCenter), UsingColorAnmCenter);
         addColor(nameof(TextColorKeyFrameNum), TextColorKeyFrameNum);
+        addColor(nameof(TextColorAnmCenter), TextColorAnmCenter);
         addColor(nameof(ColorFireOffset), ColorFireOffset);
         addColor(nameof(UsingColorFireOffset), UsingColorFireOffset);
         addColor(nameof(ColorFireOffsetLine), ColorFireOffsetLine);
@@ -267,6 +282,7 @@ public class OverlayConfig : ISerializable, IDeserializable
         RadiusDynamicPosition = DEFAULT_MID_RADIUS,
         RadiusMovingPlatformPosition = DEFAULT_MID_RADIUS,
         RadiusKeyFramePosition = DEFAULT_RADIUS,
+        RadiusAnmCenter = DEFAULT_RADIUS,
         RadiusFireOffset = DEFAULT_RADIUS,
         RadiusPathPoint = DEFAULT_RADIUS,
         SizeOffsetNavNodeBox = DEFAULT_SIZE_OFFSET,
@@ -278,6 +294,7 @@ public class OverlayConfig : ISerializable, IDeserializable
         OffsetFireDirectionArrowSide = 9,
         OffsetFireDirectionArrowBack = 14,
         FontSizeKeyFrameNum = DEFAULT_FONT_SIZE,
+        FontSizeAnmCenter = DEFAULT_FONT_SIZE,
         FontSizePathPointNum = DEFAULT_FONT_SIZE,
         ColorCollisionPoint = TransparentGray,
         UsingColorCollisionPoint = TransparentWhite,
@@ -310,7 +327,10 @@ public class OverlayConfig : ISerializable, IDeserializable
         UsingColorMovingPlatformPosition = TransparentPink,
         ColorKeyFramePosition = TransparentYellow,
         UsingColorKeyFramePosition = TransparentOrange,
+        ColorAnmCenter = TransparentDarkGreen,
+        UsingColorAnmCenter = TransparentGreen,
         TextColorKeyFrameNum = RlColor.White,
+        TextColorAnmCenter = RlColor.White,
         ColorFireOffset = TransparentOrange,
         UsingColorFireOffset = TransparentRed,
         ColorFireOffsetLine = TransparentYellow,

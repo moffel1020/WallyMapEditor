@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
@@ -8,6 +9,7 @@ namespace WallyMapEditor;
 public class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
 {
     public DragCircle Position { get; set; } = new(plat.X, plat.Y);
+    public DragCircle Center { get; set; } = new(plat.Animation.CenterX ?? 0, plat.Animation.CenterY ?? 0);
 
     public Dictionary<KeyFrame, KeyFrameOverlay> KeyFrameCircles { get; set; } = [];
 
@@ -15,8 +17,23 @@ public class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
     {
         Position.Color = data.OverlayConfig.ColorMovingPlatformPosition;
         Position.UsingColor = data.OverlayConfig.UsingColorMovingPlatformPosition;
-
         Position.Draw(data);
+
+        if (plat.Animation.CenterX is not null || plat.Animation.CenterY is not null)
+        {
+            Center.Color = data.OverlayConfig.ColorAnmCenter;
+            Center.UsingColor = data.OverlayConfig.ColorAnmCenter;
+            Center.Draw(data);
+            int centerFontSize = data.OverlayConfig.FontSizeAnmCenter;
+            RlColor centerTextColor = data.OverlayConfig.TextColorAnmCenter;
+            string centerText = "C";
+            float textW = RaylibEx.MeasureTextV(centerText, centerFontSize).X;
+            double textX = (plat.Animation.CenterX ?? 0) + plat.X - textW / 2;
+            double textY = (plat.Animation.CenterY ?? 0) + plat.Y - Center.Radius / 2;
+            Vector2 textPos = new((float)textX, (float)textY);
+            RaylibEx.DrawTextV(centerText, textPos, centerFontSize, centerTextColor);
+        }
+
         // draw higher framenum keyframes ontop of lower framenum keyframes
         foreach (KeyFrameOverlay kfo in KeyFrameCircles.Values.OrderBy(k => k.FrameNumOverride))
             kfo.Draw(level, data);
@@ -25,10 +42,30 @@ public class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
     public bool Update(EditorLevel level, OverlayData data)
     {
         Position.Radius = data.OverlayConfig.RadiusMovingPlatformPosition;
+        Center.Radius = data.OverlayConfig.RadiusAnmCenter;
 
         bool dragging = false;
-        HashSet<KeyFrame> currentKeyFrames = [];
 
+        if (plat.Animation.CenterX is not null || plat.Animation.CenterY is not null)
+        {
+            Center.X = (plat.Animation.CenterX ?? 0) + plat.X;
+            Center.Y = (plat.Animation.CenterY ?? 0) + plat.Y;
+            /*Center.Update(level.Camera, data, !dragging);
+            dragging |= Center.Dragging;
+
+            if (Center.Dragging)
+            {
+                level.CommandHistory.Add(new PropChangeCommand<double?, double?>(
+                    (val1, val2) => (plat.Animation.CenterX, plat.Animation.CenterY) = (val1, val2),
+                    plat.Animation.CenterX, plat.Animation.CenterY,
+                    // only update the center if it's not null
+                    plat.Animation.CenterX is not null ? Center.X - plat.X : null,
+                    plat.Animation.CenterY is not null ? Center.Y - plat.Y : null
+                ));
+            }*/
+        }
+
+        HashSet<KeyFrame> currentKeyFrames = [];
         // we go through the keyframes in the reverse order
         // this gives higher framenum keyframes priority
         foreach ((KeyFrame kf, int num) in EnumerateKeyFrames(plat.Animation.KeyFrames).Reverse())
