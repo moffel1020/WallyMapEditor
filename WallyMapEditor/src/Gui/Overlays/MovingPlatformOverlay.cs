@@ -76,6 +76,8 @@ public class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
             kfo.PlatOffset = (plat.X, plat.Y);
             kfo.AllowDragging = !dragging;
             kfo.FrameNumOverride = num;
+            kfo.CenterXFallback = plat.Animation.CenterX;
+            kfo.CenterYFallback = plat.Animation.CenterY;
             dragging |= kfo.Update(level, data);
         }
         // remove deleted keyframes
