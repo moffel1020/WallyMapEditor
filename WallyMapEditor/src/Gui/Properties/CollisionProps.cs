@@ -60,7 +60,7 @@ public partial class PropertiesWindow
 
         ImGui.SeparatorText("Anchor");
         ImGuiExt.HintTooltip(Strings.UI_COLLISION_ANCHOR_TOOLTIP);
-        propChanged |= ImGuiExt.DragNullableDoublePairHistory(
+        propChanged |= ImGuiExt.DragNullableDoublePairHistory1(
             "anchor",
             $"AnchorX##props{ac.GetHashCode()}", $"AnchorY##props{ac.GetHashCode()}",
             ac.AnchorX, ac.AnchorY,
