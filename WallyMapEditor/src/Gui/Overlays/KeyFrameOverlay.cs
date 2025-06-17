@@ -1,4 +1,3 @@
-using System.Numerics;
 using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
@@ -24,14 +23,15 @@ public class KeyFrameOverlay(KeyFrame kf) : IOverlay
         Circle.UsingColor = data.OverlayConfig.UsingColorKeyFramePosition;
         Circle.Draw(data);
         // pos text
-        int numFontSize = data.OverlayConfig.FontSizeKeyFrameNum;
-        RlColor numTextColor = data.OverlayConfig.TextColorKeyFrameNum;
         string frameNumText = (FrameNumOverride ?? kf.FrameNum).ToString();
-        float frameNumTextW = RaylibEx.MeasureTextV(frameNumText, numFontSize).X;
-        double frameNumTextX = kf.X + offX - frameNumTextW / 2;
-        double frameNumTextY = kf.Y + offY - Circle.Radius / 2;
-        Vector2 frameNumTextPos = new((float)frameNumTextX, (float)frameNumTextY);
-        RaylibEx.DrawTextV(frameNumText, frameNumTextPos, numFontSize, numTextColor);
+        RaylibEx.DrawCenteredText(
+            frameNumText,
+            kf.X + offX,
+            kf.Y + offY,
+            Circle.Radius,
+            data.OverlayConfig.FontSizeKeyFrameNum,
+            data.OverlayConfig.TextColorKeyFrameNum
+        );
 
         /*
         notice the fallback isn't taken into account.
@@ -45,14 +45,14 @@ public class KeyFrameOverlay(KeyFrame kf) : IOverlay
             Center.UsingColor = data.OverlayConfig.UsingColorKeyFrameCenter;
             Center.Draw(data);
             // center text
-            int centerFontSize = data.OverlayConfig.FontSizeKeyFrameCenter;
-            RlColor centerTextColor = data.OverlayConfig.TextColorKeyFrameCenter;
-            string centerText = $"C{frameNumText}";
-            float centerTextW = RaylibEx.MeasureTextV(centerText, centerFontSize).X;
-            double centerTextX = (kf.CenterX ?? CenterXFallback ?? 0) + offX - centerTextW / 2;
-            double centerTextY = (kf.CenterY ?? CenterYFallback ?? 0) + offY - Circle.Radius / 2;
-            Vector2 centerTextPos = new((float)centerTextX, (float)centerTextY);
-            RaylibEx.DrawTextV(centerText, centerTextPos, centerFontSize, centerTextColor);
+            RaylibEx.DrawCenteredText(
+                $"C{frameNumText}",
+                (kf.CenterX ?? CenterXFallback ?? 0) + offX,
+                (kf.CenterY ?? CenterYFallback ?? 0) + offY,
+                Center.Radius,
+                data.OverlayConfig.FontSizeKeyFrameCenter,
+                data.OverlayConfig.TextColorKeyFrameCenter
+            );
         }
     }
 

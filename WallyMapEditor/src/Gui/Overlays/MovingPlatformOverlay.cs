@@ -24,14 +24,14 @@ public class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
             Center.Color = data.OverlayConfig.ColorAnmCenter;
             Center.UsingColor = data.OverlayConfig.ColorAnmCenter;
             Center.Draw(data);
-            int centerFontSize = data.OverlayConfig.FontSizeAnmCenter;
-            RlColor centerTextColor = data.OverlayConfig.TextColorAnmCenter;
-            string centerText = "C";
-            float textW = RaylibEx.MeasureTextV(centerText, centerFontSize).X;
-            double textX = (plat.Animation.CenterX ?? 0) + plat.X - textW / 2;
-            double textY = (plat.Animation.CenterY ?? 0) + plat.Y - Center.Radius / 2;
-            Vector2 textPos = new((float)textX, (float)textY);
-            RaylibEx.DrawTextV(centerText, textPos, centerFontSize, centerTextColor);
+            RaylibEx.DrawCenteredText(
+                "C",
+                (plat.Animation.CenterX ?? 0) + plat.X,
+                (plat.Animation.CenterY ?? 0) + plat.Y,
+                Center.Radius,
+                data.OverlayConfig.FontSizeAnmCenter,
+                data.OverlayConfig.TextColorAnmCenter
+            );
         }
 
         // draw higher framenum keyframes ontop of lower framenum keyframes
