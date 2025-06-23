@@ -22,22 +22,32 @@ public class RenderConfigDefault : IDeserializable, ISerializable
 
     public static RenderConfigDefault Load()
     {
-        string? dir = Path.GetDirectoryName(FilePath);
-        if (dir is not null)
+        if (!File.Exists(FilePath)) return new();
+        try
         {
-            Directory.CreateDirectory(dir);
-            if (File.Exists(FilePath))
-            {
-                return WmeUtils.DeserializeFromPath<RenderConfigDefault>(FilePath);
-            }
+            return WmeUtils.DeserializeFromPath<RenderConfigDefault>(FilePath);
         }
-
-        return new();
+        catch (Exception e)
+        {
+            Rl.TraceLog(TraceLogLevel.Error, $"Load default render config failed with error: {e.Message}");
+            Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
+            return new();
+        }
     }
 
     public void Save()
     {
-        WmeUtils.SerializeToPath(this, FilePath);
+        try
+        {
+            string? dir = Path.GetDirectoryName(FilePath);
+            if (dir is not null) Directory.CreateDirectory(dir);
+            WmeUtils.SerializeToPath(this, FilePath);
+        }
+        catch (Exception e)
+        {
+            Rl.TraceLog(TraceLogLevel.Error, $"Save default render config failed with error: {e.Message}");
+            Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
+        }
     }
 
     public void Deserialize(XElement e)

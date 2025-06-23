@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Xml.Linq;
+using Raylib_cs;
 using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
@@ -44,22 +45,32 @@ public class PathPreferences : IDeserializable, ISerializable
 
     public static PathPreferences Load()
     {
-        string? dir = Path.GetDirectoryName(FilePath);
-        if (dir is not null)
+        if (!File.Exists(FilePath)) return new();
+        try
         {
-            Directory.CreateDirectory(dir);
-            if (File.Exists(FilePath))
-            {
-                return WmeUtils.DeserializeFromPath<PathPreferences>(FilePath);
-            }
+            return WmeUtils.DeserializeFromPath<PathPreferences>(FilePath);
         }
-
-        return new();
+        catch (Exception e)
+        {
+            Rl.TraceLog(TraceLogLevel.Error, $"Load path prefs failed with error: {e.Message}");
+            Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
+            return new();
+        }
     }
 
     public void Save()
     {
-        WmeUtils.SerializeToPath(this, FilePath);
+        try
+        {
+            string? dir = Path.GetDirectoryName(FilePath);
+            if (dir is not null) Directory.CreateDirectory(dir);
+            WmeUtils.SerializeToPath(this, FilePath);
+        }
+        catch (Exception e)
+        {
+            Rl.TraceLog(TraceLogLevel.Error, $"Save path prefs failed with error: {e.Message}");
+            Rl.TraceLog(TraceLogLevel.Trace, e.StackTrace);
+        }
     }
 
     public void Deserialize(XElement e)
