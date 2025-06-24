@@ -174,8 +174,8 @@ public static partial class ImGuiExt
     public static bool DragNullableDoubleHistory(string label, double? value, double defaultValue, Action<double?> changeCommand, CommandHistory cmd, float speed = 1, double minValue = double.MinValue, double maxValue = double.MaxValue)
         => NullableGenericHistory(label, value, val => DragDouble(label, val, speed, minValue, maxValue), defaultValue, changeCommand, cmd);
 
-    // this is a monster
-    public static bool DragNullableDoublePairHistory(
+    // when both are either null or non-null
+    public static bool DragNullableDoublePairHistory1(
         string mainLabel,
         string label1, string label2,
         double? value1, double? value2,
@@ -193,6 +193,43 @@ public static partial class ImGuiExt
             propChanged |= DragDoubleHistory(label1, value1.Value, val => changeCommand(val, value2.Value), cmd, speed: speed1, minValue: minValue1, maxValue: maxValue1);
             propChanged |= DragDoubleHistory(label2, value2.Value, val => changeCommand(value1.Value, val), cmd, speed: speed2, minValue: minValue2, maxValue: maxValue2);
             if (ImGui.Button("Remove##" + mainLabel))
+            {
+                cmd.Add(new PropChangeCommand<double?, double?>(changeCommand, value1, value2, null, null));
+                return true;
+            }
+        }
+        else
+        {
+            ImGui.Text(mainLabel);
+            ImGui.SameLine();
+            if (ImGui.Button("Add##" + mainLabel))
+            {
+                cmd.Add(new PropChangeCommand<double?, double?>(changeCommand, value1, value2, default1, default2));
+                return true;
+            }
+        }
+        return propChanged;
+    }
+
+    // when one of them can be non-null (but it's not common)
+    public static bool DragNullableDoublePairHistory2(
+        string mainLabel,
+        string label1, string label2,
+        double? value1, double? value2,
+        double default1, double default2,
+        Action<double?, double?> changeCommand,
+        CommandHistory cmd,
+        float speed1 = 1, float speed2 = 1,
+        double minValue1 = double.MinValue, double minValue2 = double.MaxValue,
+        double maxValue1 = double.MinValue, double maxValue2 = double.MaxValue
+    )
+    {
+        bool propChanged = false;
+        if (value1 is not null || value2 is not null)
+        {
+            propChanged |= DragNullableDoubleHistory(label1, value1, default1, val => changeCommand(val, value2), cmd, speed: speed1, minValue: minValue1, maxValue: maxValue1);
+            propChanged |= DragNullableDoubleHistory(label2, value2, default2, val => changeCommand(value1, val), cmd, speed: speed2, minValue: minValue2, maxValue: maxValue2);
+            if (value1 is not null && value2 is not null && ImGui.Button("Remove##" + mainLabel))
             {
                 cmd.Add(new PropChangeCommand<double?, double?>(changeCommand, value1, value2, null, null));
                 return true;
