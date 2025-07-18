@@ -28,7 +28,7 @@ public partial class PropertiesWindow
 
         ImGui.SeparatorText("Center");
         ImGuiExt.HintTooltip(Strings.UI_CENTER_TOOLTIP);
-        propChanged |= ImGuiExt.DragNullableDoublePairHistory(
+        propChanged |= ImGuiExt.DragNullableDoublePairHistory2(
             "center",
             "CenterX", "CenterY",
             anim.CenterX, anim.CenterY,
