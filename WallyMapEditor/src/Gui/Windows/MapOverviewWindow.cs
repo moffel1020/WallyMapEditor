@@ -405,6 +405,7 @@ public class MapOverviewWindow
                         BlueDigitFont = "SwapSynthBlue",
                     };
                     cmd.Add(new PropChangeCommand<TeamScoreboard?>((ts) => l.Desc.TeamScoreboard = ts, l.Desc.TeamScoreboard, ts), false);
+                    selection.Object = ts;
                     _propChanged |= true;
                 }
             }
