@@ -373,6 +373,43 @@ public class MapOverviewWindow
             }
         });
 
+        if (ImGui.CollapsingHeader("Team Scoreboard##overview"))
+        {
+            if (l.Desc.TeamScoreboard is not null)
+            {
+                TeamScoreboard ts = l.Desc.TeamScoreboard;
+                if (ImGui.Button($"x##{ts.GetHashCode()}"))
+                {
+                    cmd.Add(new PropChangeCommand<TeamScoreboard?>((ts) => l.Desc.TeamScoreboard = ts, l.Desc.TeamScoreboard, null), false);
+                    _propChanged |= true;
+                }
+                ImGui.SameLine();
+                if (ImGui.Selectable($"{ts.GetType().Name} {GetExtraObjectInfo(ts)}###selectable{ts.GetHashCode()}", selection.Object == ts))
+                    selection.Object = ts;
+            }
+            else
+            {
+                if (ImGui.Button("Add team scoreboard"))
+                {
+                    // values taken from SynthwaveSoccer
+                    TeamScoreboard ts = new()
+                    {
+                        RedTeamX = 1244,
+                        BlueTeamX = 1981,
+                        Y = 0,
+                        DoubleDigitsOnesX = 47,
+                        DoubleDigitsTensX = -10,
+                        DoubleDigitsY = 2403,
+                        DoubleDigitsScale = .6,
+                        RedDigitFont = "SwapSynthRed",
+                        BlueDigitFont = "SwapSynthBlue",
+                    };
+                    cmd.Add(new PropChangeCommand<TeamScoreboard?>((ts) => l.Desc.TeamScoreboard = ts, l.Desc.TeamScoreboard, ts), false);
+                    _propChanged |= true;
+                }
+            }
+        }
+
         ImGui.End();
     }
 
@@ -448,6 +485,9 @@ public class MapOverviewWindow
         DynamicNavNode dn => $"({dn.PlatID})",
 
         AbstractKeyFrame kf => $"({PropertiesWindow.FirstKeyFrameNum(kf)})",
+
+        TeamScoreboard ts => $"({ts.RedDigitFont} {ts.RedTeamX},{ts.Y} | {ts.BlueDigitFont} {ts.BlueTeamX},{ts.Y})",
+
         _ => ""
     };
 
