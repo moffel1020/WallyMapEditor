@@ -391,18 +391,18 @@ public class MapOverviewWindow
             {
                 if (ImGui.Button("Add team scoreboard"))
                 {
-                    // values taken from SynthwaveSoccer
+                    // values taken from Soccer (default kung foot map)
                     TeamScoreboard ts = new()
                     {
-                        RedTeamX = 1244,
-                        BlueTeamX = 1981,
-                        Y = 0,
+                        RedTeamX = 1229,
+                        BlueTeamX = 1992,
+                        Y = 2223,
                         DoubleDigitsOnesX = 47,
                         DoubleDigitsTensX = -10,
-                        DoubleDigitsY = 2403,
+                        DoubleDigitsY = 2238,
                         DoubleDigitsScale = .6,
-                        RedDigitFont = "SwapSynthRed",
-                        BlueDigitFont = "SwapSynthBlue",
+                        RedDigitFont = "",
+                        BlueDigitFont = "SwapBlue",
                     };
                     cmd.Add(new PropChangeCommand<TeamScoreboard?>((ts) => l.Desc.TeamScoreboard = ts, l.Desc.TeamScoreboard, ts), false);
                     selection.Object = ts;
