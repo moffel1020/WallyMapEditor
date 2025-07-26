@@ -33,6 +33,7 @@ public class Editor
     public EditorLevel? CurrentLevel { get => _currentLevel; set => _currentLevel = value; }
 
     public List<EditorLevel> LoadedLevels { get; set; } = [];
+    public Stack<EditorLevel> ClosedLevels { get; set; } = [];
     private readonly Queue<EditorLevel> _removedLevelsQueue = [];
     public LevelLoader LevelLoader { get; set; }
 
@@ -295,6 +296,7 @@ public class Editor
             if (ImGuiExt.MenuItemDisabledIf(!EnableReloadMapButton, "Reload map", "Ctrl+Shift+R")) ReloadMap();
             ImGui.Separator();
             if (ImGuiExt.MenuItemDisabledIf(!EnableCloseMapButton, "Close", "Ctrl+Shift+W")) CloseCurrentLevel();
+            if (ImGui.MenuItem("Reopen", "Ctrl+Shift+T")) ReopenClosedLevel();
             ImGui.EndMenu();
         }
         if (ImGui.BeginMenu("Edit"))
@@ -386,6 +388,7 @@ public class Editor
                 if (Rl.IsKeyPressed(KeyboardKey.E)) ExportDialog = new(PathPrefs, _backupsList) { Open = true };
                 if (EnableSaveButton && Rl.IsKeyPressed(KeyboardKey.S)) SaveLevelFileToPath();
                 if (EnableCloseMapButton && Rl.IsKeyPressed(KeyboardKey.W)) CloseCurrentLevel();
+                if (Rl.IsKeyPressed(KeyboardKey.T)) ReopenClosedLevel();
                 if (EnableReloadMapButton && Rl.IsKeyPressed(KeyboardKey.R)) ReloadMap();
             }
         }
@@ -633,6 +636,7 @@ public class Editor
         }
 
         LoadedLevels.Remove(level);
+        ClosedLevels.Push(level);
     }
 
     public void OnLevelReloaded(EditorLevel level, Level newData, ILoadMethod loadMethod)
@@ -650,6 +654,12 @@ public class Editor
         LoadedLevels.Add(editorLevel);
         if (takeFocus)
             CurrentLevel = editorLevel;
+    }
+
+    public void ReopenClosedLevel()
+    {
+        if (!ClosedLevels.TryPop(out EditorLevel? level)) return;
+        AddNewLevel(level, true);
     }
 
     private void ReloadMap()
