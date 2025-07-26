@@ -306,6 +306,7 @@ public class Editor
                 if (ImGui.MenuItem("Undo", "Ctrl+Z")) CurrentLevel.CommandHistory.Undo();
                 if (ImGui.MenuItem("Redo", "Ctrl+Y")) CurrentLevel.CommandHistory.Redo();
                 if (ImGui.MenuItem("Deselect", "Ctrl+D")) CurrentLevel.Selection.Object = null;
+                if (ImGui.MenuItem("Edit History", null, HistoryPanel.Open)) HistoryPanel.Open = !HistoryPanel.Open;
             }
             else
             {
@@ -313,6 +314,7 @@ public class Editor
                 ImGui.MenuItem("Undo", "Ctrl+Z");
                 ImGui.MenuItem("Redo", "Ctrl+Y");
                 ImGui.MenuItem("Deselect", "Ctrl+D");
+                ImGui.MenuItem("Edit History", null, HistoryPanel.Open);
                 ImGui.EndDisabled();
             }
             ImGui.EndMenu();
@@ -329,8 +331,10 @@ public class Editor
         {
             if (ImGui.MenuItem("Save image", "P")) ExportWorldImage();
             if (ImGui.MenuItem("Center Camera", "R")) ResetCam();
-            if (ImGui.MenuItem("History", null, HistoryPanel.Open)) HistoryPanel.Open = !HistoryPanel.Open;
+            ImGui.Separator();
+            if (ImGuiExt.MenuItemDisabledIf(ClosedLevels.Count == 0, "Clear Level History")) ClosedLevels.Clear();
             if (ImGui.MenuItem("Clear Cache")) Canvas?.ClearTextureCache();
+            ImGui.Separator();
             if (ImGui.MenuItem("Find swz key", null, KeyFinderPanel.Open)) KeyFinderPanel.Open = !KeyFinderPanel.Open;
             if (ImGui.MenuItem("Manage swz backups", null, BackupsDialog.Open)) BackupsDialog.Open = !BackupsDialog.Open;
             ImGui.EndMenu();
