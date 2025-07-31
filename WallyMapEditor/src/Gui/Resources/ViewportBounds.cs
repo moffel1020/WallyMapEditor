@@ -2,7 +2,7 @@ using System.Numerics;
 
 namespace WallyMapEditor;
 
-public class ViewportBounds
+public sealed class ViewportBounds
 {
     public Vector2 P1 { get; set; }
     public Vector2 P2 { get; set; }

@@ -3,7 +3,7 @@ using Raylib_cs;
 
 namespace WallyMapEditor;
 
-public class CommandLineArgs
+public sealed class CommandLineArgs
 {
     private readonly Dictionary<string, string> argDict = [];
 

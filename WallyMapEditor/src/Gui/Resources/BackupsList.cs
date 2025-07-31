@@ -8,7 +8,7 @@ using ImGuiNET;
 
 namespace WallyMapEditor;
 
-public partial class BackupsList
+public sealed partial class BackupsList
 {
     // state that is unique to each instance
     public sealed class ExternalState

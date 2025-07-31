@@ -3,7 +3,7 @@ using Raylib_cs;
 
 namespace WallyMapEditor;
 
-public class Texture2DWrapper : IDisposable
+public sealed class Texture2DWrapper : IDisposable
 {
     private bool _disposedValue = false;
 
@@ -32,8 +32,7 @@ public class Texture2DWrapper : IDisposable
 
     public static Texture2DWrapper Default => new(new() { Id = 0 });
 
-
-    protected virtual void Dispose(bool disposing)
+    public void Dispose()
     {
         if (!_disposedValue)
         {
@@ -44,11 +43,7 @@ public class Texture2DWrapper : IDisposable
 
             _disposedValue = true;
         }
-    }
 
-    public void Dispose()
-    {
-        Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
 }

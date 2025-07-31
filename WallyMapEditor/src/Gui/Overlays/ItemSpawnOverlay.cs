@@ -2,7 +2,7 @@ using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public class ItemSpawnOverlay(AbstractItemSpawn item) : IOverlay
+public sealed class ItemSpawnOverlay(AbstractItemSpawn item) : IOverlay
 {
     public ResizableDragBox ResizableBox { get; set; } = new(item.X, item.Y, item.W, item.H);
 

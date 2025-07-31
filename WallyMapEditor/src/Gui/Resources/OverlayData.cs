@@ -2,7 +2,7 @@ using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public class OverlayData
+public sealed class OverlayData
 {
     public required ViewportWindow Viewport { get; init; }
     public required RenderContext Context { get; init; }

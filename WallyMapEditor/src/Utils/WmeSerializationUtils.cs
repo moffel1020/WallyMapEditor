@@ -25,7 +25,7 @@ public static partial class WmeUtils
         Encoding = new UTF8Encoding(false) // use UTF8 (no BOM) encoding
     };
 
-    public static T DeserializeFromPath<T>(string fromPath, bool bhstyle = false) where T : IDeserializable, new()
+    public static T DeserializeFromPath<T>(string fromPath, bool bhstyle = false) where T : IDeserializable<T>
     {
         if (bhstyle)
         {
@@ -80,7 +80,7 @@ public static partial class WmeUtils
     }
 
     public static T DeserializeFromString<T>(string xmldata, bool bhstyle = false)
-        where T : IDeserializable, new()
+        where T : IDeserializable<T>
     {
         if (bhstyle)
         {
@@ -93,7 +93,7 @@ public static partial class WmeUtils
     }
 
     public static T? DeserializeSwzFromPath<T>(string swzPath, string filename, uint key, bool bhstyle = false)
-        where T : IDeserializable, new()
+        where T : IDeserializable<T>
     {
         string? content = GetFileInSwzFromPath(swzPath, filename, key);
         if (content is null) return default;

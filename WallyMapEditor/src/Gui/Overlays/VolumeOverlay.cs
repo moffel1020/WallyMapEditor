@@ -3,7 +3,7 @@ using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public class VolumeOverlay(AbstractVolume volume) : IOverlay
+public sealed class VolumeOverlay(AbstractVolume volume) : IOverlay
 {
     public ResizableDragBox ResizableBox { get; set; } = new(volume.X, volume.Y, volume.W, volume.H);
 

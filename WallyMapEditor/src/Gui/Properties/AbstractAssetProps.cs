@@ -8,7 +8,7 @@ using NativeFileDialogSharp;
 
 namespace WallyMapEditor;
 
-partial class PropertiesWindow
+public sealed partial class PropertiesWindow
 {
     private static string? _assetErrorText;
 

@@ -5,7 +5,7 @@ using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
+public sealed class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
 {
     public DragCircle Position { get; set; } = new(plat.X, plat.Y);
 

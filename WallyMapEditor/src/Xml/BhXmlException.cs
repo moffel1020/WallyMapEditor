@@ -3,7 +3,7 @@ using System;
 namespace WallyMapEditor;
 
 [Serializable]
-public class BhXmlException : Exception
+public sealed class BhXmlException : Exception
 {
     public BhXmlException() { }
     public BhXmlException(string message) : base(message) { }

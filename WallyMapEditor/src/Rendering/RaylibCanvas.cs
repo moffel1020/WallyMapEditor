@@ -5,7 +5,7 @@ using Raylib_cs;
 
 namespace WallyMapEditor;
 
-public class RaylibCanvas : ICanvas
+public sealed class RaylibCanvas : ICanvas
 {
     public BucketPriorityQueue<(object?, Action)> DrawingQueue { get; } = new(Enum.GetValues<DrawPriorityEnum>().Length);
     public AssetLoader Loader { get; }

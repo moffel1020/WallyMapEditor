@@ -1,6 +1,6 @@
 namespace WallyMapEditor;
 
-public class SelectionContext
+public sealed class SelectionContext
 {
     public object? Object { get; set; }
 }

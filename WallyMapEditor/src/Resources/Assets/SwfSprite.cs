@@ -4,7 +4,7 @@ using SwfLib.Tags.DisplayListTags;
 
 namespace WallyMapEditor;
 
-public class SwfSprite
+public sealed class SwfSprite
 {
     public SwfSpriteFrame[] Frames { get; set; } = [];
 

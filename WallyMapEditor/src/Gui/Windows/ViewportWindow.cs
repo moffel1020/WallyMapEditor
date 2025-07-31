@@ -6,7 +6,7 @@ using rlImGui_cs;
 
 namespace WallyMapEditor;
 
-public class ViewportWindow
+public sealed class ViewportWindow
 {
     public RenderTexture2D Framebuffer { get; set; }
     public ViewportBounds Bounds { get; set; } = new();

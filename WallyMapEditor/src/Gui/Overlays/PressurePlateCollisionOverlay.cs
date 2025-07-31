@@ -4,7 +4,7 @@ using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public class PressurePlateCollisionOverlay(AbstractPressurePlateCollision col) : CollisionOverlay(col)
+public sealed class PressurePlateCollisionOverlay(AbstractPressurePlateCollision col) : CollisionOverlay(col)
 {
     public List<DragCircle> OffsetCircles { get; set; } = [];
 

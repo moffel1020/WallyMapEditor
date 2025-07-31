@@ -1,9 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Xml.Linq;
 using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public class OverlayConfig : ISerializable, IDeserializable
+public sealed class OverlayConfig : ISerializable, IDeserializable<OverlayConfig>
 {
     public required float RadiusCollisionPoint { get; set; }
     public required float RadiusCollisionAnchor { get; set; }
@@ -88,7 +89,9 @@ public class OverlayConfig : ISerializable, IDeserializable
     public required RlColor UsingColorPathPoint { get; set; }
     public required RlColor TextColorPathPointNum { get; set; }
 
-    public void Deserialize(XElement e)
+    public OverlayConfig() { }
+    [SetsRequiredMembers]
+    private OverlayConfig(XElement e)
     {
         OverlayConfig @default = Default;
 
@@ -165,6 +168,7 @@ public class OverlayConfig : ISerializable, IDeserializable
         UsingColorPathPoint = getColor(nameof(UsingColorPathPoint), @default.UsingColorPathPoint);
         TextColorPathPointNum = getColor(nameof(TextColorPathPointNum), @default.TextColorPathPointNum);
     }
+    public static OverlayConfig Deserialize(XElement e) => new(e);
 
     public void Serialize(XElement e)
     {

@@ -12,7 +12,7 @@ using NativeFileDialogSharp;
 
 namespace WallyMapEditor;
 
-public class MapOverviewWindow
+public sealed class MapOverviewWindow
 {
     private bool _open = true;
     public bool Open { get => _open; set => _open = value; }

@@ -12,7 +12,7 @@ we don't want to fully disable fire offset rendering from the library, since it 
 
 namespace WallyMapEditor;
 
-public class CustomPathOverlay(CustomPath cp) : IOverlay
+public sealed class CustomPathOverlay(CustomPath cp) : IOverlay
 {
     public List<DragCircle> Points { get; set; } = [];
 

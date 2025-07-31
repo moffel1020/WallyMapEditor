@@ -6,7 +6,7 @@ using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public class PathPreferences : IDeserializable, ISerializable
+public sealed class PathPreferences : IDeserializable<PathPreferences>, ISerializable
 {
     public const string APPDATA_DIR_NAME = "WallyMapEditor";
     public const string FILE_NAME = "PathPreferences.xml";
@@ -73,7 +73,8 @@ public class PathPreferences : IDeserializable, ISerializable
         }
     }
 
-    public void Deserialize(XElement e)
+    public PathPreferences() { }
+    private PathPreferences(XElement e)
     {
         _brawlhallaPath = e.GetElementOrNull(nameof(BrawlhallaPath)); // don't trigger setter!
         BrawlhallaAirPath = e.GetElementOrNull(nameof(BrawlhallaAirPath));
@@ -93,6 +94,7 @@ public class PathPreferences : IDeserializable, ISerializable
         ModDescription = e.GetElementOrNull(nameof(ModDescription));
         ModAuthor = e.GetElementOrNull(nameof(ModAuthor));
     }
+    public static PathPreferences Deserialize(XElement e) => new(e);
 
     public void Serialize(XElement e)
     {

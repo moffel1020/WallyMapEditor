@@ -3,7 +3,7 @@ using SwfLib.Tags.DisplayListTags;
 
 namespace WallyMapEditor;
 
-public class SwfSpriteFrameLayer
+public sealed class SwfSpriteFrameLayer
 {
     public int FrameOffset { get; set; }
     public SwfMatrix Matrix { get; set; }

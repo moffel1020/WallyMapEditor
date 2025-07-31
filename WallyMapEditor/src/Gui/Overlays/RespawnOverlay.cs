@@ -1,7 +1,7 @@
 namespace WallyMapEditor;
 using WallyMapSpinzor2;
 
-public class RespawnOverlay(Respawn res) : IOverlay
+public sealed class RespawnOverlay(Respawn res) : IOverlay
 {
     public DragBox Box { get; set; } = new(res.X, res.Y, 0, 0);
     public void Draw(EditorLevel level, OverlayData data)

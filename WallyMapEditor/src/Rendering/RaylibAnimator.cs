@@ -8,7 +8,7 @@ using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
+public sealed class RaylibAnimator(RaylibCanvas canvas, AssetLoader loader)
 {
     private readonly struct BoneSprite
     {

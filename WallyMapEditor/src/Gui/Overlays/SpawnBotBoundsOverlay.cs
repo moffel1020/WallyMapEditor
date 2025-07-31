@@ -2,7 +2,7 @@ using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public class SpawnBotBoundsOverlay(SpawnBotBounds bounds) : IOverlay
+public sealed class SpawnBotBoundsOverlay(SpawnBotBounds bounds) : IOverlay
 {
     public ResizableDragBox ResizableBox { get; set; } = new(bounds.X, bounds.Y, bounds.W, bounds.H);
 

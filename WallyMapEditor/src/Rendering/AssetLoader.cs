@@ -5,7 +5,7 @@ using WallyAnmSpinzor;
 
 namespace WallyMapEditor;
 
-public class AssetLoader
+public sealed class AssetLoader
 {
     private string _brawlPath;
     public string BrawlPath

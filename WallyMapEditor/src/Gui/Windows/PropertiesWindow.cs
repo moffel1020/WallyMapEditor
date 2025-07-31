@@ -4,7 +4,7 @@ using Raylib_cs;
 
 namespace WallyMapEditor;
 
-public partial class PropertiesWindow
+public sealed partial class PropertiesWindow
 {
     private bool _open = true;
     public bool Open { get => _open; set => _open = value; }
@@ -52,7 +52,7 @@ public partial class PropertiesWindow
         AbstractCollision ac => ShowCollisionProps(ac, level, data),
         AbstractItemSpawn i => ShowItemSpawnProps(i, level),
         AbstractAsset a => ShowAbstractAssetProps(a, level, data),
-        AbstractVolume v => ShowAbstractVolumeProps(v, level, data),
+        AbstractVolume v => ShowAbstractVolumeProps(v, level),
         NavNode n => ShowNavNodeProps(n, level),
 
         LevelSound ls => ShowLevelSoundProps(ls, level),

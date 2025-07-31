@@ -11,7 +11,7 @@ using NativeFileDialogSharp;
 
 namespace WallyMapEditor;
 
-public class ImportWindow
+public sealed class ImportWindow
 {
     public const int MAX_KEY_LENGTH = 9;
 

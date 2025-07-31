@@ -4,7 +4,7 @@ using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public class ParentAssetOverlay(AbstractAsset asset) : IOverlay
+public sealed class ParentAssetOverlay(AbstractAsset asset) : IOverlay
 {
     public DragCircle Position { get; set; } = new(0, 0);
     public RotatePoint RotatePoint { get; set; } = new(0, 0);

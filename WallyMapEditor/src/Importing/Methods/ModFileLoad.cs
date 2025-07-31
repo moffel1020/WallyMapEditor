@@ -9,7 +9,7 @@ using WallyMapEditor.Mod;
 
 namespace WallyMapEditor;
 
-public class ModFileLoad(string path, string brawlPath) : ILoadMethod
+public sealed class ModFileLoad(string path, string brawlPath) : ILoadMethod
 {
     public string FilePath { get; init; } = path;
     public string BrawlPath { get; init; } = brawlPath;

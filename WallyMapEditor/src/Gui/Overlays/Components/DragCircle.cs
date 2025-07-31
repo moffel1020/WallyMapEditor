@@ -3,7 +3,7 @@ using Raylib_cs;
 
 namespace WallyMapEditor;
 
-public class DragCircle(double x, double y)
+public sealed class DragCircle(double x, double y)
 {
     public float Radius { get; set; } = 30;
     public RlColor Color { get; set; } = RlColor.Gray with { A = 190 };

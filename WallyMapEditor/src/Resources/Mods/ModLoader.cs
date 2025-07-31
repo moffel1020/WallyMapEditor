@@ -9,7 +9,7 @@ namespace WallyMapEditor.Mod;
 
 using ModFileOverrides = Dictionary<string, byte[]>;
 
-public class ModLoader(string brawlDir)
+public sealed class ModLoader(string brawlDir)
 {
     private readonly List<ModFile> _wallyFiles = [];
 

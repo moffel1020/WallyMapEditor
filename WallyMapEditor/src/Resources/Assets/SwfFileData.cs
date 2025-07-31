@@ -12,7 +12,7 @@ using SwiffCheese.Wrappers;
 
 namespace WallyMapEditor;
 
-public class SwfFileData
+public sealed class SwfFileData
 {
     public SwfFile Swf { get; private init; } = null!;
     public Dictionary<string, ushort> SymbolClass { get; private init; } = null!;

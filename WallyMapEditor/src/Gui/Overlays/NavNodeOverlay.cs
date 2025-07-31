@@ -2,7 +2,7 @@ using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public class NavNodeOverlay(NavNode node) : IOverlay
+public sealed class NavNodeOverlay(NavNode node) : IOverlay
 {
     public DragBox Box { get; set; } = new(node.X, node.Y, 0, 0);
     public void Draw(EditorLevel level, OverlayData data)

@@ -2,8 +2,8 @@ using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public class AbstractDynamicOverlay<T>(AbstractDynamic<T> dyn) : IOverlay
-    where T : ISerializable, IDeserializable, IDrawable
+public sealed class AbstractDynamicOverlay<T>(AbstractDynamic<T> dyn) : IOverlay
+    where T : ISerializable, IDrawable
 {
     public DragCircle Position { get; set; } = new(dyn.X, dyn.Y);
 

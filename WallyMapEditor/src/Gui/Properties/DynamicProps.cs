@@ -8,7 +8,7 @@ namespace WallyMapEditor;
 public partial class PropertiesWindow
 {
     public static bool ShowDynamicProps<T>(AbstractDynamic<T> ad, EditorLevel level, PropertiesWindowData data)
-        where T : IDeserializable, ISerializable, IDrawable
+        where T : ISerializable, IDrawable
     {
         CommandHistory cmd = level.CommandHistory;
         SelectionContext selection = level.Selection;
@@ -113,7 +113,7 @@ public partial class PropertiesWindow
     }
 
     private static Maybe<T> CreateDynamicChild<T>(AbstractDynamic<T> parent, LevelDesc? ld)
-        where T : IDeserializable, ISerializable, IDrawable => parent switch
+        where T : ISerializable, IDrawable => parent switch
         {
             DynamicCollision col => CreateCollisionChild(col).Cast<T>(),
             DynamicItemSpawn item => CreateItemSpawnChild(item).Cast<T>(),

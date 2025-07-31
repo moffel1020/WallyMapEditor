@@ -13,7 +13,7 @@ using NativeFileDialogSharp;
 
 namespace WallyMapEditor;
 
-public class Editor
+public sealed class Editor
 {
     public const string WINDOW_NAME = "WallyMapEditor";
     public const float ZOOM_INCREMENT = 0.15f;
@@ -54,7 +54,7 @@ public class Editor
     private bool _movingObject = false;
 
     private bool _renderPaused = false;
-    private readonly RenderConfig _renderConfig = RenderConfig.Default;
+    private RenderConfig _renderConfig = RenderConfig.Default;
     private readonly OverlayConfig _overlayConfig = OverlayConfig.Default;
     private readonly RenderState _state = new();
     private RenderContext _context = new();
@@ -117,7 +117,7 @@ public class Editor
     {
         LogCallback.Init();
 
-        _renderConfig.Deserialize(ConfigDefault.SerializeToXElement());
+        _renderConfig = ConfigDefault.SerializeToXElement().DeserializeTo<RenderConfig>();
 
         ImportDialog.Open = true;
 
@@ -153,6 +153,11 @@ public class Editor
         LevelLoader.OnMapReloaded += (_, level, newData, loadMethod) =>
         {
             OnLevelReloaded(level, newData, loadMethod);
+        };
+
+        RenderConfigWindow.RenderConfigChanged += (_, renderConfig) =>
+        {
+            _renderConfig = renderConfig;
         };
 
         RenderConfigWindow.MoveFrames += (_, frames) =>

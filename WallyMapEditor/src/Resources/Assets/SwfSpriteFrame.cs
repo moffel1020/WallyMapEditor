@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace WallyMapEditor;
 
-public class SwfSpriteFrame
+public sealed class SwfSpriteFrame
 {
     public SortedDictionary<ushort, SwfSpriteFrameLayer> Layers { get; set; } = [];
 

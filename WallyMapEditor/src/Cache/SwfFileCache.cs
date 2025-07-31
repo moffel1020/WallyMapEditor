@@ -2,7 +2,7 @@ using System.IO;
 
 namespace WallyMapEditor;
 
-public class SwfFileCache : ManagedCache<string, SwfFileData?>
+public sealed class SwfFileCache : ManagedCache<string, SwfFileData?>
 {
     protected override SwfFileData? LoadInternal(string path)
     {

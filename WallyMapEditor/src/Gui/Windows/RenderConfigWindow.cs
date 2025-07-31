@@ -11,23 +11,24 @@ using Raylib_cs;
 
 namespace WallyMapEditor;
 
-public class RenderConfigWindow
+public sealed class RenderConfigWindow
 {
     private bool _open = false;
     public bool Open { get => _open; set => _open = value; }
 
+    public event EventHandler<RenderConfig>? RenderConfigChanged;
     public event EventHandler<int>? MoveFrames;
     public event EventHandler<int>? SetFrames;
 
     private int _advanceFrames;
     private int _setFrames;
 
-    private static void LoadConfig(RenderConfig config, string path)
+    private static RenderConfig LoadConfig(string path)
     {
         XElement element;
         using (FileStream stream = new(path, FileMode.Open, FileAccess.Read))
             element = XElement.Load(stream);
-        config.Deserialize(element);
+        return element.DeserializeTo<RenderConfig>();
     }
 
     private static void SaveConfig(RenderConfig config, string path)
@@ -51,7 +52,8 @@ public class RenderConfigWindow
                     prefs.ConfigFolderPath = Path.GetDirectoryName(result.Path);
                     try
                     {
-                        LoadConfig(config, result.Path);
+                        RenderConfig config = LoadConfig(result.Path);
+                        RenderConfigChanged?.Invoke(this, config);
                     }
                     catch (Exception e)
                     {
@@ -88,17 +90,17 @@ public class RenderConfigWindow
 
         if (ImGui.Button("Reset to custom default##config"))
         {
-            config.Deserialize(configDefault.SerializeToXElement());
+            RenderConfigChanged?.Invoke(this, new(configDefault.ConfigDefault));
         }
 
         if (ImGui.Button("Reset to base default##config"))
         {
-            config.Deserialize(RenderConfig.Default.SerializeToXElement());
+            RenderConfigChanged?.Invoke(this, RenderConfig.Default);
         }
 
         if (ImGui.Button("Set as custom default##config"))
         {
-            configDefault.Deserialize(config.SerializeToXElement());
+            RenderConfigChanged?.Invoke(this, new(config));
         }
 
         ImGui.SeparatorText("Rendering##config");

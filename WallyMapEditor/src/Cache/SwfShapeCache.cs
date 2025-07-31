@@ -12,7 +12,7 @@ using SkiaSharp;
 
 namespace WallyMapEditor;
 
-public class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCache.ShapeData, Texture2DWrapper>
+public sealed class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCache.ShapeData, Texture2DWrapper>
 {
     private readonly static SKSamplingOptions SAMPLING_OPTIONS = new(SKFilterMode.Linear, SKMipmapMode.Linear);
     private const int SWF_UNIT_DIVISOR = 20;

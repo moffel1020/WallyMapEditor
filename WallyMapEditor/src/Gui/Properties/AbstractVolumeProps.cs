@@ -5,7 +5,7 @@ namespace WallyMapEditor;
 
 public partial class PropertiesWindow
 {
-    public static bool ShowAbstractVolumeProps(AbstractVolume v, EditorLevel level, PropertiesWindowData data)
+    public static bool ShowAbstractVolumeProps(AbstractVolume v, EditorLevel level)
     {
         CommandHistory cmd = level.CommandHistory;
         LevelDesc ld = level.Level.Desc;

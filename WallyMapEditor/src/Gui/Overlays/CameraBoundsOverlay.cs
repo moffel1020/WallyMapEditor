@@ -2,7 +2,7 @@ using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public class CameraBoundsOverlay(CameraBounds bounds) : IOverlay
+public sealed class CameraBoundsOverlay(CameraBounds bounds) : IOverlay
 {
     public ResizableDragBox ResizableBox { get; set; } = new(bounds.X, bounds.Y, bounds.W, bounds.H);
 

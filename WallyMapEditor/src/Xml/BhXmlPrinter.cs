@@ -4,7 +4,7 @@ using System.Xml.Linq;
 
 namespace WallyMapEditor;
 
-public partial class BhXmlPrinter
+public sealed partial class BhXmlPrinter
 {
     public static string Print(XNode xml, bool pretty = false)
     {

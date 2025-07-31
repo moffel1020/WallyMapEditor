@@ -8,7 +8,7 @@ using WallyMapEditor.Mod;
 
 namespace WallyMapEditor;
 
-public class ModLoaderWindow(PathPreferences prefs)
+public sealed class ModLoaderWindow(PathPreferences prefs)
 {
     private bool _open;
     public bool Open { get => _open; set => _open = value; }

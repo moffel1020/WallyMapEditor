@@ -7,7 +7,7 @@ using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public class OverridableGameLoad : ILoadMethod
+public sealed class OverridableGameLoad : ILoadMethod
 {
     public string BrawlPath { get; init; }
     public uint DecryptionKey { get; init; }
@@ -101,7 +101,7 @@ public class OverridableGameLoad : ILoadMethod
         return files;
     }
 
-    private static T? LoadFile<T>(string? overridePath, string swzPath, string swzFile, uint key) where T : IDeserializable, new() =>
+    private static T? LoadFile<T>(string? overridePath, string swzPath, string swzFile, uint key) where T : IDeserializable<T> =>
         overridePath is null
             ? WmeUtils.DeserializeSwzFromPath<T>(swzPath, swzFile, key, bhstyle: true)
             : WmeUtils.DeserializeFromPath<T>(overridePath);

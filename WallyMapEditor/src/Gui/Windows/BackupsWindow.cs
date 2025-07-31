@@ -2,7 +2,7 @@ using ImGuiNET;
 
 namespace WallyMapEditor;
 
-public class BackupsWindow(PathPreferences prefs, BackupsList backups)
+public sealed class BackupsWindow(PathPreferences prefs, BackupsList backups)
 {
     private BackupsList.ExternalState _state = new();
 

@@ -105,7 +105,7 @@ public static class AddObjectPopup
 
     private static void AddObjectWithDynamicMenuHistory<N, D>(double posX, double posY, string dynName, Func<double, double, Maybe<N>> normalMenu, Action<N> normalCmdAdd, Action<D> dynamicCmdAdd, SelectionContext selection, CommandHistory cmd)
         where D : AbstractDynamic<N>, new()
-        where N : ISerializable, IDeserializable, IDrawable
+        where N : ISerializable, IDrawable
     {
         Maybe<N> maybeItem = normalMenu(posX, posY);
         if (maybeItem.TryGetValue(out N? item))
@@ -124,7 +124,7 @@ public static class AddObjectPopup
     }
 
     private static void AddObjectMenuHistory<N>(double posX, double posY, Func<double, double, Maybe<N>> menu, Action<N> cmdAdd, SelectionContext selection, CommandHistory cmd)
-        where N : ISerializable, IDeserializable, IDrawable
+        where N : ISerializable
     {
         Maybe<N> maybeItem = menu(posX, posY);
         if (maybeItem.TryGetValue(out N? item))

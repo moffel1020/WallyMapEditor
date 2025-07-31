@@ -12,7 +12,7 @@ using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public class ModCreatorWindow(PathPreferences prefs)
+public sealed class ModCreatorWindow(PathPreferences prefs)
 {
     private readonly record struct LevelFileList(string[] Assets, string[] Backgrounds, string? Thumbnail);
     private readonly record struct ModLevel(Level Level, LevelFileList Files);

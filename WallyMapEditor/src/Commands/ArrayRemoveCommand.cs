@@ -4,7 +4,7 @@ namespace WallyMapEditor;
 
 // the ctor requires the arguments passed to be correct
 // be nice to it
-public class ArrayRemoveCommand<T> : PropChangeCommand<T[]>, ISelectCommand
+public sealed  class ArrayRemoveCommand<T> : PropChangeCommand<T[]>, ISelectCommand
 {
     private readonly T _removedValue;
 

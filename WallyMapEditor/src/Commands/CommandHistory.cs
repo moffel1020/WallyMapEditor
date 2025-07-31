@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace WallyMapEditor;
 
-public class CommandHistory(SelectionContext selection)
+public sealed class CommandHistory(SelectionContext selection)
 {
     private int _saveAtCommands = 0;
     public Stack<ICommand> Commands { get; set; } = new();

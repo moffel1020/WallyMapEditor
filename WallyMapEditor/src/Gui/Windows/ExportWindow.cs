@@ -14,7 +14,7 @@ using NativeFileDialogSharp;
 
 namespace WallyMapEditor;
 
-public class ExportWindow(PathPreferences prefs, BackupsList backups)
+public sealed class ExportWindow(PathPreferences prefs, BackupsList backups)
 {
     private bool _open;
     public bool Open { get => _open; set => _open = value; }

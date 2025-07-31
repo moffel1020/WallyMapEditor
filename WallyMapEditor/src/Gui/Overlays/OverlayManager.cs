@@ -2,7 +2,7 @@ using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public class OverlayManager(EditorLevel level)
+public sealed class OverlayManager(EditorLevel level)
 {
     public IOverlay? ActiveOverlay { get; private set; } = null;
     private object? _currentObject = null;

@@ -2,7 +2,7 @@ using System;
 
 namespace WallyMapEditor;
 
-public class PropertiesWindowData
+public sealed class PropertiesWindowData
 {
     public required TimeSpan Time { get; init; }
     public required RaylibCanvas? Canvas { get; init; }

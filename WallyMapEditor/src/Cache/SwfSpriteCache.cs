@@ -1,6 +1,6 @@
 namespace WallyMapEditor;
 
-public class SwfSpriteCache : ManagedCache<SwfSpriteCache.SpriteInfo, SwfSprite?>
+public sealed class SwfSpriteCache : ManagedCache<SwfSpriteCache.SpriteInfo, SwfSprite?>
 {
     public readonly record struct SpriteInfo(SwfFileData Swf, ushort SpriteId);
 

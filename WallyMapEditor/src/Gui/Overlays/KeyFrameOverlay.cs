@@ -3,7 +3,7 @@ using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public class KeyFrameOverlay(KeyFrame kf) : IOverlay
+public sealed class KeyFrameOverlay(KeyFrame kf) : IOverlay
 {
     public (double, double) PlatOffset { get; set; }
     public bool AllowDragging { get; set; } = true;

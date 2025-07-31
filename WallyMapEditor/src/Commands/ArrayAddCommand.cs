@@ -2,7 +2,7 @@ using System;
 
 namespace WallyMapEditor;
 
-public class ArrayAddCommand<T> : PropChangeCommand<T[]>, ISelectCommand
+public sealed class ArrayAddCommand<T> : PropChangeCommand<T[]>, ISelectCommand
 {
     private readonly T _toAdd;
 

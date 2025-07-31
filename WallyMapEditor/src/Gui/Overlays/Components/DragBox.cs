@@ -3,7 +3,7 @@ using Raylib_cs;
 
 namespace WallyMapEditor;
 
-public class DragBox(double x, double y, double w, double h)
+public sealed class DragBox(double x, double y, double w, double h)
 {
     public const int LINE_SIZE = 5;
 

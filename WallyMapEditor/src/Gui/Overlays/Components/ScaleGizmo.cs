@@ -2,7 +2,7 @@ using Raylib_cs;
 
 namespace WallyMapEditor;
 
-public class ScaleGizmo(double x, double y)
+public sealed class ScaleGizmo(double x, double y)
 {
     public RlColor Color
     {

@@ -4,7 +4,7 @@ using Raylib_cs;
 namespace WallyMapEditor;
 
 // TODO: this should somehow be unified with the AssetOverlay stuff
-public class ResizableDragBox(double x, double y, double w, double h)
+public sealed class ResizableDragBox(double x, double y, double w, double h)
 {
     public DragCircle TopLeft { get; } = new(x, y);
     public DragCircle TopRight { get; } = new(x + w, y);

@@ -4,7 +4,7 @@ using Raylib_cs;
 
 namespace WallyMapEditor;
 
-public class RotatePoint(double x, double y)
+public sealed class RotatePoint(double x, double y)
 {
     public const double ANGLE_SNAP = 45 * Math.PI / 180;
 

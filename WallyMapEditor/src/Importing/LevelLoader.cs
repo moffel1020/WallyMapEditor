@@ -5,7 +5,7 @@ using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public class LevelLoader
+public sealed class LevelLoader
 {
     public delegate void OnNewMapLoadedEventHandler(LevelLoader? sender, EditorLevel newLevel);
     public delegate void OnMapReloadedEventHandler(LevelLoader? sender, EditorLevel level, Level newData, ILoadMethod loadMethod);

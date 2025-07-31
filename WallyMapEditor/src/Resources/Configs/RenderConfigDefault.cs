@@ -6,7 +6,7 @@ using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public class RenderConfigDefault : IDeserializable, ISerializable
+public sealed class RenderConfigDefault : IDeserializable<RenderConfigDefault>, ISerializable
 {
     public const string APPDATA_DIR_NAME = "WallyMapEditor";
     public const string FILE_NAME = "RenderConfigDefault.xml";
@@ -50,10 +50,12 @@ public class RenderConfigDefault : IDeserializable, ISerializable
         }
     }
 
-    public void Deserialize(XElement e)
+    public RenderConfigDefault() { }
+    private RenderConfigDefault(XElement e)
     {
-        ConfigDefault.Deserialize(e);
+        ConfigDefault = e.DeserializeTo<RenderConfig>();
     }
+    public static RenderConfigDefault Deserialize(XElement e) => new(e);
 
     public void Serialize(XElement e)
     {

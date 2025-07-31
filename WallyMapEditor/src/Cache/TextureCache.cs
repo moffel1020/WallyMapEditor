@@ -4,7 +4,7 @@ using SkiaSharp;
 
 namespace WallyMapEditor;
 
-public class TextureCache : UploadCache<string, RlImage, Texture2DWrapper>
+public sealed class TextureCache : UploadCache<string, RlImage, Texture2DWrapper>
 {
     protected override RlImage LoadIntermediate(string path)
     {

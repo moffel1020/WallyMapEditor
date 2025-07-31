@@ -5,7 +5,7 @@ using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public class AssetOverlay(AbstractAsset asset) : IOverlay
+public sealed class AssetOverlay(AbstractAsset asset) : IOverlay
 {
     public DragCircle TopLeft { get; set; } = new(0, 0);
     public DragCircle TopRight { get; set; } = new(0, 0);

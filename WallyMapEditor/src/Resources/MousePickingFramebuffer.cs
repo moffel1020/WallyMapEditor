@@ -6,7 +6,7 @@ using Raylib_cs;
 
 namespace WallyMapEditor;
 
-public class MousePickingFramebuffer : IDisposable
+public sealed class MousePickingFramebuffer : IDisposable
 {
     private bool _disposedValue = false;
 
@@ -136,19 +136,15 @@ public class MousePickingFramebuffer : IDisposable
         }
     }
 
-    protected virtual void Dispose(bool disposing)
-    {
-        if (_disposedValue) return;
-
-        if (_framebuffer.Id != 0) Rl.UnloadRenderTexture(_framebuffer);
-        if (Shader.Id != 0) Rl.UnloadShader(Shader);
-
-        _disposedValue = true;
-    }
-
     public void Dispose()
     {
-        Dispose(disposing: true);
+        if (!_disposedValue)
+        {
+            if (_framebuffer.Id != 0) Rl.UnloadRenderTexture(_framebuffer);
+            if (Shader.Id != 0) Rl.UnloadShader(Shader);
+
+            _disposedValue = true;
+        }
         GC.SuppressFinalize(this);
     }
 
