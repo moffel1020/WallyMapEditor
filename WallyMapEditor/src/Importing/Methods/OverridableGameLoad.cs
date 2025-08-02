@@ -9,7 +9,6 @@ namespace WallyMapEditor;
 
 public sealed class OverridableGameLoad : ILoadMethod
 {
-    public string BrawlPath { get; init; }
     public uint DecryptionKey { get; init; }
     public string? SwzLevelName { get; init; }
     public string? DescOverride { get; init; }
@@ -18,15 +17,11 @@ public sealed class OverridableGameLoad : ILoadMethod
     public string? BonesOverride { get; init; }
     public string? PowersOverride { get; init; }
 
-    public OverridableGameLoad(string brawlPath, string? swzLevelName, uint key, string? descPath = null, string? typesPath = null, string? setTypesPath = null, string? bonesPath = null, string? powersPath = null)
+    public OverridableGameLoad(string? swzLevelName, uint key, string? descPath = null, string? typesPath = null, string? setTypesPath = null, string? bonesPath = null, string? powersPath = null)
     {
         if (descPath is null && swzLevelName is null)
             throw new ArgumentException("Could not create OverridableGameLoad. swzLevelName or descPath has to be set");
 
-        if (!WmeUtils.IsValidBrawlPath(brawlPath))
-            throw new ArgumentException($"{brawlPath} is not a valid brawlhalla path");
-
-        BrawlPath = brawlPath;
         SwzLevelName = swzLevelName;
         DescOverride = descPath;
         DecryptionKey = key;
@@ -36,11 +31,12 @@ public sealed class OverridableGameLoad : ILoadMethod
         PowersOverride = powersPath;
     }
 
-    public LoadedData Load()
+    public LoadedData Load(PathPreferences pathPrefs)
     {
-        string dynamicPath = Path.Combine(BrawlPath, "Dynamic.swz");
-        string gamePath = Path.Combine(BrawlPath, "Game.swz");
-        string initPath = Path.Combine(BrawlPath, "Init.swz");
+        string brawlPath = pathPrefs.BrawlhallaPath ?? throw new ArgumentException("No brawlhalla path provided");
+        string dynamicPath = Path.Combine(brawlPath, "Dynamic.swz");
+        string gamePath = Path.Combine(brawlPath, "Game.swz");
+        string initPath = Path.Combine(brawlPath, "Init.swz");
 
         LevelDesc ld = LoadFile<LevelDesc>(DescOverride, dynamicPath, "LevelDesc_" + SwzLevelName, DecryptionKey) ?? throw new FileLoadException("Could not load LevelDesc from swz or path");
         (LevelTypes lt, BoneTypes bt) = ReadFromInitSwz(initPath);

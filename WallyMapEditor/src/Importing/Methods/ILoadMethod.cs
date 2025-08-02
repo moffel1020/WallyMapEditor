@@ -6,5 +6,5 @@ public record LoadedData(Level Level, BoneTypes? Bones, string[]? Powers);
 
 public interface ILoadMethod
 {
-    public LoadedData Load();
+    public LoadedData Load(PathPreferences pathPrefs);
 }

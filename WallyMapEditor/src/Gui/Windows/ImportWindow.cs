@@ -42,7 +42,6 @@ public sealed class ImportWindow
     public ImportWindow(PathPreferences prefs)
     {
         Prefs = prefs;
-        Prefs.BrawlhallaPathChanged += (_, path) => UpdateModFileBrawlPath(path);
     }
 
     public void Show(LevelLoader loader)
@@ -122,7 +121,7 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
                 if (result.IsOk)
                 {
                     _savedModPath = result.Path;
-                    CreateModFileLoad(_savedModPath, Prefs);
+                    CreateModFileLoad(_savedModPath);
                 }
             });
         }
@@ -134,7 +133,7 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
             if (ImGui.Button("Use last path"))
             {
                 _savedModPath = Prefs.ModFilePath;
-                CreateModFileLoad(_savedModPath, Prefs);
+                CreateModFileLoad(_savedModPath);
             }
             ImGui.SameLine();
             ImGui.Text(Prefs.ModFilePath);
@@ -167,7 +166,7 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
                 {
                     _loadingError = null;
                     _loadingStatus = "loading...";
-                    loader.LoadMap(_modFileLoad!);
+                    loader.LoadMap(Prefs, _modFileLoad!);
                 }
                 catch (Exception e)
                 {
@@ -180,18 +179,12 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
             });
     }
 
-    private void UpdateModFileBrawlPath(string brawlPath)
+    private void CreateModFileLoad(string path)
     {
-        if (_modFileLoad is not null && _modFileLoad.BrawlPath != brawlPath)
-            _modFileLoad = new ModFileLoad(_modFileLoad.FilePath, brawlPath);
-    }
+        if (_modFileLoad is null || path != _modFileLoad.FilePath)
+            _modFileLoad = new ModFileLoad(path);
 
-    private void CreateModFileLoad(string path, PathPreferences prefs)
-    {
-        if (_modFileLoad is null || path != _modFileLoad.FilePath || prefs.BrawlhallaPath! != _modFileLoad.BrawlPath)
-            _modFileLoad = new ModFileLoad(path, prefs.BrawlhallaPath!);
-
-        prefs.ModFilePath = path;
+        Prefs.ModFilePath = path;
         _modFileLoad?.CacheModFile();
     }
 
@@ -432,7 +425,6 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
                     uint key = GetSwzKey(Prefs.BrawlhallaPath!) ?? throw new Exception("Decryption key not found");
                     ILoadMethod loadMethod = new OverridableGameLoad
                     (
-                        brawlPath: Prefs.BrawlhallaPath!,
                         swzLevelName: _savedLdPath is null ? _swzDescName : null,
                         key: key,
                         descPath: _savedLdPath,
@@ -441,7 +433,7 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
                         bonesPath: _savedBtPath,
                         powersPath: _savedPtPath
                     );
-                    loader.LoadMap(loadMethod);
+                    loader.LoadMap(Prefs, loadMethod);
 
                     Prefs.DecryptionKey = key.ToString();
                     Prefs.LevelDescPath = _savedLdPath ?? Prefs.LevelDescPath;

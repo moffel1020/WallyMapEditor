@@ -30,15 +30,15 @@ public sealed class LevelLoader
 
     public static bool CanReImport([NotNullWhen(true)] EditorLevel? level) => level?.ReloadMethod is not null;
 
-    public void ReImport(EditorLevel? level)
+    public void ReImport(PathPreferences pathPrefs, EditorLevel? level)
     {
         if (!CanReImport(level)) return;
-        LoadMap(level.ReloadMethod!, level);
+        LoadMap(pathPrefs, level.ReloadMethod!, level);
     }
 
-    public void LoadMap(ILoadMethod loadMethod, EditorLevel? reload = null)
+    public void LoadMap(PathPreferences pathPrefs, ILoadMethod loadMethod, EditorLevel? reload = null)
     {
-        (Level l, BoneTypes? bt, string[]? pn) = loadMethod.Load();
+        (Level l, BoneTypes? bt, string[]? pn) = loadMethod.Load(pathPrefs);
         if (BoneTypes is null && bt is null) throw new InvalidOperationException("Could not load map. BoneTypes has not been imported.");
 
         if (bt is not null) (BoneTypes, PowerNames) = (bt, pn);

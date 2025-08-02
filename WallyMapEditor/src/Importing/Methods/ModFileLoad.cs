@@ -9,10 +9,9 @@ using WallyMapEditor.Mod;
 
 namespace WallyMapEditor;
 
-public sealed class ModFileLoad(string path, string brawlPath) : ILoadMethod
+public sealed class ModFileLoad(string path) : ILoadMethod
 {
     public string FilePath { get; init; } = path;
-    public string BrawlPath { get; init; } = brawlPath;
     public ModFile? ModFile => _cachedFile?.Item1;
 
     private (ModFile, DateTime)? _cachedFile;
@@ -20,8 +19,10 @@ public sealed class ModFileLoad(string path, string brawlPath) : ILoadMethod
     [MemberNotNullWhen(false, nameof(_cachedFile))]
     private bool CacheInvalid => _cachedFile is null || File.GetLastWriteTimeUtc(FilePath) != _cachedFile.Value.Item2;
 
-    public LoadedData Load()
+    public LoadedData Load(PathPreferences pathPrefs)
     {
+        string brawlPath = pathPrefs.BrawlhallaPath ?? throw new ArgumentException("Not brawlhalla path chosen");
+
         ModFile file = LoadModFile();
 
         LevelDescObject ldo = file.LevelDescs.Single(); // mod files with multiple levels are currently not supported in the editor
@@ -34,9 +35,9 @@ public sealed class ModFileLoad(string path, string brawlPath) : ILoadMethod
 
         foreach (ExtraFileObject efo in file.ExtraFiles)
         {
-            string destPath = Path.Combine(BrawlPath, efo.FullPath);
+            string destPath = Path.Combine(brawlPath, efo.FullPath);
             // path not in brawl dir. stinky!
-            if (!WmeUtils.IsInDirectory(BrawlPath, destPath))
+            if (!WmeUtils.IsInDirectory(brawlPath, destPath))
             {
                 Rl.TraceLog(Raylib_cs.TraceLogLevel.Warning, $"Mod file had a file with dangerous path {destPath}. It was skipped");
                 continue;

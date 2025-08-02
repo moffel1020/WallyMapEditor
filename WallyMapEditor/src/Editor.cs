@@ -567,7 +567,7 @@ public sealed class Editor
             {
                 try
                 {
-                    LevelLoader.LoadMap(new LevelPathLoad(result.Path));
+                    LevelLoader.LoadMap(PathPrefs, new LevelPathLoad(result.Path));
                     PathPrefs.LevelPath = result.Path;
                 }
                 catch (Exception e)
@@ -678,7 +678,7 @@ public sealed class Editor
         {
             try
             {
-                LevelLoader.ReImport(CurrentLevel);
+                LevelLoader.ReImport(PathPrefs, CurrentLevel);
             }
             catch (Exception e)
             {
