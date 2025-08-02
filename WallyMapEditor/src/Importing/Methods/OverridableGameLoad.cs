@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 using BrawlhallaSwz;
 using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public sealed class OverridableGameLoad : ILoadMethod
+public sealed class OverridableGameLoad : ILoadMethod, IDeserializable<OverridableGameLoad>
 {
     public uint DecryptionKey { get; init; }
     public string? SwzLevelName { get; init; }
@@ -102,4 +103,26 @@ public sealed class OverridableGameLoad : ILoadMethod
             ? WmeUtils.DeserializeSwzFromPath<T>(swzPath, swzFile, key, bhstyle: true)
             : WmeUtils.DeserializeFromPath<T>(overridePath);
 
+    public static OverridableGameLoad Deserialize(XElement e)
+    {
+        uint key = e.GetUIntElement(nameof(DecryptionKey));
+        string? swzLevelName = e.GetElementOrNull(nameof(SwzLevelName));
+        string? descPath = e.GetElementOrNull(nameof(DescOverride));
+        string? typesPath = e.GetElementOrNull(nameof(TypesOverride));
+        string? setTypesPath = e.GetElementOrNull(nameof(SetTypesOverride));
+        string? bonesPath = e.GetElementOrNull(nameof(BonesOverride));
+        string? powersPath = e.GetElementOrNull(nameof(PowersOverride));
+        return new(swzLevelName, key, descPath, typesPath, setTypesPath, bonesPath, powersPath);
+    }
+
+    public void Serialize(XElement e)
+    {
+        e.SetElementValue(nameof(DecryptionKey), DecryptionKey);
+        e.SetElementValue(nameof(SwzLevelName), SwzLevelName);
+        e.SetElementValue(nameof(DescOverride), DescOverride);
+        e.SetElementValue(nameof(TypesOverride), TypesOverride);
+        e.SetElementValue(nameof(SetTypesOverride), SetTypesOverride);
+        e.SetElementValue(nameof(BonesOverride), BonesOverride);
+        e.SetElementValue(nameof(PowersOverride), PowersOverride);
+    }
 }

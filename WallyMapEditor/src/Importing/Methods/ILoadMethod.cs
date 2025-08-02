@@ -4,7 +4,7 @@ namespace WallyMapEditor;
 
 public record LoadedData(Level Level, BoneTypes? Bones, string[]? Powers);
 
-public interface ILoadMethod
+public interface ILoadMethod : ISerializable
 {
     public LoadedData Load(PathPreferences pathPrefs);
 }

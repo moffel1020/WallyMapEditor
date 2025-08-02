@@ -6,10 +6,11 @@ using System.Linq;
 
 using WallyMapSpinzor2;
 using WallyMapEditor.Mod;
+using System.Xml.Linq;
 
 namespace WallyMapEditor;
 
-public sealed class ModFileLoad(string path) : ILoadMethod
+public sealed class ModFileLoad(string path) : ILoadMethod, IDeserializable<ModFileLoad>
 {
     public string FilePath { get; init; } = path;
     public ModFile? ModFile => _cachedFile?.Item1;
@@ -68,5 +69,16 @@ public sealed class ModFileLoad(string path) : ILoadMethod
     public void CacheModFile()
     {
         if (CacheInvalid) LoadModFile();
+    }
+
+    public static ModFileLoad Deserialize(XElement e)
+    {
+        string path = e.GetElement("FilePath");
+        return new(path);
+    }
+
+    public void Serialize(XElement e)
+    {
+        e.SetElementValue("FilePath", FilePath);
     }
 }
