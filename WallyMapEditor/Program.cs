@@ -8,5 +8,7 @@ prefs.ApplyCmdlineOverrides(cmdArgs);
 RenderConfigDefault config = RenderConfigDefault.Load();
 config.ApplyCmdlineOverrides(cmdArgs);
 
-Editor editor = new(prefs, config);
+RecentlyOpened recentlyOpened = RecentlyOpened.Load();
+
+Editor editor = new(prefs, config, recentlyOpened);
 editor.Run();

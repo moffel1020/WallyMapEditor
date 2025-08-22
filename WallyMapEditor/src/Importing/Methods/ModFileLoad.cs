@@ -20,6 +20,8 @@ public sealed class ModFileLoad(string path) : ILoadMethod, IDeserializable<ModF
     [MemberNotNullWhen(false, nameof(_cachedFile))]
     private bool CacheInvalid => _cachedFile is null || File.GetLastWriteTimeUtc(FilePath) != _cachedFile.Value.Item2;
 
+    public string Description => Path.GetFullPath(FilePath);
+
     public LoadedData Load(PathPreferences pathPrefs)
     {
         string brawlPath = pathPrefs.BrawlhallaPath ?? throw new ArgumentException("Not brawlhalla path chosen");

@@ -12,15 +12,55 @@ public sealed class RecentlyOpened : IDeserializable<RecentlyOpened>, ISerializa
 {
     public const string APPDATA_DIR_NAME = "WallyMapEditor";
     public const string FILE_NAME = "RecentlyOpened.xml";
+    public const int MAX_RECENTLY_OPENED = 300;
 
-    public List<ILoadMethod> LoadMethods { get; } = [];
+    private readonly List<ILoadMethod> _loadMethods = [];
+
+    public int LoadMethodCount => _loadMethods.Count;
+
+    public IEnumerable<ILoadMethod> LoadMethods
+    {
+        get
+        {
+            for (int i = _loadMethods.Count - 1; i >= 0; --i)
+                yield return _loadMethods[i];
+        }
+    }
+
+    public void MoveLoadMethodToFront(ILoadMethod loadMethod)
+    {
+        int index = _loadMethods.FindIndex((l) => l == loadMethod);
+        if (index != -1)
+        {
+            _loadMethods.RemoveAt(index);
+            _loadMethods.Add(loadMethod);
+        }
+    }
+
+    public void AddLoadMethod(ILoadMethod loadMethod)
+    {
+        int index = _loadMethods.FindIndex((l) => l == loadMethod);
+        if (index == -1)
+        {
+            _loadMethods.Add(loadMethod);
+        }
+        else
+        {
+            _loadMethods.RemoveAt(index);
+            _loadMethods.Add(loadMethod);
+        }
+    }
+
+    public void ClearLoadMethods()
+    {
+        _loadMethods.Clear();
+    }
 
     public static string FilePath => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         APPDATA_DIR_NAME,
         FILE_NAME
     );
-
 
     public static RecentlyOpened Load()
     {
@@ -55,7 +95,7 @@ public sealed class RecentlyOpened : IDeserializable<RecentlyOpened>, ISerializa
     public RecentlyOpened() { }
     private RecentlyOpened(XElement e)
     {
-        LoadMethods = e.Elements().Select<XElement, ILoadMethod?>((child) =>
+        _loadMethods = e.Elements().Select<XElement, ILoadMethod?>((child) =>
         {
             try
             {
@@ -63,6 +103,7 @@ public sealed class RecentlyOpened : IDeserializable<RecentlyOpened>, ISerializa
                 {
                     "LevelPathLoad" => child.DeserializeTo<LevelPathLoad>(),
                     "ModFileLoad" => child.DeserializeTo<ModFileLoad>(),
+                    "OverridableGameLoad" => child.DeserializeTo<OverridableGameLoad>(),
                     _ => null,
                 };
             }
@@ -78,6 +119,6 @@ public sealed class RecentlyOpened : IDeserializable<RecentlyOpened>, ISerializa
 
     public void Serialize(XElement e)
     {
-        e.AddManySerialized(LoadMethods);
+        e.AddManySerialized(_loadMethods);
     }
 }

@@ -7,6 +7,7 @@ public sealed class LevelPathLoad(string path) : ILoadMethod, IDeserializable<Le
 {
     public string Path => path;
 
+    public string Description => System.IO.Path.GetFullPath(Path);
     public LoadedData Load(PathPreferences pathPrefs) => new(WmeUtils.DeserializeFromPath<Level>(path), null, null);
 
 

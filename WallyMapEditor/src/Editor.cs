@@ -28,6 +28,7 @@ public sealed class Editor
 
     PathPreferences PathPrefs { get; }
     RenderConfigDefault ConfigDefault { get; }
+    RecentlyOpened RecentlyOpened { get; }
 
     private EditorLevel? _currentLevel;
     public EditorLevel? CurrentLevel { get => _currentLevel; set => _currentLevel = value; }
@@ -65,16 +66,17 @@ public sealed class Editor
 
     private bool _showMainMenuBar = true;
 
-    public Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault)
+    public Editor(PathPreferences pathPrefs, RenderConfigDefault configDefault, RecentlyOpened recentlyOpened)
     {
         PathPrefs = pathPrefs;
         ConfigDefault = configDefault;
+        RecentlyOpened = recentlyOpened;
         ExportDialog = new(pathPrefs, _backupsList);
         ImportDialog = new(pathPrefs);
         BackupsDialog = new(pathPrefs, _backupsList);
         ModCreatorDialog = new(pathPrefs);
         ModLoaderDialog = new(pathPrefs);
-        LevelLoader = new();
+        LevelLoader = new(pathPrefs, recentlyOpened);
     }
 
     private OverlayData OverlayData => new()
@@ -285,13 +287,41 @@ public sealed class Editor
             using (ImGuiExt.DisabledIf(!EnableNewAndOpenMapButtons))
             {
                 if (ImGui.MenuItem("New", "Ctrl+N")) NewLevelModal.Open();
-                ImGui.Separator();
                 if (ImGui.MenuItem("Open", "Ctrl+O")) OpenLevelFile();
+                if (ImGui.BeginMenu("Open Recent"))
+                {
+                    if (ImGuiExt.MenuItemDisabledIf(ClosedLevels.Count < 1, "Reopen", "Ctrl+Shift+T")) ReopenClosedLevel();
+                    ImGui.Separator();
+
+                    if (RecentlyOpened.LoadMethodCount < 1)
+                    {
+                        ImGui.TextDisabled("Open a map to see it listed here");
+                    }
+
+                    // do not LoadMap inside the loop because it modifies the LoadMethods
+                    ILoadMethod? toLoad = null;
+                    foreach (ILoadMethod loadMethod in RecentlyOpened.LoadMethods)
+                    {
+                        if (ImGui.MenuItem($"{loadMethod.Description}###{loadMethod.GetHashCode()}"))
+                            toLoad = loadMethod;
+                    }
+                    if (toLoad is not null)
+                        LevelLoader.LoadMap(toLoad, isExisting: true);
+
+                    ImGui.Separator();
+                    if (ImGui.MenuItem("Clear##clear"))
+                    {
+                        RecentlyOpened.ClearLoadMethods();
+                        ClosedLevels.Clear();
+                    }
+                    ImGui.EndMenu();
+                }
             }
             ImGui.EndGroup();
             if (btIsNull && ImGui.IsItemHovered())
                 ImGui.SetTooltip("Required files need to be imported first.\nPress \"Load required files only\" in the import menu or override the individual files manually.");
 
+            ImGui.Separator();
             if (ImGuiExt.MenuItemDisabledIf(!EnableSaveButton, "Save", "Ctrl+S")) SaveLevelFile();
             if (ImGuiExt.MenuItemDisabledIf(!EnableSaveButton, "Save As...", "Ctrl+Shift+S")) SaveLevelFileToPath();
             ImGui.Separator();
@@ -301,7 +331,6 @@ public sealed class Editor
             if (ImGuiExt.MenuItemDisabledIf(!EnableReloadMapButton, "Reload map", "Ctrl+Shift+R")) ReloadMap();
             ImGui.Separator();
             if (ImGuiExt.MenuItemDisabledIf(!EnableCloseMapButton, "Close", "Ctrl+Shift+W")) CloseCurrentLevel();
-            if (ImGui.MenuItem("Reopen", "Ctrl+Shift+T")) ReopenClosedLevel();
             ImGui.EndMenu();
         }
         if (ImGui.BeginMenu("Edit"))
@@ -337,7 +366,6 @@ public sealed class Editor
             if (ImGui.MenuItem("Save image", "P")) ExportWorldImage();
             if (ImGui.MenuItem("Center Camera", "R")) ResetCam();
             ImGui.Separator();
-            if (ImGuiExt.MenuItemDisabledIf(ClosedLevels.Count == 0, "Clear Level History")) ClosedLevels.Clear();
             if (ImGui.MenuItem("Clear Cache")) Canvas?.ClearTextureCache();
             ImGui.Separator();
             if (ImGui.MenuItem("Find swz key", null, KeyFinderPanel.Open)) KeyFinderPanel.Open = !KeyFinderPanel.Open;
@@ -567,7 +595,7 @@ public sealed class Editor
             {
                 try
                 {
-                    LevelLoader.LoadMap(PathPrefs, new LevelPathLoad(result.Path));
+                    LevelLoader.LoadMap(new LevelPathLoad(result.Path));
                     PathPrefs.LevelPath = result.Path;
                 }
                 catch (Exception e)
@@ -678,7 +706,7 @@ public sealed class Editor
         {
             try
             {
-                LevelLoader.ReImport(PathPrefs, CurrentLevel);
+                LevelLoader.ReImport(CurrentLevel);
             }
             catch (Exception e)
             {

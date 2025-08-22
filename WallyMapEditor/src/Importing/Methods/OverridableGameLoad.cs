@@ -32,6 +32,7 @@ public sealed class OverridableGameLoad : ILoadMethod, IDeserializable<Overridab
         PowersOverride = powersPath;
     }
 
+    public string Description => $"{SwzLevelName ?? DescOverride}";
     public LoadedData Load(PathPreferences pathPrefs)
     {
         string brawlPath = pathPrefs.BrawlhallaPath ?? throw new ArgumentException("No brawlhalla path provided");

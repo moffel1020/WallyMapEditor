@@ -5,7 +5,7 @@ using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public sealed class LevelLoader
+public sealed class LevelLoader(PathPreferences pathPrefs, RecentlyOpened recentlyOpened)
 {
     public delegate void OnNewMapLoadedEventHandler(LevelLoader? sender, EditorLevel newLevel);
     public delegate void OnMapReloadedEventHandler(LevelLoader? sender, EditorLevel level, Level newData, ILoadMethod loadMethod);
@@ -30,13 +30,13 @@ public sealed class LevelLoader
 
     public static bool CanReImport([NotNullWhen(true)] EditorLevel? level) => level?.ReloadMethod is not null;
 
-    public void ReImport(PathPreferences pathPrefs, EditorLevel? level)
+    public void ReImport(EditorLevel? level)
     {
         if (!CanReImport(level)) return;
-        LoadMap(pathPrefs, level.ReloadMethod!, level);
+        LoadMap(level.ReloadMethod!, level, true);
     }
 
-    public void LoadMap(PathPreferences pathPrefs, ILoadMethod loadMethod, EditorLevel? reload = null)
+    public void LoadMap(ILoadMethod loadMethod, EditorLevel? reload = null, bool isExisting = false)
     {
         (Level l, BoneTypes? bt, string[]? pn) = loadMethod.Load(pathPrefs);
         if (BoneTypes is null && bt is null) throw new InvalidOperationException("Could not load map. BoneTypes has not been imported.");
@@ -49,6 +49,15 @@ public sealed class LevelLoader
         {
             EditorLevel editorLevel = new(l) { ReloadMethod = loadMethod };
             OnNewMapLoaded?.Invoke(this, editorLevel);
+        }
+
+        if (isExisting)
+        {
+            recentlyOpened.MoveLoadMethodToFront(loadMethod);
+        }
+        else
+        {
+            recentlyOpened.AddLoadMethod(loadMethod);
         }
     }
 

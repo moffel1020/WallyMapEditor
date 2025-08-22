@@ -166,7 +166,7 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
                 {
                     _loadingError = null;
                     _loadingStatus = "loading...";
-                    loader.LoadMap(Prefs, _modFileLoad!);
+                    loader.LoadMap(_modFileLoad!);
                 }
                 catch (Exception e)
                 {
@@ -433,7 +433,7 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
                         bonesPath: _savedBtPath,
                         powersPath: _savedPtPath
                     );
-                    loader.LoadMap(Prefs, loadMethod);
+                    loader.LoadMap(loadMethod);
 
                     Prefs.DecryptionKey = key.ToString();
                     Prefs.LevelDescPath = _savedLdPath ?? Prefs.LevelDescPath;
