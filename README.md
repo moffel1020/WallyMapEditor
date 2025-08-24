@@ -7,6 +7,8 @@
 
 A map editor for Brawlhalla. **Currently under development.**
 
+<img width="1920" height="1006" alt="{D241805C-8341-4987-BCA3-0780132BDB49}" src="https://github.com/user-attachments/assets/d1dde174-ffdd-4d1c-8e82-f318e01f3a8d" />
+
 ## Download
 Download the latest release [here](https://github.com/moffel1020/WallyMapEditor/releases/latest)
 
