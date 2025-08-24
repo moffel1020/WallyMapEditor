@@ -22,7 +22,7 @@ public sealed class ImportWindow
     private string? _savedBtPath;
     private string? _savedPtPath;
     private string? _savedModPath;
-    private string _keyInput = "";
+    private string _keyOverride = "";
 
     private bool _searchingDescNames = false;
     private bool _shouldCloseDescPopup = false;
@@ -42,7 +42,6 @@ public sealed class ImportWindow
     public ImportWindow(PathPreferences prefs)
     {
         Prefs = prefs;
-        _keyInput = prefs.DecryptionKey ?? "";
         Prefs.BrawlhallaPathChanged += (_, path) => UpdateModFileBrawlPath(path);
     }
 
@@ -267,9 +266,9 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
                     try
                     {
                         _loadingError = null;
-                        uint key = uint.Parse(_keyInput);
+                        uint key = GetSwzKey(Prefs.BrawlhallaPath) ?? throw new Exception("Decryption key not found");
+                        Prefs.DecryptionKey = key.ToString();
                         levelDescNames = FindLevelDescNames(Prefs.BrawlhallaPath, key);
-                        Prefs.DecryptionKey = _keyInput;
                         _searchingDescNames = false;
                     }
                     catch (Exception e)
@@ -300,6 +299,22 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
         }
 
         if (_savedLdPath is null && _swzDescName is not null) ImGui.Text($"From game: {_swzDescName}");
+    }
+
+    private void ShowDecryptionKeySection()
+    {
+        if (_keyOverride.Length == 0)
+            ImGui.Text("Swz decryption key will be loaded from BrawlhallaAir");
+        else
+            ImGui.Text("Swz decryption key is set manually");
+
+        ImGui.InputText("Key override", ref _keyOverride, 9, ImGuiInputTextFlags.CharsDecimal);
+        if (_keyOverride.Length > 0)
+        {
+            ImGui.SameLine();
+            if (ImGui.Button("x"))
+                _keyOverride = "";
+        }
     }
 
     private void ShowLevelTypesImportSection()
@@ -360,29 +375,6 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
             ImGui.TextColored(ImGuiExt.RGBHexToVec4(0xAA4433), "Please select path");
         else
             ImGui.Text($"Selected path: {Prefs.BrawlhallaPath}");
-        ImGui.SeparatorText("Decryption key");
-
-        ImGui.InputText("Decryption key", ref _keyInput, 9, ImGuiInputTextFlags.CharsDecimal);
-        if (Prefs.BrawlhallaPath is not null && ImGui.Button("Find key"))
-        {
-            Task.Run(() =>
-            {
-                try
-                {
-                    _loadingError = null;
-                    _loadingStatus = "searching key...";
-                    _keyInput = WmeUtils.FindDecryptionKeyFromPath(Path.Combine(Prefs.BrawlhallaPath, "BrawlhallaAir.swf"))?.ToString() ?? "";
-                }
-                catch (Exception e)
-                {
-                    _loadingError = e.Message;
-                }
-                finally
-                {
-                    _loadingStatus = null;
-                }
-            });
-        }
 
         ImGui.Spacing();
         ImGui.SeparatorText("Select files");
@@ -395,7 +387,7 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
         ImGui.Spacing();
 
         ImGui.Separator();
-        if (ImGui.CollapsingHeader("Override paths"))
+        if (ImGui.CollapsingHeader("Overrides"))
         {
             ImGui.Separator();
             ShowLevelTypesImportSection();
@@ -405,16 +397,22 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
             ShowBoneTypesImportSection();
             ImGui.Separator();
             ShowPowerNamesImportSection();
+            ImGui.Separator();
+            ShowDecryptionKeySection();
         }
 
 #if DEBUG
         // secret stress testing option :3
-        if (Prefs.BrawlhallaPath is not null && uint.TryParse(_keyInput, out uint decryptionKey))
+        if (Prefs.BrawlhallaPath is not null)
         {
             ImGui.Separator();
             if (ImGui.Button("stress test"))
             {
-                _loadingError = LoadStressTester.StressTest(Prefs.BrawlhallaPath, decryptionKey);
+                uint? key = GetSwzKey(Prefs.BrawlhallaPath);
+                if (key is not null)
+                {
+                    _loadingError = LoadStressTester.StressTest(Prefs.BrawlhallaPath, key.Value);
+                }
             }
         }
 #endif
@@ -422,29 +420,30 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
 
     private void LoadButton(LevelLoader loader)
     {
-        if (ImGuiExt.ButtonDisabledIf(!uint.TryParse(_keyInput, out uint decryptionKey)
-            && !WmeUtils.IsValidBrawlPath(Prefs.BrawlhallaPath) || (_savedLdPath is null && _swzDescName is null), "Load map"))
+        if (ImGuiExt.ButtonDisabledIf(!WmeUtils.IsValidBrawlPath(Prefs.BrawlhallaPath) || (_savedLdPath is null && _swzDescName is null), "Load map"))
         {
             Task.Run(() =>
             {
                 try
                 {
+                    _loadingStatus = "loading...";
+                    _loadingError = null;
+
+                    uint key = GetSwzKey(Prefs.BrawlhallaPath!) ?? throw new Exception("Decryption key not found");
                     ILoadMethod loadMethod = new OverridableGameLoad
                     (
                         brawlPath: Prefs.BrawlhallaPath!,
                         swzLevelName: _savedLdPath is null ? _swzDescName : null,
-                        key: decryptionKey,
+                        key: key,
                         descPath: _savedLdPath,
                         typesPath: _savedLtPath,
                         setTypesPath: _savedLstPath,
                         bonesPath: _savedBtPath,
                         powersPath: _savedPtPath
                     );
-                    _loadingStatus = "loading...";
-                    _loadingError = null;
                     loader.LoadMap(loadMethod);
 
-                    Prefs.DecryptionKey = _keyInput;
+                    Prefs.DecryptionKey = key.ToString();
                     Prefs.LevelDescPath = _savedLdPath ?? Prefs.LevelDescPath;
                     Prefs.LevelTypesPath = _savedLtPath ?? Prefs.LevelTypesPath;
                     Prefs.LevelSetTypesPath = _savedLstPath ?? Prefs.LevelSetTypesPath;
@@ -506,6 +505,11 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
             : WmeUtils.ParsePowerTypesFromString(powerTypesContent);
 
     }
+
+    // choose between manual key override or searching for key in game
+    private uint? GetSwzKey(string brawlPath) => _keyOverride.Length == 0
+        ? WmeUtils.FindDecryptionKeyFromPath(Path.Combine(brawlPath, "BrawlhallaAir.swf"))
+        : uint.TryParse(_keyOverride, out uint key) ? key : null;
 
     private static string[] FindLevelDescNames(string brawlPath, uint key)
     {
