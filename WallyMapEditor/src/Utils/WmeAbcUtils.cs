@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using AbcDisassembler;
-using SwfLib;
-using SwfLib.Tags.ActionsTags;
+using AbcDisassembler.Instructions;
+using AbcDisassembler.Multinames;
+using AbcDisassembler.Swf.Tags;
+using AbcDisassembler.Swf;
 
 namespace WallyMapEditor;
 
@@ -76,25 +77,22 @@ public static partial class WmeUtils
         return null;
     }
 
-    public static DoABCDefineTag? GetDoABCDefineTag(string swfPath)
+    public static DoAbcTag? GetDoAbcTag(string swfPath)
     {
-        SwfFile swf;
-        using (FileStream stream = new(swfPath, FileMode.Open, FileAccess.Read))
-            swf = SwfFile.ReadFrom(stream);
-        return swf.Tags.OfType<DoABCDefineTag>().FirstOrDefault();
+        using FileStream file = new(swfPath, FileMode.Open, FileAccess.Read);
+        foreach (ITag t in SwfFile.ReadTags(file))
+        {
+            if (t is DoAbcTag abcTag)
+                return abcTag;
+        }
+
+        return null;
     }
 
     public static uint? FindDecryptionKeyFromPath(string bhairPath)
     {
-        // TODO: rip apart the SwfLib implementation to avoid storing tags we don't need in memory
-
-        DoABCDefineTag? tag = GetDoABCDefineTag(bhairPath);
+        DoAbcTag? tag = GetDoAbcTag(bhairPath);
         if (tag is null) return null;
-
-        AbcFile abc;
-        using (MemoryStream ms = new(tag.ABCData))
-            abc = AbcFile.Read(ms);
-
-        return FindDecryptionKey(abc);
+        return FindDecryptionKey(tag.AbcFile);
     }
 }

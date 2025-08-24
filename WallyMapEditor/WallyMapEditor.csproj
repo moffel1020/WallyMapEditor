@@ -31,7 +31,8 @@
     <ProjectReference Include="..\WallyMapSpinzor2\WallyMapSpinzor2.csproj" />
     <ProjectReference Include="..\SwiffCheese\SwiffCheese.csproj" />
     <ProjectReference Include="..\BrawlhallaSwz\BrawlhallaSwz\BrawlhallaSwz.csproj" />
-    <ProjectReference Include="..\AbcDisassembler\AbcDisassembler\AbcDisassembler.csproj" />
+    <ProjectReference Include="..\AbcDisassembler\src\AbcDisassembler\AbcDisassembler.csproj" />
+    <ProjectReference Include="..\AbcDisassembler\src\AbcDisassembler.Swf\AbcDisassembler.Swf.csproj" />
     <ProjectReference Include="..\WallyAnmSpinzor\WallyAnmSpinzor.csproj" />
   </ItemGroup>
   
