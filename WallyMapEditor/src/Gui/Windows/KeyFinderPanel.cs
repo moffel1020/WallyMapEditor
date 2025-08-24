@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using ImGuiNET;
@@ -8,6 +9,7 @@ namespace WallyMapEditor;
 public static class KeyFinderPanel
 {
     private static string? _foundKey = null;
+    private static string? _errorMessage = null;
     private static bool _open = false;
     public static bool Open { get => _open; set => _open = value; }
 
@@ -27,16 +29,32 @@ public static class KeyFinderPanel
         if (prefs.BrawlhallaPath is null)
             ImGui.TextColored(ImGuiExt.RGBHexToVec4(0xAA4433), "Please select path");
         else
-            ImGui.Text($"Selected path: {prefs.BrawlhallaPath}");
+            ImGui.Text($"Selected path: {prefs.BrawlhallaAirPath}");
 
         if (!string.IsNullOrWhiteSpace(prefs.BrawlhallaAirPath) && ImGui.Button("Find"))
-            Task.Run(() => _foundKey = WmeUtils.FindDecryptionKeyFromPath(prefs.BrawlhallaAirPath)?.ToString());
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    _foundKey = WmeUtils.FindDecryptionKeyFromPath(prefs.BrawlhallaAirPath)?.ToString();
+                    _errorMessage = null;
+                }
+                catch (Exception e)
+                {
+                    _errorMessage = e.Message;
+                }
+            });
+        }
 
         if (_foundKey is not null)
         {
             ImGui.Separator();
             ImGuiExt.InputText("found key", _foundKey, flags: ImGuiInputTextFlags.ReadOnly);
         }
+
+        if (!string.IsNullOrEmpty(_errorMessage))
+            ImGui.Text($"[Error] {_errorMessage}");
 
         ImGui.End();
     }
