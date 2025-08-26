@@ -66,7 +66,7 @@ public sealed class SwfFileData
         {
             if (tag is ShapeBaseTag shape)
             {
-                swf.ShapeTags[shape.ShapeID] = new DefineShapeXTag(shape);
+                swf.ShapeTags[shape.ShapeID] = shape;
             }
         }
 
