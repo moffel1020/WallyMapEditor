@@ -21,18 +21,25 @@ public static class LoadStressTester
             return $"Error while loading LevelTypes: {e.Message}";
         }
 
-        foreach (string file in WmeUtils.GetFilesInSwz(dynamicPath, key))
+        try
         {
-            string fileName = SwzUtils.GetFileName(file);
-            if (!fileName.StartsWith("LevelDesc_")) continue;
-            try
+            foreach (string file in WmeUtils.GetFilesInSwz(dynamicPath, key))
             {
-                WmeUtils.DeserializeFromString<LevelDesc>(file, bhstyle: true);
+                string fileName = SwzUtils.GetFileName(file);
+                if (!fileName.StartsWith("LevelDesc_")) continue;
+                try
+                {
+                    WmeUtils.DeserializeFromString<LevelDesc>(file, bhstyle: true);
+                }
+                catch (Exception e)
+                {
+                    return $"Error while loading map {fileName}: {e.Message}";
+                }
             }
-            catch (Exception e)
-            {
-                return $"Error while loading map {fileName}: {e.Message}";
-            }
+        }
+        catch (Exception e)
+        {
+            return $"Error while reading Dynamic.swz: {e.Message}";
         }
 
         return "all good!";
