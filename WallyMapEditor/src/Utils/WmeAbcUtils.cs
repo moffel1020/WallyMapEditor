@@ -12,10 +12,10 @@ namespace WallyMapEditor;
 
 public static partial class WmeUtils
 {
-    private static List<int> FindGetlexPositions(CPoolInfo cpool, string lexName, List<Instruction> code)
+    private static List<int> FindGetlexPositions(CPoolInfo cpool, string lexName, ReadOnlySpan<Instruction> code)
     {
         List<int> result = [];
-        for (int i = 0; i < code.Count; ++i)
+        for (int i = 0; i < code.Length; ++i)
         {
             Instruction instruction = code[i];
             if (instruction.Name == "getlex" &&
@@ -60,7 +60,7 @@ public static partial class WmeUtils
         {
             ReadOnlySpan<Instruction> instructions = CollectionsMarshal.AsSpan(mb.Code);
 
-            List<int> getlexPos = FindGetlexPositions(abc.ConstantPool, "ANE_RawData", mb.Code);
+            List<int> getlexPos = FindGetlexPositions(abc.ConstantPool, "ANE_RawData", instructions);
             for (int i = 0; i < getlexPos.Count; i++)
             {
                 ReadOnlySpan<Instruction> relevantCode = getlexPos[i] == getlexPos[^1]
