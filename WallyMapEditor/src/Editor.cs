@@ -469,7 +469,10 @@ public sealed class Editor
 
         // keyboard controls
         if (!wantCaptureKeyboard && Rl.IsKeyPressed(KeyboardKey.R) && !Rl.IsKeyDown(KeyboardKey.LeftControl))
+        {
             ResetCam();
+            cam = CurrentLevel.Camera; // Camera2D is a struct. it could have changed during ResetCam
+        }
 
         bool left = Rl.IsKeyDown(KeyboardKey.Left);
         bool right = Rl.IsKeyDown(KeyboardKey.Right);
