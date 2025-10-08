@@ -84,8 +84,8 @@ public static partial class WmeUtils
     {
         using FileStream stream = new(swzPath, FileMode.Open, FileAccess.Read);
         using SwzReader reader = new(stream, key);
-        while (reader.HasNext())
-            yield return reader.ReadFile();
+        foreach (string file in reader.ReadFiles())
+            yield return file;
     }
 
     public static string? GetFileInSwzFromPath(string swzPath, string filename, uint key) =>
