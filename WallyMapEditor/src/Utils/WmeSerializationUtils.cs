@@ -4,6 +4,7 @@ using System.Xml.Linq;
 using System.Text;
 using nietras.SeparatedValues;
 using WallyMapSpinzor2;
+using BrawlhallaSwz.Xml;
 
 namespace WallyMapEditor;
 
@@ -84,7 +85,7 @@ public static partial class WmeUtils
     {
         if (bhstyle)
         {
-            return BhXmlParser.ParseElement(xmldata).DeserializeTo<T>();
+            return BhXmlParser.ParseElement(xmldata)!.DeserializeTo<T>();
         }
         else
         {
@@ -113,7 +114,7 @@ public static partial class WmeUtils
         return ParsePowerTypes(reader);
     }
 
-    public static string[]? ParsePowerTypes(TextReader reader)
+    private static string[]? ParsePowerTypes(TextReader reader)
     {
         reader.ReadLine(); // skip first line bs
         using SepReader sep = Sep.New(',').Reader().From(reader);
