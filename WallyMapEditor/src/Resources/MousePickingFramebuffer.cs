@@ -128,7 +128,7 @@ public sealed class MousePickingFramebuffer : IDisposable
         try
         {
             img = Rl.LoadImageFromTexture(_framebuffer.Texture);
-            unsafe { return ((float*)img.Data)[x + (img.Height - y) * img.Width]; }
+            unsafe { return ((float*)img.Data)[x + (img.Height - y - 1) * img.Width]; }
         }
         finally
         {
