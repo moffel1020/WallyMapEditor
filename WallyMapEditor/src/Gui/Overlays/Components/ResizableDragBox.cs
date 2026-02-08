@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Raylib_cs;
 
@@ -87,12 +88,47 @@ public sealed class ResizableDragBox(double x, double y, double w, double h)
             Resizing |= circle.Dragging;
         }
 
+        // TODO: This code is copied from the AssetOverlay code, but without the transforms
+        // maybe find a way to unify the two
+        double oldX = x;
+        double oldY = y;
+        double oldW = w;
+        double oldH = h;
+
+        double ratioH = oldH / oldW;
+        double ratioW = oldW / oldH;
+
+        bool scaleDrag = Rl.IsKeyDown(KeyboardKey.LeftShift);
+        bool mirrorDrag = Rl.IsKeyDown(KeyboardKey.LeftAlt);
+
         if (TopLeft.Dragging)
         {
             x = TopLeft.X;
             y = TopLeft.Y;
             w = TopRight.X - TopLeft.X;
             h = BotLeft.Y - TopLeft.Y;
+
+            if (scaleDrag)
+            {
+                if (Math.Abs(TopLeft.X - oldX) > Math.Abs(TopLeft.Y - oldY))
+                {
+                    w = h * ratioW;
+                    x = oldX - w + oldW;
+                }
+                else
+                {
+                    h = w * ratioH;
+                    y = oldY - h + oldH;
+                }
+            }
+
+            if (mirrorDrag)
+            {
+                double diffX = x - oldX;
+                w -= diffX;
+                double diffY = y - oldY;
+                h -= diffY;
+            }
         }
         else if (TopRight.Dragging)
         {
@@ -100,6 +136,28 @@ public sealed class ResizableDragBox(double x, double y, double w, double h)
             y = TopRight.Y;
             w = TopRight.X - TopLeft.X;
             h = BotRight.Y - TopRight.Y;
+
+            if (scaleDrag)
+            {
+                if (Math.Abs(oldX + oldW - TopRight.X) > Math.Abs(TopRight.Y - oldY))
+                {
+                    w = h * ratioW;
+                }
+                else
+                {
+                    h = w * ratioH;
+                    y = oldY - h + oldH;
+                }
+            }
+
+            if (mirrorDrag)
+            {
+                double diffW = w - oldW;
+                x -= diffW;
+                w += diffW;
+                double diffY = y - oldY;
+                h -= diffY;
+            }
         }
         else if (BotLeft.Dragging)
         {
@@ -107,6 +165,28 @@ public sealed class ResizableDragBox(double x, double y, double w, double h)
             // y in unchanged
             w = BotRight.X - BotLeft.X;
             h = BotLeft.Y - TopLeft.Y;
+
+            if (scaleDrag)
+            {
+                if (Math.Abs(BotLeft.X - oldX) > Math.Abs(oldY + oldH - BotLeft.Y))
+                {
+                    w = h * ratioW;
+                    x = oldX - w + oldW;
+                }
+                else
+                {
+                    h = w * ratioH;
+                }
+            }
+
+            if (mirrorDrag)
+            {
+                double diffX = x - oldX;
+                w -= diffX;
+                double diffH = h - oldH;
+                y -= diffH;
+                h += diffH;
+            }
         }
         else if (BotRight.Dragging)
         {
@@ -114,6 +194,28 @@ public sealed class ResizableDragBox(double x, double y, double w, double h)
             // y is unchanged
             w = BotRight.X - BotLeft.X;
             h = BotRight.Y - TopRight.Y;
+
+            if (scaleDrag)
+            {
+                if (Math.Abs(oldX + oldW - BotRight.X) > Math.Abs(oldY + oldH - BotRight.Y))
+                {
+                    w = h * ratioW;
+                }
+                else
+                {
+                    h = w * ratioH;
+                }
+            }
+
+            if (mirrorDrag)
+            {
+                double diffW = w - oldW;
+                x -= diffW;
+                w += diffW;
+                double diffH = h - oldH;
+                y -= diffH;
+                h += diffH;
+            }
         }
         else if (LeftEdge.Dragging)
         {
@@ -121,6 +223,17 @@ public sealed class ResizableDragBox(double x, double y, double w, double h)
             // y is unchanged
             w = RightEdge.X - LeftEdge.X;
             // h is unchanged
+
+            if (scaleDrag)
+            {
+                h = w * ratioH;
+            }
+
+            if (mirrorDrag)
+            {
+                double diffX = x - oldX;
+                w -= diffX;
+            }
         }
         else if (RightEdge.Dragging)
         {
@@ -128,6 +241,18 @@ public sealed class ResizableDragBox(double x, double y, double w, double h)
             // y is unchanged
             w = RightEdge.X - LeftEdge.X;
             // h is unchanged
+
+            if (scaleDrag)
+            {
+                h = w * ratioH;
+            }
+
+            if (mirrorDrag)
+            {
+                double diffW = w - oldW;
+                x -= diffW;
+                w += diffW;
+            }
         }
         else if (TopEdge.Dragging)
         {
@@ -135,6 +260,17 @@ public sealed class ResizableDragBox(double x, double y, double w, double h)
             y = TopEdge.Y;
             // w is unchanged
             h = BottomEdge.Y - TopEdge.Y;
+
+            if (scaleDrag)
+            {
+                w = h * ratioW;
+            }
+
+            if (mirrorDrag)
+            {
+                double diffY = y - oldY;
+                h -= diffY;
+            }
         }
         else if (BottomEdge.Dragging)
         {
@@ -142,6 +278,18 @@ public sealed class ResizableDragBox(double x, double y, double w, double h)
             // y is unchanged
             // w is unchanged
             h = BottomEdge.Y - TopEdge.Y;
+
+            if (scaleDrag)
+            {
+                w = h * ratioW;
+            }
+
+            if (mirrorDrag)
+            {
+                double diffH = h - oldH;
+                y -= diffH;
+                h += diffH;
+            }
         }
 
         if (Resizing) Bounds = (x, y, w, h);
