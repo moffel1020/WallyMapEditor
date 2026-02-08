@@ -186,4 +186,13 @@ public static class RaylibEx
         Font font = Rl.GetFontDefault();
         return Rl.MeasureTextEx(font, text, fontSize, spacing);
     }
+
+    public static void DrawCenteredText(string text, double x, double y, double bottomMargin, float fontSize, Color tint)
+    {
+        float textW = MeasureTextV(text, fontSize).X;
+        double textX = x - textW / 2;
+        double textY = y - bottomMargin / 2;
+        Vector2 frameNumTextPos = new((float)textX, (float)textY);
+        DrawTextV(text, frameNumTextPos, fontSize, tint);
+    }
 }

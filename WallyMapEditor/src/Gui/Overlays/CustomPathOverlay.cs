@@ -53,21 +53,20 @@ public sealed class CustomPathOverlay(CustomPath cp) : IOverlay
 
     public void Draw(EditorLevel level, OverlayData data)
     {
-        int fontSize = data.OverlayConfig.FontSizePathPointNum;
-        RlColor textColor = data.OverlayConfig.TextColorPathPointNum;
-
         foreach ((DragCircle circle, int i) in Points.Indexed())
         {
-            float textW = RaylibEx.MeasureTextV(i.ToString(), fontSize).X;
-
             circle.Color = data.OverlayConfig.ColorPathPoint;
             circle.UsingColor = data.OverlayConfig.UsingColorPathPoint;
             circle.Draw(data);
 
-            double textX = circle.X - textW / 2;
-            double textY = circle.Y - circle.Radius / 2;
-            Vector2 textPos = new((float)textX, (float)textY);
-            RaylibEx.DrawTextV(i.ToString(), textPos, fontSize, textColor);
+            RaylibEx.DrawCenteredText(
+                i.ToString(),
+                circle.X,
+                circle.Y,
+                circle.Radius,
+                data.OverlayConfig.FontSizePathPointNum,
+                data.OverlayConfig.TextColorPathPointNum
+            );
         }
     }
 }
