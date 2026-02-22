@@ -4,12 +4,15 @@ using SkiaSharp;
 
 namespace WallyMapEditor;
 
-public sealed class TextureCache : UploadCache<string, RlImage, Texture2DWrapper>
+public sealed class TextureCache : UploadCache<string, RlImage?, Texture2DWrapper>
 {
-    protected override RlImage LoadIntermediate(string path)
+    protected override RlImage? LoadIntermediate(string path)
     {
         path = Path.GetFullPath(path);
-        using SKBitmap bitmap = WmeUtils.LoadSKBitmap(path);
+        using SKBitmap? bitmap = WmeUtils.LoadSKBitmap(path);
+        if (bitmap is null)
+            return null;
+
         RlImage img1 = WmeUtils.SKBitmapAsRlImage(bitmap);
         // alpha premult done in LoadSKBitmap
         RlImage img2 = RaylibEx.ImageCopyWithMipmaps(img1);
@@ -18,9 +21,12 @@ public sealed class TextureCache : UploadCache<string, RlImage, Texture2DWrapper
         return img2;
     }
 
-    protected override Texture2DWrapper IntermediateToValue(RlImage img)
+    protected override Texture2DWrapper IntermediateToValue(RlImage? img)
     {
-        Texture2D texture = Rl.LoadTextureFromImage(img);
+        if (img is null)
+            return Texture2DWrapper.Default;
+
+        Texture2D texture = Rl.LoadTextureFromImage(img.Value);
         return new(texture);
     }
 
@@ -31,9 +37,9 @@ public sealed class TextureCache : UploadCache<string, RlImage, Texture2DWrapper
         Rl.GenTextureMipmaps(ref texture);
     }
 
-    protected override void UnloadIntermediate(RlImage img)
+    protected override void UnloadIntermediate(RlImage? img)
     {
-        Rl.UnloadImage(img);
+        if (img is not null) Rl.UnloadImage(img.Value);
     }
 
     protected override void UnloadValue(Texture2DWrapper texture)

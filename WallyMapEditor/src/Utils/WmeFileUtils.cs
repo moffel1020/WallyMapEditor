@@ -10,8 +10,11 @@ namespace WallyMapEditor;
 
 public static partial class WmeUtils
 {
-    public static SKBitmap LoadSKBitmap(string path)
+    public static SKBitmap? LoadSKBitmap(string path)
     {
+        if (!File.Exists(path))
+            return null;
+
         SKImageInfo info;
         using (SKCodec codec = SKCodec.Create(path))
             info = codec.Info;
