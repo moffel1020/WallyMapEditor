@@ -8,6 +8,8 @@ using WallyMapEditor.Mod;
 
 using ImGuiNET;
 using NativeFileDialogSharp;
+using WallyMapSpinzor2;
+using System.Collections.Generic;
 
 namespace WallyMapEditor;
 
@@ -26,7 +28,11 @@ public sealed class ImportWindow
 
     private bool _searchingDescNames = false;
     private bool _shouldCloseDescPopup = false;
-    private string[] levelDescNames = [];
+    private readonly record struct LevelDescEntry(string LevelName, string? DisplayName)
+    {
+        public string Text => DisplayName is null ? LevelName : $"{LevelName} ({DisplayName})";
+    }
+    private LevelDescEntry[] levelDescs = [];
     private string _levelDescFileFilter = "";
 
     private string? _loadingError;
@@ -258,7 +264,7 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
                 ImGui.CloseCurrentPopup();
             }
 
-            if (!_searchingDescNames && Prefs.BrawlhallaPath is not null && levelDescNames.Length == 0)
+            if (!_searchingDescNames && Prefs.BrawlhallaPath is not null && levelDescs.Length == 0)
             {
                 _searchingDescNames = true;
                 Task.Run(() =>
@@ -268,7 +274,7 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
                         _loadingError = null;
                         uint key = GetSwzKey(Prefs.BrawlhallaPath) ?? throw new Exception("Decryption key not found");
                         Prefs.DecryptionKey = key.ToString();
-                        levelDescNames = FindLevelDescNames(Prefs.BrawlhallaPath, key);
+                        levelDescs = FindLevelDescs(Prefs.BrawlhallaPath, key);
                         _searchingDescNames = false;
                     }
                     catch (Exception e)
@@ -280,13 +286,14 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
                 });
             }
 
-            if (levelDescNames.Length > 0)
+            if (levelDescs.Length > 0)
             {
                 _levelDescFileFilter = ImGuiExt.InputText("Filter map names", _levelDescFileFilter);
-                string[] levelDescs = [.. levelDescNames.Where(s => s.Contains(_levelDescFileFilter, StringComparison.CurrentCultureIgnoreCase))];
-                int pickedItem = Array.FindIndex(levelDescs, s => s == _swzDescName);
-                if (ImGui.ListBox("Pick level file from swz", ref pickedItem, levelDescs, levelDescs.Length, 12))
-                    _swzDescName = levelDescs[pickedItem];
+                LevelDescEntry[] filteredLevelDesc = [.. levelDescs.Where(s => s.Text.Contains(_levelDescFileFilter, StringComparison.CurrentCultureIgnoreCase))];
+                int pickedItem = Array.FindIndex(filteredLevelDesc, s => s.LevelName == _swzDescName);
+                string[] texts = [.. filteredLevelDesc.Select((entry) => entry.Text)];
+                if (ImGui.ListBox("Pick level file from swz", ref pickedItem, texts, texts.Length, 12))
+                    _swzDescName = filteredLevelDesc[pickedItem].LevelName;
 
                 if (ImGui.Button("Select")) ImGui.CloseCurrentPopup();
             }
@@ -511,14 +518,19 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
         ? WmeUtils.FindDecryptionKeyFromPath(Path.Combine(brawlPath, "BrawlhallaAir.swf"))
         : uint.TryParse(_keyOverride, out uint key) ? key : null;
 
-    private static string[] FindLevelDescNames(string brawlPath, uint key)
+    private static LevelDescEntry[] FindLevelDescs(string brawlPath, uint key)
     {
+        string initPath = Path.Combine(brawlPath, "Init.swz");
+        LevelTypes? levelTypes = WmeUtils.DeserializeSwzFromPath<LevelTypes>(initPath, "LevelTypes.xml", key, bhstyle: true);
+        Dictionary<string, string>? levelNameMap = levelTypes?.Levels.ToDictionary(l => l.LevelName, l => l.DisplayName);
+
         string dynamicPath = Path.Combine(brawlPath, "Dynamic.swz");
 
         return WmeUtils.GetFilesInSwz(dynamicPath, key)
             .Select(SwzUtils.GetFileName)
             .Where(n => n.StartsWith("LevelDesc_"))
-            .Select(n => n["LevelDesc_".Length..])
+            .Select(n => n["LevelDesc_".Length..^".xml".Length])
+            .Select(n => new LevelDescEntry(n, levelNameMap is not null && levelNameMap.TryGetValue(n, out string? realName) ? realName : null))
             .ToArray();
     }
 }
