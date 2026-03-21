@@ -371,7 +371,7 @@ public sealed class AssetOverlay(AbstractAsset asset) : IOverlay
 
     private static WmsTransform GetMovingPlatformTransform(MovingPlatform m, RenderContext context)
     {
-        return context.PlatIDMovingPlatformTransform.GetValueOrDefault(m.PlatID, WmsTransform.IDENTITY);
+        return context.MovingPlatformTransform.GetValueOrDefault(m, WmsTransform.IDENTITY);
     }
 
     private void TransfromDragCircles(WmsTransform trans)

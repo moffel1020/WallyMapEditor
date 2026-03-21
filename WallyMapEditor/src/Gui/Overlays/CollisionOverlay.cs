@@ -273,9 +273,10 @@ public class CollisionOverlay(AbstractCollision col) : IOverlay
     {
         foreach (DynamicCollision dc in dynamics)
         {
-            if (context.PlatIDDynamicOffset.TryGetValue(dc.PlatID, out (double, double) dynOffset))
+            MovingPlatform? movingPlatform = context.MovingPlatformByPlatID.GetValueOrDefault(dc.PlatID, []).FirstOrDefault();
+            if (movingPlatform is not null)
             {
-                (double offX, double offY) = dynOffset;
+                (double offX, double offY) = context.MovingPlatformDynamicOffset[movingPlatform];
                 foreach (AbstractCollision ac in dc.Children)
                 {
                     if (ac == exclude) continue;
