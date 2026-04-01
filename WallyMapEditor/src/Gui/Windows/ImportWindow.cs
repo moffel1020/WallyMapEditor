@@ -528,9 +528,12 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
 
         return WmeUtils.GetFilesInSwz(dynamicPath, key)
             .Select(SwzUtils.GetFileName)
+            // only pick level descs (no cutscenes)
             .Where(n => n.StartsWith("LevelDesc_"))
+            // get internal level name
             .Select(n => n["LevelDesc_".Length..^".xml".Length])
-            .Select(n => new LevelDescEntry(n, levelNameMap is not null && levelNameMap.TryGetValue(n, out string? realName) ? realName : null))
+            // get real name and create entry
+            .Select(n => new LevelDescEntry(n, levelNameMap?.GetValueOrDefault(n)))
             .ToArray();
     }
 }
