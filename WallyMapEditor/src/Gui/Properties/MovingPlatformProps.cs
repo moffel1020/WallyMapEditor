@@ -68,7 +68,7 @@ public partial class PropertiesWindow
                 ImGui.SetTooltip("Only one DynamicCollision can be animated by a movingplatform. idk ask bmg");
         }
 
-        if (desc.DynamicCollisions.Where(d => mp.PlatID == d.PlatID).LastOrDefault() is DynamicCollision lastDc)
+        if (desc.DynamicCollisions.LastOrDefault(d => mp.PlatID == d.PlatID) is DynamicCollision lastDc)
             if (ImGui.Button($"Collision ({lastDc.X:0.###}, {lastDc.Y:0.###})##{lastDc.GetHashCode()}") && selection is not null)
                 selection.Object = lastDc;
 

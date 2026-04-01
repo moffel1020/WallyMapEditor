@@ -5,9 +5,9 @@ using WallyMapSpinzor2;
 
 namespace WallyMapEditor;
 
-public sealed class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
+public sealed class MovingPlatformOverlay(MovingPlatform mp) : IOverlay
 {
-    public DragCircle Position { get; set; } = new(plat.X, plat.Y);
+    public DragCircle Position { get; set; } = new(mp.X, mp.Y);
 
     public Dictionary<KeyFrame, KeyFrameOverlay> KeyFrameCircles { get; set; } = [];
 
@@ -31,12 +31,12 @@ public sealed class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
 
         // we go through the keyframes in the reverse order
         // this gives higher framenum keyframes priority
-        foreach ((KeyFrame kf, int num) in EnumerateKeyFrames(plat.Animation.KeyFrames).Reverse())
+        foreach ((KeyFrame kf, int num) in EnumerateKeyFrames(mp.Animation.KeyFrames).Reverse())
         {
             currentKeyFrames.Add(kf);
             if (!KeyFrameCircles.TryGetValue(kf, out KeyFrameOverlay? kfo))
                 kfo = KeyFrameCircles[kf] = new(kf);
-            kfo.PlatOffset = (plat.X, plat.Y);
+            kfo.PlatOffset = (mp.X, mp.Y);
             kfo.AllowDragging = !dragging;
             kfo.FrameNumOverride = num;
             dragging |= kfo.Update(level, data);
@@ -48,8 +48,8 @@ public sealed class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
                 KeyFrameCircles.Remove(kf);
         }
 
-        if (!data.Context.PlatIDMovingPlatformTransform.TryGetValue(plat.PlatID, out Transform platTransform))
-            throw new Exception($"Attempt to update overlay for moving platform with PlatID {plat.PlatID}, but moving platform offset dictionary did not contain that PlatID");
+        if (!data.Context.MovingPlatformTransform.TryGetValue(mp, out Transform platTransform))
+            throw new Exception($"Attempt to update overlay for moving platform with PlatID {mp.PlatID}, but moving platform offset dictionary did not contain that moving platform");
         (double offsetX, double offsetY) = platTransform * (0, 0);
         (Position.X, Position.Y) = (offsetX, offsetY);
         Position.Update(level.Camera, data, !dragging);
@@ -57,9 +57,9 @@ public sealed class MovingPlatformOverlay(MovingPlatform plat) : IOverlay
         if (Position.Dragging)
         {
             level.CommandHistory.Add(new PropChangeCommand<double, double>(
-                (val1, val2) => (plat.X, plat.Y) = (val1, val2),
-                plat.X, plat.Y,
-                plat.X + Position.X - offsetX, plat.Y + Position.Y - offsetY
+                (val1, val2) => (mp.X, mp.Y) = (val1, val2),
+                mp.X, mp.Y,
+                mp.X + Position.X - offsetX, mp.Y + Position.Y - offsetY
             ));
         }
 

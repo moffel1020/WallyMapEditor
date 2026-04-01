@@ -42,7 +42,7 @@ public partial class PropertiesWindow
 
         propChanged |= ImGuiExt.GenericStringComboHistory("NavType", n.Type, val => n.Type = val,
             NavTypeToString, ParseNavTypeString,
-            [.. Enum.GetValues<NavNodeTypeEnum>().Where(t => t != NavNodeTypeEnum.D)], cmd);
+            Enum.GetValues<NavNodeTypeEnum>(), cmd);
 
         ImGui.Separator();
         ImGui.Text("Path:");
@@ -57,8 +57,8 @@ public partial class PropertiesWindow
                 remove = () =>
                 {
                     // no need for ArrayRemoveCommand because we're not dealing with selectables
-                    (uint, NavNodeTypeEnum)[] result = WmeUtils.RemoveAt(n.Path, index);
-                    cmd.Add(new PropChangeCommand<(uint, NavNodeTypeEnum)[]>(val => n.Path = val, n.Path, result), false);
+                    (uint, NavNodePathTypeFlags)[] result = WmeUtils.RemoveAt(n.Path, index);
+                    cmd.Add(new PropChangeCommand<(uint, NavNodePathTypeFlags)[]>(val => n.Path = val, n.Path, result), false);
                     propChanged = true;
                 };
             }
@@ -74,7 +74,14 @@ public partial class PropertiesWindow
                 if (node.NavID != n.NavID && ImGui.Selectable($"{node.NavID}###pathselect{node.GetHashCode()}"))
                 {
                     // no need for ArrayAddCommand because we're not dealing with selectables
-                    cmd.Add(new PropChangeCommand<(uint, NavNodeTypeEnum)[]>(val => n.Path = val, n.Path, [.. n.Path, (node.NavID, node.Type)]), false);
+                    cmd.Add(new PropChangeCommand<(uint, NavNodePathTypeFlags)[]>(val => n.Path = val, n.Path, [.. n.Path, (node.NavID, node.Type switch {
+                        NavNodeTypeEnum.A => NavNodePathTypeFlags.A,
+                        NavNodeTypeEnum.L => NavNodePathTypeFlags.L,
+                        NavNodeTypeEnum.G => NavNodePathTypeFlags.G,
+                        NavNodeTypeEnum.T => NavNodePathTypeFlags.T,
+                        NavNodeTypeEnum.S => NavNodePathTypeFlags.S,
+                        _ => 0,
+                    })]), false);
                 }
             }
             ImGui.EndCombo();
@@ -109,7 +116,7 @@ public partial class PropertiesWindow
         {
             for (int i = 0; i < node.Path.Length; i++)
             {
-                (uint id, NavNodeTypeEnum type) = node.Path[i];
+                (uint id, NavNodePathTypeFlags type) = node.Path[i];
                 if (id == oldID)
                     node.Path[i] = (newID, type);
             }
