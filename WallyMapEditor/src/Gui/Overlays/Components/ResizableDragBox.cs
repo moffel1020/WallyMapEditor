@@ -5,7 +5,7 @@ using Raylib_cs;
 namespace WallyMapEditor;
 
 // TODO: this should somehow be unified with the AssetOverlay stuff
-public sealed class ResizableDragBox(double x, double y, double w, double h)
+public sealed class ResizableDragBox(double x, double y, double w, double h, bool allowSpecial = true)
 {
     public DragCircle TopLeft { get; } = new(x, y);
     public DragCircle TopRight { get; } = new(x + w, y);
@@ -98,8 +98,8 @@ public sealed class ResizableDragBox(double x, double y, double w, double h)
         double ratioH = oldH / oldW;
         double ratioW = oldW / oldH;
 
-        bool scaleDrag = Rl.IsKeyDown(KeyboardKey.LeftShift);
-        bool mirrorDrag = Rl.IsKeyDown(KeyboardKey.LeftAlt);
+        bool scaleDrag = allowSpecial && Rl.IsKeyDown(KeyboardKey.LeftShift);
+        bool mirrorDrag = allowSpecial && Rl.IsKeyDown(KeyboardKey.LeftAlt);
 
         if (TopLeft.Dragging)
         {

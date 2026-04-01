@@ -5,7 +5,7 @@ namespace WallyMapEditor;
 
 public sealed class VolumeOverlay(AbstractVolume volume) : IOverlay
 {
-    public ResizableDragBox ResizableBox { get; set; } = new(volume.X, volume.Y, volume.W, volume.H);
+    public ResizableDragBox ResizableBox { get; set; } = new(volume.X, volume.Y, volume.W, volume.H, false);
 
     public void Draw(EditorLevel level, OverlayData data)
     {
