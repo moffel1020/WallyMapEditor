@@ -30,7 +30,7 @@ public sealed class ImportWindow
     private bool _shouldCloseDescPopup = false;
     private readonly record struct LevelDescEntry(string LevelName, string? DisplayName)
     {
-        public string Text => DisplayName is null ? LevelName : $"{LevelName} ({DisplayName})";
+        public string Text => DisplayName is null ? LevelName : $"{DisplayName} ({LevelName})";
     }
     private LevelDescEntry[] levelDescs = [];
     private string _levelDescFileFilter = "";
