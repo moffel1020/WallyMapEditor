@@ -11,23 +11,23 @@ public sealed class OverridableGameLoad : ILoadMethod
 {
     public string BrawlPath { get; init; }
     public uint DecryptionKey { get; init; }
-    public string? SwzLevelName { get; init; }
+    public string? SwzLevelXmlName { get; init; }
     public string? DescOverride { get; init; }
     public string? TypesOverride { get; init; }
     public string? SetTypesOverride { get; init; }
     public string? BonesOverride { get; init; }
     public string? PowersOverride { get; init; }
 
-    public OverridableGameLoad(string brawlPath, string? swzLevelName, uint key, string? descPath = null, string? typesPath = null, string? setTypesPath = null, string? bonesPath = null, string? powersPath = null)
+    public OverridableGameLoad(string brawlPath, string? swzLevelXmlName, uint key, string? descPath = null, string? typesPath = null, string? setTypesPath = null, string? bonesPath = null, string? powersPath = null)
     {
-        if (descPath is null && swzLevelName is null)
+        if (descPath is null && swzLevelXmlName is null)
             throw new ArgumentException("Could not create OverridableGameLoad. swzLevelName or descPath has to be set");
 
         if (!WmeUtils.IsValidBrawlPath(brawlPath))
             throw new ArgumentException($"{brawlPath} is not a valid brawlhalla path");
 
         BrawlPath = brawlPath;
-        SwzLevelName = swzLevelName;
+        SwzLevelXmlName = swzLevelXmlName;
         DescOverride = descPath;
         DecryptionKey = key;
         TypesOverride = typesPath;
@@ -42,7 +42,7 @@ public sealed class OverridableGameLoad : ILoadMethod
         string gamePath = Path.Combine(BrawlPath, "Game.swz");
         string initPath = Path.Combine(BrawlPath, "Init.swz");
 
-        LevelDesc ld = LoadFile<LevelDesc>(DescOverride, dynamicPath, "LevelDesc_" + SwzLevelName, DecryptionKey) ?? throw new FileLoadException("Could not load LevelDesc from swz or path");
+        LevelDesc ld = LoadFile<LevelDesc>(DescOverride, dynamicPath, "LevelDesc_" + SwzLevelXmlName, DecryptionKey) ?? throw new FileLoadException("Could not load LevelDesc from swz or path");
         (LevelTypes lt, BoneTypes bt) = ReadFromInitSwz(initPath);
         (LevelSetTypes lst, string[]? pt) = ReadFromGameSwz(gamePath);
 

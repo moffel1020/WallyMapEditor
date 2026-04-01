@@ -440,7 +440,7 @@ If you just want to play with mods in game, use the menu under Mods > Load mods"
                     ILoadMethod loadMethod = new OverridableGameLoad
                     (
                         brawlPath: Prefs.BrawlhallaPath!,
-                        swzLevelName: _savedLdPath is null ? _swzDescName : null,
+                        swzLevelXmlName: _savedLdPath is null ? _swzDescName + ".xml" : null,
                         key: key,
                         descPath: _savedLdPath,
                         typesPath: _savedLtPath,
