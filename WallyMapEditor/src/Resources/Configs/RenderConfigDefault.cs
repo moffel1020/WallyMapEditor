@@ -11,7 +11,7 @@ public sealed class RenderConfigDefault : IDeserializable<RenderConfigDefault>, 
     public const string APPDATA_DIR_NAME = "WallyMapEditor";
     public const string FILE_NAME = "RenderConfigDefault.xml";
 
-    public RenderConfig ConfigDefault { get; set; } = RenderConfig.Default;
+    public EditorRenderConfig ConfigDefault { get; set; } = EditorRenderConfig.Default;
 
     public static string FilePath => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -53,7 +53,7 @@ public sealed class RenderConfigDefault : IDeserializable<RenderConfigDefault>, 
     public RenderConfigDefault() { }
     private RenderConfigDefault(XElement e)
     {
-        ConfigDefault = e.DeserializeTo<RenderConfig>();
+        ConfigDefault = e.DeserializeTo<EditorRenderConfig>();
     }
     public static RenderConfigDefault Deserialize(XElement e) => new(e);
 

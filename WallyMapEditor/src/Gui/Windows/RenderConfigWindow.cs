@@ -16,27 +16,27 @@ public sealed class RenderConfigWindow
     private bool _open = false;
     public bool Open { get => _open; set => _open = value; }
 
-    public event EventHandler<RenderConfig>? RenderConfigChanged;
+    public event EventHandler<EditorRenderConfig>? RenderConfigChanged;
     public event EventHandler<int>? MoveFrames;
     public event EventHandler<int>? SetFrames;
 
     private int _advanceFrames;
     private int _setFrames;
 
-    private static RenderConfig LoadConfig(string path)
+    private static EditorRenderConfig LoadConfig(string path)
     {
         XElement element;
         using (FileStream stream = new(path, FileMode.Open, FileAccess.Read))
             element = XElement.Load(stream);
-        return element.DeserializeTo<RenderConfig>();
+        return element.DeserializeTo<EditorRenderConfig>();
     }
 
-    private static void SaveConfig(RenderConfig config, string path)
+    private static void SaveConfig(EditorRenderConfig config, string path)
     {
         WmeUtils.SerializeToPath(config, path);
     }
 
-    public void Show(RenderConfig config, RenderConfigDefault configDefault, PathPreferences prefs, ref bool paused)
+    public void Show(EditorRenderConfig editorConfig, RenderConfigDefault configDefault, PathPreferences prefs, ref Camera2D? camera)
     {
         ImGui.Begin("Render Config", ref _open);
 
@@ -52,7 +52,7 @@ public sealed class RenderConfigWindow
                     prefs.ConfigFolderPath = Path.GetDirectoryName(result.Path);
                     try
                     {
-                        RenderConfig config = LoadConfig(result.Path);
+                        EditorRenderConfig config = LoadConfig(result.Path);
                         RenderConfigChanged?.Invoke(this, config);
                     }
                     catch (Exception e)
@@ -75,7 +75,7 @@ public sealed class RenderConfigWindow
                     prefs.ConfigFolderPath = Path.GetDirectoryName(result.Path);
                     try
                     {
-                        SaveConfig(config, result.Path);
+                        SaveConfig(editorConfig, result.Path);
                     }
                     catch (Exception e)
                     {
@@ -95,22 +95,24 @@ public sealed class RenderConfigWindow
 
         if (ImGui.Button("Reset to base default##config"))
         {
-            RenderConfigChanged?.Invoke(this, RenderConfig.Default);
+            RenderConfigChanged?.Invoke(this, EditorRenderConfig.Default);
         }
 
         if (ImGui.Button("Set as custom default##config"))
         {
-            RenderConfigChanged?.Invoke(this, new(config));
+            RenderConfigChanged?.Invoke(this, new(editorConfig));
         }
 
         ImGui.SeparatorText("Rendering##config");
 
+        RenderConfig config = editorConfig.RenderConfig;
+
         int currentFrame = (int)Math.Round(config.Time.TotalSeconds * 60);
         ImGui.Text($"Frame {currentFrame}");
 
-        config.RenderSpeed = ImGuiExt.DragDouble("Render speed##config", config.RenderSpeed, speed: 0.1f);
-        if (ImGui.Button(paused ? "Unpause###pause" : "Pause###pause"))
-            paused = !paused;
+        editorConfig.RenderSpeed = ImGuiExt.DragDouble("Render speed##config", editorConfig.RenderSpeed, speed: 0.1f);
+        if (ImGui.Button(editorConfig.Paused ? "Unpause###pause" : "Pause###pause"))
+            editorConfig.Paused = !editorConfig.Paused;
         if (ImGui.Button("Reset time##config")) SetFrames?.Invoke(this, 0);
         if (ImGui.Button("Prev frame")) MoveFrames?.Invoke(this, -1);
         ImGui.SameLine();
@@ -123,6 +125,17 @@ public sealed class RenderConfigWindow
         ImGui.InputInt("##advanceframesinput", ref _advanceFrames, 0, 0);
         ImGui.SameLine();
         if (ImGui.Button("Advance frames")) MoveFrames?.Invoke(this, _advanceFrames);
+
+        if (camera is not null)
+        {
+            ImGui.SeparatorText("Camera##config");
+            float targetX = (float)ImGuiExt.DragDouble("Camera Target X##config", camera.Value.Target.X);
+            float targetY = (float)ImGuiExt.DragDouble("Camera Target Y##config", camera.Value.Target.Y);
+            float offsetX = (float)ImGuiExt.DragDouble("Camera Offset X##config", camera.Value.Offset.X);
+            float offsetY = (float)ImGuiExt.DragDouble("Camera Offset Y##config", camera.Value.Offset.Y);
+            float zoom = (float)ImGuiExt.DragDouble("Camera Zoom##config", camera.Value.Zoom, speed: 0.01f);
+            camera = new(new(offsetX, offsetY), new(targetX, targetY), 0, zoom);
+        }
 
         ImGui.SeparatorText("Bounds##config");
         config.ShowCameraBounds = ImGuiExt.Checkbox("Camera bounds##config", config.ShowCameraBounds);

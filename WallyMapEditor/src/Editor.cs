@@ -53,8 +53,7 @@ public sealed class Editor
 
     private bool _movingObject = false;
 
-    private bool _renderPaused = false;
-    private RenderConfig _renderConfig = RenderConfig.Default;
+    private EditorRenderConfig _renderConfig = EditorRenderConfig.Default;
     private readonly OverlayConfig _overlayConfig = OverlayConfig.Default;
     private readonly RenderState _state = new();
     private RenderContext _context = new();
@@ -81,7 +80,7 @@ public sealed class Editor
     {
         Viewport = ViewportWindow,
         Context = _context,
-        RenderConfig = _renderConfig,
+        RenderConfig = _renderConfig.RenderConfig,
         OverlayConfig = _overlayConfig,
     };
 
@@ -101,8 +100,8 @@ public sealed class Editor
         while (!Rl.WindowShouldClose())
         {
             float delta = Rl.GetFrameTime();
-            if (!_renderPaused)
-                _renderConfig.Time += TimeSpan.FromSeconds(_renderConfig.RenderSpeed * delta);
+            if (!_renderConfig.Paused)
+                _renderConfig.RenderConfig.Time += TimeSpan.FromSeconds(_renderConfig.RenderSpeed * delta);
             Time += TimeSpan.FromSeconds(delta);
             Draw();
             Update();
@@ -117,7 +116,7 @@ public sealed class Editor
     {
         LogCallback.Init();
 
-        _renderConfig = ConfigDefault.SerializeToXElement().DeserializeTo<RenderConfig>();
+        _renderConfig = ConfigDefault.SerializeToXElement().DeserializeTo<EditorRenderConfig>();
 
         ImportDialog.Open = true;
 
@@ -162,12 +161,12 @@ public sealed class Editor
 
         RenderConfigWindow.MoveFrames += (_, frames) =>
         {
-            _renderConfig.Time += TimeSpan.FromSeconds(frames / 60.0);
+            _renderConfig.RenderConfig.Time += TimeSpan.FromSeconds(frames / 60.0);
         };
 
         RenderConfigWindow.SetFrames += (_, frames) =>
         {
-            _renderConfig.Time = TimeSpan.FromSeconds(frames / 60.0);
+            _renderConfig.RenderConfig.Time = TimeSpan.FromSeconds(frames / 60.0);
         };
     }
 
@@ -195,7 +194,7 @@ public sealed class Editor
                 Canvas.CameraMatrix = Rl.GetCameraMatrix2D(CurrentLevel.Camera);
 
                 _context = new();
-                CurrentLevel.Level.DrawOn(Canvas, WmsTransform.IDENTITY, _renderConfig, _context, _state);
+                CurrentLevel.Level.DrawOn(Canvas, WmsTransform.IDENTITY, _renderConfig.RenderConfig, _context, _state);
                 Canvas.FinalizeDraw();
             }
 
@@ -219,7 +218,11 @@ public sealed class Editor
         if (ViewportWindow.Open)
             ViewportWindow.Show(LoadedLevels, ref _currentLevel);
         if (RenderConfigWindow.Open)
-            RenderConfigWindow.Show(_renderConfig, ConfigDefault, PathPrefs, ref _renderPaused);
+        {
+            Camera2D? camera = _currentLevel?.Camera;
+            RenderConfigWindow.Show(_renderConfig, ConfigDefault, PathPrefs, ref camera);
+            if (_currentLevel is not null) _currentLevel.Camera = camera!.Value;
+        }
 
         if (CurrentLevel is not null)
         {
@@ -372,7 +375,7 @@ public sealed class Editor
             usingOverlay |= CurrentLevel.OverlayManager.IsUsing;
             // if overlay not used, do object picking
             if (ViewportWindow.Hovered && !usingOverlay && Rl.IsMouseButtonReleased(MouseButton.Left))
-                CurrentLevel.Selection.Object = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, CurrentLevel.Level, CurrentLevel.Camera, _renderConfig, _state);
+                CurrentLevel.Selection.Object = PickingFramebuffer.GetObjectAtCoords(ViewportWindow, Canvas, CurrentLevel.Level, CurrentLevel.Camera, _renderConfig.RenderConfig, _state);
         }
 
         if (!wantCaptureKeyboard && Rl.IsKeyDown(KeyboardKey.LeftControl))
@@ -506,11 +509,6 @@ public sealed class Editor
         CurrentLevel.Camera = cam;
     }
 
-    public void QueueResetCam()
-    {
-        if (CurrentLevel is not null)
-            CurrentLevel.DidCameraInit = false;
-    }
     public void ResetCam() => ResetCam(ViewportWindow.Bounds.Width, ViewportWindow.Bounds.Height);
 
     public void ResetCam(double surfaceW, double surfaceH)
@@ -550,7 +548,7 @@ public sealed class Editor
         Rl.ClearBackground(RlColor.Blank);
         Rl.BeginMode2D(camera);
         Canvas.CameraMatrix = Rl.GetCameraMatrix2D(camera);
-        CurrentLevel?.Level.DrawOn(Canvas, WmsTransform.IDENTITY, _renderConfig, new RenderContext(), _state);
+        CurrentLevel?.Level.DrawOn(Canvas, WmsTransform.IDENTITY, _renderConfig.RenderConfig, new RenderContext(), _state);
         Canvas.FinalizeDraw();
         Rl.EndMode2D();
         Rl.EndTextureMode();
