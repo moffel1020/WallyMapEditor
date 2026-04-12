@@ -14,7 +14,6 @@ namespace WallyMapEditor;
 
 public sealed class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfShapeCache.ShapeData, Texture2DWrapper>
 {
-    private readonly static SKSamplingOptions SAMPLING_OPTIONS = new(SKFilterMode.Linear, SKMipmapMode.Linear);
     private const int SWF_UNIT_DIVISOR = 20;
     private const double ANIM_SCALE_MULTIPLIER = 1.2;
 
@@ -55,7 +54,7 @@ public sealed class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfSh
         reader.Dispose();
         using SKBitmap bitmap1 = svg.Picture!.ToBitmap(SKColors.Transparent, 3, 3, SKColorType.Rgba8888, SKAlphaType.Premul, SKColorSpace.CreateSrgb())!;
         svg.Dispose();
-        using SKBitmap bitmap2 = bitmap1.Resize(new SKSizeI(imageW, imageH), SAMPLING_OPTIONS);
+        using SKBitmap bitmap2 = bitmap1.Resize(new SKSizeI(imageW, imageH), SKFilterQuality.Medium);
         bitmap1.Dispose();
         RlImage img1 = WmeUtils.SKBitmapAsRlImage(bitmap2);
         RlImage img2 = RaylibEx.ImageCopyWithMipmaps(img1);
