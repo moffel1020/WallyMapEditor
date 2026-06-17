@@ -70,6 +70,7 @@ public static class AddObjectPopup
             if (ImGui.MenuItem(nameof(PressurePlateCollision))) result = PropertiesWindow.DefaultCollision<PressurePlateCollision>(startX, startY, endX, endY);
             if (ImGui.MenuItem(nameof(SoftPressurePlateCollision))) result = PropertiesWindow.DefaultCollision<SoftPressurePlateCollision>(startX, startY, endX, endY);
             if (ImGui.MenuItem(nameof(LavaCollision))) result = PropertiesWindow.DefaultCollision<LavaCollision>(startX, startY, endX, endY);
+            if (ImGui.MenuItem(nameof(MudCollision))) result = PropertiesWindow.DefaultCollision<MudCollision>(startX, startY, endX, endY);
             ImGui.EndMenu();
         }
         return result;

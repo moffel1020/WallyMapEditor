@@ -268,6 +268,7 @@ public sealed class RenderConfigWindow
                 config.ColorPressurePlateCollision = ImGuiExt.ColorPicker4("Pressure plate##configColors", config.ColorPressurePlateCollision);
                 config.ColorSoftPressurePlateCollision = ImGuiExt.ColorPicker4("Soft pressure plate##configColors", config.ColorSoftPressurePlateCollision);
                 config.ColorLavaCollision = ImGuiExt.ColorPicker4("Lava##configColors", config.ColorLavaCollision);
+                config.ColorMudCollision = ImGuiExt.ColorPicker4("Mud##configColors", config.ColorMudCollision);
                 ImGui.Spacing();
                 config.ColorCollisionNormal = ImGuiExt.ColorPicker4("Collision normal##configColors", config.ColorCollisionNormal);
                 config.ColorFireOffset = ImGuiExt.ColorPicker4("Pressure plate fire offset##configColors", config.ColorFireOffset);

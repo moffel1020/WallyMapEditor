@@ -30,7 +30,6 @@ public static class Strings
     public const string UI_BG_ANIMATED_ASSET_TOOLTIP = "An alternative background to use when animated backgrounds are enabled";
     public const string UI_COLLISION_FLAG_TOOLTIP = "Affects bouncing sound. Sand is used in Vollybrawl. Might not work.";
     public const string UI_COLLISION_COLOR_FLAG_TOOLTIP = "Unused.";
-    public const string UI_COLLISION_TAUNT_EVENT_TOOLTIP = "Used for battlepass missions like taunting on an island.";
     public const string UI_COLLISION_ANCHOR_TOOLTIP = "Turns the collision into a quadratic bezier.";
     public const string UI_COLLISION_NORMAL_TOOLTIP = "Overrides the default collision normal. Useful when moving platforms move through collision.";
     public const string UI_PLATFORM_ASSET_SWAP_TOOLTIP = "Set if the platform always shows up, only shows up when animated backgrounds are off, or only shows up when animated backgrounds are on.";

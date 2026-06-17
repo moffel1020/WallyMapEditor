@@ -55,8 +55,6 @@ public partial class PropertiesWindow
         ImGuiExt.HintTooltip(Strings.UI_COLLISION_FLAG_TOOLTIP);
         propChanged |= ImGuiExt.NullableEnumComboHistory($"ColorFlag##{ac.GetHashCode()}", ac.ColorFlag, val => ac.ColorFlag = val, cmd);
         ImGuiExt.HintTooltip(Strings.UI_COLLISION_COLOR_FLAG_TOOLTIP);
-        propChanged |= ImGuiExt.InputTextHistory($"TauntEvent##{ac.GetHashCode()}", ac.TauntEvent ?? "", val => ac.TauntEvent = val == "" ? null : val, cmd);
-        ImGuiExt.HintTooltip(Strings.UI_COLLISION_TAUNT_EVENT_TOOLTIP);
 
         ImGui.SeparatorText("Anchor");
         ImGuiExt.HintTooltip(Strings.UI_COLLISION_ANCHOR_TOOLTIP);
@@ -272,7 +270,6 @@ public partial class PropertiesWindow
             result.DoIfSome(col =>
             {
                 col.Parent = og.Parent;
-                col.TauntEvent = og.TauntEvent;
                 col.Team = og.Team;
                 col.AnchorX = og.AnchorX;
                 col.AnchorY = og.AnchorY;
