@@ -133,4 +133,13 @@ public sealed partial class PropertiesWindow
         W = 750,
         H = 175,
     };
+
+    public static ForegroundAsset DefaultForegroundAsset(double posX, double posY) => new()
+    {
+        AssetName = "../Swamp/Mud4B.png",
+        X = posX,
+        Y = posY,
+        W = 1305,
+        H = 670,
+    };
 }

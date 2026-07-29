@@ -142,6 +142,9 @@ public sealed class RenderConfigWindow
         config.ShowKillBounds = ImGuiExt.Checkbox("Kill bounds##config", config.ShowKillBounds);
         config.ShowSpawnBotBounds = ImGuiExt.Checkbox("Spawn bot bounds##config", config.ShowSpawnBotBounds);
 
+        ImGui.SeparatorText("Mud##config");
+        config.ShowMudLine = ImGuiExt.Checkbox("Show mud line##config", config.ShowMudLine);
+
         ImGui.SeparatorText("Collisions##config");
         config.ShowCollision = ImGuiExt.Checkbox("Collisions##config", config.ShowCollision);
         config.ShowCollisionNormalOverride = ImGuiExt.Checkbox("Normal overrides##config", config.ShowCollisionNormalOverride);
@@ -254,6 +257,12 @@ public sealed class RenderConfigWindow
                 config.ColorSpawnBotBounds = ImGuiExt.ColorPicker4("Spawn bot bounds##configColors", config.ColorSpawnBotBounds);
                 ImGui.TreePop();
             }
+            if (ImGui.TreeNode("Mud##configColor"))
+            {
+                config.ColorMudLine = ImGuiExt.ColorPicker4("Mud line##configColors", config.ColorMudLine);
+                config.ColorMudKillLine = ImGuiExt.ColorPicker4("Mud kill line##configColors", config.ColorMudKillLine);
+                ImGui.TreePop();
+            }
             if (ImGui.TreeNode("Collisions##configColors"))
             {
                 config.ColorHardCollision = ImGuiExt.ColorPicker4("Hard##configColors", config.ColorHardCollision);
@@ -268,7 +277,6 @@ public sealed class RenderConfigWindow
                 config.ColorPressurePlateCollision = ImGuiExt.ColorPicker4("Pressure plate##configColors", config.ColorPressurePlateCollision);
                 config.ColorSoftPressurePlateCollision = ImGuiExt.ColorPicker4("Soft pressure plate##configColors", config.ColorSoftPressurePlateCollision);
                 config.ColorLavaCollision = ImGuiExt.ColorPicker4("Lava##configColors", config.ColorLavaCollision);
-                config.ColorMudCollision = ImGuiExt.ColorPicker4("Mud##configColors", config.ColorMudCollision);
                 ImGui.Spacing();
                 config.ColorCollisionNormal = ImGuiExt.ColorPicker4("Collision normal##configColors", config.ColorCollisionNormal);
                 config.ColorFireOffset = ImGuiExt.ColorPicker4("Pressure plate fire offset##configColors", config.ColorFireOffset);

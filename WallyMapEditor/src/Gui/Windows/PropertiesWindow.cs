@@ -35,6 +35,8 @@ public sealed partial class PropertiesWindow
 
     private static bool ShowProperties(object o, EditorLevel level, PropertiesWindowData data) => o switch
     {
+        LevelMud lm => ShowLevelMudProps(lm, level),
+
         Respawn r => ShowRespawnProps(r, level),
         Background b => ShowBackgroundProps(b, level, data),
         TeamScoreboard ts => ShowTeamScoreboardProps(ts, level),

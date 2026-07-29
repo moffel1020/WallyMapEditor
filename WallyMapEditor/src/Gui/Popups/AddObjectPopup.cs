@@ -70,7 +70,6 @@ public static class AddObjectPopup
             if (ImGui.MenuItem(nameof(PressurePlateCollision))) result = PropertiesWindow.DefaultCollision<PressurePlateCollision>(startX, startY, endX, endY);
             if (ImGui.MenuItem(nameof(SoftPressurePlateCollision))) result = PropertiesWindow.DefaultCollision<SoftPressurePlateCollision>(startX, startY, endX, endY);
             if (ImGui.MenuItem(nameof(LavaCollision))) result = PropertiesWindow.DefaultCollision<LavaCollision>(startX, startY, endX, endY);
-            if (ImGui.MenuItem(nameof(MudCollision))) result = PropertiesWindow.DefaultCollision<MudCollision>(startX, startY, endX, endY);
             ImGui.EndMenu();
         }
         return result;
@@ -86,10 +85,11 @@ public static class AddObjectPopup
         return result;
     }
 
-    public static Maybe<AbstractAsset> AddAssetMenu(double posX, double posY, bool allowAsset = false)
+    public static Maybe<AbstractAsset> AddAssetMenu(double posX, double posY, bool allowAsset = false, bool allowForegroundAsset = false)
     {
         Maybe<AbstractAsset> result = new();
         if (allowAsset && ImGui.MenuItem("Asset")) result = PropertiesWindow.DefaultAsset(posX, posY);
+        if (allowForegroundAsset && ImGui.MenuItem("ForegroundAsset")) result = PropertiesWindow.DefaultForegroundAsset(posX, posY);
         if (ImGui.MenuItem("Platform with AssetName")) result = PropertiesWindow.DefaultPlatformWithAssetName(posX, posY);
         if (ImGui.MenuItem("Platform without AssetName")) result = PropertiesWindow.DefaultPlatformWithoutAssetName(posX, posY);
         return result;
@@ -178,7 +178,7 @@ public static class AddObjectPopup
 
     public static void AddMovingPlatformMenuHistory(double posX, double posY, Level l, SelectionContext selection, CommandHistory cmd)
     {
-        Maybe<AbstractAsset> maybeAsset = AddAssetMenu(posX, posY, allowAsset: false);
+        Maybe<AbstractAsset> maybeAsset = AddAssetMenu(posX, posY, allowAsset: false, allowForegroundAsset: true);
         if (ImGui.MenuItem("MovingPlatform"))
         {
             maybeAsset = new MovingPlatform()

@@ -291,6 +291,35 @@ public sealed class MapOverviewWindow
             ShowSelectableList(l.Desc.Backgrounds, selection, val => l.Desc.Backgrounds = val, cmd, false);
         }
 
+        if (ImGui.CollapsingHeader("Mud##overview"))
+        {
+            if (l.Desc.Mud is not null && l.Desc.Mud.IsValid)
+            {
+                LevelMud lm = l.Desc.Mud;
+                if (ImGui.Button($"x##{lm.GetHashCode()}"))
+                {
+                    cmd.Add(new PropChangeCommand<LevelMud?>((lm) => l.Desc.Mud = lm, l.Desc.Mud, null), false);
+                    _propChanged |= true;
+                }
+                ImGui.SameLine();
+                if (ImGui.Selectable($"{lm.GetType().Name} {GetExtraObjectInfo(lm)}###selectable{lm.GetHashCode()}", selection.Object == lm))
+                    selection.Object = lm;
+            }
+            else
+            {
+                if (ImGui.Button("Add mud"))
+                {
+                    LevelMud lm = new()
+                    {
+                        MudY = l.Desc.CameraBounds.Y + 0.75 * l.Desc.CameraBounds.H,
+                    };
+                    cmd.Add(new PropChangeCommand<LevelMud?>((ts) => l.Desc.Mud = ts, l.Desc.Mud, lm), false);
+                    selection.Object = lm;
+                    _propChanged |= true;
+                }
+            }
+        }
+
         ImGui.Separator();
 
         void addButton(string id, Action<double, double> menu)
